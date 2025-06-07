@@ -1,0 +1,48 @@
+.pantallaDeCarga {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  width: 100%;
+  margin-top: 180px;
+  background-color:rgba(240, 255, 255, 0);
+}
+
+.cargaSpinner {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.spinner {
+  width: 100%;
+  height: 100%;
+  border: 4px solid #d7d7d799;
+  border-top: 4px solid var(--primary-600);
+  border-radius: 50%;
+  animation: spin 1.2s linear infinite;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.277);
+}
+
+.textoDeCarga {
+  margin-top: 10px;
+  font-size: 1.5rem;
+  color: #1a1a1a;
+}
+
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
