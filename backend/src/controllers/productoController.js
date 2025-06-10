@@ -6,6 +6,7 @@ export const productoController = {
     getAllProductos: async (req, res) => {
     try {
             const productos = await productoModel.getAllProductos();
+            console.log(productos);
         res.json(productos);
     } catch (error) {
             res.status(500).json({ message: error.message });
