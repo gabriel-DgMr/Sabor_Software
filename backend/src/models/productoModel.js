@@ -13,6 +13,7 @@ export const productoModel = {
                 LEFT JOIN categorias c ON p.id_categoria = c.id_categoria 
                 WHERE p.activo = 1`
             )
+            console.log(rows);
             return rows
         } catch (error) {
             throw new Error('Error al obtener productos: ' + error.message)
