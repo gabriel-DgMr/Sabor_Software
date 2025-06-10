@@ -11,6 +11,21 @@ dotenv.config({ path: join(__dirname, '../../.env') });
 
 export const config = {
 
+    // Configuración del servidor
+    server: {
+        port: process.env.PORT || 3000,
+        mode: process.env.NODE_ENV || 'development'
+    },
+
+    // Configuración de la base de datos
+    db: {
+        host: process.env.DB_HOST || 'localhost',
+        user: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME || 'sabor_db',
+        port: process.env.DB_PORT || 3306
+    },
+
     // Configuración de JWT
     jwt: {
         secret: process.env.JWT_SECRET,
@@ -40,6 +55,11 @@ export const config = {
 // Validar variables de entorno requeridas
 const requiredEnvVars = [
     'DB_PASSWORD',
+    'DB_HOST',
+    'DB_USER',
+    'DB_NAME',
+    'PORT',
+    'NODE_ENV',
     'JWT_SECRET',
     'COOKIE_SECRET',
     'EMAIL_USER',

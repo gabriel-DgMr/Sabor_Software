@@ -51,9 +51,9 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // Iniciar servidor
-const PORT = config.port;
+const PORT = config.server.port;
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en puerto ${PORT} en modo ${config.nodeEnv}`);
+    console.log(`Servidor corriendo en puerto ${PORT} en modo ${config.server.mode}`);
 });
 
 export default app;
