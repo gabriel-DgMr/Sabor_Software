@@ -9,8 +9,29 @@ const __dirname = dirname(__filename);
 // Cargar variables de entorno
 dotenv.config({ path: join(__dirname, '../../.env') });
 
-export const config = {
 
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+    throw new Error(
+        `Faltan las siguientes variables de entorno requeridas: ${missingEnvVars.join(', ')}`
+    );
+}
+// Validar variables de entorno requeridas
+const requiredEnvVars = [
+    'DB_PASSWORD',
+    'DB_HOST',
+    'DB_USER',
+    'DB_NAME',
+    'PORT',
+    'NODE_ENV',
+    'JWT_SECRET',
+    'COOKIE_SECRET',
+    'EMAIL_USER',
+    'EMAIL_PASSWORD'
+];
+
+export const config = {
     // Configuración del servidor
     server: {
         port: process.env.PORT || 3000,
@@ -52,24 +73,3 @@ export const config = {
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173'
 };
 
-// Validar variables de entorno requeridas
-const requiredEnvVars = [
-    'DB_PASSWORD',
-    'DB_HOST',
-    'DB_USER',
-    'DB_NAME',
-    'PORT',
-    'NODE_ENV',
-    'JWT_SECRET',
-    'COOKIE_SECRET',
-    'EMAIL_USER',
-    'EMAIL_PASSWORD'
-];
-
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
-
-if (missingEnvVars.length > 0) {
-    throw new Error(
-        `Faltan las siguientes variables de entorno requeridas: ${missingEnvVars.join(', ')}`
-    );
-}
