@@ -7,15 +7,43 @@ export const productoModel = {
     // Obtener todos los productos
     getAllProductos: async () => {
         try {
-            const [rows] = await pool.query(
-                `SELECT p.*, c.nombre_categoria 
+            console.log('Ejecutando consulta getAllProductos...');
+            
+            const query = `
+                SELECT 
+                    p.id_producto,
+                    p.nombre_producto,
+                    p.descripcion_producto,
+                    p.precio_producto,
+                    p.imagen_producto,
+                    p.id_categoria,
+                    c.nombre_categoria,
+                    p.activo
                 FROM productos p 
                 LEFT JOIN categorias c ON p.id_categoria = c.id_categoria 
-                WHERE p.activo = 1`
-            )
-            return rows
+                WHERE p.activo = 1
+                ORDER BY p.id_producto DESC
+            `;
+            
+            console.log('Query SQL:', query);
+            
+            const [rows] = await pool.query(query);
+            console.log('Número de productos encontrados:', rows.length);
+            
+            if (rows.length === 0) {
+                console.log('No se encontraron productos activos');
+            } else {
+                console.log('Ejemplo de producto:', {
+                    id: rows[0].id_producto,
+                    nombre: rows[0].nombre_producto,
+                    categoria: rows[0].nombre_categoria
+                });
+            }
+            
+            return rows;
         } catch (error) {
-            throw new Error('Error al obtener productos: ' + error.message)
+            console.error('Error en getAllProductos (model):', error);
+            throw new Error('Error al obtener productos: ' + error.message);
         }
     },
 

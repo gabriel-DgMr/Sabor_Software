@@ -4,12 +4,22 @@ import { categoriaModel } from '../models/categoriaModel.js';
 export const productoController = {
 // Obtener todos los productos
     getAllProductos: async (req, res) => {
-    try {
+        try {
+            console.log('Obteniendo todos los productos...');
+            console.log('Usuario autenticado:', req.user);
+            
             const productos = await productoModel.getAllProductos();
-        res.json(productos);
-    } catch (error) {
-            res.status(500).json({ message: error.message });
-    }
+            console.log('Productos obtenidos:', productos.length);
+            console.log('Primer producto:', productos[0]);
+            
+            res.json(productos);
+        } catch (error) {
+            console.error('Error en getAllProductos:', error);
+            res.status(500).json({ 
+                message: 'Error al obtener los productos',
+                error: error.message 
+            });
+        }
     },
 
 // Obtener producto por ID

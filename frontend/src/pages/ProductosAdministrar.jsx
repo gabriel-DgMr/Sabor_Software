@@ -21,15 +21,40 @@ const ProductosAdministrar = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [loadingStates, setLoadingStates] = useState({
+    delete: {},
+    edit: {},
+    submit: false
+  });
 
   useEffect(() => {
     const cargarProductos = async () => {
       try {
-        dispatch({ type: 'SET_LOADING' });
+        console.log('Iniciando carga de productos...');
+        dispatch({ type: 'SET_LOADING', payload: true });
+        
         const productos = await productoService.obtenerTodos();
+        console.log('Productos cargados:', productos);
+        console.log('Número de productos:', productos.length);
+        
+        if (productos.length === 0) {
+          console.log('No se encontraron productos');
+        } else {
+          console.log('Ejemplo de producto:', {
+            id: productos[0].id_producto,
+            nombre: productos[0].nombre_producto,
+            categoria: productos[0].nombre_categoria
+          });
+        }
+        
         dispatch({ type: 'SET_PRODUCTOS', payload: productos });
       } catch (error) {
+        console.error('Error al cargar productos:', error);
         dispatch({ type: 'SET_ERROR', payload: error.message });
+      } finally {
+        dispatch({ type: 'SET_LOADING', payload: false });
       }
     };
 
@@ -88,9 +113,47 @@ const ProductosAdministrar = () => {
     }));
   };
 
+  const handleEditProduct = (producto) => {
+    setIsEditing(true);
+    setEditingProductId(producto.id_producto);
+    setFormData({
+      nombre_producto: producto.nombre_producto,
+      descripcion_producto: producto.descripcion_producto,
+      precio_producto: producto.precio_producto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'),
+      id_categoria_producto: producto.id_categoria_producto,
+      imagen_producto: null
+    });
+    document.querySelector('.productos__editor').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleDeleteProduct = async (idProducto) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+      try {
+        setLoadingStates(prev => ({
+          ...prev,
+          delete: { ...prev.delete, [idProducto]: true }
+        }));
+        await productoService.eliminar(idProducto);
+        const productos = await productoService.obtenerTodos();
+        dispatch({ type: 'SET_PRODUCTOS', payload: productos });
+        setSuccessMessage('Producto eliminado exitosamente');
+        setTimeout(() => {
+          setSuccessMessage('');
+        }, 3000);
+      } catch (error) {
+        dispatch({ type: 'SET_ERROR', payload: error.message });
+      } finally {
+        setLoadingStates(prev => ({
+          ...prev,
+          delete: { ...prev.delete, [idProducto]: false }
+        }));
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch({ type: 'SET_LOADING' });
+    setLoadingStates(prev => ({ ...prev, submit: true }));
 
     const newErrors = {};
     if (!formData.nombre_producto) {
@@ -102,7 +165,6 @@ const ProductosAdministrar = () => {
     if (!formData.precio_producto) {
       newErrors.precio_producto = 'El precio es obligatorio.';
     } else {
-      // Convertir el precio formateado a número para validación
       const precioNumerico = parseFloat(formData.precio_producto.replace(/\./g, '').replace(',', '.'));
       if (isNaN(precioNumerico) || precioNumerico <= 0) {
         newErrors.precio_producto = 'El precio debe ser un número positivo.';
@@ -111,102 +173,33 @@ const ProductosAdministrar = () => {
     if (!formData.id_categoria_producto) {
       newErrors.id_categoria_producto = 'Debes seleccionar una categoría.';
     }
-    if (!formData.imagen_producto) {
-      newErrors.imagen_producto = 'La imagen es obligatoria.';
+    if (!isEditing && !formData.imagen_producto) {
+      newErrors.imagen_producto = 'La imagen es obligatoria para nuevos productos.';
     }
 
     if (Object.keys(newErrors).length > 0) {
       manejarErroresDeCampo(newErrors);
-      dispatch({ type: 'SET_LOADING', payload: false });
+      setLoadingStates(prev => ({ ...prev, submit: false }));
       return;
     }
 
     try {
-      // Preparar los datos para enviar, convirtiendo el precio a número
       const datosParaEnviar = {
         ...formData,
         precio_producto: parseFloat(formData.precio_producto.replace(/\./g, '').replace(',', '.'))
       };
 
-      console.log('Datos del formulario a enviar:', datosParaEnviar);
-      const response = await productoService.crear(datosParaEnviar);
-      console.log('Respuesta del servidor:', response);
-      
-      // Recargar la lista de productos
-      const productos = await productoService.obtenerTodos();
-      dispatch({ type: 'SET_PRODUCTOS', payload: productos });
-      
-      // Mostrar mensaje de éxito
-      setSuccessMessage('Producto creado exitosamente');
-      
-      // Limpiar el formulario
-      setFormData({
-        nombre_producto: '',
-        descripcion_producto: '',
-        precio_producto: '',
-        id_categoria_producto: '',
-        imagen_producto: null
-      });
-      
-      // Limpiar la vista previa de la imagen
-      setImagePreview(null);
-      
-      // Ocultar el mensaje de éxito después de 3 segundos
-      setTimeout(() => {
-        setSuccessMessage('');
-        dispatch({ type: 'SET_LOADING', payload: false });
-      }, 3000);
-      
-    } catch (error) {
-      console.error('Error al crear el producto:', error);
-      dispatch({ type: 'SET_ERROR', payload: error.message });
-      dispatch({ type: 'SET_LOADING', payload: false });
-
-    }
-    if (!formData.descripcion_producto) {
-      newErrors.descripcion_producto = 'La descripción es obligatoria.';
-    }
-    if (!formData.precio_producto) {
-      newErrors.precio_producto = 'El precio es obligatorio.';
-    } else {
-      // Convertir el precio formateado a número para validación
-      const precioNumerico = parseFloat(formData.precio_producto.replace(/\./g, '').replace(',', '.'));
-      if (isNaN(precioNumerico) || precioNumerico <= 0) {
-        newErrors.precio_producto = 'El precio debe ser un número positivo.';
+      if (isEditing) {
+        await productoService.actualizar(editingProductId, datosParaEnviar);
+        setSuccessMessage('Producto actualizado exitosamente');
+      } else {
+        await productoService.crear(datosParaEnviar);
+        setSuccessMessage('Producto creado exitosamente');
       }
-    }
-    if (!formData.id_categoria_producto) {
-      newErrors.id_categoria_producto = 'Debes seleccionar una categoría.';
-    }
-    if (!formData.imagen_producto) {
-      newErrors.imagen_producto = 'La imagen es obligatoria.';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      manejarErroresDeCampo(newErrors);
-      dispatch({ type: 'SET_LOADING', payload: false });
-      return;
-    }
-
-    try {
-      // Preparar los datos para enviar, convirtiendo el precio a número
-      const datosParaEnviar = {
-        ...formData,
-        precio_producto: parseFloat(formData.precio_producto.replace(/\./g, '').replace(',', '.'))
-      };
-
-      console.log('Datos del formulario a enviar:', datosParaEnviar);
-      const response = await productoService.crear(datosParaEnviar);
-      console.log('Respuesta del servidor:', response);
       
-      // Recargar la lista de productos
       const productos = await productoService.obtenerTodos();
       dispatch({ type: 'SET_PRODUCTOS', payload: productos });
       
-      // Mostrar mensaje de éxito
-      setSuccessMessage('Producto creado exitosamente');
-      
-      // Limpiar el formulario
       setFormData({
         nombre_producto: '',
         descripcion_producto: '',
@@ -214,21 +207,19 @@ const ProductosAdministrar = () => {
         id_categoria_producto: '',
         imagen_producto: null
       });
-      
-      // Limpiar la vista previa de la imagen
       setImagePreview(null);
+      setIsEditing(false);
+      setEditingProductId(null);
       
-      // Ocultar el mensaje de éxito después de 3 segundos
       setTimeout(() => {
         setSuccessMessage('');
       }, 3000);
       
     } catch (error) {
-      console.error('Error al crear el producto:', error);
+      console.error('Error al procesar el producto:', error);
       dispatch({ type: 'SET_ERROR', payload: error.message });
     } finally {
-      // Asegurarnos de que el estado de carga se desactive
-      dispatch({ type: 'SET_LOADING', payload: false });
+      setLoadingStates(prev => ({ ...prev, submit: false }));
     }
   };
 
@@ -252,8 +243,57 @@ const ProductosAdministrar = () => {
     return acc;
   }, {});
 
-  if (state.loading) return <div>Cargando...</div>;
-  if (state.error) return <div>Error: {state.error}</div>;
+  console.log('Productos agrupados por categoría:', productosPorCategoria);
+  console.log('Categorías encontradas:', Object.keys(productosPorCategoria));
+
+  if (state.loading) {
+    console.log('Estado de carga: true');
+    return (
+      <div className='layout'>
+        <MenuLateral />
+        <main className='productos__administrar'>
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Cargando productos...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (state.error) {
+    console.error('Error en el estado:', state.error);
+    return (
+      <div className='layout'>
+        <MenuLateral />
+        <main className='productos__administrar'>
+          <div className="error-container">
+            <p>Error: {state.error}</p>
+            <button 
+              className="retry-button"
+              onClick={() => window.location.reload()}
+            >
+              Reintentar
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (state.productos.length === 0) {
+    console.log('No hay productos para mostrar');
+    return (
+      <div className='layout'>
+        <MenuLateral />
+        <main className='productos__administrar'>
+          <div className="empty-state">
+            <p>No hay productos disponibles</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className='layout'>
@@ -265,16 +305,44 @@ const ProductosAdministrar = () => {
             {Object.entries(productosPorCategoria).map(([categoria, productosCategoria]) => (
               <article key={categoria} className='productos__vista'>
                 <h2 className='vista__titulo--primera'>Categoria: {categoria}</h2>
-                <div className='productos__card'>
+                <div className='productos__grid'>
                   {productosCategoria.map((producto) => (
-                    <div key={producto.id_producto} className="producto-card">
-                      <img 
+                    <div key={producto.id_producto} className="productos__card-producto">
+                      <img
                         alt={producto.nombre_producto}
-                        className='productos__img'
+                        className="productos__imagen"
                         src={`http://localhost:3000/uploads/productos/${producto.imagen_producto}`}
                       />
-                      <h3>{producto.nombre_producto}</h3>
-                      <p>Precio: {formatearPrecio(producto.precio_producto)}</p>
+                      <div className="productos__info">
+                        <h4 className="productos__nombre">{producto.nombre_producto}</h4>
+                        <p className="productos__precio">{formatearPrecio(producto.precio_producto)}</p>
+                        <div className="productos__acciones">
+                          <button
+                            className={`productos__boton productos__boton--editar ${loadingStates.edit[producto.id_producto] ? 'productos__boton--loading' : ''}`}
+                            disabled={loadingStates.edit[producto.id_producto] || loadingStates.delete[producto.id_producto]}
+                            onClick={() => handleEditProduct(producto)}
+                            type="button"
+                          >
+                            {loadingStates.edit[producto.id_producto] ? (
+                              <span className="loading-indicator"></span>
+                            ) : (
+                              'Editar'
+                            )}
+                          </button>
+                          <button
+                            className={`productos__boton productos__boton--eliminar ${loadingStates.delete[producto.id_producto] ? 'productos__boton--loading' : ''}`}
+                            disabled={loadingStates.edit[producto.id_producto] || loadingStates.delete[producto.id_producto]}
+                            onClick={() => handleDeleteProduct(producto.id_producto)}
+                            type="button"
+                          >
+                            {loadingStates.delete[producto.id_producto] ? (
+                              <span className="loading-indicator"></span>
+                            ) : (
+                              'Eliminar'
+                            )}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -282,7 +350,9 @@ const ProductosAdministrar = () => {
             ))}
           </div>
           <article className='productos__editor'>
-            <h2 className='editor__titulo'>Agregar Nuevo Producto</h2>
+            <h2 className='editor__titulo'>
+              {isEditing ? 'Editar Producto' : 'Agregar Nuevo Producto'}
+            </h2>
             {successMessage && (
               <div className="success-message">
                 <svg 
@@ -409,7 +479,40 @@ const ProductosAdministrar = () => {
                   </div>
                 )}
               </div>
-              <button className='descripcion__boton' type="submit">Confirmar</button>
+              <div className="editor__botones">
+                <button 
+                  className={`descripcion__boton ${loadingStates.submit ? 'descripcion__boton--loading' : ''}`}
+                  disabled={loadingStates.submit}
+                  type="submit"
+                >
+                  {loadingStates.submit ? (
+                    <span className="loading-indicator"></span>
+                  ) : (
+                    isEditing ? 'Actualizar' : 'Confirmar'
+                  )}
+                </button>
+                {isEditing && (
+                  <button
+                    className='descripcion__boton descripcion__boton--cancelar'
+                    disabled={loadingStates.submit}
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditingProductId(null);
+                      setFormData({
+                        nombre_producto: '',
+                        descripcion_producto: '',
+                        precio_producto: '',
+                        id_categoria_producto: '',
+                        imagen_producto: null
+                      });
+                      setImagePreview(null);
+                    }}
+                    type="button"
+                  >
+                    Cancelar
+                  </button>
+                )}
+              </div>
             </form>
           </article>
         </section>

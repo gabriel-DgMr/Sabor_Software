@@ -2,9 +2,24 @@ const API_URL = 'http://localhost:3000/api';
 
 export const productoService = {
     obtenerTodos: async () => {
-        const response = await fetch(`${API_URL}/productos`);
-        if (!response.ok) throw new Error('Error al obtener los productos');
-        return response.json();
+        try {
+            const response = await fetch(`${API_URL}/productos`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al obtener los productos');
+            }
+            
+            return response.json();
+        } catch (error) {
+            console.error('Error en obtener productos:', error);
+            throw error;
+        }
     },
     crear: async (producto) => {
         try {

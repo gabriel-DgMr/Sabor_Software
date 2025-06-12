@@ -131,11 +131,11 @@ const Home = () => {
                   <p className="productos__descripcion">
                     {producto.descripcion_producto}
                   </p>
-                  <p className="productos__precio">{formatearPrecio(producto.precio_producto)}</p>
-                  <button className="btn-agregarpr" onClick={() => addItemToCart({
-                    nombre: producto.nombre_producto,
-                    precio: producto.precio_producto
-                  })}>Agregar</button>
+                    <p className="productos__precio">{formatearPrecio(producto.precio_producto)}</p>
+                    <button className="btn-agregarpr" onClick={() => addItemToCart({
+                      nombre: producto.nombre_producto,
+                      precio: producto.precio_producto
+                    })}>Agregar</button>
                 </div>
               </div>
             ))}

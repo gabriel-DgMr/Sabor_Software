@@ -8,8 +8,10 @@ const router = express.Router();
 
 // Rutas públicas
 router.get('/', productoController.getAllProductos);
-router.get('/:id', productoController.getProductoById);
-router.get('/categoria/:categoriaId', productoController.getProductosByCategoria);
+
+// Rutas protegidas
+router.get('/:id', authenticateToken, productoController.getProductoById);
+router.get('/categoria/:categoriaId', authenticateToken, productoController.getProductosByCategoria);
 
 // Rutas protegidas con manejo de imágenes
 router.post('/', 

@@ -18,12 +18,6 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Middleware para loggear requests (temporal)
-app.use((req, res, next) => {
-  console.log(`Request received: ${req.method} ${req.url}`);
-  next();
-});
-
 // Middlewares
 app.use(express.json());
 app.use(cookieParser(config.cookie.secret));
@@ -33,8 +27,6 @@ app.use(cors({
 }));
 
 // Rutas
-console.log('Setting up routes...');
-console.log('Horario routes:', horarioRoutes.stack.map(layer => layer.route)); // Loggea las rutas definidas en horarioRoutes
 app.use('/api/auth', authRoutes);
 app.use('/api/productos', productoRoutes);
 app.use('/api/categorias', categoriaRoutes);
