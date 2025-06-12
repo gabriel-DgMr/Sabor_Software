@@ -7,31 +7,16 @@ import Header from '../components/Header.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useProductos } from '../context/ProductoContext';
-import { productoService } from '../services/productoService';
 
 import AuthPage from './auth/index.jsx';
 
 const Home = () => {
   const { addItemToCart } = useCart();
-  const { state, dispatch } = useProductos();
+  const { state } = useProductos();
 
   useEffect(() => {
     document.title = 'Sabor: Home';
   }, []);
-
-  useEffect(() => {
-    const cargarProductos = async () => {
-      try {
-        dispatch({ type: 'SET_LOADING' });
-        const productos = await productoService.obtenerTodos();
-        dispatch({ type: 'SET_PRODUCTOS', payload: productos });
-      } catch (error) {
-        dispatch({ type: 'SET_ERROR', payload: error.message });
-      }
-    };
-
-    cargarProductos();
-  }, [dispatch]);
 
   const formatearPrecio = (precio) => {
     return new Intl.NumberFormat('es-CO', {
@@ -131,6 +116,7 @@ const Home = () => {
                   <p className="productos__descripcion">
                     {producto.descripcion_producto}
                   </p>
+                  <div className= "productos__footer">
                   <p className="productos__precio">{formatearPrecio(producto.precio_producto)}</p>
                   <button className="btn-agregarpr" onClick={() => addItemToCart({
                     nombre: producto.nombre_producto,
@@ -138,6 +124,7 @@ const Home = () => {
                   })}>Agregar</button>
                 </div>
               </div>
+            </div>
             ))}
           </div>
         </section>
