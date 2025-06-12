@@ -116,6 +116,7 @@ const Home = () => {
                   <p className="productos__descripcion">
                     {producto.descripcion_producto}
                   </p>
+                  <div className= "productos__footer">
                   <p className="productos__precio">{formatearPrecio(producto.precio_producto)}</p>
                   <button className="btn-agregarpr" onClick={() => addItemToCart({
                     nombre: producto.nombre_producto,
@@ -123,6 +124,7 @@ const Home = () => {
                   })}>Agregar</button>
                 </div>
               </div>
+            </div>
             ))}
           </div>
         </section>
