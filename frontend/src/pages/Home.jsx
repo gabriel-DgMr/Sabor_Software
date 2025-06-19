@@ -102,34 +102,34 @@ const Home = () => {
         </section>
 
         {/* Sección de productos */}
-        <section className="seccion seccion--productos">
-          <div className="productos">
-            {state.productos.map((producto) => (
-              <div key={producto.id_producto} className="productos__card-producto">
-                <img
-                  alt={producto.nombre_producto}
-                  className="productos__imagen"
-                  src={`http://localhost:3000/uploads/productos/${producto.imagen_producto}`}
-                />
-                <div className="productos__info">
-                  <h4 className="productos__nombre">{producto.nombre_producto}</h4>
-                  <p className="productos__descripcion">
-                    {producto.descripcion_producto}
-                  </p>
-                  <div className= "productos__footer">
-                  <p className="productos__precio">{formatearPrecio(producto.precio_producto)}</p>
-                  <button className="btn-agregarpr" onClick={() => addItemToCart({
-                    nombre: producto.nombre_producto,
-                    precio: producto.precio_producto
-                  })}>Agregar</button>
-                </div>
+      <section className="seccion seccion--productos">
+        <div className="productos">
+          {state.productos.map((producto) => (
+            <div key={producto.id_producto} className="productos__card-producto">
+              <img
+                alt={producto.nombre_producto}
+                className="productos__imagen"
+                src={`http://localhost:3000/uploads/productos/${producto.imagen_producto}`}
+              />
+              <div className="productos__info">
+                <h4 className="productos__nombre">{producto.nombre_producto}</h4>
+                <p className="productos__descripcion">
+                  {producto.descripcion_producto}
+                </p>
+                <div className= "productos__footer">
+                <p className="productos__precio">{formatearPrecio(producto.precio_producto)}</p>
+                <button className="btn-agregarpr" onClick={() => addItemToCart({
+                  nombre: producto.nombre_producto,
+                  precio: producto.precio_producto
+                })}>Agregar</button>
               </div>
             </div>
-            ))}
           </div>
-        </section>
+          ))}
+        </div>
+      </section>
+      
       </main>
-
       <Footer />
     </div>
   );

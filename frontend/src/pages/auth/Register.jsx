@@ -94,7 +94,7 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
             disabled={loading}
             id="nombre-register"
             name="nombre"
-            placeholder="Tu Nombre Completo"
+            placeholder="Juan Felipe Velasquez"
             type="text"
           />
           {errors.nombre && <small className="formulario__mensaje-error">{errors.nombre}</small>}
