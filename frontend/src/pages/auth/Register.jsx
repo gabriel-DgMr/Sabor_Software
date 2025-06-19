@@ -12,18 +12,6 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
     return () => setErrors({});
   }, []);
 
-  const manejarErroresDeCampo = newErrors => {
-    setErrors(newErrors);
-    setTimeout(() => animateElements('.formulario__mensaje-error', 'fade-in'), 0);
-    setTimeout(() => {
-      document.querySelectorAll('.formulario__mensaje-error').forEach(el => {
-        el.classList.remove('fade-in');
-        el.classList.add('fade-out');
-      });
-      setTimeout(() => setErrors({}), ANIM_DURATION);
-    }, VISIBLE_DURATION);
-  };
-
   const handleRegister = async e => {
     e.preventDefault();
     setErrors({});
@@ -32,32 +20,96 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
     const nombre_cliente = form.nombre.value.trim();
     const email_cliente = form.email.value.trim();
     const telefono_cliente = form.telefono.value.trim();
-    const contraseña_cliente = form.password.value;
-    const confirmPassword = form.confirmPassword.value;
+    const contraseña_cliente = form.password.value.trim();
+    const confirmPassword = form.confirmPassword.value.trim();
 
     const newErrors = {};
-    if (!nombre_cliente) newErrors.nombre = 'El nombre es obligatorio.';
-    if (!email_cliente) {
+
+    
+  const validarCaracteresEspeciales = (valor, campo) => {
+    const caracteresProhibidos = /[<>"'/\\(){}[\]=;:%&]/;
+    if (caracteresProhibidos.test(valor)) {
+      return `El campo ${campo} no puede contener caracteres especiales como < > " ' / \\ ( ) { } [ ] = ; : % &`;
+    }
+    return null;
+  };
+
+  // Validación de caracteres especiales y espacios para todos los campos
+  const errorNombre = validarCaracteresEspeciales(form.nombre.value, 'nombre'); 
+    if (errorNombre) {
+      newErrors.nombre = errorNombre;
+    } else if (!nombre_cliente) {
+      newErrors.nombre = 'El nombre es obligatorio.';
+    } else if (nombre_cliente !== form.nombre.value) {
+      newErrors.nombre = 'No se permiten espacios al inicio ni al final del nombre.';
+    } else if (/\s{2,}/.test(form.nombre.value)) {
+      newErrors.nombre = 'No se permiten espacios dobles o múltiples en el nombre.';
+    }
+
+    const errorEmail = validarCaracteresEspeciales(form.email.value, 'correo');
+    if (errorEmail) {
+      newErrors.email = errorEmail;
+    } else if (!email_cliente) {
       newErrors.email = 'El correo es obligatorio.';
+    } else if (email_cliente !== form.email.value) {
+      newErrors.email = 'No se permiten espacios al inicio ni al final del correo.';
+    } else if (/\s{2,}/.test(form.email.value)) {
+      newErrors.email = 'No se permiten espacios dobles o múltiples en el correo.';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email_cliente)) {
       newErrors.email = 'El correo no es válido.';
     }
-    if (!telefono_cliente) {
+
+    const errorTelefono = validarCaracteresEspeciales(form.telefono.value, 'teléfono');
+    if (errorTelefono) {
+      newErrors.telefono = errorTelefono;
+    } else if (!telefono_cliente) {
       newErrors.telefono = 'El teléfono es obligatorio.';
+    } else if (telefono_cliente !== form.telefono.value) {
+      newErrors.telefono = 'No se permiten espacios al inicio ni al final del teléfono.';
+    } else if (/\s{2,}/.test(form.telefono.value)) {
+      newErrors.telefono = 'No se permiten espacios dobles o múltiples en el teléfono.';
     } else if (!/^\d{10}$/.test(telefono_cliente)) {
       newErrors.telefono = 'El teléfono debe tener 10 dígitos.';
     }
-    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-    if (!contraseña_cliente) {
+    
+    const errorPassword = validarCaracteresEspeciales(form.password.value, 'contraseña');
+    if (errorPassword) {
+      newErrors.password = errorPassword;
+    } else if (!contraseña_cliente) {
       newErrors.password = 'La contraseña es obligatoria.';
+    } else if (contraseña_cliente !== form.password.value) {
+      newErrors.password = 'No se permiten espacios al inicio ni al final de la contraseña.';
+    } else if (/\s{2,}/.test(form.password.value)) {
+      newErrors.password = 'No se permiten espacios dobles o múltiples en la contraseña.';
     } else if (!pwdRegex.test(contraseña_cliente)) {
       newErrors.password = 'Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.';
     }
-    if (!confirmPassword) {
+    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+    const errorConfirmPassword = validarCaracteresEspeciales(form.confirmPassword.value, 'confirmación de contraseña');
+    if (errorConfirmPassword) {
+      newErrors.confirmPassword = errorConfirmPassword;
+    } else if (!confirmPassword) {
       newErrors.confirmPassword = 'Confirma tu contraseña.';
+    } else if (confirmPassword !== form.confirmPassword.value) {
+      newErrors.confirmPassword = 'No se permiten espacios al inicio ni al final de la confirmación de contraseña.';
+    } else if (/\s{2,}/.test(form.confirmPassword.value)) {
+      newErrors.confirmPassword = 'No se permiten espacios dobles o múltiples en la confirmación de contraseña.';
     } else if (contraseña_cliente !== confirmPassword) {
       newErrors.confirmPassword = 'Las contraseñas no coinciden.';
     }
+
+    const manejarErroresDeCampo = newErrors => {
+      setErrors(newErrors);
+      setTimeout(() => animateElements('.formulario__mensaje-error', 'fade-in'), 0);
+      setTimeout(() => {
+        document.querySelectorAll('.formulario__mensaje-error').forEach(el => {
+          el.classList.remove('fade-in');
+          el.classList.add('fade-out');
+        });
+        setTimeout(() => setErrors({}), ANIM_DURATION);
+      }, VISIBLE_DURATION);
+    };
 
     if (Object.keys(newErrors).length > 0) {
       manejarErroresDeCampo(newErrors);
@@ -94,7 +146,7 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
             disabled={loading}
             id="nombre-register"
             name="nombre"
-            placeholder="Tu Nombre Completo"
+            placeholder="Ej: Juan Carlos Perez"
             type="text"
           />
           {errors.nombre && <small className="formulario__mensaje-error">{errors.nombre}</small>}
@@ -110,7 +162,7 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
             disabled={loading}
             id="email-register"
             name="email"
-            placeholder="Tu Correo Electrónico"
+            placeholder="Ej: juan.perez@gmail.com"
             type="email"
           />
           {errors.email && <small className="formulario__mensaje-error">{errors.email}</small>}
@@ -126,7 +178,7 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
             disabled={loading}
             id="telefono-register"
             name="telefono"
-            placeholder="Tu Número de Teléfono (10 dígitos)"
+            placeholder="Ej: 5512345678"
             type="tel"
           />
           {errors.telefono && <small className="formulario__mensaje-error">{errors.telefono}</small>}
@@ -142,7 +194,7 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
             disabled={loading}
             id="password-register"
             name="password"
-            placeholder="Crea una Contraseña Segura"
+            placeholder="Ej: Contraseña123!"
             type="password"
           />
           {errors.password && <small className="formulario__mensaje-error">{errors.password}</small>}
@@ -158,7 +210,7 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
             disabled={loading}
             id="confirmPassword-register"
             name="confirmPassword"
-            placeholder="Confirma tu Contraseña"
+            placeholder="Ej: Contraseña123!"
             type="password"
           />
           {errors.confirmPassword && (

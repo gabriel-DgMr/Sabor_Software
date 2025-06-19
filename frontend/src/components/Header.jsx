@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FaUserCircle } from 'react-icons/fa';
+import { Link } from 'react-router-dom'
 
 import { useAuth } from '../context/AuthContext.jsx';
 import AuthPage from '../pages/auth/index.jsx';
@@ -12,7 +13,7 @@ const Header = () => {
     <>
       <header className="encabezado">
         <div className="encabezado__contenedor">
-          <img alt="Logo Sabor" className="encabezado__logo" src="/images/logo_sabor.png" />
+          <Link to="/"><img alt="Logo Sabor" className="encabezado__logo" src="/images/logo_sabor.png" /></Link>
 
           <div className="encabezado__informacion">
             <span aria-label="Bandera de España" className="encabezado__idioma" role="img">
