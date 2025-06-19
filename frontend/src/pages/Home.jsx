@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../index.css';
+import { FaCartShopping } from "react-icons/fa6";
 
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
@@ -11,7 +12,19 @@ import { useProductos } from '../context/ProductoContext';
 import AuthPage from './auth/index.jsx';
 
 const Home = () => {
-  const { addItemToCart } = useCart();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolled = window.scrollY > 0;
+      setIsScrolled(scrolled);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  {/*const { addItemToCart } = useCart();
   const { state } = useProductos();
 
   useEffect(() => {
@@ -28,14 +41,14 @@ const Home = () => {
   };
 
   if (state.loading) return <LoadingScreen />;
-  if (state.error) return <div>Error al cargar productos: {state.error}</div>;
+  if (state.error) return <div>Error al cargar productos: {state.error}</div>;*/}
 
   return (
     <div>
       <Header />
-      <Link className="carrito-flotante" to="/carrito">
+      <Link className={`carrito-link ${isScrolled ? 'carrito-flotante' : 'carrito-fixed'}`} to="/carrito">
         <div className="carrito-icono">
-          <span aria-label="carrito" role="img">🛒</span>
+          <FaCartShopping  className='carrito' size={30}/>
         </div>
       </Link>
 
@@ -102,6 +115,7 @@ const Home = () => {
         </section>
 
         {/* Sección de productos */}
+        {/*
       <section className="seccion seccion--productos">
         <div className="productos">
           {state.productos.map((producto) => (
@@ -128,6 +142,7 @@ const Home = () => {
           ))}
         </div>
       </section>
+      */}
       
       </main>
       <Footer />
