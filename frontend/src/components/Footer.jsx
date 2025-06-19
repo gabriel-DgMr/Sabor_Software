@@ -31,12 +31,13 @@ const Footer = () => {
         <div className="pie-pagina__nosotros">
           <h3 className="pie-pagina__titulo">Sobre Nosotros</h3>
           <h4 className="pie-pagina__subtitulo">
-            <a href="#">¿Quiénes somos?</a>
+            <a href="#" className='nosotros-opc'>¿Quiénes somos?</a>
+            <a href="#" className='nosotros-opc'>Descubrenos </a>
           </h4>
         </div>
-
-        <div className="pie-pagina__descubre">
-          <h3 className="pie-pagina__titulo">Descubre</h3>
+        <div className="cuentanos">
+          <h3 className="pie-pagina__titulo">¡Cuentanos!</h3>
+          <textarea className='cuentanos__input' placeholder='¡Tu experiencia!'/>
         </div>
       </footer>
   );

@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useReducer } from 'react';
+import PropTypes from 'prop-types';
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
+
+import { productoService } from '../services/productoService';
 
 const ProductoContext = createContext();
 
@@ -37,11 +40,30 @@ const productoReducer = (state, action) => {
 
 export const ProductoProvider = ({ children }) => {
     const [state, dispatch] = useReducer(productoReducer, initialState);
+
+    useEffect(() => {
+        const cargarProductos = async () => {
+            try {
+                dispatch({ type: 'SET_LOADING' });
+                const productos = await productoService.obtenerTodos();
+                dispatch({ type: 'SET_PRODUCTOS', payload: productos });
+            } catch (error) {
+                dispatch({ type: 'SET_ERROR', payload: error.message });
+            }
+        };
+
+        cargarProductos();
+    }, []);
+
     return (
         <ProductoContext.Provider value={{ state, dispatch }}>
             {children}
         </ProductoContext.Provider>
     );
+};
+
+ProductoProvider.propTypes = {
+    children: PropTypes.node.isRequired,
 };
 
 export const useProductos = () => {

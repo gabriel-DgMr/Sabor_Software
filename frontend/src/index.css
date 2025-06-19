@@ -205,6 +205,7 @@ hr {
   padding: 2rem 3rem;
   border-radius: 2.5rem;
   text-align: center;
+  opacity: 0.90;
 }
 .categorias__titulo {
   font-size: 2.4rem;
@@ -304,32 +305,31 @@ hr {
     gap: 2.5rem;
   }
 }
-@media (min-width: 1280px) {
-  .productos {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
+
 .productos__card-producto {
-   background-color: var(--neutral-50);
-   border-radius: 1.5rem;
-   overflow: hidden;
-   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-   transition: transform 0.3s ease;
-   width: 100%;
-   max-width: 300px;
-   margin: 1rem;
+  width: 100%;
+  max-width: 250px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.3s;
+  display: flex;
+  flex-direction: column;
 }
 
+
 .productos__card-producto:hover {
-   transform: translateY(-5px);
-   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
 }
 
 .productos__info {
-   padding: 2rem;
-   display: flex;
-   flex-direction: column;
-   gap: 1rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: justify; 
+  gap: 1rem;
+  flex: 1; 
 }
 
 .productos__imagen {
@@ -345,9 +345,21 @@ hr {
 }
 
 .productos__descripcion {
-   font-size: 1.4rem;
-   color: var(--neutral-600);
-   line-height: 1.4;
+  height: 72px; 
+  overflow: hidden;
+  transition: height 0.3s ease;
+  text-align:justify;
+}
+.productos__card-producto:hover .productos__descripcion {
+  height: 180px; 
+  overflow-y: auto;
+}
+
+.productos__footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .productos__precio {
@@ -355,6 +367,21 @@ hr {
    font-weight: 700;
    color: var(--primary-500);
    margin: 0.5rem 0;
+}
+
+.btn-agregarpr {
+  background-color: var(--primary-500);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: auto;
+}
+
+.btn-agregarpr:hover {
+  background-color: var(--primary-600);
 }
 
 /* Carrito flotante */
@@ -390,14 +417,16 @@ hr {
 
 /* Pie de página */
 .pie-pagina {
+  position: relative;
+  bottom: 0;
+  width: 100%;
    background-color: var(--secondary-600);
    margin-top: 10%;
-   padding: 5rem;
+   padding: 2rem;
    color: var(--neutral-50);
    display: grid;
    grid-template-columns: repeat(3, 1fr);
    justify-items: center;
-   gap: 2rem;
 }
 
 @media (max-width: 768px) {
@@ -435,6 +464,17 @@ hr {
   text-decoration: underline;
 }
 
+.nosotros-opc {
+  display: block;
+}
+
+.cuentanos__input {
+  outline: none;
+  color: var(--primary-500);
+  background-color: var(--neutral-50);
+  padding: 1rem;
+  border-radius: 2rem;
+}
 /* Reservas */
 
 .seccion--reservas {
@@ -701,17 +741,3 @@ hr {
 }
 
 /* Estilos para el botón Agregar Producto en la página de inicio */
-.btn-agregarpr {
-  background-color: var(--primary-500);
-  color: white;
-  padding: 1rem 2rem;
-  border-radius: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: auto;
-}
-
-.btn-agregarpr:hover {
-  background-color: var(--primary-600);
-}
