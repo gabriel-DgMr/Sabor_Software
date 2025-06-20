@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext.jsx';
 import { CategoriaProvider } from './context/CategoriaContext.jsx';
 import { ProductoProvider } from './context/ProductoContext.jsx';
+import ActualizarDatos from './pages/ActualizarDatos.jsx';
 import Login from './pages/auth/Login.jsx';
 import Register from './pages/auth/Register.jsx';
 import ResetPasswordContainer from './pages/auth/ResetPasswordContainer.jsx';
@@ -16,11 +17,10 @@ import DashboardVentas from './pages/DashboardVentas.jsx';
 import EmpleadosHome from './pages/EmpleadosHome.jsx';
 import Home from './pages/Home.jsx';
 import ModificarPedido from './pages/ModificarPedido.jsx';
-import PedidosAdministrar from './pages/PedidosAdministrar.jsx';
+import PedidosAdministrar from './pages/pedidosAdministrar.jsx';
 import ProductosAdministrar from './pages/ProductosAdministrar.jsx';
 import ReservasAdministrar from './pages/ReservacionesAdministrar.jsx';
 import Reservas from './pages/Reservas.jsx';
-
 function App() {
   return (
     <AuthProvider>
@@ -87,6 +87,14 @@ function App() {
                   </ProtectedRoute>
                 }
                 path="/administrar/panel/ventas"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <ActualizarDatos />
+                  </ProtectedRoute>
+                }
+                path="/actualizar-datos"
               />
             </Routes>
           </CartProvider>

@@ -1,5 +1,5 @@
 import * as authModel from '../models/authModel.js';
-
+import validator from 'validator'
 // Obtener todos los clientes
 export const getAllClientes = async (req, res) => {
     try {
@@ -38,7 +38,7 @@ export const updateCliente = async (req, res) => {
     try {
         const { id } = req.params;
         const { nombre_cliente, email_cliente, telefono_cliente } = req.body;
-
+        console.log('Datos recibidos:', { id, nombre_cliente, email_cliente, telefono_cliente }); // <-- Agrega esto
         // Validar campos requeridos
         if (!nombre_cliente || !email_cliente || !telefono_cliente) {
             return res.status(400).json({

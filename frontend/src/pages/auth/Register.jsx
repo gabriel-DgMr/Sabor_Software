@@ -3,10 +3,13 @@ import React, { useState, useEffect } from 'react';
 
 import { useAuth } from '../../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
+import { validarCaracteresEspeciales } from '../../utils/validaciones';
+
 
 const Register = ({ onShowMessage, onRegisterSuccess }) => {
   const { registerUser, loading } = useAuth();
   const [errors, setErrors] = useState({});
+  const [globalError, setGlobalError] = useState('');
 
   useEffect(() => {
     return () => setErrors({});
@@ -15,6 +18,7 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
   const handleRegister = async e => {
     e.preventDefault();
     setErrors({});
+    setGlobalError('');
 
     const form = e.target;
     const nombre_cliente = form.nombre.value.trim();
@@ -23,16 +27,9 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
     const contraseña_cliente = form.password.value.trim();
     const confirmPassword = form.confirmPassword.value.trim();
 
-    const newErrors = {};
+    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
-    
-  const validarCaracteresEspeciales = (valor, campo) => {
-    const caracteresProhibidos = /[<>"'/\\(){}[\]=;:%&]/;
-    if (caracteresProhibidos.test(valor)) {
-      return `El campo ${campo} no puede contener caracteres especiales como < > " ' / \\ ( ) { } [ ] = ; : % &`;
-    }
-    return null;
-  };
+    const newErrors = {};
 
   // Validación de caracteres especiales y espacios para todos los campos
   const errorNombre = validarCaracteresEspeciales(form.nombre.value, 'nombre'); 
@@ -84,7 +81,6 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
     } else if (!pwdRegex.test(contraseña_cliente)) {
       newErrors.password = 'Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.';
     }
-    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
     const errorConfirmPassword = validarCaracteresEspeciales(form.confirmPassword.value, 'confirmación de contraseña');
     if (errorConfirmPassword) {
@@ -101,6 +97,7 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
 
     const manejarErroresDeCampo = newErrors => {
       setErrors(newErrors);
+      setGlobalError('');
       setTimeout(() => animateElements('.formulario__mensaje-error', 'fade-in'), 0);
       setTimeout(() => {
         document.querySelectorAll('.formulario__mensaje-error').forEach(el => {
@@ -128,7 +125,16 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
       if (onRegisterSuccess) onRegisterSuccess();
       form.reset();
     } else {
-      onShowMessage('error', result.message || 'Error en el registro.');
+      setGlobalError(result.message || 'Error en el registro.');
+      setTimeout(() => animateElements('#global-error-register', 'fade-in'), 0);
+      setTimeout(() => {
+        const el = document.getElementById('global-error-register');
+        if (el) {
+          el.classList.remove('fade-in');
+          el.classList.add('fade-out');
+        }
+        setTimeout(() => setGlobalError(''), ANIM_DURATION);
+      }, VISIBLE_DURATION);
     }
   };
 
@@ -217,6 +223,16 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
             <small className="formulario__mensaje-error">{errors.confirmPassword}</small>
           )}
         </div>
+
+        {globalError && (
+          <div
+            className="formulario__mensaje-error"
+            id="global-error-register"
+            style={{ textAlign: 'center', marginBottom: '1rem' }}
+          >
+            {globalError}
+          </div>
+        )}
 
         <button className="formulario__boton-principal" disabled={loading} type="submit">
           {loading ? 'Registrando...' : 'Registrarse'}

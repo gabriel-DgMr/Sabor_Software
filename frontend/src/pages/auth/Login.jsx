@@ -3,10 +3,13 @@ import React, { useState, useEffect } from 'react';
 
 import { useAuth } from '../../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
+import { validarCaracteresEspeciales } from '../../utils/validaciones';
+
 
 const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
   const { login, loading } = useAuth();
   const [errors, setErrors] = useState({});
+  const [globalError, setGlobalError] = useState('');
 
   useEffect(() => {
     return () => setErrors({});
@@ -14,6 +17,7 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
 
   const manejarErroresDeCampo = newErrors => {
     setErrors(newErrors);
+    setGlobalError('');
     setTimeout(() => animateElements('.formulario__mensaje-error', 'fade-in'), 0);
     setTimeout(() => {
       document.querySelectorAll('.formulario__mensaje-error').forEach(el => {
@@ -33,6 +37,19 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
     const contraseña_cliente = form.password.value;
 
     const newErrors = {};
+
+    // Validar caracteres especiales en el correo
+    const errorEmail = validarCaracteresEspeciales(email_cliente, "correo");
+    if (errorEmail) {
+      newErrors.email = errorEmail;
+    }
+
+    // Validar caracteres especiales en la contraseña
+    const errorPassword = validarCaracteresEspeciales(contraseña_cliente, "contraseña");
+    if (errorPassword) {
+      newErrors.password = errorPassword;
+    }
+
     if (!email_cliente) {
       newErrors.email = 'El correo es obligatorio.';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email_cliente)) {
@@ -53,7 +70,16 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
       onShowMessage('success', 'Inicio de sesión exitoso.');
       if (onLoginSuccess) onLoginSuccess();
     } else {
-      onShowMessage('error', result.message || 'Error al iniciar sesión.');
+      setGlobalError(result.message || 'Error al iniciar sesión.');
+      setTimeout(() => animateElements('#global-error-login', 'fade-in'), 0);
+      setTimeout(() => {
+        const el = document.getElementById('global-error-login');
+        if (el) {
+          el.classList.remove('fade-in');
+          el.classList.add('fade-out');
+        }
+        setTimeout(() => setGlobalError(''), ANIM_DURATION);
+      }, VISIBLE_DURATION);
     }
   };
 
@@ -92,12 +118,20 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
           />
           {errors.password && <small className="formulario__mensaje-error">{errors.password}</small>}
         </div>
-
+        {globalError && (
+          <div
+            className="formulario__mensaje-error"
+            id="global-error-login"
+            style={{ textAlign: 'center', marginBottom: '1rem' }}
+          >
+            {globalError}
+          </div>
+        )}
         <button className="formulario__boton-principal" disabled={loading} type="submit">
           {loading ? 'Iniciando...' : 'Iniciar Sesión'}
         </button>
-        <button 
-          type="button" 
+        <button
+          type="button"
           className="formulario__olvidar-contraseña"
           onClick={() => onShowForgotPassword()}
         >

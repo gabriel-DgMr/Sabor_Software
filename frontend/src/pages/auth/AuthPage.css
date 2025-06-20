@@ -28,9 +28,16 @@
   padding: 2rem 5rem;
   border-radius: 1.6rem;
   position: relative;
-  width: 40%;
+  width: 60%;
   text-align: center;
 }
+
+@media (max-width: 768px) {
+  .modal__contenido {
+    width: 100%;
+  }
+}
+
 .modal__boton-cerrar {
   position: absolute;
   top: 1.4rem;
