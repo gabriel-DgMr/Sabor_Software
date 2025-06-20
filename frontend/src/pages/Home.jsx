@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { FaCartShopping } from "react-icons/fa6";
 import { Link } from 'react-router-dom';
 import '../index.css';
-import { FaCartShopping } from "react-icons/fa6";
 
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
@@ -24,7 +24,7 @@ const Home = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  {/*const { addItemToCart } = useCart();
+  const { addItemToCart } = useCart();
   const { state } = useProductos();
   const [productoExpandido, setProductoExpandido] = useState(null);
 
@@ -42,7 +42,7 @@ const Home = () => {
   };
 
   if (state.loading) return <LoadingScreen />;
-  if (state.error) return <div>Error al cargar productos: {state.error}</div>;*/}
+  if (state.error) return <div>Error al cargar productos: {state.error}</div>;
 
   return (
     <div>
@@ -116,7 +116,6 @@ const Home = () => {
         </section>
 
         {/* Sección de productos */}
-        {/*
       <section className="seccion seccion--productos">
         <div className="productos">
           {state.productos.map((producto) => (
@@ -149,9 +148,7 @@ const Home = () => {
             </div>
           ))}
         </div>
-      </section>
-      */}
-      
+      </section> 
       </main>
       <Footer />
     </div>
