@@ -73,7 +73,7 @@
 }
 
 .formulario__input--error {
-  border-color: var(--error-500);
+  border-color: var(--error-400);
 }
 
 .formulario__mensaje-error,
@@ -84,10 +84,9 @@
 .formulario__mensaje-error {
   display: block;
   margin: 1rem 0;
-  color: var(--error-900);
-  background-color: var(--error-400);
+  color: var(--error-700);
+  font-weight: 800;
   border-radius: 1rem;
-  padding: 1rem;
   width: 100%;
 }
 

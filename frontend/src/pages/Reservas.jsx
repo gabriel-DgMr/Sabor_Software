@@ -271,7 +271,7 @@ const Reservas = () => {
       <div className="inputCantidadPersonas">
         <input
           required
-          className={formErrors.personas ? 'reservas__input-error' : ''}
+          className={`cantidad-personas__input ${formErrors.personas ? 'reservas__input-error' : ''}`}
           min="1"
           name="personas"
           placeholder="CANTIDAD DE PERSONAS"
@@ -394,34 +394,39 @@ const Reservas = () => {
   // Estructura principal
   return (
     <div>
-      <Header /* setShowLogin={setShowLogin} */ /> {/* Comentado para que el linter no este fastidiando*/}
-      <main className="pagina__contenido">
-        <section className="seccion_reservas">
-          <h1 className="reservas__titulo">Reservación</h1>
-          {renderStepIndicator()}
+      <div>
+        <Header /* setShowLogin={setShowLogin} */ /> {/* Comentado para que el linter no este fastidiando*/}
+        <main className="pagina__contenido-reservas">
+          <section className="reservas__imagen">
+            <img src="/images/imagen-reservas.jpg" alt="imagen-reservas" className='imagen-reservas'/>
+          </section>
+          <section className="seccion_reservas">
+            <h1 className="reservas__titulo">Reservación</h1>
+            {renderStepIndicator()}
 
-          <div className="reservas__contenido">
-            <form onSubmit={handleSubmit}>
-              {step === 1 && renderPaso1()}
-              {step === 2 && renderPaso2()}
-              {step === 3 && renderPaso3()}
-              {step === 4 && renderPaso4()}
+            <div className="reservas__contenido">
+              <form onSubmit={handleSubmit}>
+                {step === 1 && renderPaso1()}
+                {step === 2 && renderPaso2()}
+                {step === 3 && renderPaso3()}
+                {step === 4 && renderPaso4()}
 
-              <div className="reservas__acciones">
-                {step > 1 && (
-                  <button className="boton_regresar" type="button" onClick={handlePreviousStep}>
-                    Regresar
+                <div className="reservas__acciones">
+                  {step > 1 && (
+                    <button className="boton_regresar" type="button" onClick={handlePreviousStep}>
+                      Regresar
+                    </button>
+                  )}
+                  <button className="boton_siguiente" type="submit">
+                    {step === 4 ? 'Confirmar Reserva' : step === 3 ? 'Ver Resumen' : 'Siguiente'}
                   </button>
-                )}
-                <button className="boton_siguiente" type="submit">
-                  {step === 4 ? 'Confirmar Reserva' : step === 3 ? 'Ver Resumen' : 'Siguiente'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </section>
-      </main>
-      <Footer />
+                </div>
+              </form>
+            </div>
+          </section>
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 };
