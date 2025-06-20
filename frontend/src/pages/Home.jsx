@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../index.css';
 
@@ -13,6 +13,7 @@ import AuthPage from './auth/index.jsx';
 const Home = () => {
   const { addItemToCart } = useCart();
   const { state } = useProductos();
+  const [productoExpandido, setProductoExpandido] = useState(null);
 
   useEffect(() => {
     document.title = 'Sabor: Home';
@@ -105,7 +106,12 @@ const Home = () => {
       <section className="seccion seccion--productos">
         <div className="productos">
           {state.productos.map((producto) => (
-            <div key={producto.id_producto} className="productos__card-producto">
+            <div
+              key={producto.id_producto}
+              className="productos__card-producto"
+              onMouseEnter={() => setProductoExpandido(producto.id_producto)}
+              onMouseLeave={() => setProductoExpandido(null)}
+            >
               <img
                 alt={producto.nombre_producto}
                 className="productos__imagen"
@@ -113,18 +119,20 @@ const Home = () => {
               />
               <div className="productos__info">
                 <h4 className="productos__nombre">{producto.nombre_producto}</h4>
-                <p className="productos__descripcion">
+                <p
+                  className={`productos__descripcion${productoExpandido === producto.id_producto ? ' expandida' : ''}`}
+                >
                   {producto.descripcion_producto}
                 </p>
-                <div className= "productos__footer">
-                <p className="productos__precio">{formatearPrecio(producto.precio_producto)}</p>
-                <button className="btn-agregarpr" onClick={() => addItemToCart({
-                  nombre: producto.nombre_producto,
-                  precio: producto.precio_producto
-                })}>Agregar</button>
+                <div className="productos__footer">
+                  <p className="productos__precio">{formatearPrecio(producto.precio_producto)}</p>
+                  <button className="btn-agregarpr" onClick={() => addItemToCart({
+                    nombre: producto.nombre_producto,
+                    precio: producto.precio_producto
+                  })}>Agregar</button>
+                </div>
               </div>
             </div>
-          </div>
           ))}
         </div>
       </section>
