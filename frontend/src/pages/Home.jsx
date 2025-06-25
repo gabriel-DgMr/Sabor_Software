@@ -3,16 +3,19 @@ import { FaCartShopping } from "react-icons/fa6";
 import { Link } from 'react-router-dom';
 import '../index.css';
 
+import MensajeExito from '../components/DialogoExito.jsx'
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useProductos } from '../context/ProductoContext';
-
-import AuthPage from './auth/index.jsx';
+import { FormatPriceCOP } from '../utils/format.js';
 
 const Home = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  // Estados para el diálogo de éxito
+  const [exitoOpen, setExitoOpen] = useState(false);
+  const [mensajeExito, setMensajeExito] = useState('');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,13 +35,14 @@ const Home = () => {
     document.title = 'Sabor: Home';
   }, []);
 
-  const formatearPrecio = (precio) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(precio);
+  // Función para agregar producto y mostrar mensaje de éxito
+  const handleAgregar = (producto) => {
+    addItemToCart({
+      nombre: producto.nombre_producto,
+      precio: producto.precio_producto
+    });
+    setMensajeExito(`¡${producto.nombre_producto} agregado al carrito!`);
+    setExitoOpen(true);
   };
 
   if (state.loading) return <LoadingScreen />;
@@ -49,7 +53,7 @@ const Home = () => {
       <Header />
       <Link className={`carrito-link ${isScrolled ? 'carrito-flotante' : 'carrito-fixed'}`} to="/carrito">
         <div className="carrito-icono">
-          <FaCartShopping  className='carrito' size={30}/>
+          <FaCartShopping  className='carrito' optionsSize={30}/>
         </div>
       </Link>
 
@@ -138,11 +142,10 @@ const Home = () => {
                   {producto.descripcion_producto}
                 </p>
                 <div className="productos__footer">
-                  <p className="productos__precio">{formatearPrecio(producto.precio_producto)}</p>
-                  <button className="btn-agregarpr" onClick={() => addItemToCart({
-                    nombre: producto.nombre_producto,
-                    precio: producto.precio_producto
-                  })}>Agregar</button>
+                  <p className="productos__precio">{FormatPriceCOP(producto.precio_producto)}</p>
+                  <button className="btn-agregarpr" onClick={() => handleAgregar(producto)}>
+                    Agregar
+                  </button>
                 </div>
               </div>
             </div>
@@ -150,6 +153,13 @@ const Home = () => {
         </div>
       </section> 
       </main>
+      {/* Diálogo de éxito */}
+      <MensajeExito
+        open={exitoOpen}
+        message={mensajeExito}
+        onClose={() => setExitoOpen(false)}
+        duration={2000}
+      />
       <Footer />
     </div>
   );

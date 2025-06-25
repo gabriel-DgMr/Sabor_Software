@@ -15,7 +15,7 @@ const Header = () => {
 
   // Detectar si es móvil
   const handleResize = () => {
-    if (window.innerWidth < 769) {
+    if (window.innerWidth <= 769) {
       setIsMobileMenu(true);
     } else {
       setIsMobileMenu(false);
@@ -46,7 +46,6 @@ const Header = () => {
           <Link to="/"><img alt="Logo Sabor" className="encabezado__logo" src="/images/logo_sabor.png" /></Link>
 
           <div className="encabezado__informacion">
-            <div className="encabezado__idioma">
               <nav className="encabezado__idioma" aria-label="Selector de idioma">
                 <button
                   type="button"
@@ -69,12 +68,15 @@ const Header = () => {
                   <ReactCountryFlag countryCode="US" svg />
                 </button>
               </nav>
-            </div>
 
-            {user ? (
-              isMobileMenu ? (
+            {isMobileMenu ? (
+              user ? (
                 <div className="encabezado__usuario encabezado__usuario--mobile">
-                  <button className="menu-hamburguesa" onClick={toggleMobileMenu} aria-label="Abrir menú de usuario">
+                  <button
+                    className="menu-hamburguesa"
+                    onClick={toggleMobileMenu}
+                    aria-label="Abrir menú de usuario"
+                  >
                     {!showMenu && <FaBars size={32} />}
                   </button>
                   {showMenu && (
@@ -108,13 +110,20 @@ const Header = () => {
                   )}
                 </div>
               ) : (
+                <div className="encabezado__usuario" onClick={() => setShowLogin(true)}>
+                  <p className="encabezado__nombre-usuario">Iniciar sesión</p>
+                  <FaUserCircle className="encabezado__icono-usuario" size={32} />
+                </div>
+              )
+            ) : (
+              user ? (
                 <div
                   className="encabezado__usuario"
                   onMouseEnter={() => setShowMenu(true)}
                   onMouseLeave={() => setShowMenu(false)}
                 >
-                <p className="encabezado__nombre-usuario">{user.nombre_cliente}</p>
-                <FaUserCircle className="encabezado__icono-usuario" size={32} />
+                  <p className="encabezado__nombre-usuario">{user.nombre_cliente}</p>
+                  <FaUserCircle className="encabezado__icono-usuario" size={32} />
                   {showMenu && (
                     <div className="menu-perfil">
                       <Link className="menu-perfil__opcion" to="/historial-pedidos">Ver historial de pedidos</Link>
@@ -123,13 +132,13 @@ const Header = () => {
                       <button className="menu-perfil__opcion menu-perfil__opcion--cerrar-sesion" onClick={logout}>Cerrar sesión</button>
                     </div>
                   )}
-              </div>
+                </div>
+              ) : (
+                <div className="encabezado__usuario" onClick={() => setShowLogin(true)}>
+                  <p className="encabezado__nombre-usuario">Iniciar sesión</p>
+                  <FaUserCircle className="encabezado__icono-usuario" size={32} />
+                </div>
               )
-            ) : (
-              <div className="encabezado__usuario" onClick={() => setShowLogin(true)}>
-                <p className="encabezado__nombre-usuario">Iniciar sesión</p>
-                <FaUserCircle className="encabezado__icono-usuario" size={32} />
-              </div>
             )}
           </div>
         </div>

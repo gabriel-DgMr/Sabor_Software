@@ -98,8 +98,7 @@
 }
 
 .formulario__mensaje-exito {
-  color: var(--success-900);
-  background-color: var(--success-400);
+  color: var(--success-600);
   border-radius: 1rem;
   padding: 1rem;
 }

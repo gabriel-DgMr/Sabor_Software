@@ -37,18 +37,6 @@ const ModificarPedido = () => {
     <>
       <Header />
       <main className="carrito_bg">
-        <div className="reservas__acciones" style={{ 
-          position: 'absolute',
-          top: '100px',
-          left: '20px'
-        }}>
-          <button 
-            className="carrito_btn__regresar"
-            onClick={() => navigate('/carrito')}
-          >
-            Regresar
-          </button>
-        </div>
         <h1 className="carrito_titulo">Modificar pedido</h1>
         <div className="carrito_contenido">
           <div className="carrito_pedidos">
@@ -60,7 +48,7 @@ const ModificarPedido = () => {
                     {item.precio.toLocaleString('es-CO')} COP
                   </div>
                 </div>
-                <button 
+                <button
                   className="carrito_btn eliminar"
                   onClick={() => eliminarItem(index)}
                 >
@@ -91,7 +79,7 @@ const ModificarPedido = () => {
               </div>
             </div>
 
-            <button 
+            <button
               className="carrito_btn modificar"
               style={{
                 width: '100%',
@@ -103,18 +91,20 @@ const ModificarPedido = () => {
             >
               + Agregar producto
             </button>
-            <button 
-              className="carrito_btn pagar"
-              style={{
-                width: '100%',
-                marginTop: '20px',
-                padding: '15px',
-                fontSize: '1.2rem'
-              }}
-              onClick={confirmarCambios}
-            >
-              Confirmar cambios
-            </button>
+            <div className='modificar__botones--pagarregresar'>
+              <button
+                className="carrito_btn__pagar"
+                onClick={confirmarCambios}
+              >
+                Confirmar cambios
+              </button>
+              <button
+                className="carrito_btn__regresar"
+                onClick={() => navigate('/carrito')}
+              >
+                Regresar
+              </button>
+            </div>
           </div>
         </div>
       </main>

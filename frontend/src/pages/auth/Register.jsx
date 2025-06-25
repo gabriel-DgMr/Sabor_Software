@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
@@ -10,6 +11,8 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
   const { registerUser, loading } = useAuth();
   const [errors, setErrors] = useState({});
   const [globalError, setGlobalError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     return () => setErrors({});
@@ -121,9 +124,13 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
     });
 
     if (result && result.success) {
-      onShowMessage('success', result.message || 'Registro exitoso. Ahora puedes iniciar sesión.');
-      if (onRegisterSuccess) onRegisterSuccess();
+      setSuccessMessage(result.message || 'Registro exitoso. Ahora puedes iniciar sesión.');
+      setTimeout(() => {
+        setSuccessMessage('');
+        navigate('/');
+      }, 2000);
       form.reset();
+      return;
     } else {
       setGlobalError(result.message || 'Error en el registro.');
       setTimeout(() => animateElements('#global-error-register', 'fade-in'), 0);
@@ -228,9 +235,14 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
           <div
             className="formulario__mensaje-error"
             id="global-error-register"
-            style={{ textAlign: 'center', marginBottom: '1rem' }}
           >
             {globalError}
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="formulario__mensaje-exito">
+            {successMessage}
           </div>
         )}
 
