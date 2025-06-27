@@ -9,14 +9,6 @@ const __dirname = dirname(__filename);
 // Cargar variables de entorno
 dotenv.config({ path: join(__dirname, '../../.env') });
 
-
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
-
-if (missingEnvVars.length > 0) {
-    throw new Error(
-        `Faltan las siguientes variables de entorno requeridas: ${missingEnvVars.join(', ')}`
-    );
-}
 // Validar variables de entorno requeridas
 const requiredEnvVars = [
     'DB_PASSWORD',
@@ -30,6 +22,14 @@ const requiredEnvVars = [
     'EMAIL_USER',
     'EMAIL_PASSWORD'
 ];
+
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+    throw new Error(
+        `Faltan las siguientes variables de entorno requeridas: ${missingEnvVars.join(', ')}`
+    );
+}
 
 export const config = {
     // Configuración del servidor

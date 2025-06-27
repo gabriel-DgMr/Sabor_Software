@@ -501,8 +501,8 @@ hr {
   height: 100%;
 }
 
-.reservas__imagen {
-  border-radius: 2rem;
+.imagen-reservas {
+  border-radius:2rem;
 
 }
 
@@ -516,6 +516,10 @@ hr {
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 2rem;
+}
+
+.pie-reservas{
+  position: absolute;
 }
 
 .steps_container {
@@ -769,3 +773,11 @@ hr {
 }
 
 /* Estilos para el botón Agregar Producto en la página de inicio */
+
+.pie-pagina--fixed {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  z-index: 100;
+}

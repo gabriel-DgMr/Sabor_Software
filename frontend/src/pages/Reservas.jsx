@@ -425,7 +425,7 @@ const Reservas = () => {
             </div>
           </section>
         </main>
-        <Footer />
+        <Footer/>
       </div>
     </div>
   );
