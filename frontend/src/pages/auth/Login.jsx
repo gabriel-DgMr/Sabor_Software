@@ -1,15 +1,16 @@
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
-import { validarCaracteresEspeciales } from '../../utils/validaciones';
-
+import { validarLogin } from '../../utils/validaciones';
 
 const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
   const { login, loading } = useAuth();
   const [errors, setErrors] = useState({});
   const [globalError, setGlobalError] = useState('');
+  const { t } = useTranslation();
 
   useEffect(() => {
     return () => setErrors({});
@@ -33,44 +34,26 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
     setErrors({});
 
     const form = e.target;
-    const email_cliente = form.email.value.trim();
-    const contraseña_cliente = form.password.value;
+    const formData = {
+      email_cliente: form.email.value,
+      contraseña_cliente: form.password.value
+    };
 
-    const newErrors = {};
+    // Usar validaciones centralizadas
+    const validationErrors = validarLogin(formData);
 
-    // Validar caracteres especiales en el correo
-    const errorEmail = validarCaracteresEspeciales(email_cliente, "correo");
-    if (errorEmail) {
-      newErrors.email = errorEmail;
-    }
-
-    // Validar caracteres especiales en la contraseña
-    const errorPassword = validarCaracteresEspeciales(contraseña_cliente, "contraseña");
-    if (errorPassword) {
-      newErrors.password = errorPassword;
-    }
-
-    if (!email_cliente) {
-      newErrors.email = 'El correo es obligatorio.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email_cliente)) {
-      newErrors.email = 'El correo no es válido.';
-    }
-    if (!contraseña_cliente) {
-      newErrors.password = 'La contraseña es obligatoria.';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      manejarErroresDeCampo(newErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      manejarErroresDeCampo(validationErrors);
       return;
     }
 
-    const result = await login(email_cliente, contraseña_cliente);
+    const result = await login(formData.email_cliente.trim(), formData.contraseña_cliente);
 
     if (result && result.success) {
-      onShowMessage('success', 'Inicio de sesión exitoso.');
+      onShowMessage('success', t('login_exito'));
       if (onLoginSuccess) onLoginSuccess();
     } else {
-      setGlobalError(result.message || 'Error al iniciar sesión.');
+      setGlobalError(result.message || t('login_error'));
       setTimeout(() => animateElements('#global-error-login', 'fade-in'), 0);
       setTimeout(() => {
         const el = document.getElementById('global-error-login');
@@ -85,38 +68,38 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
 
   return (
     <div className="formulario__contenedor formulario__contenedor--login">
-      <h2 className="modal__titulo">Iniciar Sesión</h2>
+      <h2 className="modal__titulo">{t('iniciar_sesion')}</h2>
       <form noValidate className="formulario" onSubmit={handleLogin}>
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="email-login">
-            Correo Electrónico*
+            {t('correo_electronico')}
           </label>
           <input
             autoComplete="email"
-            className={`formulario__input ${errors.email ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.email_cliente ? 'input--error' : ''}`}
             disabled={loading}
             id="email-login"
             name="email"
-            placeholder="Tu Correo Electrónico"
+            placeholder={t('login_placeholder_email')}
             type="email"
           />
-          {errors.email && <small className="formulario__mensaje-error">{errors.email}</small>}
+          {errors.email_cliente && <small className="formulario__mensaje-error">{errors.email_cliente}</small>}
         </div>
 
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="password-login">
-            Contraseña*
+            {t('contrasena')}
           </label>
           <input
             autoComplete="current-password"
-            className={`formulario__input ${errors.password ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.contraseña_cliente ? 'input--error' : ''}`}
             disabled={loading}
             id="password-login"
             name="password"
-            placeholder="Tu Contraseña"
+            placeholder={t('login_placeholder_password')}
             type="password"
           />
-          {errors.password && <small className="formulario__mensaje-error">{errors.password}</small>}
+          {errors.contraseña_cliente && <small className="formulario__mensaje-error">{errors.contraseña_cliente}</small>}
         </div>
         {globalError && (
           <div
@@ -128,14 +111,14 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
           </div>
         )}
         <button className="formulario__boton-principal" disabled={loading} type="submit">
-          {loading ? 'Iniciando...' : 'Iniciar Sesión'}
+          {loading ? t('login_iniciando') : t('iniciar_sesion')}
         </button>
         <button
           type="button"
           className="formulario__olvidar-contraseña"
           onClick={() => onShowForgotPassword()}
         >
-          ¿Olvidaste tu contraseña?
+          {t('login_olvidaste_contrasena')}
         </button>
       </form>
     </div>

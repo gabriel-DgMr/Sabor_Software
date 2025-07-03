@@ -127,7 +127,6 @@ body {
 }
 
 main {
-  flex: 1;
 }
 
 img,
@@ -631,13 +630,12 @@ hr {
   position: relative;
   bottom: 0;
   width: 100%;
-   background-color: var(--secondary-600);
-   padding: 2rem;
-   color: var(--neutral-50);
-   display: grid;
-   grid-template-columns: repeat(3, 1fr);
-   justify-items: center;
-  margin-top: auto;
+  background-color: var(--secondary-600);
+  padding: 2rem;
+  color: var(--neutral-50);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
 }
 
 @media (max-width: 768px) {
@@ -1125,17 +1123,14 @@ hr {
   display: block;
   object-fit: cover;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  transition: box-shadow 0.2s, background 0.2s, transform 0.2s;
 }
 
-.encabezado__informacion .menu-perfil__idioma-boton:hover,
-.encabezado__informacion .menu-perfil__idioma-boton:focus {
-  transform: scale(1.15);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  background-color: var(--secondary-700);
-}
-
-.menu-perfil__idioma-boton--activo {
-  transform: scale(1.15);
+.menu-perfil__idioma-boton--activo,
+.menu-perfil__idioma-boton:hover {
+  transform: scale(1.50);
+  background: var(--primary-100);
+  box-shadow: 0 0 0 3px var(--primary-200);
 }
 
 /* =====================
@@ -1259,4 +1254,62 @@ hr {
 .success-dialog__message {
   font-size: 1.2rem;
   color: #2e7d32;
+}
+
+/* =====================
+   ANIMACIONES BÁSICAS
+   ===================== */
+.fade-in {
+  animation: fadeIn 0.3s ease-in forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.encabezado__links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.encabezado__link {
+  color: var(--darkmode-800);
+  font-size: 1.15rem;
+  text-decoration: none;
+  transition: color 0.2s, border-bottom 0.2s;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: transform 0.4s;
+
+}
+
+.encabezado__link:hover, .encabezado__link--bold:hover {
+  color: var(--darkmode-700);
+  background: var(--primary-300);
+  transform: scale(1.08);
+  text-decoration: underline;
 }

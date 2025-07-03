@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
+import { validarEmail } from '../../utils/validaciones';
 
 const ForgotPassword = ({ onShowMessage }) => {
   // Estados para manejar la carga y errores del formulario
@@ -45,14 +46,17 @@ const ForgotPassword = ({ onShowMessage }) => {
     setErrors({});
 
     const form = e.target;
-    const email_cliente = form.email.value.trim();
+    const email_cliente = form.email.value;
 
-    // Validación del correo electrónico
+    // Validación del correo electrónico usando funciones centralizadas
     const newErrors = {};
     if (!email_cliente) {
       newErrors.email = 'El correo es obligatorio.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email_cliente)) {
-      newErrors.email = 'El correo no es válido.';
+    } else {
+      const emailError = validarEmail(email_cliente);
+      if (emailError) {
+        newErrors.email = emailError;
+      }
     }
 
     // Si hay errores, mostrarlos y detener el proceso
@@ -69,7 +73,7 @@ const ForgotPassword = ({ onShowMessage }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email_cliente }),
+        body: JSON.stringify({ email_cliente: email_cliente.trim() }),
       });
 
       const data = await response.json();

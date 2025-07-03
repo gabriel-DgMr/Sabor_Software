@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ANIM_DURATION, VISIBLE_DURATION, animateElement } from '../../utils/animationUtils';
 
@@ -11,6 +12,7 @@ import './AuthPage.css';
 const AuthPage = ({ isOpen, onClose }) => {
   const [view, setView] = useState('login'); // 'login', 'register', 'forgot-password'
   const [globalMessage, setGlobalMessage] = useState({ type: '', text: '' });
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!isOpen) {
@@ -101,16 +103,16 @@ const AuthPage = ({ isOpen, onClose }) => {
           <div className="auth-page__toggle-view">
             {view === 'login' ? (
               <p>
-                ¿No tienes una cuenta?{' '}
+                {t('no_tienes_cuenta')}{' '}
                 <button className="auth-page__toggle-button" onClick={() => setView('register')}>
-                  Regístrate
+                  {t('registrate')}
                 </button>
               </p>
             ) : (
               <p>
-                ¿Ya tienes una cuenta?{' '}
+                {t('ya_tienes_cuenta')}{' '}
                 <button className="auth-page__toggle-button" onClick={() => setView('login')}>
-                  Inicia Sesión
+                  {t('iniciar_sesion')}
                 </button>
               </p>
             )}

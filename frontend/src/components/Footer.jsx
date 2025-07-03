@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AiFillInstagram } from 'react-icons/ai';
 import { BsTwitterX } from 'react-icons/bs';
 import { FaFacebook, FaTiktok, FaYoutube } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils';
-import { validarCaracteresEspeciales } from '../utils/validaciones';
+import { validarCaracteresEspeciales, validarLongitud, validarEspaciosInicioFinal } from '../utils/validaciones';
 
 const Footer = () => {
   const [experiencia, setExperiencia] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
+  const { t } = useTranslation();
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -17,12 +20,27 @@ const Footer = () => {
     setMensaje('');
 
     let errorMessage = '';
-    if (!experiencia.trim()) {
+    
+    // Validar que el campo no esté vacío
+    if (!experiencia) {
       errorMessage = 'El campo no puede estar vacío.';
     } else {
-      const errorValidacion = validarCaracteresEspeciales(experiencia, 'experiencia');
-      if (errorValidacion) {
-        errorMessage = errorValidacion;
+      // Validar longitud
+      const longitudError = validarLongitud(experiencia, 'experiencia', 5, 500);
+      if (longitudError) {
+        errorMessage = longitudError;
+      } else {
+        // Validar caracteres especiales
+        const caracteresError = validarCaracteresEspeciales(experiencia, 'experiencia');
+        if (caracteresError) {
+          errorMessage = caracteresError;
+        } else {
+          // Validar espacios al inicio y final
+          const espaciosError = validarEspaciosInicioFinal(experiencia, 'experiencia');
+          if (espaciosError) {
+            errorMessage = espaciosError;
+          }
+        }
       }
     }
 
@@ -57,8 +75,8 @@ const Footer = () => {
   return (
       <footer className="pie-pagina">
         <div className="pie-pagina__contacto">
-          <h3 className="pie-pagina__titulo">Contáctanos</h3>
-          <h4 className="pie-pagina__subtitulo">Nuestras redes sociales</h4>
+          <h3 className="pie-pagina__titulo">{t('contactanos')}</h3>
+          <h4 className="pie-pagina__subtitulo">{t('nuestras_redes')}</h4>
           <div className="pie-pagina__redes">
             <div className="pie-pagina__icono-red">
               <FaFacebook size={32} />
@@ -79,22 +97,22 @@ const Footer = () => {
         </div>
 
         <div className="pie-pagina__nosotros">
-          <h3 className="pie-pagina__titulo">Sobre Nosotros</h3>
+          <h3 className="pie-pagina__titulo">{t('sobre_nosotros')}</h3>
           <h4 className="pie-pagina__subtitulo">
-            <a href="#" className='nosotros-opc'>¿Quiénes somos?</a>
-            <a href="#" className='nosotros-opc'>Descubrenos </a>
+            <Link to="/quienes-somos" className='nosotros-opc'>{t('quienes_somos')}</Link>
+            <Link to="/sobre-nosotros" className='nosotros-opc'>{t('descubrenos')}</Link>
           </h4>
         </div>
         <form className="cuentanos" onSubmit={handleSubmit} noValidate>
-          <h3 className="pie-pagina__titulo">¡Cuentanos!</h3>
+          <h3 className="pie-pagina__titulo">{t('cuentanos')}</h3>
           <textarea
             className="cuentanos__input"
-            placeholder="¡Tu experiencia!"
+            placeholder={t('tu_experiencia')}
             value={experiencia}
             onChange={e => setExperiencia(e.target.value)}
           />
           <button type="submit" className="cuentanos__boton">
-            Enviar
+            {t('enviar')}
           </button>
           {error && (
             <p id="error-footer" className="cuentanos__mensaje-error">

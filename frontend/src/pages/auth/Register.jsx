@@ -1,18 +1,19 @@
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
-import { validarCaracteresEspeciales } from '../../utils/validaciones';
+import { validarRegistro } from '../../utils/validaciones';
 
-
-const Register = ({ onShowMessage, onRegisterSuccess }) => {
+const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegisterSuccess }) => {
   const { registerUser, loading } = useAuth();
   const [errors, setErrors] = useState({});
   const [globalError, setGlobalError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     return () => setErrors({});
@@ -24,79 +25,24 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
     setGlobalError('');
 
     const form = e.target;
-    const nombre_cliente = form.nombre.value.trim();
-    const email_cliente = form.email.value.trim();
-    const telefono_cliente = form.telefono.value.trim();
-    const contraseña_cliente = form.password.value.trim();
-    const confirmPassword = form.confirmPassword.value.trim();
+    const formData = {
+      nombre_cliente: form.nombre.value,
+      email_cliente: form.email.value,
+      telefono_cliente: form.telefono.value,
+      contraseña_cliente: form.password.value
+    };
+    const confirmPassword = form.confirmPassword.value;
 
-    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-
-    const newErrors = {};
-
-  // Validación de caracteres especiales y espacios para todos los campos
-  const errorNombre = validarCaracteresEspeciales(form.nombre.value, 'nombre'); 
-    if (errorNombre) {
-      newErrors.nombre = errorNombre;
-    } else if (!nombre_cliente) {
-      newErrors.nombre = 'El nombre es obligatorio.';
-    } else if (nombre_cliente !== form.nombre.value) {
-      newErrors.nombre = 'No se permiten espacios al inicio ni al final del nombre.';
-    } else if (/\s{2,}/.test(form.nombre.value)) {
-      newErrors.nombre = 'No se permiten espacios dobles o múltiples en el nombre.';
-    }
-
-    const errorEmail = validarCaracteresEspeciales(form.email.value, 'correo');
-    if (errorEmail) {
-      newErrors.email = errorEmail;
-    } else if (!email_cliente) {
-      newErrors.email = 'El correo es obligatorio.';
-    } else if (email_cliente !== form.email.value) {
-      newErrors.email = 'No se permiten espacios al inicio ni al final del correo.';
-    } else if (/\s{2,}/.test(form.email.value)) {
-      newErrors.email = 'No se permiten espacios dobles o múltiples en el correo.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email_cliente)) {
-      newErrors.email = 'El correo no es válido.';
-    }
-
-    const errorTelefono = validarCaracteresEspeciales(form.telefono.value, 'teléfono');
-    if (errorTelefono) {
-      newErrors.telefono = errorTelefono;
-    } else if (!telefono_cliente) {
-      newErrors.telefono = 'El teléfono es obligatorio.';
-    } else if (telefono_cliente !== form.telefono.value) {
-      newErrors.telefono = 'No se permiten espacios al inicio ni al final del teléfono.';
-    } else if (/\s{2,}/.test(form.telefono.value)) {
-      newErrors.telefono = 'No se permiten espacios dobles o múltiples en el teléfono.';
-    } else if (!/^\d{10}$/.test(telefono_cliente)) {
-      newErrors.telefono = 'El teléfono debe tener 10 dígitos.';
-    }
+    // Usar validaciones centralizadas
+    const validationErrors = validarRegistro(formData);
     
-    const errorPassword = validarCaracteresEspeciales(form.password.value, 'contraseña');
-    if (errorPassword) {
-      newErrors.password = errorPassword;
-    } else if (!contraseña_cliente) {
-      newErrors.password = 'La contraseña es obligatoria.';
-    } else if (contraseña_cliente !== form.password.value) {
-      newErrors.password = 'No se permiten espacios al inicio ni al final de la contraseña.';
-    } else if (/\s{2,}/.test(form.password.value)) {
-      newErrors.password = 'No se permiten espacios dobles o múltiples en la contraseña.';
-    } else if (!pwdRegex.test(contraseña_cliente)) {
-      newErrors.password = 'Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.';
+    // Validar confirmación de contraseña
+    if (!confirmPassword) {
+      validationErrors.confirmPassword = t('confirma_contrasena');
+    } else if (confirmPassword !== formData.contraseña_cliente) {
+      validationErrors.confirmPassword = t('contrasenas_no_coinciden');
     }
-
-    const errorConfirmPassword = validarCaracteresEspeciales(form.confirmPassword.value, 'confirmación de contraseña');
-    if (errorConfirmPassword) {
-      newErrors.confirmPassword = errorConfirmPassword;
-    } else if (!confirmPassword) {
-      newErrors.confirmPassword = 'Confirma tu contraseña.';
-    } else if (confirmPassword !== form.confirmPassword.value) {
-      newErrors.confirmPassword = 'No se permiten espacios al inicio ni al final de la confirmación de contraseña.';
-    } else if (/\s{2,}/.test(form.confirmPassword.value)) {
-      newErrors.confirmPassword = 'No se permiten espacios dobles o múltiples en la confirmación de contraseña.';
-    } else if (contraseña_cliente !== confirmPassword) {
-      newErrors.confirmPassword = 'Las contraseñas no coinciden.';
-    }
+      
 
     const manejarErroresDeCampo = newErrors => {
       setErrors(newErrors);
@@ -111,20 +57,20 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
       }, VISIBLE_DURATION);
     };
 
-    if (Object.keys(newErrors).length > 0) {
-      manejarErroresDeCampo(newErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      manejarErroresDeCampo(validationErrors);
       return;
     }
 
     const result = await registerUser({
-      nombre_cliente,
-      email_cliente,
-      telefono_cliente,
-      contraseña_cliente,
+      nombre_cliente: formData.nombre_cliente.trim(),
+      email_cliente: formData.email_cliente.trim(),
+      telefono_cliente: formData.telefono_cliente.trim(),
+      contraseña_cliente: formData.contraseña_cliente,
     });
 
     if (result && result.success) {
-      setSuccessMessage(result.message || 'Registro exitoso. Ahora puedes iniciar sesión.');
+      setSuccessMessage(result.message || t('registro_exitoso'));
       setTimeout(() => {
         setSuccessMessage('');
         navigate('/');
@@ -132,7 +78,7 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
       form.reset();
       return;
     } else {
-      setGlobalError(result.message || 'Error en el registro.');
+      setGlobalError(result.message || t('error_registro'));
       setTimeout(() => animateElements('#global-error-register', 'fade-in'), 0);
       setTimeout(() => {
         const el = document.getElementById('global-error-register');
@@ -147,75 +93,75 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
 
   return (
     <div className="formulario__contenedor formulario__contenedor--register">
-      <h2 className="modal__titulo">Crear Cuenta</h2>
+      <h2 className="modal__titulo">{t('crear_cuenta')}</h2>
       <form noValidate className="formulario" onSubmit={handleRegister}>
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="nombre-register">
-            Nombre Completo*
+            {t('nombre_completo')}
           </label>
           <input
             autoComplete="name"
-            className={`formulario__input ${errors.nombre ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.nombre_cliente ? 'input--error' : ''}`}
             disabled={loading}
             id="nombre-register"
             name="nombre"
-            placeholder="Ej: Juan Carlos Perez"
+            placeholder={t('ej_nombre')}
             type="text"
           />
-          {errors.nombre && <small className="formulario__mensaje-error">{errors.nombre}</small>}
+          {errors.nombre_cliente && <small className="formulario__mensaje-error">{errors.nombre_cliente}</small>}
         </div>
 
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="email-register">
-            Correo Electrónico*
+            {t('correo_electronico')}
           </label>
           <input
             autoComplete="email"
-            className={`formulario__input ${errors.email ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.email_cliente ? 'input--error' : ''}`}
             disabled={loading}
             id="email-register"
             name="email"
-            placeholder="Ej: juan.perez@gmail.com"
+            placeholder={t('ej_email')}
             type="email"
           />
-          {errors.email && <small className="formulario__mensaje-error">{errors.email}</small>}
+          {errors.email_cliente && <small className="formulario__mensaje-error">{errors.email_cliente}</small>}
         </div>
 
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="telefono-register">
-            Teléfono*
+            {t('telefono')}
           </label>
           <input
             autoComplete="tel"
-            className={`formulario__input ${errors.telefono ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.telefono_cliente ? 'input--error' : ''}`}
             disabled={loading}
             id="telefono-register"
             name="telefono"
-            placeholder="Ej: 5512345678"
+            placeholder={t('ej_telefono')}
             type="tel"
           />
-          {errors.telefono && <small className="formulario__mensaje-error">{errors.telefono}</small>}
+          {errors.telefono_cliente && <small className="formulario__mensaje-error">{errors.telefono_cliente}</small>}
         </div>
 
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="password-register">
-            Contraseña*
+            {t('contrasena')}
           </label>
           <input
             autoComplete="new-password"
-            className={`formulario__input ${errors.password ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.contraseña_cliente ? 'input--error' : ''}`}
             disabled={loading}
             id="password-register"
             name="password"
-            placeholder="Ej: Contraseña123!"
+            placeholder={t('ej_contrasena')}
             type="password"
           />
-          {errors.password && <small className="formulario__mensaje-error">{errors.password}</small>}
+          {errors.contraseña_cliente && <small className="formulario__mensaje-error">{errors.contraseña_cliente}</small>}
         </div>
 
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="confirmPassword-register">
-            Confirmar Contraseña*
+            {t('confirmar_contrasena')}
           </label>
           <input
             autoComplete="new-password"
@@ -223,7 +169,7 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
             disabled={loading}
             id="confirmPassword-register"
             name="confirmPassword"
-            placeholder="Ej: Contraseña123!"
+            placeholder={t('ej_contrasena')}
             type="password"
           />
           {errors.confirmPassword && (
@@ -247,7 +193,7 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
         )}
 
         <button className="formulario__boton-principal" disabled={loading} type="submit">
-          {loading ? 'Registrando...' : 'Registrarse'}
+          {loading ? t('registrando') : t('registrarse')}
         </button>
       </form>
     </div>
