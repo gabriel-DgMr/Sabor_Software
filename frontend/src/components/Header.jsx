@@ -36,32 +36,32 @@ const Header = () => {
     <>
       <header className="encabezado">
         <div className="encabezado__contenedor">
-          <Link to="/"><img alt="Logo Sabor" className="encabezado__logo" src="/images/logo_sabor.png" /></Link>
+          <Link to="/"><img className="encabezado__logo" alt="Logo Sabor" src="/images/logo_sabor.png" /></Link>
 
           <div className="encabezado__informacion">
 
             <nav className="encabezado__links">
-              <Link to="/quienes-somos" className="encabezado__link">{t('quienes_somos')}</Link>
-              <Link to="/sobre-nosotros" className="encabezado__link">{t('sobre_nosotros')}</Link>
+              <Link className="encabezado__link" to="/quienes-somos">{t('quienes_somos')}</Link>
+              <Link className="encabezado__link" to="/sobre-nosotros">{t('sobre_nosotros')}</Link>
             </nav>
 
-            <nav className="encabezado__idioma" aria-label="Selector de idioma">
+            <nav aria-label="Selector de idioma" className="encabezado__idioma">
               <button
-                type="button"
-                className={`menu-perfil__idioma-boton${i18n.language === 'es' ? ' menu-perfil__idioma-boton--activo' : ''}`}
                 aria-label="Cambiar a español"
-                title="Español"
                 aria-pressed={i18n.language === 'es'}
+                className={`menu-perfil__idioma-boton${i18n.language === 'es' ? ' menu-perfil__idioma-boton--activo' : ''}`}
+                title="Español"
+                type="button"
                 onClick={() => handleIdioma('es')}
               >
                 <ReactCountryFlag countryCode="ES" svg />
               </button>
               <button
-                type="button"
-                className={`menu-perfil__idioma-boton${i18n.language === 'en' ? ' menu-perfil__idioma-boton--activo' : ''}`}
                 aria-label="Cambiar a inglés"
-                title="English"
                 aria-pressed={i18n.language === 'en'}
+                className={`menu-perfil__idioma-boton${i18n.language === 'en' ? ' menu-perfil__idioma-boton--activo' : ''}`}
+                title="English"
+                type="button"
                 onClick={() => handleIdioma('en')}
               >
                 <ReactCountryFlag countryCode="US" svg />
@@ -89,26 +89,26 @@ const Header = () => {
                       </button>
                       <div className="menu-perfil__opcion menu-perfil__opcion--idioma">
                         <button
-                          className={`menu-perfil__idioma-boton${i18n.language === 'es' ? ' menu-perfil__idioma-boton--activo' : ''}`}
                           aria-label="Cambiar a español"
+                          className={`menu-perfil__idioma-boton${i18n.language === 'es' ? ' menu-perfil__idioma-boton--activo' : ''}`}
                           onClick={() => handleIdioma('es')}
                         >
-                          <ReactCountryFlag svg countryCode="ES" />
+                          <ReactCountryFlag countryCode="ES" svg />
                         </button>
                         <button
-                          className={`menu-perfil__idioma-boton${i18n.language === 'en' ? ' menu-perfil__idioma-boton--activo' : ''}`}
                           aria-label="Cambiar a inglés"
+                          className={`menu-perfil__idioma-boton${i18n.language === 'en' ? ' menu-perfil__idioma-boton--activo' : ''}`}
                           onClick={() => handleIdioma('en')}
                         >
-                          <ReactCountryFlag svg countryCode="US" />
+                          <ReactCountryFlag countryCode="US" svg />
                         </button>
                       </div>
                       <div className="menu-perfil__opcion menu-perfil__opcion--usuario">
                         <span>{user?.nombre_cliente || user?.email_cliente}</span>
                       </div>
-                      <Link className="menu-perfil__opcion" to="/historial-pedidos" onClick={closeMobileMenu}>{t('ver_historial_pedidos')}</Link>
-                      <Link className="menu-perfil__opcion" to="/historial-reservas" onClick={closeMobileMenu}>{t('ver_historial_reservas')}</Link>
-                      <Link className="menu-perfil__opcion" to="/actualizar-datos" onClick={closeMobileMenu}>{t('actualizar_datos')}</Link>
+                      <Link className="menu-perfil__opcion" onClick={closeMobileMenu} to="/historial-pedidos">{t('ver_historial_pedidos')}</Link>
+                      <Link className="menu-perfil__opcion" onClick={closeMobileMenu} to="/historial-reservas">{t('ver_historial_reservas')}</Link>
+                      <Link className="menu-perfil__opcion" onClick={closeMobileMenu} to="/actualizar-datos">{t('actualizar_datos')}</Link>
                       <button className="menu-perfil__opcion menu-perfil__opcion--cerrar-sesion" onClick={() => { logout(); closeMobileMenu(); }}>{t('cerrar_sesion')}</button>
                     </div>
                   )}
