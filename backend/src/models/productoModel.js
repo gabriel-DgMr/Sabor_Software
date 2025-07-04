@@ -77,27 +77,16 @@ export const productoModel = {
                 descripcion_producto, 
                 precio_producto, 
                 id_categoria_producto, 
-<<<<<<< HEAD
                 imagen_producto,
                 calificacion = 0, // Calificación de 1.0 a 5.0 (un decimal)
                 ventas = 0 // Número de ventas
-            } = productoData
+            } = productoData;
 
             const [result] = await pool.query(
                 'INSERT INTO productos (nombre_producto, descripcion_producto, precio_producto, id_categoria, imagen_producto, calificacion, ventas) VALUES (?, ?, ?, ?, ?, ?, ?)',
                 [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto, calificacion, ventas]
-            )
-            return result.insertId
-=======
-                imagen_producto 
-            } = productoData;
-
-            const [result] = await pool.query(
-                'INSERT INTO productos (nombre_producto, descripcion_producto, precio_producto, id_categoria, imagen_producto) VALUES (?, ?, ?, ?, ?)',
-                [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto]
             );
             return result.insertId;
->>>>>>> 66cfb2625080fe09d6184a0e66e612dad10bf129
         } catch (error) {
             throw new Error('Error al crear producto: ' + error.message);
         }
@@ -111,27 +100,16 @@ export const productoModel = {
                 descripcion_producto, 
                 precio_producto, 
                 id_categoria_producto, 
-<<<<<<< HEAD
                 imagen_producto,
                 calificacion, // Calificación de 1.0 a 5.0 (un decimal)
                 ventas // Número de ventas
-            } = productoData
+            } = productoData;
 
             const [result] = await pool.query(
                 'UPDATE productos SET nombre_producto = ?, descripcion_producto = ?, precio_producto = ?, id_categoria = ?, imagen_producto = ?, calificacion = ?, ventas = ? WHERE id_producto = ?',
                 [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto, calificacion, ventas, id]
-            )
-            return result.affectedRows > 0
-=======
-                imagen_producto 
-            } = productoData;
-
-            const [result] = await pool.query(
-                'UPDATE productos SET nombre_producto = ?, descripcion_producto = ?, precio_producto = ?, id_categoria = ?, imagen_producto = ? WHERE id_producto = ?',
-                [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto, id]
             );
             return result.affectedRows > 0;
->>>>>>> 66cfb2625080fe09d6184a0e66e612dad10bf129
         } catch (error) {
             throw new Error('Error al actualizar producto: ' + error.message);
         }
