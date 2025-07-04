@@ -5,6 +5,7 @@ import { useCategorias } from '../context/CategoriaContext.jsx';
 import { useProductos } from '../context/ProductoContext';
 import { productoService } from '../services/productoService';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils';
+import { validarProducto, validarImagen } from '../utils/validaciones';
 
 import '../styles/empleados.css';
 
@@ -155,30 +156,28 @@ const ProductosAdministrar = () => {
     e.preventDefault();
     setLoadingStates(prev => ({ ...prev, submit: true }));
 
-    const newErrors = {};
-    if (!formData.nombre_producto) {
-      newErrors.nombre_producto = 'El nombre del producto es obligatorio.';
-    }
-    if (!formData.descripcion_producto) {
-      newErrors.descripcion_producto = 'La descripción es obligatoria.';
-    }
-    if (!formData.precio_producto) {
-      newErrors.precio_producto = 'El precio es obligatorio.';
-    } else {
-      const precioNumerico = parseFloat(formData.precio_producto.replace(/\./g, '').replace(',', '.'));
-      if (isNaN(precioNumerico) || precioNumerico <= 0) {
-        newErrors.precio_producto = 'El precio debe ser un número positivo.';
+    // Usar validaciones centralizadas
+    const formDataForValidation = {
+      nombre_producto: formData.nombre_producto,
+      descripcion_producto: formData.descripcion_producto,
+      precio_producto: formData.precio_producto.replace(/\./g, '').replace(',', '.'),
+      id_categoria_producto: formData.id_categoria_producto
+    };
+
+    const validationErrors = validarProducto(formDataForValidation);
+
+    // Validar imagen si es un nuevo producto
+    if (!isEditing && formData.imagen_producto) {
+      const imagenError = validarImagen(formData.imagen_producto);
+      if (imagenError) {
+        validationErrors.imagen_producto = imagenError;
       }
-    }
-    if (!formData.id_categoria_producto) {
-      newErrors.id_categoria_producto = 'Debes seleccionar una categoría.';
-    }
-    if (!isEditing && !formData.imagen_producto) {
-      newErrors.imagen_producto = 'La imagen es obligatoria para nuevos productos.';
+    } else if (!isEditing && !formData.imagen_producto) {
+      validationErrors.imagen_producto = 'La imagen es obligatoria para nuevos productos.';
     }
 
-    if (Object.keys(newErrors).length > 0) {
-      manejarErroresDeCampo(newErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      manejarErroresDeCampo(validationErrors);
       setLoadingStates(prev => ({ ...prev, submit: false }));
       return;
     }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import "../index.css";
 import "../styles/carrito.css";
@@ -8,6 +9,7 @@ import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useCart } from '../context/useCart.js';
+
 const API_URL = 'http://localhost:3000/api';
 
 export default function Carrito() {
@@ -17,6 +19,7 @@ export default function Carrito() {
   const { cartItems, clearCart, closedOrders, closeCurrentOrder, createNewOrder } = useCart();
   const [recomendaciones, setRecomendaciones] = useState('');
   const [modal, setModal] = useState({ open: false, message: '', icon: '✅', onConfirm: null });
+  const { t } = useTranslation();
 
   useEffect(() => {
     document.title = 'Sabor: Carrito';
@@ -50,7 +53,7 @@ export default function Carrito() {
 
   }, []); // Dependencias: [useCart, API_URL, navigate, setRecomendaciones, setLoading, setError]
 
-  const procesarPago = () => {
+  const procesarPago = async () => {
     if (cartItems.length === 0) {
       setModal({
         open: true,
@@ -60,7 +63,76 @@ export default function Carrito() {
       });
       return;
     }
-    navigate('/checkout');
+
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setModal({
+          open: true,
+          message: t('carrito_debes_iniciar_sesion'),
+          icon: '⚠️',
+          onConfirm: () => {
+            setModal({ ...modal, open: false });
+            navigate('/login');
+          }
+        });
+        return;
+      }
+
+      // Mapear items del carrito a un formato adecuado para el backend
+      const itemsParaBackend = cartItems.map(item => ({
+        id_producto: item.id,
+        cantidad: item.quantity || 1,
+        precio_unitario: item.precio
+      }));
+      const totalCarrito = cartItems.reduce((sum, item) => sum + item.precio * (item.quantity || 1), 0);
+      const recomendacionesPedido = localStorage.getItem('recomendacionesPedido') || '';
+
+      const nuevoPedido = {
+        items: itemsParaBackend,
+        total: totalCarrito,
+        recomendaciones: recomendacionesPedido
+      };
+
+      const response = await fetch(`${API_URL}/pedidos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(nuevoPedido),
+      });
+      
+      if (!response.ok) {
+         const errorData = await response.json();
+         throw new Error(errorData.mensaje || `Error HTTP: ${response.status}`);
+      }
+      
+      clearCart();
+      localStorage.removeItem('recomendacionesPedido');
+      setModal({
+        open: true,
+        message: t('carrito_pedido_exito'),
+        icon: '✅',
+        onConfirm: () => {
+          setModal({ ...modal, open: false });
+          navigate('/');
+        }
+      });
+
+    } catch (error) {
+      console.error('Error al procesar el pago:', error);
+      setModal({
+        open: true,
+        message: t('carrito_error_pago', { error: error.message }),
+        icon: '❌',
+        onConfirm: () => setModal({ ...modal, open: false })
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEliminarCarrito = () => {
@@ -84,7 +156,7 @@ export default function Carrito() {
   };
 
   const handleCerrarPedido = () => {
-    if (window.confirm('¿Estás seguro de que deseas cerrar este pedido y crear uno nuevo?')) {
+    if (window.confirm(t('carrito_confirmar_cerrar'))) {
       closeCurrentOrder();
       createNewOrder();
       localStorage.removeItem('recomendacionesPedido');
@@ -114,7 +186,7 @@ export default function Carrito() {
               setError(null);
               setLoading(true);
             }}>
-              Reintentar
+              {t('carrito_reintentar')}
             </button>
           </div>
         </main>
@@ -127,19 +199,18 @@ export default function Carrito() {
     <>
       <Header />
       <main className="carrito_bg">
-        <h1 className="carrito_titulo">Carrito</h1>
+        <h1 className="carrito_titulo">{t('carrito_titulo')}</h1>
         <div className="carrito_contenido">
           <div className="carrito_pedidos">
             <div className="carrito_alerta">
               <span className="carrito_alerta_icono">❗</span>
-              Si desea reportar un problema con su (s) pedidos haga{" "}
-              <span className="carrito_alerta_link">clic aquí</span>
+              {t('carrito_alerta')}
+              {' '}
+              <span className="carrito_alerta_link">{t('carrito_clic_aqui')}</span>
             </div>
             
             {cartItems.length === 0 ? (
-              <div className="carrito_vacio">
-                No hay productos en el carrito.
-              </div>
+              <div className="carrito_vacio">{t('carrito_vacio')}</div>
             ) : (
               <div key="pedido-pendiente" className="carrito_pedido">
                 <div className="carrito_pedido_info">
@@ -147,7 +218,7 @@ export default function Carrito() {
                     <span aria-label="carrito" role="img">
                       🛒
                     </span>
-                    Tu Pedido Actual
+                    {t('carrito_pedido_actual')}
                   </div>
                   <ul className="carrito_pedido_lista">
                     {cartItems.map((item, i) => (
@@ -157,11 +228,11 @@ export default function Carrito() {
                     ))}
                   </ul>
                   <div className="carrito_pedido_total">
-                    Total: {cartItems.reduce((sum, item) => sum + item.precio, 0).toLocaleString('es-CO')} COP
+                    {t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio, 0).toLocaleString('es-CO')} COP
                   </div>
                   {recomendaciones && (
                     <div className="carrito_pedido_recomendaciones">
-                      <h4>Recomendaciones:</h4>
+                      <h4>{t('carrito_recomendaciones')}</h4>
                       <p>{recomendaciones}</p>
                     </div>
                   )}
@@ -171,25 +242,25 @@ export default function Carrito() {
                     className="carrito_btn eliminar"
                     onClick={handleEliminarCarrito}
                   >
-                    🗑️ Eliminar
+                    🗑️ {t('carrito_eliminar')}
                   </button>
                   <button 
                     className="carrito_btn modificar"
                     onClick={handleModificarPedido}
                   >
-                    ✍️ Modificar
+                    ✍️ {t('carrito_modificar')}
                   </button>
                   <button 
                     className="carrito_btn cerrar"
                     onClick={handleCerrarPedido}
                   >
-                    🔒 Cerrar Pedido
+                    🔒 {t('carrito_cerrar_pedido')}
                   </button>
                   <button 
                     className="carrito_btn pagar"
                     onClick={procesarPago}
                   >
-                    💳 Pagar
+                    💳 {t('carrito_pagar')}
                   </button>
                 </div>
               </div>
@@ -197,7 +268,7 @@ export default function Carrito() {
 
             {closedOrders.length > 0 && (
               <div className="carrito_pedidos_cerrados">
-                <h2>Pedidos Cerrados</h2>
+                <h2>{t('carrito_pedidos_cerrados')}</h2>
                 {closedOrders.map((order) => (
                   <div key={order.id} className="carrito_pedido cerrado">
                     <div className="carrito_pedido_info">
@@ -205,7 +276,7 @@ export default function Carrito() {
                         <span aria-label="pedido-cerrado" role="img">
                           📦
                         </span>
-                        Pedido #{order.id} - {new Date(order.fecha).toLocaleString()}
+                        {t('carrito_pedido_numero', { id: order.id, fecha: new Date(order.fecha).toLocaleString() })}
                       </div>
                       <ul className="carrito_pedido_lista">
                         {order.items.map((item, i) => (
@@ -215,11 +286,11 @@ export default function Carrito() {
                         ))}
                       </ul>
                       <div className="carrito_pedido_total">
-                        Total: {order.items.reduce((sum, item) => sum + item.precio, 0).toLocaleString('es-CO')} COP
+                        {t('carrito_total')}: {order.items.reduce((sum, item) => sum + item.precio, 0).toLocaleString('es-CO')} COP
                       </div>
                       {order.recomendaciones && (
                         <div className="carrito_pedido_recomendaciones">
-                          <h4>Recomendaciones:</h4>
+                          <h4>{t('carrito_recomendaciones')}</h4>
                           <p>{order.recomendaciones}</p>
                         </div>
                       )}
@@ -230,20 +301,20 @@ export default function Carrito() {
             )}
           </div>
           <div className="carrito_detalles">
-            <h2>Detalles de compra</h2>
+            <h2>{t('carrito_detalles_compra')}</h2>
             <p>
-              Aquí se mostrarán los detalles del pedido que usted seleccione (o del carrito actual).
+              {t('carrito_detalles_compra_desc')}
             </p>
             
             {cartItems.length > 0 && (
               <div>
-                <h3>Resumen del Carrito</h3>
+                <h3>{t('carrito_resumen')}</h3>
                 <ul>
                   {cartItems.map((item, i) => (
                     <li key={i}>{item.nombre}: {item.precio.toLocaleString('es-CO')} COP</li>
                   ))}
                 </ul>
-                <p><strong>Total: {cartItems.reduce((sum, item) => sum + item.precio, 0).toLocaleString('es-CO')} COP</strong></p>
+                <p><strong>{t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio, 0).toLocaleString('es-CO')} COP</strong></p>
               </div>
             )}
           </div>

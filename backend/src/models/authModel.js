@@ -20,6 +20,15 @@ export const registerUser = async (clienteData) => {
         throw new Error('El correo ya está registrado');
     }
 
+    // Verificar si el teléfono ya existe
+    const [existingPhone] = await pool.query(
+        'SELECT * FROM clientes WHERE telefono_cliente = ?',
+        [telefono_cliente]
+    );
+    if (existingPhone.length > 0) {
+        throw new Error('El teléfono ya está registrado');
+    }
+
     // Encriptar contraseña
     const hashedPassword = await bcrypt.hash(contraseña_cliente, 10);
 

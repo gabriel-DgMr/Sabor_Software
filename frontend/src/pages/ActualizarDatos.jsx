@@ -4,7 +4,7 @@ import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils.js';
-import { validarCaracteresEspeciales } from '../utils/validaciones.js';
+import { validarEmail, validarTelefono, validarLongitud, validarCaracteresEspeciales, validarEspacios } from '../utils/validaciones.js';
 
 const ActualizarDatos = () => {
   const { user } = useAuth();
@@ -50,29 +50,54 @@ const ActualizarDatos = () => {
 
     const newErrors = {};
 
-    const errorNombre = validarCaracteresEspeciales(nombre, 'nombre');
-    if (errorNombre) {
-      newErrors.nombre = errorNombre;
-    } else if (!nombre) {
+    // Validar nombre
+    if (!nombre) {
       newErrors.nombre = 'El nombre es obligatorio.';
+    } else {
+      const longitudError = validarLongitud(nombre, 'nombre', 2, 50);
+      if (longitudError) {
+        newErrors.nombre = longitudError;
+      } else {
+        const caracteresError = validarCaracteresEspeciales(nombre, 'nombre');
+        if (caracteresError) {
+          newErrors.nombre = caracteresError;
+        } else {
+          const espaciosError = validarEspacios(nombre, 'nombre');
+          if (espaciosError) {
+            newErrors.nombre = espaciosError;
+          }
+        }
+      }
     }
 
-    const errorCorreo = validarCaracteresEspeciales(correo, 'correo');
-    if (errorCorreo) {
-      newErrors.correo = errorCorreo;
-    } else if (!correo) {
+    // Validar correo
+    if (!correo) {
       newErrors.correo = 'El correo es obligatorio.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
-      newErrors.correo = 'El formato del correo no es válido.';
+    } else {
+      const emailError = validarEmail(correo);
+      if (emailError) {
+        newErrors.correo = emailError;
+      } else {
+        const espaciosError = validarEspacios(correo, 'correo');
+        if (espaciosError) {
+          newErrors.correo = espaciosError;
+        }
+      }
     }
 
-    const errorTelefono = validarCaracteresEspeciales(telefono, 'teléfono');
-    if (errorTelefono) {
-      newErrors.telefono = errorTelefono;
-    } else if (!telefono) {
+    // Validar teléfono
+    if (!telefono) {
       newErrors.telefono = 'El teléfono es obligatorio.';
-    } else if (!/^\d{10}$/.test(telefono)) {
-      newErrors.telefono = 'El teléfono debe tener 10 dígitos.';
+    } else {
+      const telefonoError = validarTelefono(telefono);
+      if (telefonoError) {
+        newErrors.telefono = telefonoError;
+      } else {
+        const espaciosError = validarEspacios(telefono, 'teléfono');
+        if (espaciosError) {
+          newErrors.telefono = espaciosError;
+        }
+      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -90,9 +115,9 @@ const ActualizarDatos = () => {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          nombre_cliente: nombre,
-          email_cliente: correo,
-          telefono_cliente: telefono,
+          nombre_cliente: nombre.trim(),
+          email_cliente: correo.trim(),
+          telefono_cliente: telefono.trim(),
         }),
       });
       const data = await response.json();
@@ -120,7 +145,8 @@ const ActualizarDatos = () => {
           setTimeout(() => setGlobalError(''), ANIM_DURATION);
         }, VISIBLE_DURATION);
       }
-    } catch {
+    } catch (error) {
+      console.error('Error de conexión:', error);
       setGlobalError('Error de conexión con el servidor.');
       setTimeout(() => animateElements('#mensaje-error-actualizar', 'fade-in'), 0);
       setTimeout(() => {

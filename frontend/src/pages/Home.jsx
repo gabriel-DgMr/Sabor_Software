@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaCartShopping } from "react-icons/fa6";
 import { Link } from 'react-router-dom';
 import '../index.css';
@@ -16,6 +17,8 @@ const Home = () => {
   // Estados para el diálogo de éxito
   const [exitoOpen, setExitoOpen] = useState(false);
   const [mensajeExito, setMensajeExito] = useState('');
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,19 +44,19 @@ const Home = () => {
       nombre: producto.nombre_producto,
       precio: producto.precio_producto
     });
-    setMensajeExito(`¡${producto.nombre_producto} agregado al carrito!`);
+    setMensajeExito(t('producto_agregado', { nombre: producto.nombre_producto }));
     setExitoOpen(true);
   };
 
   if (state.loading) return <LoadingScreen />;
-  if (state.error) return <div>Error al cargar productos: {state.error}</div>;
+  if (state.error) return <div>{t('error_cargar_productos', { error: state.error })}</div>;
 
   return (
     <div>
       <Header />
       <Link className={`carrito-link ${isScrolled ? 'carrito-flotante' : 'carrito-fixed'}`} to="/carrito">
         <div className="carrito-icono">
-          <FaCartShopping  className='carrito' optionsSize={30}/>
+          <FaCartShopping className='carrito' size={30}/>
         </div>
       </Link>
 
@@ -67,10 +70,10 @@ const Home = () => {
           />
           <div className="contenedor__categorias">
             <div className="categorias">
-              <h1 className="categorias__titulo">¿Qué vas a ordenar hoy?</h1>
+              <h1 className="categorias__titulo">{t('que_ordenar')}</h1>
               <div className="categorias__contenedor-cards">
                 <div className="categorias__card">
-                  <h4 className="categorias__nombre">Platos Fuertes</h4>
+                  <h4 className="categorias__nombre">{t('platos_fuertes')}</h4>
                   <img
                     alt="Platos Fuertes"
                     className="categorias__imagen"
@@ -78,7 +81,7 @@ const Home = () => {
                   />
                 </div>
                 <div className="categorias__card">
-                  <h4 className="categorias__nombre">Entradas</h4>
+                  <h4 className="categorias__nombre">{t('entradas')}</h4>
                   <img
                     alt="Entradas"
                     className="categorias__imagen"
@@ -86,7 +89,7 @@ const Home = () => {
                   />
                 </div>
                 <div className="categorias__card">
-                  <h4 className="categorias__nombre">Bebidas</h4>
+                  <h4 className="categorias__nombre">{t('bebidas')}</h4>
                   <img
                     alt="Bebidas"
                     className="categorias__imagen"
@@ -95,7 +98,7 @@ const Home = () => {
                 </div>
               </div>
               <h2 className="categorias__reserva">
-                <a href="/reservas">¿O quieres reservar una mesa?</a>
+                <a href="/reservas">{t('reservar_mesa')}</a>
               </h2>
             </div>
           </div>
@@ -105,16 +108,16 @@ const Home = () => {
         <section className="seccion seccion--navegacion">
           <div className="barra-navegacion">
             <div className="barra-navegacion__opcion">
-              <h3 className="barra-navegacion__titulo">Promociones</h3>
+              <h3 className="barra-navegacion__titulo">{t('promociones')}</h3>
             </div>
             <div className="barra-navegacion__opcion">
-              <h3 className="barra-navegacion__titulo">Tipo de plato</h3>
+              <h3 className="barra-navegacion__titulo">{t('tipo_plato')}</h3>
             </div>
             <div className="barra-navegacion__opcion barra-navegacion__opcion--filtro">
-              <h3 className="barra-navegacion__titulo">Filtrar</h3>
+              <h3 className="barra-navegacion__titulo">{t('filtrar')}</h3>
             </div>
             <div className="barra-navegacion__buscador">
-              <input className="barra-navegacion__input" placeholder="Buscar" type="text" />
+              <input className="barra-navegacion__input" placeholder={t('buscar')} type="text" />
             </div>
           </div>
         </section>
@@ -144,7 +147,7 @@ const Home = () => {
                 <div className="productos__footer">
                   <p className="productos__precio">{FormatPriceCOP(producto.precio_producto)}</p>
                   <button className="btn-agregarpr" onClick={() => handleAgregar(producto)}>
-                    Agregar
+                    {t('agregar')}
                   </button>
                 </div>
               </div>

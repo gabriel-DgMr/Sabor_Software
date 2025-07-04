@@ -6,6 +6,9 @@ import DialogoModal from '../components/DialogoExito.jsx';
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import { useCart } from '../context/useCart.js';
+import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils.js';
+import { validarLongitud, validarCaracteresEspeciales, validarEspacios } from '../utils/validaciones.js';
+
 const API_URL = 'http://localhost:3000/api';
 
 // Datos de ejemplo de tarjetas guardadas
@@ -40,13 +43,80 @@ export default function Checkout() {
   });
   const [modal, setModal] = useState({ open: false, message: '', icon: '✅', onConfirm: null });
   const [intentos, setIntentos] = useState(0);
+  const [errors, setErrors] = useState({});
   
   useEffect(() => {
     document.title = 'Sabor: Checkout';
   }, []);
 
+  const manejarErroresDeCampo = (newErrors) => {
+    setErrors(newErrors);
+    setTimeout(() => animateElements('#error-checkout', 'fade-in'), 0);
+    setTimeout(() => {
+      const el = document.querySelector('#error-checkout');
+      if (el) {
+        el.classList.remove('fade-in');
+        el.classList.add('fade-out');
+      }
+      setTimeout(() => setErrors({}), ANIM_DURATION);
+    }, VISIBLE_DURATION);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validaciones
+    const newErrors = {};
+    
+    if (!formData.nombre.trim()) {
+      newErrors.nombre = 'El nombre es obligatorio';
+    } else {
+      const nombreError = validarLongitud(formData.nombre, 'nombre', 2, 50);
+      if (nombreError) newErrors.nombre = nombreError;
+      else {
+        const caracteresError = validarCaracteresEspeciales(formData.nombre, 'nombre');
+        if (caracteresError) newErrors.nombre = caracteresError;
+        else {
+          const espaciosError = validarEspacios(formData.nombre, 'nombre');
+          if (espaciosError) newErrors.nombre = espaciosError;
+        }
+      }
+    }
+    
+    if (!formData.numero.trim()) {
+      newErrors.numero = 'El número de tarjeta es obligatorio';
+    } else if (!/^\d{16}$/.test(formData.numero.replace(/\s/g, ''))) {
+      newErrors.numero = 'El número de tarjeta debe tener 16 dígitos';
+    }
+    
+    if (!formData.fecha.trim()) {
+      newErrors.fecha = 'La fecha de vencimiento es obligatoria';
+    } else if (!/^\d{2}\/\d{2}$/.test(formData.fecha)) {
+      newErrors.fecha = 'Formato de fecha inválido (MM/YY)';
+    }
+    
+    if (!formData.cvv.trim()) {
+      newErrors.cvv = 'El CVV es obligatorio';
+    } else if (!/^\d{3,4}$/.test(formData.cvv)) {
+      newErrors.cvv = 'El CVV debe tener 3 o 4 dígitos';
+    }
+    
+    if (!formData.direccion.trim()) {
+      newErrors.direccion = 'La dirección es obligatoria';
+    } else {
+      const direccionError = validarLongitud(formData.direccion, 'dirección', 10, 200);
+      if (direccionError) newErrors.direccion = direccionError;
+      else {
+        const caracteresError = validarCaracteresEspeciales(formData.direccion, 'dirección');
+        if (caracteresError) newErrors.direccion = caracteresError;
+      }
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      manejarErroresDeCampo(newErrors);
+      return;
+    }
+
     if (cartItems.length === 0) {
       setModal({
         open: true,
@@ -287,7 +357,9 @@ export default function Checkout() {
                   type="text" 
                   value={formData.nombre}
                   onChange={handleInputChange}
+                  className={errors.nombre ? 'formulario__input--error' : ''}
                 />
+                {errors.nombre && <small className="cuentanos__mensaje-error">{errors.nombre}</small>}
               </div>
               
               <div className="checkout_grupo">
@@ -300,7 +372,9 @@ export default function Checkout() {
                   type="text"
                   value={formData.numero}
                   onChange={handleInputChange}
+                  className={errors.numero ? 'formulario__input--error' : ''}
                 />
+                {errors.numero && <small className="cuentanos__mensaje-error">{errors.numero}</small>}
               </div>
               
               <div className="checkout_fila">
@@ -314,7 +388,9 @@ export default function Checkout() {
                     type="text"
                     value={formData.fecha}
                     onChange={handleInputChange}
+                    className={errors.fecha ? 'formulario__input--error' : ''}
                   />
+                  {errors.fecha && <small className="cuentanos__mensaje-error">{errors.fecha}</small>}
                 </div>
                 
                 <div className="checkout_grupo">
@@ -327,7 +403,9 @@ export default function Checkout() {
                     type="text"
                     value={formData.cvv}
                     onChange={handleInputChange}
+                    className={errors.cvv ? 'formulario__input--error' : ''}
                   />
+                  {errors.cvv && <small className="cuentanos__mensaje-error">{errors.cvv}</small>}
                 </div>
               </div>
               
@@ -339,7 +417,9 @@ export default function Checkout() {
                   type="text"
                   value={formData.direccion}
                   onChange={handleInputChange}
+                  className={errors.direccion ? 'formulario__input--error' : ''}
                 />
+                {errors.direccion && <small className="cuentanos__mensaje-error">{errors.direccion}</small>}
               </div>
               
               <button className="checkout_btn_pagar" type="submit">

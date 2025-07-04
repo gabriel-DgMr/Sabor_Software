@@ -38,28 +38,7 @@ export const updateCliente = async (req, res) => {
     try {
         const { id } = req.params;
         const { nombre_cliente, email_cliente, telefono_cliente } = req.body;
-        console.log('Datos recibidos:', { id, nombre_cliente, email_cliente, telefono_cliente }); // <-- Agrega esto
-        // Validar campos requeridos
-        if (!nombre_cliente || !email_cliente || !telefono_cliente) {
-            return res.status(400).json({
-                message: 'Todos los campos son obligatorios'
-            });
-        }
-
-        // Validar correo
-        if (!validator.isEmail(email_cliente)) {
-            return res.status(400).json({
-                message: 'Correo no válido'
-            });
-        }
-
-        // Validar teléfono
-        if (!validator.matches(telefono_cliente, /^\d{10}$/)) {
-            return res.status(400).json({
-                message: 'El teléfono debe tener 10 dígitos'
-            });
-        }
-
+        
         const success = await authModel.updateUser(id, {
             nombre_cliente,
             email_cliente,

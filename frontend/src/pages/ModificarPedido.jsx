@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import '../styles/carrito.css';
@@ -10,6 +11,7 @@ const ModificarPedido = () => {
   const navigate = useNavigate();
   const { cartItems, removeItemFromCart } = useCart();
   const [recomendaciones, setRecomendaciones] = useState('');
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Recuperar recomendaciones guardadas si existen
@@ -37,7 +39,7 @@ const ModificarPedido = () => {
     <>
       <Header />
       <main className="carrito_bg">
-        <h1 className="carrito_titulo">Modificar pedido</h1>
+        <h1 className="carrito_titulo">{t('modificar_titulo')}</h1>
         <div className="carrito_contenido">
           <div className="carrito_pedidos">
             {cartItems.map((item, index) => (
@@ -52,7 +54,7 @@ const ModificarPedido = () => {
                   className="carrito_btn eliminar"
                   onClick={() => eliminarItem(index)}
                 >
-                  🗑️ Eliminar
+                  🗑️ {t('carrito_eliminar')}
                 </button>
               </div>
             ))}
@@ -60,10 +62,12 @@ const ModificarPedido = () => {
             <div className="carrito_pedido" style={{ padding: '20px' }}>
               <div className="carrito_pedido_info" style={{ width: '100%' }}>
                 <div className="carrito_pedido_titulo" style={{ marginBottom: '10px' }}>
-                  Información adicional o recomendaciones para este pedido
+                  {t('modificar_info_adicional')}
                 </div>
                 <textarea
-                  placeholder="Escribe aquí tus recomendaciones o información adicional para este pedido específico"
+                  value={recomendaciones}
+                  placeholder={t('modificar_placeholder')}
+                  onChange={(e) => setRecomendaciones(e.target.value)}
                   style={{
                     width: '100%',
                     minHeight: '100px',
@@ -73,8 +77,6 @@ const ModificarPedido = () => {
                     fontSize: '1rem',
                     resize: 'vertical'
                   }}
-                  value={recomendaciones}
-                  onChange={(e) => setRecomendaciones(e.target.value)}
                 />
               </div>
             </div>
@@ -89,20 +91,20 @@ const ModificarPedido = () => {
               }}
               onClick={agregarProducto}
             >
-              + Agregar producto
+              + {t('modificar_agregar_producto')}
             </button>
             <div className='modificar__botones--pagarregresar'>
               <button
                 className="carrito_btn__pagar"
                 onClick={confirmarCambios}
               >
-                Confirmar cambios
+                {t('modificar_confirmar_cambios')}
               </button>
               <button
                 className="carrito_btn__regresar"
                 onClick={() => navigate('/carrito')}
               >
-                Regresar
+                {t('modificar_regresar')}
               </button>
             </div>
           </div>

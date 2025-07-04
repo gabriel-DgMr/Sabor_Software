@@ -1,24 +1,44 @@
 import express from 'express';
 import { getPedidos, deletePedido, createPedido, updatePedido } from '../controllers/pedidoController.js';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken, checkPermission } from '../middleware/auth.js';
+import { validatePedido } from '../middleware/validateRequest.js';
 
 const router = express.Router();
 
-// GET /api/pedidos - Obtener todos los pedidos
-// Añadir middleware authenticateToken para proteger esta ruta
-router.get('/', authenticateToken, getPedidos);
+// Rutas protegidas con validaciones
+router.post('/', 
+    authenticateToken, 
+    validatePedido,
+    createPedido
+);
 
-// DELETE /api/pedidos/:id - Eliminar un pedido
-router.delete('/:id', deletePedido);
+router.get('/', 
+    authenticateToken, 
+    checkPermission('read'),
+    getPedidos
+);
 
-// GET /api/pedidos/cerrados - Obtener todos los pedidos cerrados
-//router.get('/cerrados', authenticateToken, getPedidosCerrados);
+router.get('/:id', 
+    authenticateToken, 
+    checkPermission('read'),
+    (req, res) => {
+        // Implementar getPedidoById si es necesario
+        res.status(501).json({ message: 'Función no implementada' });
+    }
+);
 
-// POST /api/pedidos - Crear un nuevo pedido
-router.post('/', authenticateToken, createPedido);
+router.put('/:id', 
+    authenticateToken, 
+    checkPermission('write'),
+    validatePedido,
+    updatePedido
+);
 
-// PUT /api/pedidos/:id - Actualizar un pedido
-router.put('/:id', updatePedido);
+router.delete('/:id', 
+    authenticateToken, 
+    checkPermission('delete'),
+    deletePedido
+);
 
 // === RUTAS DE CARRITO ===
 import {
