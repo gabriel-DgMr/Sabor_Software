@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import AuthPage from '../pages/auth/index.jsx';
 
 const Header = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isMobileMenu, setIsMobileMenu] = useState(false);
@@ -69,7 +69,7 @@ const Header = () => {
             </nav>
 
             {isMobileMenu ? (
-              user ? (
+              isAuthenticated ? (
                 <div className="encabezado__usuario encabezado__usuario--mobile">
                   <button
                     aria-label="Abrir menú de usuario"
@@ -103,6 +103,9 @@ const Header = () => {
                           <ReactCountryFlag svg countryCode="US" />
                         </button>
                       </div>
+                      <div className="menu-perfil__opcion menu-perfil__opcion--usuario">
+                        <span>{user?.nombre_cliente || user?.email_cliente}</span>
+                      </div>
                       <Link className="menu-perfil__opcion" to="/historial-pedidos" onClick={closeMobileMenu}>{t('ver_historial_pedidos')}</Link>
                       <Link className="menu-perfil__opcion" to="/historial-reservas" onClick={closeMobileMenu}>{t('ver_historial_reservas')}</Link>
                       <Link className="menu-perfil__opcion" to="/actualizar-datos" onClick={closeMobileMenu}>{t('actualizar_datos')}</Link>
@@ -117,16 +120,19 @@ const Header = () => {
                 </div>
               )
             ) : (
-              user ? (
+              isAuthenticated ? (
                 <div
                   className="encabezado__usuario"
                   onMouseEnter={() => setShowMenu(true)}
                   onMouseLeave={() => setShowMenu(false)}
                 >
-                  <p className="encabezado__nombre-usuario">{t('iniciar_sesion')}</p>
+                  <p className="encabezado__nombre-usuario">{user?.nombre_cliente || user?.email_cliente}</p>
                   <FaUserCircle className="encabezado__icono-usuario" size={32} />
                   {showMenu && (
                     <div className="menu-perfil">
+                      <div className="menu-perfil__opcion menu-perfil__opcion--usuario">
+                        <span>{user?.nombre_cliente || user?.email_cliente}</span>
+                      </div>
                       <Link className="menu-perfil__opcion" to="/historial-pedidos">{t('ver_historial_pedidos')}</Link>
                       <Link className="menu-perfil__opcion" to="/historial-reservas">{t('ver_historial_reservas')}</Link>
                       <Link className="menu-perfil__opcion" to="/actualizar-datos">{t('actualizar_datos')}</Link>

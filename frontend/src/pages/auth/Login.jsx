@@ -53,6 +53,7 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
       onShowMessage('success', t('login_exito'));
       if (onLoginSuccess) onLoginSuccess();
     } else {
+      // Mostrar solo el mensaje real del backend
       setGlobalError(result.message || t('login_error'));
       setTimeout(() => animateElements('#global-error-login', 'fade-in'), 0);
       setTimeout(() => {
