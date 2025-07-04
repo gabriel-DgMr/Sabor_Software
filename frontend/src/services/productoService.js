@@ -45,7 +45,7 @@ export const productoService = {
 
             // Verificar que todos los campos estén en el FormData
             console.log('Contenido del FormData:');
-            for (let pair of formData.entries()) {
+            for (const pair of formData.entries()) {
                 console.log(pair[0] + ': ' + pair[1]);
             }
 

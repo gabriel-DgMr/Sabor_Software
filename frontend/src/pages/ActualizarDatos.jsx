@@ -168,61 +168,61 @@ const ActualizarDatos = () => {
       <main className="actualizar-datos">
         <section className="actualizar-datos__contenedor">
           <h1 className="actualizar-datos__titulo">Actualizar datos</h1>
-          <form className="actualizar-datos__formulario" onSubmit={handleSubmit} autoComplete="off">
+          <form autoComplete="off" className="actualizar-datos__formulario" onSubmit={handleSubmit}>
             <div className="actualizar-datos__campo">
-              <label htmlFor="nombre" className="actualizar-datos__label">Nombre</label>
+              <label className="actualizar-datos__label" htmlFor="nombre">Nombre</label>
               <input
-                id="nombre"
+                required
                 className={`actualizar-datos__input ${errors.nombre ? 'input--error' : ''}`}
+                id="nombre"
+                placeholder="Tu nombre"
                 type="text"
                 value={nombre}
                 onChange={e => setNombre(e.target.value)}
-                placeholder="Tu nombre"
-                required
               />
               {errors.nombre && <p className="actualizar-datos__mensaje-error">{errors.nombre}</p>}
             </div>
             <div className="actualizar-datos__campo">
-              <label htmlFor="correo" className="actualizar-datos__label">Correo electrónico</label>
+              <label className="actualizar-datos__label" htmlFor="correo">Correo electrónico</label>
               <input
-                id="correo"
+                required
                 className={`actualizar-datos__input ${errors.correo ? 'input--error' : ''}`}
+                id="correo"
+                placeholder="tucorreo@ejemplo.com"
                 type="email"
                 value={correo}
                 onChange={e => setCorreo(e.target.value)}
-                placeholder="tucorreo@ejemplo.com"
-                required
               />
               {errors.correo && <p className="actualizar-datos__mensaje-error">{errors.correo}</p>}
             </div>
             <div className="actualizar-datos__campo">
-              <label htmlFor="telefono" className="actualizar-datos__label">Teléfono</label>
+              <label className="actualizar-datos__label" htmlFor="telefono">Teléfono</label>
               <input
-                id="telefono"
+                required
                 className={`actualizar-datos__input ${errors.telefono ? 'input--error' : ''}`}
+                id="telefono"
+                maxLength={10}
+                placeholder="Tu teléfono (10 dígitos)"
                 type="tel"
                 value={telefono}
                 onChange={e => setTelefono(e.target.value)}
-                placeholder="Tu teléfono (10 dígitos)"
-                required
-                maxLength={10}
               />
               {errors.telefono && <p className="actualizar-datos__mensaje-error">{errors.telefono}</p>}
             </div>
             <div className="actualizar-datos__campo">
-              <label htmlFor="contrasena" className="actualizar-datos__label">Nueva contraseña</label>
+              <label className="actualizar-datos__label" htmlFor="contrasena">Nueva contraseña</label>
               <input
-                id="contrasena"
-                className="actualizar-datos__input"
-                type="password"
-                placeholder="Para cambiar la contraseña, usa la opción de recuperación."
                 disabled
+                className="actualizar-datos__input"
+                id="contrasena"
+                placeholder="Para cambiar la contraseña, usa la opción de recuperación."
+                type="password"
               />
               <small className="actualizar-datos__ayuda">Para cambiar la contraseña, utiliza la opción de recuperación de contraseña.</small>
             </div>
-            {mensaje && <p id="mensaje-exito-actualizar" className="actualizar-datos__mensaje-exito">{mensaje}</p>}
-            {globalError && <p id="mensaje-error-actualizar" className="actualizar-datos__mensaje-error">{globalError}</p>}
-            <button className="actualizar-datos__boton" type="submit" disabled={cargando}>{cargando ? 'Guardando...' : 'Guardar cambios'}</button>
+            {mensaje && <p className="actualizar-datos__mensaje-exito" id="mensaje-exito-actualizar">{mensaje}</p>}
+            {globalError && <p className="actualizar-datos__mensaje-error" id="mensaje-error-actualizar">{globalError}</p>}
+            <button className="actualizar-datos__boton" disabled={cargando} type="submit">{cargando ? 'Guardando...' : 'Guardar cambios'}</button>
           </form>
         </section>
       </main>

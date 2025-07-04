@@ -61,8 +61,8 @@ const AuthPage = ({ isOpen, onClose }) => {
         return (
           <Login
             onLoginSuccess={handleLoginSuccess}
-            onShowMessage={handleShowMessage}
             onShowForgotPassword={() => setView('forgot-password')}
+            onShowMessage={handleShowMessage}
           />
         );
       case 'register':

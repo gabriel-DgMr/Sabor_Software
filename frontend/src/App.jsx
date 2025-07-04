@@ -15,9 +15,11 @@ import Checkout from './pages/Checkout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import DashboardVentas from './pages/DashboardVentas.jsx';
 import EmpleadosHome from './pages/EmpleadosHome.jsx';
+import HistorialPedidos from './pages/HistorialPedidos.jsx';
+import HistorialReservas from './pages/HistorialReservas.jsx';
 import Home from './pages/Home.jsx';
 import ModificarPedido from './pages/ModificarPedido.jsx';
-import PedidosAdministrar from './pages/pedidosAdministrar.jsx';
+import PedidosAdministrar from './pages/pedidosadministrar.jsx';
 import ProductosAdministrar from './pages/ProductosAdministrar.jsx';
 import QuienesSomos from './pages/QuienesSomos.jsx';
 import ReservasAdministrar from './pages/ReservacionesAdministrar.jsx';
@@ -100,6 +102,22 @@ function App() {
                   </ProtectedRoute>
                 }
                 path="/actualizar-datos"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <HistorialPedidos />
+                  </ProtectedRoute>
+                }
+                path="/historial-pedidos"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <HistorialReservas />
+                  </ProtectedRoute>
+                }
+                path="/historial-reservas"
               />
             </Routes>
           </CartProvider>

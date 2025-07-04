@@ -115,12 +115,12 @@ const Footer = () => {
             {t('enviar')}
           </button>
           {error && (
-            <p id="error-footer" className="cuentanos__mensaje-error">
+            <p className="cuentanos__mensaje-error" id="error-footer">
               {error}
             </p>
           )}
           {mensaje && (
-            <p id="exito-footer" className="cuentanos__mensaje-exito">
+            <p className="cuentanos__mensaje-exito" id="exito-footer">
               {mensaje}
             </p>
           )}

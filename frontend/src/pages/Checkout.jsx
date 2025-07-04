@@ -2,10 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import "../styles/carrito.css";
+import DialogoModal from '../components/DialogoExito.jsx';
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
+import { useCart } from '../context/useCart.js';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils.js';
 import { validarLongitud, validarCaracteresEspeciales, validarEspacios } from '../utils/validaciones.js';
+
+const API_URL = 'http://localhost:3000/api';
 
 // Datos de ejemplo de tarjetas guardadas
 const tarjetasGuardadas = [
@@ -29,6 +33,7 @@ const tarjetasGuardadas = [
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const { cartItems, clearCart } = useCart();
   const [formData, setFormData] = useState({
     nombre: "",
     numero: "",
@@ -36,6 +41,8 @@ export default function Checkout() {
     cvv: "",
     direccion: "",
   });
+  const [modal, setModal] = useState({ open: false, message: '', icon: '✅', onConfirm: null });
+  const [intentos, setIntentos] = useState(0);
   const [errors, setErrors] = useState({});
   
   useEffect(() => {
@@ -44,89 +51,64 @@ export default function Checkout() {
 
   const manejarErroresDeCampo = (newErrors) => {
     setErrors(newErrors);
-    setTimeout(() => animateElements('.cuentanos__mensaje-error', 'fade-in'), 0);
+    setTimeout(() => animateElements('#error-checkout', 'fade-in'), 0);
     setTimeout(() => {
-      document.querySelectorAll('.cuentanos__mensaje-error').forEach(el => {
+      const el = document.querySelector('#error-checkout');
+      if (el) {
         el.classList.remove('fade-in');
         el.classList.add('fade-out');
-      });
+      }
       setTimeout(() => setErrors({}), ANIM_DURATION);
     }, VISIBLE_DURATION);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validar campos
+    // Validaciones
     const newErrors = {};
     
-    // Validar nombre
-    if (!formData.nombre) {
-      newErrors.nombre = 'El nombre es obligatorio.';
+    if (!formData.nombre.trim()) {
+      newErrors.nombre = 'El nombre es obligatorio';
     } else {
-      const longitudError = validarLongitud(formData.nombre, 'nombre', 2, 50);
-      if (longitudError) {
-        newErrors.nombre = longitudError;
-      } else {
+      const nombreError = validarLongitud(formData.nombre, 'nombre', 2, 50);
+      if (nombreError) newErrors.nombre = nombreError;
+      else {
         const caracteresError = validarCaracteresEspeciales(formData.nombre, 'nombre');
-        if (caracteresError) {
-          newErrors.nombre = caracteresError;
-        } else {
+        if (caracteresError) newErrors.nombre = caracteresError;
+        else {
           const espaciosError = validarEspacios(formData.nombre, 'nombre');
-          if (espaciosError) {
-            newErrors.nombre = espaciosError;
-          }
+          if (espaciosError) newErrors.nombre = espaciosError;
         }
       }
     }
     
-    // Validar número de tarjeta
-    if (!formData.numero) {
-      newErrors.numero = 'El número de tarjeta es obligatorio.';
-    } else {
-      const numeroLimpio = formData.numero.replace(/\s/g, '');
-      if (numeroLimpio.length !== 16) {
-        newErrors.numero = 'El número de tarjeta debe tener 16 dígitos.';
-      }
+    if (!formData.numero.trim()) {
+      newErrors.numero = 'El número de tarjeta es obligatorio';
+    } else if (!/^\d{16}$/.test(formData.numero.replace(/\s/g, ''))) {
+      newErrors.numero = 'El número de tarjeta debe tener 16 dígitos';
     }
     
-    // Validar fecha
-    if (!formData.fecha) {
-      newErrors.fecha = 'La fecha de expiración es obligatoria.';
-    } else {
-      const fechaRegex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
-      if (!fechaRegex.test(formData.fecha)) {
-        newErrors.fecha = 'El formato de fecha debe ser MM/YY.';
-      }
+    if (!formData.fecha.trim()) {
+      newErrors.fecha = 'La fecha de vencimiento es obligatoria';
+    } else if (!/^\d{2}\/\d{2}$/.test(formData.fecha)) {
+      newErrors.fecha = 'Formato de fecha inválido (MM/YY)';
     }
     
-    // Validar CVV
-    if (!formData.cvv) {
-      newErrors.cvv = 'El CVV es obligatorio.';
-    } else {
-      const cvvRegex = /^[0-9]{3,4}$/;
-      if (!cvvRegex.test(formData.cvv)) {
-        newErrors.cvv = 'El CVV debe tener 3 o 4 dígitos.';
-      }
+    if (!formData.cvv.trim()) {
+      newErrors.cvv = 'El CVV es obligatorio';
+    } else if (!/^\d{3,4}$/.test(formData.cvv)) {
+      newErrors.cvv = 'El CVV debe tener 3 o 4 dígitos';
     }
     
-    // Validar dirección
-    if (!formData.direccion) {
-      newErrors.direccion = 'La dirección es obligatoria.';
+    if (!formData.direccion.trim()) {
+      newErrors.direccion = 'La dirección es obligatoria';
     } else {
-      const longitudError = validarLongitud(formData.direccion, 'dirección', 10, 200);
-      if (longitudError) {
-        newErrors.direccion = longitudError;
-      } else {
+      const direccionError = validarLongitud(formData.direccion, 'dirección', 10, 200);
+      if (direccionError) newErrors.direccion = direccionError;
+      else {
         const caracteresError = validarCaracteresEspeciales(formData.direccion, 'dirección');
-        if (caracteresError) {
-          newErrors.direccion = caracteresError;
-        } else {
-          const espaciosError = validarEspacios(formData.direccion, 'dirección');
-          if (espaciosError) {
-            newErrors.direccion = espaciosError;
-          }
-        }
+        if (caracteresError) newErrors.direccion = caracteresError;
       }
     }
     
@@ -134,10 +116,164 @@ export default function Checkout() {
       manejarErroresDeCampo(newErrors);
       return;
     }
+
+    if (cartItems.length === 0) {
+      setModal({
+        open: true,
+        message: 'El carrito está vacío.',
+        icon: '⚠️',
+        onConfirm: () => setModal({ ...modal, open: false })
+      });
+      return;
+    }
     
-    // Aquí iría la lógica de procesamiento del pago
-    alert('¡Pago procesado con éxito!');
-    navigate('/');
+    // Simular pago (éxito 60%, fallo 40%)
+    const pagoExitoso = Math.random() < 0.6;
+    if (pagoExitoso) {
+      // Crear pedido en backend
+      try {
+        const token = localStorage.getItem('token');
+        const itemsParaBackend = cartItems.map(item => ({
+          id_producto: item.id,
+          cantidad: item.quantity || 1,
+          precio_unitario: item.precio
+        }));
+        const totalCarrito = cartItems.reduce((sum, item) => sum + item.precio * (item.quantity || 1), 0);
+        const recomendacionesPedido = localStorage.getItem('recomendacionesPedido') || '';
+        const nuevoPedido = {
+          items: itemsParaBackend,
+          total: totalCarrito,
+          recomendaciones: recomendacionesPedido
+        };
+        const response = await fetch(`${API_URL}/pedidos`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(nuevoPedido),
+        });
+        if (!response.ok) {
+          throw new Error('Error al guardar el pedido en la base de datos');
+        }
+        clearCart();
+        localStorage.removeItem('recomendacionesPedido');
+        setModal({
+          open: true,
+          message: '¡Pago procesado con éxito! Tu pedido ha sido enviado a la cocina.',
+          icon: '✅',
+          onConfirm: () => {
+            setModal({ ...modal, open: false });
+            navigate('/');
+          }
+        });
+      } catch (_) {
+        setModal({
+          open: true,
+          message: 'Error al guardar el pedido en la base de datos.',
+          icon: '❌',
+          onConfirm: () => setModal({ ...modal, open: false })
+        });
+      }
+    } else {
+      // Pago fallido
+      if (intentos < 2) {
+        setModal({
+          open: true,
+          message: 'El pago ha fallado. ¿Deseas reintentar?',
+          icon: '❌',
+          confirmText: 'Reintentar',
+          cancelText: 'Cancelar',
+          onConfirm: () => {
+            setModal({ ...modal, open: false });
+            setIntentos(intentos + 1);
+          },
+          onCancel: () => {
+            setModal({ ...modal, open: false });
+            preguntarGuardarPedido();
+          }
+        });
+      } else {
+        preguntarGuardarPedido();
+      }
+    }
+  };
+
+  const preguntarGuardarPedido = () => {
+    setModal({
+      open: true,
+      message: '¿Deseas guardar tu pedido como pendiente?',
+      icon: '❓',
+      confirmText: 'Guardar',
+      cancelText: 'Cancelar pedido',
+      onConfirm: () => {
+        guardarPedidoPendiente();
+      },
+      onCancel: () => {
+        setModal({ ...modal, open: false });
+        clearCart();
+        localStorage.removeItem('recomendacionesPedido');
+        setTimeout(() => {
+          setModal({
+            open: true,
+            message: 'Pedido cancelado por el usuario.',
+            icon: '🗑️',
+            onConfirm: () => {
+              setModal({ ...modal, open: false });
+              navigate('/');
+            }
+          });
+        }, 300);
+      }
+    });
+  };
+
+  const guardarPedidoPendiente = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const itemsParaBackend = cartItems.map(item => ({
+        id_producto: Number(item.id),
+        cantidad: Number(item.quantity) || 1,
+        precio_unitario: Number(item.precio)
+      }));
+      const totalCarrito = cartItems.reduce((sum, item) => sum + item.precio * (item.quantity || 1), 0);
+      const recomendacionesPedido = localStorage.getItem('recomendacionesPedido') || '';
+      const nuevoPedido = {
+        items: itemsParaBackend,
+        total: totalCarrito,
+        recomendaciones: recomendacionesPedido,
+        status: 'pendiente'
+      };
+      const response = await fetch(`${API_URL}/pedidos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(nuevoPedido),
+      });
+      if (!response.ok) {
+        throw new Error('Error al guardar el pedido como pendiente');
+      }
+      clearCart();
+      localStorage.removeItem('recomendacionesPedido');
+      setModal({
+        open: true,
+        message: 'Pedido guardado como pendiente. Puedes retomarlo más tarde.',
+        icon: '⏳',
+        onConfirm: () => {
+          setModal({ ...modal, open: false });
+          navigate('/');
+        }
+      });
+    } catch (_) {
+      setModal({
+        open: true,
+        message: 'Error al guardar el pedido como pendiente.',
+        icon: '❌',
+        onConfirm: () => setModal({ ...modal, open: false })
+      });
+    }
   };
 
   const formatNumeroTarjeta = (numero) => {
@@ -216,9 +352,9 @@ export default function Checkout() {
               <div className="checkout_grupo">
                 <label htmlFor="nombre">Nombre en la tarjeta</label>
                 <input 
-                  type="text" 
-                  id="nombre" 
                   required 
+                  id="nombre" 
+                  type="text" 
                   value={formData.nombre}
                   onChange={handleInputChange}
                   className={errors.nombre ? 'formulario__input--error' : ''}
@@ -229,11 +365,11 @@ export default function Checkout() {
               <div className="checkout_grupo">
                 <label htmlFor="numero">Número de tarjeta</label>
                 <input 
-                  type="text" 
-                  id="numero" 
                   required 
-                  maxLength="19"
+                  id="numero" 
+                  maxLength="19" 
                   placeholder="1234 5678 9012 3456"
+                  type="text"
                   value={formData.numero}
                   onChange={handleInputChange}
                   className={errors.numero ? 'formulario__input--error' : ''}
@@ -245,11 +381,11 @@ export default function Checkout() {
                 <div className="checkout_grupo">
                   <label htmlFor="fecha">Fecha de expiración</label>
                   <input 
-                    type="text" 
-                    id="fecha" 
                     required 
-                    maxLength="5"
+                    id="fecha" 
+                    maxLength="5" 
                     placeholder="MM/YY"
+                    type="text"
                     value={formData.fecha}
                     onChange={handleInputChange}
                     className={errors.fecha ? 'formulario__input--error' : ''}
@@ -260,11 +396,11 @@ export default function Checkout() {
                 <div className="checkout_grupo">
                   <label htmlFor="cvv">CVV</label>
                   <input 
-                    type="text" 
-                    id="cvv" 
                     required 
+                    id="cvv" 
                     pattern="[0-9]{3,4}" 
-                    placeholder="123"
+                    placeholder="123" 
+                    type="text"
                     value={formData.cvv}
                     onChange={handleInputChange}
                     className={errors.cvv ? 'formulario__input--error' : ''}
@@ -276,9 +412,9 @@ export default function Checkout() {
               <div className="checkout_grupo">
                 <label htmlFor="direccion">Dirección de facturación</label>
                 <input 
-                  type="text" 
+                  required 
                   id="direccion" 
-                  required
+                  type="text"
                   value={formData.direccion}
                   onChange={handleInputChange}
                   className={errors.direccion ? 'formulario__input--error' : ''}
@@ -286,7 +422,7 @@ export default function Checkout() {
                 {errors.direccion && <small className="cuentanos__mensaje-error">{errors.direccion}</small>}
               </div>
               
-              <button type="submit" className="checkout_btn_pagar">
+              <button className="checkout_btn_pagar" type="submit">
                 Confirmar Pago
               </button>
             </form>
@@ -314,7 +450,7 @@ export default function Checkout() {
             <div className="checkout_metodos_guardados">
               <h2>Métodos de Pago Guardados</h2>
               {tarjetasGuardadas.map((tarjeta) => (
-                <div className="checkout_tarjeta_guardada" key={tarjeta.id}>
+                <div key={tarjeta.id} className="checkout_tarjeta_guardada">
                   <div className="checkout_tarjeta_info">
                     <span className="checkout_tarjeta_tipo">{tarjeta.tipo}</span>
                     <span className="checkout_tarjeta_numero">
@@ -335,15 +471,15 @@ export default function Checkout() {
               <h2>Otros Métodos de Pago</h2>
               <div className="checkout_metodos_lista">
                 <button className="checkout_metodo_opcion visa">
-                  <img src="/images/visa.png" alt="Visa" />
+                  <img alt="Visa" src="/images/visa.png" />
                   <span>Visa</span>
                 </button>
                 <button className="checkout_metodo_opcion mastercard">
-                  <img src="/images/mastercard.png" alt="Mastercard" />
+                  <img alt="Mastercard" src="/images/mastercard.png" />
                   <span>Mastercard</span>
                 </button>
                 <button className="checkout_metodo_opcion paypal">
-                  <img src="/images/paypal.png" alt="PayPal" />
+                  <img alt="PayPal" src="/images/paypal.png" />
                   <span>PayPal</span>
                 </button>
               </div>
@@ -352,6 +488,7 @@ export default function Checkout() {
         </div>
       </main>
       <Footer />
+      <DialogoModal {...modal} />
     </>
   );
 } 

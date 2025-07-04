@@ -12,7 +12,7 @@ export const productoController = {
             };
             const productos = await productoModel.getAllProductos(filtros);
             res.json(productos);
-            console.log("res.json(productos)")
+            console.log('res.json(productos)');
         } catch (error) {
             res.status(500).json({ 
                 message: 'Error al obtener los productos',

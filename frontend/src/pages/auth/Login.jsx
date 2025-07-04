@@ -53,6 +53,7 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
       onShowMessage('success', t('login_exito'));
       if (onLoginSuccess) onLoginSuccess();
     } else {
+      // Mostrar solo el mensaje real del backend
       setGlobalError(result.message || t('login_error'));
       setTimeout(() => animateElements('#global-error-login', 'fade-in'), 0);
       setTimeout(() => {
@@ -114,8 +115,8 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
           {loading ? t('login_iniciando') : t('iniciar_sesion')}
         </button>
         <button
-          type="button"
           className="formulario__olvidar-contraseña"
+          type="button"
           onClick={() => onShowForgotPassword()}
         >
           {t('login_olvidaste_contrasena')}

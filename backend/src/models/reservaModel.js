@@ -68,6 +68,24 @@ export const reservaModel = {
   //   }
   // },
 
+  /**
+   * Obtiene el historial de reservaciones de un usuario.
+   * @param {number} id_cliente - El ID del cliente.
+   * @returns {Promise<Array>} Lista de reservaciones.
+   */
+  getReservasByUser: async (id_cliente) => {
+    try {
+      const [rows] = await pool.query(
+        'SELECT id_reservacion, fecha_reservacion, hora_reservacion, numero_personas, notas, id_estado, id_mesa FROM reservaciones WHERE id_cliente = ? ORDER BY fecha_reservacion DESC, hora_reservacion DESC',
+        [id_cliente]
+      );
+      return rows;
+    } catch (error) {
+      console.error('Error al obtener historial de reservaciones:', error);
+      throw error;
+    }
+  },
+
   // Verificar disponibilidad específica
   checkDisponibilidad: async (fecha, hora) => {
     try {

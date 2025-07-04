@@ -9,8 +9,12 @@ import MensajeExito from '../components/DialogoExito.jsx'
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
+<<<<<<< HEAD
 import { useCart } from '../context/CartContext.jsx';
 import { useCategorias } from '../context/CategoriaContext';
+=======
+import { useCart } from '../context/useCart.js';
+>>>>>>> 66cfb2625080fe09d6184a0e66e612dad10bf129
 import { useProductos } from '../context/ProductoContext';
 import { FormatPriceCOP } from '../utils/format.js';
 
@@ -229,10 +233,10 @@ const Home = () => {
       </main>
       {/* Diálogo de éxito */}
       <MensajeExito
-        open={exitoOpen}
-        message={mensajeExito}
-        onClose={() => setExitoOpen(false)}
         duration={2000}
+        message={mensajeExito}
+        open={exitoOpen}
+        onClose={() => setExitoOpen(false)}
       />
       <Footer />
     </div>

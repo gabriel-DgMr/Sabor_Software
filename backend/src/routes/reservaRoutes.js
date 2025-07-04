@@ -1,5 +1,5 @@
 import express from 'express';
-import { hacerReserva, getHorariosDisponibles, checkDisponibilidad } from '../controllers/reservaController.js';
+import { hacerReserva, getHorariosDisponibles, checkDisponibilidad, getHistorialReservas } from '../controllers/reservaController.js';
 import { authenticateToken, checkPermission } from '../middleware/auth.js';
 import { validateReserva } from '../middleware/validateRequest.js';
 
@@ -8,6 +8,7 @@ const router = express.Router();
 // Rutas públicas para verificar disponibilidad
 router.get('/horarios-disponibles', getHorariosDisponibles);
 router.get('/disponibilidad', checkDisponibilidad);
+router.get('/historial', authenticateToken, getHistorialReservas);
 
 // Rutas protegidas con validaciones
 router.post('/hacerReserva', 

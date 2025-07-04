@@ -1,7 +1,7 @@
-import { dbConfig } from '../config/dbconfig.js'
-import mysql from 'mysql2/promise'
+import { dbConfig } from '../config/dbconfig.js';
+import mysql from 'mysql2/promise';
 
-const pool = mysql.createPool(dbConfig)
+const pool = mysql.createPool(dbConfig);
 
 export const productoModel = {
     // Obtener todos los productos con filtros
@@ -62,10 +62,10 @@ export const productoModel = {
             const [rows] = await pool.query(
                 'SELECT * FROM productos WHERE id_producto = ? AND activo = 1',
                 [id]
-            )
-            return rows[0]
+            );
+            return rows[0];
         } catch (error) {
-            throw new Error('Error al obtener producto: ' + error.message)
+            throw new Error('Error al obtener producto: ' + error.message);
         }
     },
 
@@ -77,6 +77,7 @@ export const productoModel = {
                 descripcion_producto, 
                 precio_producto, 
                 id_categoria_producto, 
+<<<<<<< HEAD
                 imagen_producto,
                 calificacion = 0, // Calificación de 1.0 a 5.0 (un decimal)
                 ventas = 0 // Número de ventas
@@ -87,8 +88,18 @@ export const productoModel = {
                 [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto, calificacion, ventas]
             )
             return result.insertId
+=======
+                imagen_producto 
+            } = productoData;
+
+            const [result] = await pool.query(
+                'INSERT INTO productos (nombre_producto, descripcion_producto, precio_producto, id_categoria, imagen_producto) VALUES (?, ?, ?, ?, ?)',
+                [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto]
+            );
+            return result.insertId;
+>>>>>>> 66cfb2625080fe09d6184a0e66e612dad10bf129
         } catch (error) {
-            throw new Error('Error al crear producto: ' + error.message)
+            throw new Error('Error al crear producto: ' + error.message);
         }
     },
 
@@ -100,6 +111,7 @@ export const productoModel = {
                 descripcion_producto, 
                 precio_producto, 
                 id_categoria_producto, 
+<<<<<<< HEAD
                 imagen_producto,
                 calificacion, // Calificación de 1.0 a 5.0 (un decimal)
                 ventas // Número de ventas
@@ -110,8 +122,18 @@ export const productoModel = {
                 [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto, calificacion, ventas, id]
             )
             return result.affectedRows > 0
+=======
+                imagen_producto 
+            } = productoData;
+
+            const [result] = await pool.query(
+                'UPDATE productos SET nombre_producto = ?, descripcion_producto = ?, precio_producto = ?, id_categoria = ?, imagen_producto = ? WHERE id_producto = ?',
+                [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto, id]
+            );
+            return result.affectedRows > 0;
+>>>>>>> 66cfb2625080fe09d6184a0e66e612dad10bf129
         } catch (error) {
-            throw new Error('Error al actualizar producto: ' + error.message)
+            throw new Error('Error al actualizar producto: ' + error.message);
         }
     },
 
@@ -121,10 +143,10 @@ export const productoModel = {
             const [result] = await pool.query(
                 'UPDATE productos SET activo = 0 WHERE id_producto = ?',
                 [id]
-            )
-            return result.affectedRows > 0
+            );
+            return result.affectedRows > 0;
         } catch (error) {
-            throw new Error('Error al eliminar producto: ' + error.message)
+            throw new Error('Error al eliminar producto: ' + error.message);
         }
     },
 
@@ -134,13 +156,13 @@ export const productoModel = {
             const [rows] = await pool.query(
                 'SELECT * FROM productos WHERE id_categoria = ? AND activo = 1',
                 [categoriaId]
-            )
-            return rows
+            );
+            return rows;
         } catch (error) {
-            throw new Error('Error al obtener productos por categoría: ' + error.message)
+            throw new Error('Error al obtener productos por categoría: ' + error.message);
         }
     }
-}
+};
 
 // Get Productos by Categoria
 
@@ -148,7 +170,7 @@ export const getProductosByCategoria = async (categoria) => {
     const pool = mysql.createPool(dbConfig);
     const [rows] = await pool.query('SELECT * FROM productos WHERE categoria = ?', [categoria]);
     return rows;
-}
+};
 
 // Search Productos
 
@@ -159,7 +181,7 @@ export const searchProductos = async (searchTerm) => {
         [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`]
     );
     return rows;
-}
+};
 
 // Update Producto Stock
 
@@ -170,4 +192,4 @@ export const updateProductoStock = async (id, cantidad) => {
         [cantidad, id]
     );
     return result.affectedRows;
-}
+};

@@ -1,5 +1,5 @@
 import * as authModel from '../models/authModel.js';
-import validator from 'validator'
+import validator from 'validator';
 // Obtener todos los clientes
 export const getAllClientes = async (req, res) => {
     try {

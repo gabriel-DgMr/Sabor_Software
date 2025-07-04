@@ -14,9 +14,10 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:3000', // La dirección de tu servidor backend
+        target: 'http://localhost:3000',
         changeOrigin: true,
-        // rewrite: (path) => path.replace(/^\/api/, ''), // Opcional: reescribe la ruta si el backend no espera '/api'
+        secure: false,
+        // rewrite: (path) => path.replace(/^\/api/, '/api'), // No reescribe, solo asegura el path
       },
     },
   },

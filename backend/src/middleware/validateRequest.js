@@ -2,7 +2,7 @@ import validator from 'validator';
 
 // Función auxiliar para validar caracteres especiales
 const validateSpecialCharacters = (value, fieldName) => {
-    const caracteresProhibidos = /[<>"'/\\(){}\[\]=;:%&]/;
+    const caracteresProhibidos = /[<>"'/\\(){}[\]=;:%&]/;
     if (caracteresProhibidos.test(value)) {
         return `El campo ${fieldName} no puede contener caracteres especiales como < > " ' / \\ ( ) { } [ ] = ; : % &`;
     }

@@ -124,3 +124,107 @@ export const updatePedido = async (req, res) => {
     });
   }
 }; 
+
+// === CONTROLADORES DE CARRITO ===
+import {
+  getCarritoByUser,
+  createCarrito,
+  addOrUpdateProductoCarrito,
+  updateCantidadProductoCarrito,
+  removeProductoCarrito,
+  vaciarCarrito,
+  confirmarPedido
+} from '../models/pedidoModel.js';
+
+// Obtener el carrito actual del usuario
+export const getCarrito = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const carrito = await getCarritoByUser(userId);
+    if (!carrito) {
+      // Si no hay carrito, crear uno vacío
+      const id_pedido = await createCarrito(userId);
+      return res.json({ id_pedido, items: [] });
+    }
+    res.json(carrito);
+  } catch (error) {
+    console.error('Error en getCarrito:', error);
+    res.status(500).json({ mensaje: 'Error al obtener el carrito', error: error.message });
+  }
+};
+
+// Agregar producto al carrito
+export const addProductoCarrito = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { id_producto, cantidad } = req.body;
+    if (!id_producto || !cantidad || cantidad <= 0) {
+      return res.status(400).json({ mensaje: 'id_producto y cantidad son requeridos y cantidad debe ser mayor a 0' });
+    }
+    const id_pedido = await addOrUpdateProductoCarrito(userId, id_producto, cantidad);
+    res.json({ mensaje: 'Producto agregado/actualizado en el carrito', id_pedido });
+  } catch (error) {
+    console.error('Error en addProductoCarrito:', error);
+    res.status(500).json({ mensaje: 'Error al agregar producto al carrito', error: error.message });
+  }
+};
+
+// Modificar cantidad de un producto en el carrito
+export const updateCantidadCarrito = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { id_producto, cantidad } = req.body;
+    if (!id_producto || !cantidad || cantidad <= 0) {
+      return res.status(400).json({ mensaje: 'id_producto y cantidad son requeridos y cantidad debe ser mayor a 0' });
+    }
+    const id_pedido = await updateCantidadProductoCarrito(userId, id_producto, cantidad);
+    res.json({ mensaje: 'Cantidad actualizada', id_pedido });
+  } catch (error) {
+    console.error('Error en updateCantidadCarrito:', error);
+    res.status(500).json({ mensaje: 'Error al actualizar cantidad', error: error.message });
+  }
+};
+
+// Eliminar producto del carrito
+export const removeProducto = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { id_producto } = req.body;
+    if (!id_producto) {
+      return res.status(400).json({ mensaje: 'id_producto es requerido' });
+    }
+    const id_pedido = await removeProductoCarrito(userId, id_producto);
+    res.json({ mensaje: 'Producto eliminado del carrito', id_pedido });
+  } catch (error) {
+    console.error('Error en removeProducto:', error);
+    res.status(500).json({ mensaje: 'Error al eliminar producto', error: error.message });
+  }
+};
+
+// Vaciar carrito
+export const vaciar = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const id_pedido = await vaciarCarrito(userId);
+    res.json({ mensaje: 'Carrito vaciado', id_pedido });
+  } catch (error) {
+    console.error('Error en vaciar:', error);
+    res.status(500).json({ mensaje: 'Error al vaciar carrito', error: error.message });
+  }
+};
+
+// Confirmar pedido (finalizar carrito)
+export const confirmar = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { id_empleado, metodo_pago } = req.body;
+    if (!id_empleado || !metodo_pago) {
+      return res.status(400).json({ mensaje: 'id_empleado y metodo_pago son requeridos' });
+    }
+    const id_pedido = await confirmarPedido(userId, id_empleado, metodo_pago);
+    res.json({ mensaje: 'Pedido confirmado', id_pedido });
+  } catch (error) {
+    console.error('Error en confirmar:', error);
+    res.status(500).json({ mensaje: 'Error al confirmar pedido', error: error.message });
+  }
+}; 

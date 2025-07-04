@@ -1,11 +1,8 @@
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
 
 export const authenticateToken = (req, res, next) => {
     try {
-        // Obtener el token del header o de las cookies
         const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
-
         if (!token) {
             return res.status(401).json({ 
                 message: 'No autorizado - Token no proporcionado',
@@ -20,8 +17,6 @@ export const authenticateToken = (req, res, next) => {
                 code: 'TOKEN_INVALID_FORMAT'
             });
         }
-
-        // Verificar el token
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key');
         
         // Validar que el token contenga la información necesaria

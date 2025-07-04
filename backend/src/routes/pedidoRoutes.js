@@ -40,4 +40,22 @@ router.delete('/:id',
     deletePedido
 );
 
+// === RUTAS DE CARRITO ===
+import {
+  getCarrito,
+  addProductoCarrito,
+  updateCantidadCarrito,
+  removeProducto,
+  vaciar,
+  confirmar
+} from '../controllers/pedidoController.js';
+
+// Carrito: todas protegidas
+router.get('/carrito', authenticateToken, getCarrito);
+router.post('/carrito/add', authenticateToken, addProductoCarrito);
+router.put('/carrito/update', authenticateToken, updateCantidadCarrito);
+router.delete('/carrito/remove', authenticateToken, removeProducto);
+router.delete('/carrito/vaciar', authenticateToken, vaciar);
+router.post('/carrito/confirmar', authenticateToken, confirmar);
+
 export default router; 

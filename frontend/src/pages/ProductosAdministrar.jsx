@@ -252,7 +252,7 @@ const ProductosAdministrar = () => {
         <MenuLateral />
         <main className='productos__administrar'>
           <div className="loading-container">
-            <div className="loading-spinner"></div>
+            <div className="loading-spinner" />
             <p>Cargando productos...</p>
           </div>
         </main>
@@ -319,11 +319,11 @@ const ProductosAdministrar = () => {
                           <button
                             className={`productos__boton productos__boton--editar ${loadingStates.edit[producto.id_producto] ? 'productos__boton--loading' : ''}`}
                             disabled={loadingStates.edit[producto.id_producto] || loadingStates.delete[producto.id_producto]}
-                            onClick={() => handleEditProduct(producto)}
                             type="button"
+                            onClick={() => handleEditProduct(producto)}
                           >
                             {loadingStates.edit[producto.id_producto] ? (
-                              <span className="loading-indicator"></span>
+                              <span className="loading-indicator" />
                             ) : (
                               'Editar'
                             )}
@@ -331,11 +331,11 @@ const ProductosAdministrar = () => {
                           <button
                             className={`productos__boton productos__boton--eliminar ${loadingStates.delete[producto.id_producto] ? 'productos__boton--loading' : ''}`}
                             disabled={loadingStates.edit[producto.id_producto] || loadingStates.delete[producto.id_producto]}
-                            onClick={() => handleDeleteProduct(producto.id_producto)}
                             type="button"
+                            onClick={() => handleDeleteProduct(producto.id_producto)}
                           >
                             {loadingStates.delete[producto.id_producto] ? (
-                              <span className="loading-indicator"></span>
+                              <span className="loading-indicator" />
                             ) : (
                               'Eliminar'
                             )}
@@ -362,8 +362,8 @@ const ProductosAdministrar = () => {
                   viewBox="0 0 24 24"
                   width="16"
                 >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
                 </svg>
                 {successMessage}
               </div>
@@ -415,9 +415,9 @@ const ProductosAdministrar = () => {
                             viewBox="0 0 24 24"
                             width="16"
                         >
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" x2="12" y1="8" y2="12" />
+                            <line x1="12" x2="12.01" y1="16" y2="16" />
                         </svg>
                         {categoriasError}
                     </label>
@@ -485,7 +485,7 @@ const ProductosAdministrar = () => {
                   type="submit"
                 >
                   {loadingStates.submit ? (
-                    <span className="loading-indicator"></span>
+                    <span className="loading-indicator" />
                   ) : (
                     isEditing ? 'Actualizar' : 'Confirmar'
                   )}
@@ -494,6 +494,7 @@ const ProductosAdministrar = () => {
                   <button
                     className='descripcion__boton descripcion__boton--cancelar'
                     disabled={loadingStates.submit}
+                    type="button"
                     onClick={() => {
                       setIsEditing(false);
                       setEditingProductId(null);
@@ -506,7 +507,6 @@ const ProductosAdministrar = () => {
                       });
                       setImagePreview(null);
                     }}
-                    type="button"
                   >
                     Cancelar
                   </button>
