@@ -4,12 +4,12 @@ import mysql from 'mysql2/promise'
 const pool = mysql.createPool(dbConfig)
 
 export const productoModel = {
-    // Obtener todos los productos
-    getAllProductos: async () => {
+    // Obtener todos los productos con filtros
+    getAllProductos: async (filtros = {}) => {
         try {
             console.log('Ejecutando consulta getAllProductos...');
             
-            const query = `
+            let sql = `
                 SELECT 
                     p.id_producto,
                     p.nombre_producto,
@@ -18,28 +18,37 @@ export const productoModel = {
                     p.imagen_producto,
                     p.id_categoria,
                     c.nombre_categoria,
-                    p.activo
+                    p.activo,
+                    p.calificacion,
+                    p.ventas
                 FROM productos p 
                 LEFT JOIN categorias c ON p.id_categoria = c.id_categoria 
                 WHERE p.activo = 1
-                ORDER BY p.id_producto DESC
             `;
-            
-            console.log('Query SQL:', query);
-            
-            const [rows] = await pool.query(query);
-            console.log('Número de productos encontrados:', rows.length);
-            
-            if (rows.length === 0) {
-                console.log('No se encontraron productos activos');
-            } else {
-                console.log('Ejemplo de producto:', {
-                    id: rows[0].id_producto,
-                    nombre: rows[0].nombre_producto,
-                    categoria: rows[0].nombre_categoria
-                });
+            const params = [];
+            // Filtro por categoría
+            if (filtros.categoria) {
+                sql += ' AND c.nombre_categoria = ?';
+                params.push(filtros.categoria);
             }
-            
+            // Filtro por búsqueda
+            if (filtros.busqueda) {
+                sql += ' AND (p.nombre_producto LIKE ? OR p.descripcion_producto LIKE ?)';
+                params.push(`%${filtros.busqueda}%`, `%${filtros.busqueda}%`);
+            }
+            // Ordenamiento
+            if (filtros.orden === 'precio_asc') {
+                sql += ' ORDER BY p.precio_producto ASC';
+            } else if (filtros.orden === 'precio_desc') {
+                sql += ' ORDER BY p.precio_producto DESC';
+            } else if (filtros.orden === 'calificacion') {
+                sql += ' ORDER BY p.calificacion DESC';
+            } else if (filtros.orden === 'ventas') {
+                sql += ' ORDER BY p.ventas DESC';
+            } else {
+                sql += ' ORDER BY p.id_producto DESC';
+            }
+            const [rows] = await pool.query(sql, params);
             return rows;
         } catch (error) {
             console.error('Error en getAllProductos (model):', error);
@@ -68,12 +77,14 @@ export const productoModel = {
                 descripcion_producto, 
                 precio_producto, 
                 id_categoria_producto, 
-                imagen_producto 
+                imagen_producto,
+                calificacion = 0, // Calificación de 1.0 a 5.0 (un decimal)
+                ventas = 0 // Número de ventas
             } = productoData
 
             const [result] = await pool.query(
-                'INSERT INTO productos (nombre_producto, descripcion_producto, precio_producto, id_categoria, imagen_producto) VALUES (?, ?, ?, ?, ?)',
-                [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto]
+                'INSERT INTO productos (nombre_producto, descripcion_producto, precio_producto, id_categoria, imagen_producto, calificacion, ventas) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto, calificacion, ventas]
             )
             return result.insertId
         } catch (error) {
@@ -89,12 +100,14 @@ export const productoModel = {
                 descripcion_producto, 
                 precio_producto, 
                 id_categoria_producto, 
-                imagen_producto 
+                imagen_producto,
+                calificacion, // Calificación de 1.0 a 5.0 (un decimal)
+                ventas // Número de ventas
             } = productoData
 
             const [result] = await pool.query(
-                'UPDATE productos SET nombre_producto = ?, descripcion_producto = ?, precio_producto = ?, id_categoria = ?, imagen_producto = ? WHERE id_producto = ?',
-                [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto, id]
+                'UPDATE productos SET nombre_producto = ?, descripcion_producto = ?, precio_producto = ?, id_categoria = ?, imagen_producto = ?, calificacion = ?, ventas = ? WHERE id_producto = ?',
+                [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto, calificacion, ventas, id]
             )
             return result.affectedRows > 0
         } catch (error) {

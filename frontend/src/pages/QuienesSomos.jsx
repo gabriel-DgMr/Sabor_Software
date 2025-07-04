@@ -9,10 +9,10 @@ export default function QuienesSomos() {
   return (
     <>
       <Header />
-      <main className="quienes-somos__main" style={{padding: '2rem 0', minHeight: '60vh'}}>
-        <div className="container" style={{maxWidth: 800, margin: '0 auto', background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px #0001', padding: 32}}>
+      <main className="quienes-somos__main">
+        <div className="quienes-somos__container">
           <h1>{t('quienes_titulo')}</h1>
-          <p style={{fontSize: '1.2rem', marginBottom: 24}}>{t('quienes_descripcion')}</p>
+          <p>{t('quienes_descripcion')}</p>
           <h2>{t('quienes_mision_titulo')}</h2>
           <p>{t('quienes_mision')}</p>
           <h2>{t('quienes_vision_titulo')}</h2>

@@ -5,7 +5,12 @@ export const productoController = {
 // Obtener todos los productos
     getAllProductos: async (req, res) => {
         try {
-            const productos = await productoModel.getAllProductos();
+            const filtros = {
+                categoria: req.query.categoria || '',
+                busqueda: req.query.busqueda || '',
+                orden: req.query.orden || ''
+            };
+            const productos = await productoModel.getAllProductos(filtros);
             res.json(productos);
             console.log("res.json(productos)")
         } catch (error) {
@@ -39,7 +44,9 @@ export const productoController = {
                 nombre_producto, 
                 descripcion_producto, 
                 precio_producto, 
-                id_categoria_producto 
+                id_categoria_producto,
+                calificacion = 0,
+                ventas = 0
             } = req.body;
             
             // Validaciones
@@ -67,7 +74,9 @@ export const productoController = {
                 descripcion_producto,
                 precio_producto,
                 id_categoria_producto,
-                imagen_producto: req.file.filename
+                imagen_producto: req.file.filename,
+                calificacion: parseFloat(calificacion),
+                ventas: parseInt(ventas)
             };
 
             console.log('Nombre del archivo guardado en BD:', req.file.filename);
@@ -100,7 +109,9 @@ export const productoController = {
                 nombre_producto, 
                 descripcion_producto, 
                 precio_producto, 
-                id_categoria_producto 
+                id_categoria_producto,
+                calificacion,
+                ventas
             } = req.body;
 
             // Validaciones
@@ -120,7 +131,9 @@ export const productoController = {
                 nombre_producto,
                 descripcion_producto,
                 precio_producto,
-                id_categoria_producto
+                id_categoria_producto,
+                calificacion: calificacion ? parseFloat(calificacion) : undefined,
+                ventas: ventas ? parseInt(ventas) : undefined
             };
 
             // Si se subió una nueva imagen, actualizar el nombre del archivo

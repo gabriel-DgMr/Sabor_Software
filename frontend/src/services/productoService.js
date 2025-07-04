@@ -130,5 +130,15 @@ export const productoService = {
             console.error('Error en eliminar producto:', error);
             throw error;
         }
+    },
+    getProductos: async (filtros = {}) => {
+        const params = new URLSearchParams();
+        if (filtros.categoria) params.append('categoria', filtros.categoria);
+        if (filtros.busqueda) params.append('busqueda', filtros.busqueda);
+        if (filtros.orden) params.append('orden', filtros.orden);
+        const url = `${API_URL}/productos?${params.toString()}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Error al obtener productos');
+        return await response.json();
     }
 };

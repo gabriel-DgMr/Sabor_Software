@@ -50,11 +50,21 @@ const productoReducer = (state, action) => {
 export const ProductoProvider = ({ children }) => {
     const [state, dispatch] = useReducer(productoReducer, initialState);
 
+    const getProductosFiltrados = async (filtros = {}) => {
+        try {
+            dispatch({ type: 'SET_LOADING', payload: true });
+            const productos = await productoService.getProductos(filtros);
+            dispatch({ type: 'SET_PRODUCTOS', payload: productos });
+        } catch (error) {
+            dispatch({ type: 'SET_ERROR', payload: error.message });
+        }
+    };
+
     useEffect(() => {
         const cargarProductos = async () => {
             try {
                 dispatch({ type: 'SET_LOADING' });
-                const productos = await productoService.obtenerTodos();
+                const productos = await productoService.getProductos();
                 dispatch({ type: 'SET_PRODUCTOS', payload: productos });
             } catch (error) {
                 dispatch({ type: 'SET_ERROR', payload: error.message });
@@ -65,7 +75,7 @@ export const ProductoProvider = ({ children }) => {
     }, []);
 
     return (
-        <ProductoContext.Provider value={{ state, dispatch }}>
+        <ProductoContext.Provider value={{ state, dispatch, getProductosFiltrados }}>
             {children}
         </ProductoContext.Provider>
     );
