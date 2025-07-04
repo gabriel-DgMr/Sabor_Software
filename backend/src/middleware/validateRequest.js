@@ -40,7 +40,7 @@ export const validateRegister = (req, res, next) => {
     // Validar que no haya espacios al inicio o final, ni espacios dobles o múltiples
     const tieneEspaciosExtremos = valor => valor !== valor.trim();
     const tieneEspaciosDobles = valor => /\s{2,}/.test(valor);
-    const caracteresProhibidos = /[<>"'/\\(){}\[\]=;:%&]/;
+    const caracteresProhibidos = /[<>"'/\\(){}[]=;:%&]/;
 
     // Validar nombre
     if (caracteresProhibidos.test(nombre_cliente)) {

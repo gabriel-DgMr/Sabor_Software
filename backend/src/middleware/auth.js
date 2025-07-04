@@ -2,25 +2,21 @@ import jwt from 'jsonwebtoken';
 
 export const authenticateToken = (req, res, next) => {
     try {
-        // Obtener el token del header o de las cookies
         const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
-
+        console.log('JWT_SECRET en uso:', process.env.JWT_SECRET);
+        console.log('Token recibido:', token);
         if (!token) {
-            return res.status(401).json({ 
-                message: 'No autorizado - Token no proporcionado' 
-            });
+            console.log('No se proporcionó token');
+            return res.status(401).json({ message: 'No autorizado - Token no proporcionado' });
         }
-
-        // Verificar el token
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key');
-        
-        // Agregar la información del usuario al request
+        console.log('Token decodificado:', decoded);
         req.user = decoded;
+        console.log('Pasando al siguiente middleware/controlador');
         next();
     } catch (error) {
-        return res.status(403).json({ 
-            message: 'No autorizado - Token inválido' 
-        });
+        console.error('Error al verificar token:', error);
+        return res.status(403).json({ message: 'No autorizado - Token inválido', detalle: error.message });
     }
 };
 

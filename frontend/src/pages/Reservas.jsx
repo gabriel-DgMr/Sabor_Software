@@ -398,7 +398,7 @@ const Reservas = () => {
         <Header /* setShowLogin={setShowLogin} */ /> {/* Comentado para que el linter no este fastidiando*/}
         <main className="pagina__contenido-reservas">
           <section className="reservas__imagen">
-            <img src="/images/imagen-reservas.jpg" alt="imagen-reservas" className='imagen-reservas'/>
+            <img alt="imagen-reservas" className='imagen-reservas' src="/images/imagen-reservas.jpg"/>
           </section>
           <section className="seccion_reservas">
             <h1 className="reservas__titulo">Reservación</h1>

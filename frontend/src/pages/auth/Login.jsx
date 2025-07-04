@@ -131,8 +131,8 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
           {loading ? 'Iniciando...' : 'Iniciar Sesión'}
         </button>
         <button
-          type="button"
           className="formulario__olvidar-contraseña"
+          type="button"
           onClick={() => onShowForgotPassword()}
         >
           ¿Olvidaste tu contraseña?

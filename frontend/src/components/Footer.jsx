@@ -81,11 +81,11 @@ const Footer = () => {
         <div className="pie-pagina__nosotros">
           <h3 className="pie-pagina__titulo">Sobre Nosotros</h3>
           <h4 className="pie-pagina__subtitulo">
-            <a href="#" className='nosotros-opc'>¿Quiénes somos?</a>
-            <a href="#" className='nosotros-opc'>Descubrenos </a>
+            <a className='nosotros-opc' href="#">¿Quiénes somos?</a>
+            <a className='nosotros-opc' href="#">Descubrenos </a>
           </h4>
         </div>
-        <form className="cuentanos" onSubmit={handleSubmit} noValidate>
+        <form noValidate className="cuentanos" onSubmit={handleSubmit}>
           <h3 className="pie-pagina__titulo">¡Cuentanos!</h3>
           <textarea
             className="cuentanos__input"
@@ -93,16 +93,16 @@ const Footer = () => {
             value={experiencia}
             onChange={e => setExperiencia(e.target.value)}
           />
-          <button type="submit" className="cuentanos__boton">
+          <button className="cuentanos__boton" type="submit">
             Enviar
           </button>
           {error && (
-            <p id="error-footer" className="cuentanos__mensaje-error">
+            <p className="cuentanos__mensaje-error" id="error-footer">
               {error}
             </p>
           )}
           {mensaje && (
-            <p id="exito-footer" className="cuentanos__mensaje-exito">
+            <p className="cuentanos__mensaje-exito" id="exito-footer">
               {mensaje}
             </p>
           )}

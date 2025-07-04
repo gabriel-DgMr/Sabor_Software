@@ -1,8 +1,8 @@
-import * as authModel from '../models/authModel.js'
-import jwt from 'jsonwebtoken'
-import validator from 'validator'
-import { config } from '../config/config.js'
-import nodemailer from 'nodemailer'
+import * as authModel from '../models/authModel.js';
+import jwt from 'jsonwebtoken';
+import validator from 'validator';
+import { config } from '../config/config.js';
+import nodemailer from 'nodemailer';
 
 // Configurar el transporter de nodemailer
 const transporter = nodemailer.createTransport({
@@ -72,7 +72,7 @@ export const registerUser = async (req, res) => {
             message: error.message || 'Error al registrar usuario'
         });
     }
-}
+};
 
 // Inicio de sesion
 export const loginUser = async(req, res) => {
@@ -125,13 +125,13 @@ export const loginUser = async(req, res) => {
             message: error.message || 'Error al iniciar sesión'
         });
     }
-}
+};
 
 // Controlador para cerrar sesión
 export const logoutUser = (req, res) => {
     res.clearCookie('token');
     res.json({ message: 'Sesión cerrada exitosamente' });
-}
+};
 
 // Controlador para obtener perfil de usuario
 export const getUserProfile = async (req, res) => {
@@ -152,7 +152,7 @@ export const getUserProfile = async (req, res) => {
             message: 'Error al obtener perfil de usuario'
         });
     }
-}
+};
 
 // Verificar token y obtener perfil
 export const verifyToken = async (req, res) => {

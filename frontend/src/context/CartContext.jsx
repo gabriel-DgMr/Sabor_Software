@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext } from 'react';
+import PropTypes from 'prop-types';
+import React, { createContext, useState } from 'react';
 
 const CartContext = createContext(null);
 
@@ -9,11 +10,12 @@ export const CartProvider = ({ children }) => {
 
   const addItemToCart = (product) => {
     setCartItems((prevItems) => {
-      // Aquí podríamos agregar lógica para verificar si el producto ya está en el carrito
-      // y actualizar la cantidad en lugar de agregarlo de nuevo como un item separado.
-      // Por ahora, simplemente agregamos el producto como un nuevo item.
-      const PrecioNumerico = { ...product, precio: parseFloat(product.precio) };
-      return [...prevItems, PrecioNumerico];
+      // Asegurarse de que el producto tenga un id
+      const productoConId = {
+        ...product,
+        id: product.id || product.id_producto // Usa el campo correcto si existe
+      };
+      return [...prevItems, productoConId];
     });
   };
 
@@ -63,10 +65,8 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-export const useCart = () => {
-  const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
-  return context;
-}; 
+CartProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+export { CartContext }; 

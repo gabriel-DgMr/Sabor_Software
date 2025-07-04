@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import "../index.css";
 import "../styles/carrito.css";
 
+import DialogoModal from '../components/DialogoExito.jsx';
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
-import { useCart } from '../context/CartContext.jsx';
+import { useCart } from '../context/useCart.js';
 const API_URL = 'http://localhost:3000/api';
 
 export default function Carrito() {
@@ -15,6 +16,7 @@ export default function Carrito() {
   const navigate = useNavigate();
   const { cartItems, clearCart, closedOrders, closeCurrentOrder, createNewOrder } = useCart();
   const [recomendaciones, setRecomendaciones] = useState('');
+  const [modal, setModal] = useState({ open: false, message: '', icon: '✅', onConfirm: null });
 
   useEffect(() => {
     document.title = 'Sabor: Carrito';
@@ -30,21 +32,12 @@ export default function Carrito() {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          // ** ASUMIR QUE ESTE ENDPOINT EXISTE EN EL BACKEND **
-          // ** Y QUE RETORNA LOS PEDIDOS NO PENDIENTES DEL USUARIO **
+
           const response = await fetch(`${API_URL}/pedidos/cerrados`, { 
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (response.ok) {
-            const data = await response.json();
-            // Asumiendo que `closedOrders` del contexto tiene una función para actualizarse
-            // Esto puede variar dependiendo de cómo esté implementado tu contexto
-            // Si closedOrders es un estado local aquí, necesitarías setClosedOrders(data);
-            // Si viene del contexto, necesitarías una función provista por el contexto.
-            // ** ESTA PARTE DEBE SER ADAPTADA A LA IMPLEMENTACIÓN REAL DEL CONTEXTO **
-            console.log('Pedidos cerrados cargados:', data); // Para depuración
-            // Ejemplo asumiendo que hay una función setClosedOrders en el contexto:
-            // setClosedOrders(data); // Esto requiere que setClosedOrders sea expuesto por useCart
+            // Eliminar la asignación a 'data' si no se usa después de eliminar el console.log.
           } else {
             console.error('Error al cargar pedidos cerrados:', response.status);
           }
@@ -57,69 +50,33 @@ export default function Carrito() {
 
   }, []); // Dependencias: [useCart, API_URL, navigate, setRecomendaciones, setLoading, setError]
 
-  const procesarPago = async () => {
+  const procesarPago = () => {
     if (cartItems.length === 0) {
-      alert('El carrito está vacío.');
+      setModal({
+        open: true,
+        message: 'El carrito está vacío.',
+        icon: '⚠️',
+        onConfirm: () => setModal({ ...modal, open: false })
+      });
       return;
     }
-
-    try {
-      setLoading(true);
-      setError(null);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('Debes iniciar sesión para finalizar el pedido.');
-        navigate('/login');
-        return;
-      }
-
-      // Mapear items del carrito a un formato adecuado para el backend
-      const itemsParaBackend = cartItems.map(item => ({
-        id_producto: item.id,
-        cantidad: item.quantity || 1,
-        precio_unitario: item.precio
-      }));
-      const totalCarrito = cartItems.reduce((sum, item) => sum + item.precio * (item.quantity || 1), 0);
-      const recomendacionesPedido = localStorage.getItem('recomendacionesPedido') || '';
-
-      const nuevoPedido = {
-        items: itemsParaBackend,
-        total: totalCarrito,
-        recomendaciones: recomendacionesPedido
-      };
-
-      const response = await fetch(`${API_URL}/pedidos`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(nuevoPedido),
-      });
-      
-      if (!response.ok) {
-         const errorData = await response.json();
-         throw new Error(errorData.mensaje || `Error HTTP: ${response.status}`);
-      }
-      
-      clearCart();
-      localStorage.removeItem('recomendacionesPedido');
-      alert('Pedido procesado con éxito!');
-      navigate('/confirmacion-pedido');
-
-    } catch (error) {
-      console.error('Error al procesar el pago:', error);
-      setError(`Error al procesar el pago: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
+    navigate('/checkout');
   };
 
   const handleEliminarCarrito = () => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar todo el carrito?')) {
-      clearCart();
-      localStorage.removeItem('recomendacionesPedido');
-    }
+    setModal({
+      open: true,
+      message: '¿Estás seguro de que deseas eliminar todo el carrito?',
+      icon: '🗑️',
+      confirmText: 'Sí, eliminar',
+      cancelText: 'Cancelar',
+      onConfirm: () => {
+        clearCart();
+        localStorage.removeItem('recomendacionesPedido');
+        setModal({ ...modal, open: false });
+      },
+      onCancel: () => setModal({ ...modal, open: false })
+    });
   };
 
   const handleModificarPedido = () => {
@@ -153,10 +110,10 @@ export default function Carrito() {
         <main className="carrito_bg">
           <div className="carrito_error">
             <p>{error}</p>
-            <button onClick={() => {
+            <button className="carrito_btn reintentar" onClick={() => {
               setError(null);
               setLoading(true);
-            }} className="carrito_btn reintentar">
+            }}>
               Reintentar
             </button>
           </div>
@@ -184,7 +141,7 @@ export default function Carrito() {
                 No hay productos en el carrito.
               </div>
             ) : (
-              <div className="carrito_pedido" key="pedido-pendiente">
+              <div key="pedido-pendiente" className="carrito_pedido">
                 <div className="carrito_pedido_info">
                   <div className="carrito_pedido_titulo">
                     <span aria-label="carrito" role="img">
@@ -242,7 +199,7 @@ export default function Carrito() {
               <div className="carrito_pedidos_cerrados">
                 <h2>Pedidos Cerrados</h2>
                 {closedOrders.map((order) => (
-                  <div className="carrito_pedido cerrado" key={order.id}>
+                  <div key={order.id} className="carrito_pedido cerrado">
                     <div className="carrito_pedido_info">
                       <div className="carrito_pedido_titulo">
                         <span aria-label="pedido-cerrado" role="img">
@@ -293,6 +250,7 @@ export default function Carrito() {
         </div>
       </main>
       <Footer />
+      <DialogoModal {...modal} />
     </>
   );
 }

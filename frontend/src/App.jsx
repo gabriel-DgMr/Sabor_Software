@@ -21,6 +21,8 @@ import PedidosAdministrar from './pages/pedidosAdministrar.jsx';
 import ProductosAdministrar from './pages/ProductosAdministrar.jsx';
 import ReservasAdministrar from './pages/ReservacionesAdministrar.jsx';
 import Reservas from './pages/Reservas.jsx';
+import HistorialPedidos from './pages/HistorialPedidos.jsx';
+import HistorialReservas from './pages/HistorialReservas.jsx';
 function App() {
   return (
     <AuthProvider>
@@ -95,6 +97,22 @@ function App() {
                   </ProtectedRoute>
                 }
                 path="/actualizar-datos"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <HistorialPedidos />
+                  </ProtectedRoute>
+                }
+                path="/historial-pedidos"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <HistorialReservas />
+                  </ProtectedRoute>
+                }
+                path="/historial-reservas"
               />
             </Routes>
           </CartProvider>

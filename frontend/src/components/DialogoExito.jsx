@@ -1,9 +1,19 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-const SuccessDialog = ({ message, open, onClose, duration = 2000 }) => {
+const DialogoModal = ({
+  open,
+  onClose,
+  message,
+  icon = '✅',
+  confirmText = null,
+  cancelText = null,
+  onConfirm = null,
+  onCancel = null,
+  duration = 3000
+}) => {
   React.useEffect(() => {
-    if (open && onClose) {
+    if (open && onClose && duration) {
       const timer = setTimeout(onClose, duration);
       return () => clearTimeout(timer);
     }
@@ -14,19 +24,29 @@ const SuccessDialog = ({ message, open, onClose, duration = 2000 }) => {
   return (
     <div className="success-dialog-overlay">
       <div className="success-dialog">
-        <span className="success-dialog__icon" role="img" aria-label="éxito">✅</span>
+        <span aria-label="icono" className="success-dialog__icon" role="img">{icon}</span>
         <p className="success-dialog__message">{message}</p>
+        {(confirmText || cancelText) && (
+          <div className="success-dialog__actions">
+            {confirmText && <button className="success-dialog__btn" onClick={onConfirm}>{confirmText}</button>}
+            {cancelText && <button className="success-dialog__btn" onClick={onCancel}>{cancelText}</button>}
+          </div>
+        )}
       </div>
-      {/* Los estilos de este diálogo están en index.css (ver: // Estilos SuccessDialog) */}
     </div>
   );
 };
 
-SuccessDialog.propTypes = {
-  message: PropTypes.string.isRequired,
+DialogoModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func,
-  duration: PropTypes.number, // en milisegundos
+  message: PropTypes.string.isRequired,
+  icon: PropTypes.string,
+  confirmText: PropTypes.string,
+  cancelText: PropTypes.string,
+  onConfirm: PropTypes.func,
+  onCancel: PropTypes.func,
+  duration: PropTypes.number,
 };
 
-export default SuccessDialog;
+export default DialogoModal;

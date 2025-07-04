@@ -1,8 +1,8 @@
-import express from 'express'
-import * as authController from '../controllers/authController.js'
-import * as clienteController from '../controllers/clienteController.js'
-import { authenticateToken, checkRole } from '../middleware/auth.js'
-import { validateRegister, validateLogin } from '../middleware/validateRequest.js'
+import express from 'express';
+import * as authController from '../controllers/authController.js';
+import * as clienteController from '../controllers/clienteController.js';
+import { authenticateToken, checkRole } from '../middleware/auth.js';
+import { validateRegister, validateLogin } from '../middleware/validateRequest.js';
 
 const router = express.Router();
 

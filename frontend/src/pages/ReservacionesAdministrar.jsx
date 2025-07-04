@@ -55,7 +55,7 @@ const ReservacionesAdministrar = () => {
                         <h2 className="reservaciones__bloque-titulo">{bloque.titulo}</h2>
                         <div className="reservaciones__lista">
                             {reservasFiltradas(bloque.inicio, bloque.fin).map((res, idx) => (
-                                <div className="reservacion" key={idx}>
+                                <div key={idx} className="reservacion">
                                     <p className="reservacion__nombre">
                                         <strong>Nombre:</strong> {res.nombre}
                                     </p>

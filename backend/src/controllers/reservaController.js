@@ -129,3 +129,30 @@ export const checkDisponibilidad = async (req, res) => {
         res.status(500).json({ message: 'Error al verificar disponibilidad' });
     }
 }; 
+
+/**
+ * Obtener historial de reservaciones del usuario autenticado
+ */
+export const getHistorialReservas = async (req, res) => {
+  try {
+    console.log('req.user en getHistorialReservas:', req.user);
+    if (!req.user || !req.user.userId) {
+      console.log('Usuario no autenticado o userId faltante');
+      return res.status(401).json({ message: 'No autorizado: usuario no autenticado.' });
+    }
+    const id_cliente = req.user.userId;
+    console.log('id_cliente usado para buscar reservas:', id_cliente);
+    const reservas = await reservaModel.getReservasByUser(id_cliente);
+    console.log('Reservas encontradas:', reservas);
+    res.json(reservas);
+  } catch (error) {
+    console.error('Error en getHistorialReservas:', error);
+    if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      res.status(500).json({ message: 'Error de acceso a la base de datos.' });
+    } else if (error.code === 'ER_BAD_FIELD_ERROR') {
+      res.status(500).json({ message: 'Error en la consulta de la base de datos.' });
+    } else {
+      res.status(500).json({ message: 'Error al obtener historial de reservaciones', detalle: error.message });
+    }
+  }
+}; 

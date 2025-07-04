@@ -26,7 +26,7 @@ const ProtectedRoute = ({ children }) => {
     if (!isAuthenticated) {
         return (
             <>
-                <AuthPage isOpen={showLogin} onClose={handleClose} canClose={isAuthenticated} />
+                <AuthPage canClose={isAuthenticated} isOpen={showLogin} onClose={handleClose} />
                 {children}
             </>
         );

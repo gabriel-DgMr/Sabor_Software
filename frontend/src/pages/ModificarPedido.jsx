@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/carrito.css';
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
-import { useCart } from '../context/CartContext.jsx';
+import { useCart } from '../context/useCart.js';
 
 const ModificarPedido = () => {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ const ModificarPedido = () => {
         <div className="carrito_contenido">
           <div className="carrito_pedidos">
             {cartItems.map((item, index) => (
-              <div className="carrito_pedido" key={index}>
+              <div key={index} className="carrito_pedido">
                 <div className="carrito_pedido_info">
                   <div className="carrito_pedido_titulo">{item.nombre}</div>
                   <div className="carrito_pedido_precio">
@@ -63,9 +63,7 @@ const ModificarPedido = () => {
                   Información adicional o recomendaciones para este pedido
                 </div>
                 <textarea
-                  value={recomendaciones}
                   placeholder="Escribe aquí tus recomendaciones o información adicional para este pedido específico"
-                  onChange={(e) => setRecomendaciones(e.target.value)}
                   style={{
                     width: '100%',
                     minHeight: '100px',
@@ -75,6 +73,8 @@ const ModificarPedido = () => {
                     fontSize: '1rem',
                     resize: 'vertical'
                   }}
+                  value={recomendaciones}
+                  onChange={(e) => setRecomendaciones(e.target.value)}
                 />
               </div>
             </div>

@@ -46,26 +46,26 @@ const Header = () => {
           <Link to="/"><img alt="Logo Sabor" className="encabezado__logo" src="/images/logo_sabor.png" /></Link>
 
           <div className="encabezado__informacion">
-              <nav className="encabezado__idioma" aria-label="Selector de idioma">
+              <nav aria-label="Selector de idioma" className="encabezado__idioma">
                 <button
-                  type="button"
-                  className={`menu-perfil__idioma-boton${idioma === 'es' ? ' menu-perfil__idioma-boton--activo' : ''}`}
                   aria-label="Cambiar a español"
-                  title="Español"
                   aria-pressed={idioma === 'es'}
+                  className={`menu-perfil__idioma-boton${idioma === 'es' ? ' menu-perfil__idioma-boton--activo' : ''}`}
+                  title="Español"
+                  type="button"
                   onClick={() => handleIdioma('es')}
                 >
-                  <ReactCountryFlag countryCode="ES" svg />
+                  <ReactCountryFlag svg countryCode="ES" />
                 </button>
                 <button
-                  type="button"
-                  className={`menu-perfil__idioma-boton${idioma === 'en' ? ' menu-perfil__idioma-boton--activo' : ''}`}
                   aria-label="Cambiar a inglés"
-                  title="English"
                   aria-pressed={idioma === 'en'}
+                  className={`menu-perfil__idioma-boton${idioma === 'en' ? ' menu-perfil__idioma-boton--activo' : ''}`}
+                  title="English"
+                  type="button"
                   onClick={() => handleIdioma('en')}
                 >
-                  <ReactCountryFlag countryCode="US" svg />
+                  <ReactCountryFlag svg countryCode="US" />
                 </button>
               </nav>
 
@@ -73,33 +73,33 @@ const Header = () => {
               user ? (
                 <div className="encabezado__usuario encabezado__usuario--mobile">
                   <button
+                    aria-label="Abrir menú de usuario"
                     className="menu-hamburguesa"
                     onClick={toggleMobileMenu}
-                    aria-label="Abrir menú de usuario"
                   >
                     {!showMenu && <FaBars size={32} />}
                   </button>
                   {showMenu && (
                     <div className="menu-perfil menu-perfil--mobile">
                       <button
-                        className="menu-perfil__cerrar"
                         aria-label="Cerrar menú"
+                        className="menu-perfil__cerrar"
                         onClick={closeMobileMenu}
                       >
                         <FaTimes />
                       </button>
                       <div className="menu-perfil__opcion menu-perfil__opcion--idioma">
                         <button
-                          className="menu-perfil__idioma-boton"
                           aria-label="Cambiar a español"
+                          className="menu-perfil__idioma-boton"
                         >
-                          <ReactCountryFlag countryCode="ES" svg />
+                          <ReactCountryFlag svg countryCode="ES" />
                         </button>
                         <button
-                          className="menu-perfil__idioma-boton"
                           aria-label="Cambiar a inglés"
+                          className="menu-perfil__idioma-boton"
                         >
-                          <ReactCountryFlag countryCode="US" svg />
+                          <ReactCountryFlag svg countryCode="US" />
                         </button>
                       </div>
                       <Link className="menu-perfil__opcion" to="/historial-pedidos" onClick={closeMobileMenu}>Ver historial de pedidos</Link>

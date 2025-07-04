@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import "../styles/carrito.css";
+import DialogoModal from '../components/DialogoExito.jsx';
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
+import { useCart } from '../context/useCart.js';
+const API_URL = 'http://localhost:3000/api';
 
 // Datos de ejemplo de tarjetas guardadas
 const tarjetasGuardadas = [
@@ -27,6 +30,7 @@ const tarjetasGuardadas = [
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const { cartItems, clearCart } = useCart();
   const [formData, setFormData] = useState({
     nombre: "",
     numero: "",
@@ -34,16 +38,172 @@ export default function Checkout() {
     cvv: "",
     direccion: "",
   });
+  const [modal, setModal] = useState({ open: false, message: '', icon: '✅', onConfirm: null });
+  const [intentos, setIntentos] = useState(0);
   
   useEffect(() => {
     document.title = 'Sabor: Checkout';
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí iría la lógica de procesamiento del pago
-    alert('¡Pago procesado con éxito!');
-    navigate('/');
+    if (cartItems.length === 0) {
+      setModal({
+        open: true,
+        message: 'El carrito está vacío.',
+        icon: '⚠️',
+        onConfirm: () => setModal({ ...modal, open: false })
+      });
+      return;
+    }
+    
+    // Simular pago (éxito 60%, fallo 40%)
+    const pagoExitoso = Math.random() < 0.6;
+    if (pagoExitoso) {
+      // Crear pedido en backend
+      try {
+        const token = localStorage.getItem('token');
+        const itemsParaBackend = cartItems.map(item => ({
+          id_producto: item.id,
+          cantidad: item.quantity || 1,
+          precio_unitario: item.precio
+        }));
+        const totalCarrito = cartItems.reduce((sum, item) => sum + item.precio * (item.quantity || 1), 0);
+        const recomendacionesPedido = localStorage.getItem('recomendacionesPedido') || '';
+        const nuevoPedido = {
+          items: itemsParaBackend,
+          total: totalCarrito,
+          recomendaciones: recomendacionesPedido
+        };
+        const response = await fetch(`${API_URL}/pedidos`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(nuevoPedido),
+        });
+        if (!response.ok) {
+          throw new Error('Error al guardar el pedido en la base de datos');
+        }
+        clearCart();
+        localStorage.removeItem('recomendacionesPedido');
+        setModal({
+          open: true,
+          message: '¡Pago procesado con éxito! Tu pedido ha sido enviado a la cocina.',
+          icon: '✅',
+          onConfirm: () => {
+            setModal({ ...modal, open: false });
+            navigate('/');
+          }
+        });
+      } catch (_) {
+        setModal({
+          open: true,
+          message: 'Error al guardar el pedido en la base de datos.',
+          icon: '❌',
+          onConfirm: () => setModal({ ...modal, open: false })
+        });
+      }
+    } else {
+      // Pago fallido
+      if (intentos < 2) {
+        setModal({
+          open: true,
+          message: 'El pago ha fallado. ¿Deseas reintentar?',
+          icon: '❌',
+          confirmText: 'Reintentar',
+          cancelText: 'Cancelar',
+          onConfirm: () => {
+            setModal({ ...modal, open: false });
+            setIntentos(intentos + 1);
+          },
+          onCancel: () => {
+            setModal({ ...modal, open: false });
+            preguntarGuardarPedido();
+          }
+        });
+      } else {
+        preguntarGuardarPedido();
+      }
+    }
+  };
+
+  const preguntarGuardarPedido = () => {
+    setModal({
+      open: true,
+      message: '¿Deseas guardar tu pedido como pendiente?',
+      icon: '❓',
+      confirmText: 'Guardar',
+      cancelText: 'Cancelar pedido',
+      onConfirm: () => {
+        guardarPedidoPendiente();
+      },
+      onCancel: () => {
+        setModal({ ...modal, open: false });
+        clearCart();
+        localStorage.removeItem('recomendacionesPedido');
+        setTimeout(() => {
+          setModal({
+            open: true,
+            message: 'Pedido cancelado por el usuario.',
+            icon: '🗑️',
+            onConfirm: () => {
+              setModal({ ...modal, open: false });
+              navigate('/');
+            }
+          });
+        }, 300);
+      }
+    });
+  };
+
+  const guardarPedidoPendiente = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const itemsParaBackend = cartItems.map(item => ({
+        id_producto: Number(item.id),
+        cantidad: Number(item.quantity) || 1,
+        precio_unitario: Number(item.precio)
+      }));
+      const totalCarrito = cartItems.reduce((sum, item) => sum + item.precio * (item.quantity || 1), 0);
+      const recomendacionesPedido = localStorage.getItem('recomendacionesPedido') || '';
+      const nuevoPedido = {
+        items: itemsParaBackend,
+        total: totalCarrito,
+        recomendaciones: recomendacionesPedido,
+        status: 'pendiente'
+      };
+      const response = await fetch(`${API_URL}/pedidos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(nuevoPedido),
+      });
+      if (!response.ok) {
+        throw new Error('Error al guardar el pedido como pendiente');
+      }
+      clearCart();
+      localStorage.removeItem('recomendacionesPedido');
+      setModal({
+        open: true,
+        message: 'Pedido guardado como pendiente. Puedes retomarlo más tarde.',
+        icon: '⏳',
+        onConfirm: () => {
+          setModal({ ...modal, open: false });
+          navigate('/');
+        }
+      });
+    } catch (_) {
+      setModal({
+        open: true,
+        message: 'Error al guardar el pedido como pendiente.',
+        icon: '❌',
+        onConfirm: () => setModal({ ...modal, open: false })
+      });
+    }
   };
 
   const formatNumeroTarjeta = (numero) => {
@@ -122,9 +282,9 @@ export default function Checkout() {
               <div className="checkout_grupo">
                 <label htmlFor="nombre">Nombre en la tarjeta</label>
                 <input 
-                  type="text" 
-                  id="nombre" 
                   required 
+                  id="nombre" 
+                  type="text" 
                   value={formData.nombre}
                   onChange={handleInputChange}
                 />
@@ -133,11 +293,11 @@ export default function Checkout() {
               <div className="checkout_grupo">
                 <label htmlFor="numero">Número de tarjeta</label>
                 <input 
-                  type="text" 
-                  id="numero" 
                   required 
-                  maxLength="19"
+                  id="numero" 
+                  maxLength="19" 
                   placeholder="1234 5678 9012 3456"
+                  type="text"
                   value={formData.numero}
                   onChange={handleInputChange}
                 />
@@ -147,11 +307,11 @@ export default function Checkout() {
                 <div className="checkout_grupo">
                   <label htmlFor="fecha">Fecha de expiración</label>
                   <input 
-                    type="text" 
-                    id="fecha" 
                     required 
-                    maxLength="5"
+                    id="fecha" 
+                    maxLength="5" 
                     placeholder="MM/YY"
+                    type="text"
                     value={formData.fecha}
                     onChange={handleInputChange}
                   />
@@ -160,11 +320,11 @@ export default function Checkout() {
                 <div className="checkout_grupo">
                   <label htmlFor="cvv">CVV</label>
                   <input 
-                    type="text" 
-                    id="cvv" 
                     required 
+                    id="cvv" 
                     pattern="[0-9]{3,4}" 
-                    placeholder="123"
+                    placeholder="123" 
+                    type="text"
                     value={formData.cvv}
                     onChange={handleInputChange}
                   />
@@ -174,15 +334,15 @@ export default function Checkout() {
               <div className="checkout_grupo">
                 <label htmlFor="direccion">Dirección de facturación</label>
                 <input 
-                  type="text" 
+                  required 
                   id="direccion" 
-                  required
+                  type="text"
                   value={formData.direccion}
                   onChange={handleInputChange}
                 />
               </div>
               
-              <button type="submit" className="checkout_btn_pagar">
+              <button className="checkout_btn_pagar" type="submit">
                 Confirmar Pago
               </button>
             </form>
@@ -210,7 +370,7 @@ export default function Checkout() {
             <div className="checkout_metodos_guardados">
               <h2>Métodos de Pago Guardados</h2>
               {tarjetasGuardadas.map((tarjeta) => (
-                <div className="checkout_tarjeta_guardada" key={tarjeta.id}>
+                <div key={tarjeta.id} className="checkout_tarjeta_guardada">
                   <div className="checkout_tarjeta_info">
                     <span className="checkout_tarjeta_tipo">{tarjeta.tipo}</span>
                     <span className="checkout_tarjeta_numero">
@@ -231,15 +391,15 @@ export default function Checkout() {
               <h2>Otros Métodos de Pago</h2>
               <div className="checkout_metodos_lista">
                 <button className="checkout_metodo_opcion visa">
-                  <img src="/images/visa.png" alt="Visa" />
+                  <img alt="Visa" src="/images/visa.png" />
                   <span>Visa</span>
                 </button>
                 <button className="checkout_metodo_opcion mastercard">
-                  <img src="/images/mastercard.png" alt="Mastercard" />
+                  <img alt="Mastercard" src="/images/mastercard.png" />
                   <span>Mastercard</span>
                 </button>
                 <button className="checkout_metodo_opcion paypal">
-                  <img src="/images/paypal.png" alt="PayPal" />
+                  <img alt="PayPal" src="/images/paypal.png" />
                   <span>PayPal</span>
                 </button>
               </div>
@@ -248,6 +408,7 @@ export default function Checkout() {
         </div>
       </main>
       <Footer />
+      <DialogoModal {...modal} />
     </>
   );
 } 
