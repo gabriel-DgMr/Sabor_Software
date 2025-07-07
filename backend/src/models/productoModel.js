@@ -7,13 +7,12 @@ export const productoModel = {
     // Obtener todos los productos con filtros
     getAllProductos: async (filtros = {}) => {
         try {
-            console.log('Ejecutando consulta getAllProductos...');
-            
+            const idioma = filtros.idioma || 'es';
             let sql = `
                 SELECT 
                     p.id_producto,
                     p.nombre_producto,
-                    p.descripcion_producto,
+                    COALESCE(pt.descripcion, p.descripcion_producto) AS descripcion_producto,
                     p.precio_producto,
                     p.imagen_producto,
                     p.id_categoria,
@@ -23,9 +22,10 @@ export const productoModel = {
                     p.ventas
                 FROM productos p 
                 LEFT JOIN categorias c ON p.id_categoria = c.id_categoria 
+                LEFT JOIN producto_traducciones pt ON pt.producto_id = p.id_producto AND pt.idioma = ?
                 WHERE p.activo = 1
             `;
-            const params = [];
+            const params = [idioma];
             // Filtro por categoría
             if (filtros.categoria) {
                 sql += ' AND c.nombre_categoria = ?';
@@ -33,8 +33,8 @@ export const productoModel = {
             }
             // Filtro por búsqueda
             if (filtros.busqueda) {
-                sql += ' AND (p.nombre_producto LIKE ? OR p.descripcion_producto LIKE ?)';
-                params.push(`%${filtros.busqueda}%`, `%${filtros.busqueda}%`);
+                sql += ' AND (p.nombre_producto LIKE ? OR p.descripcion_producto LIKE ? OR pt.descripcion LIKE ?)';
+                params.push(`%${filtros.busqueda}%`, `%${filtros.busqueda}%`, `%${filtros.busqueda}%`);
             }
             // Ordenamiento
             if (filtros.orden === 'precio_asc') {
@@ -170,4 +170,21 @@ export const updateProductoStock = async (id, cantidad) => {
         [cantidad, id]
     );
     return result.affectedRows;
+};
+
+// Funciones para traducciones de productos
+const upsertProductoTraduccion = async (producto_id, idioma, descripcion) => {
+    if (!descripcion) return;
+    // Intenta actualizar, si no existe inserta
+    const [result] = await pool.query(
+        `INSERT INTO producto_traducciones (producto_id, idioma, descripcion)
+         VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE descripcion = VALUES(descripcion)`,
+        [producto_id, idioma, descripcion]
+    );
+    return result;
+};
+
+export const productoTraduccionModel = {
+    upsertProductoTraduccion
 };

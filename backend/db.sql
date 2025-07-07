@@ -68,8 +68,21 @@ CREATE TABLE clientes (
   imagen_cliente varchar(255),
   fecha_registro timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   fecha_modificacion timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  activo boolean NOT NULL DEFAULT TRUE,
+  activo boolean NOT NULL DEFAULT FALSE,
+  email_verificado boolean NOT NULL DEFAULT FALSE,
   PRIMARY KEY (id_cliente)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla para códigos de verificación de email
+CREATE TABLE codigos_verificacion (
+  id_codigo int NOT NULL AUTO_INCREMENT,
+  id_cliente int NOT NULL,
+  codigo varchar(6) NOT NULL,
+  fecha_creacion timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  fecha_expiracion timestamp NOT NULL,
+  usado boolean NOT NULL DEFAULT FALSE,
+  PRIMARY KEY (id_codigo),
+  CONSTRAINT fk_codigos_verificacion_cliente FOREIGN KEY (id_cliente) REFERENCES clientes (id_cliente) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE empleados (
@@ -97,12 +110,40 @@ CREATE TABLE productos (
   stock_minimo int NOT NULL DEFAULT 5,
   descripcion_producto text,
   imagen_producto varchar(255),
+  calificacion decimal(2,1) DEFAULT 0,
+  ventas int DEFAULT 0,
   fecha_creacion timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   fecha_modificacion timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   activo boolean NOT NULL DEFAULT TRUE,
   PRIMARY KEY (id_producto),
   CONSTRAINT fk_productos_categorias FOREIGN KEY (id_categoria) REFERENCES categorias (id_categoria) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Modificar la tabla producto_traducciones para solo guardar la descripción
+DROP TABLE IF EXISTS producto_traducciones;
+CREATE TABLE producto_traducciones (
+  id_traducciones INT PRIMARY KEY AUTO_INCREMENT,
+  producto_id INT NOT NULL,
+  idioma VARCHAR(5) NOT NULL,
+  descripcion TEXT NOT NULL,
+  FOREIGN KEY (producto_id) REFERENCES productos(id_producto) ON DELETE CASCADE,
+  UNIQUE KEY (producto_id, idioma)
+);
+
+-- MIGRACIÓN AUTOMÁTICA DE DESCRIPCIONES DE PRODUCTOS A LA TABLA DE TRADUCCIONES
+INSERT INTO producto_traducciones (producto_id, idioma, descripcion)
+SELECT id_producto, 'es', descripcion_producto
+FROM productos;
+
+-- INSERCIÓN AUTOMÁTICA DE TRADUCCIONES AL INGLÉS PARA LOS PRODUCTOS DE EJEMPLO
+INSERT INTO producto_traducciones (producto_id, idioma, descripcion) VALUES
+(1, 'en', 'A traditional Colombian dish that celebrates the abundance and flavor of the region. Our bandeja paisa includes white rice, stewed red beans, ground beef, crispy pork belly, fried egg, ripe plantain, arepa, avocado, and blood sausage. A complete and authentic experience in every bite.'),
+(2, 'en', 'A traditional and comforting starter. White corn arepa, grilled to perfection and filled with melted cheese. Crunchy on the outside, soft and creamy on the inside. Ideal to start with Colombian flavor.'),
+(3, 'en', 'A comforting soup that combines beef, pork, and chicken with cassava, green plantain, potato, corn on the cob, and cilantro. Perfect for sharing with family.'),
+(4, 'en', 'Typical of Bogotá, this thick soup is made with chicken, three types of potatoes (criolla, pastusa, and sabanera), corn on the cob, and guascas. Served with white rice, avocado, capers, and cream, offering a unique flavor experience.'),
+(5, 'en', 'A traditional delicacy from Tolima, consisting of a whole pig stuffed with rice, peas, and spices, slowly roasted until the skin is crispy. Served with white arepa and a must-have at special celebrations.'),
+(6, 'en', 'A traditional Colombian Christmas dessert. Natilla is made with cornstarch, milk, and panela, while buñuelos are fluffy fried cheese balls. Together, they represent the sweet ending to our festivities.');
+-- Fin inserción automática de traducciones
 
 INSERT INTO productos (
   id_categoria,

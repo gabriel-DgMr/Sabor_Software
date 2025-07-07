@@ -223,12 +223,17 @@ export default function Carrito() {
                   <ul className="carrito_pedido_lista">
                     {cartItems.map((item, i) => (
                       <li key={i} className="carrito_item">
-                        <span>{item.nombre} - {item.precio.toLocaleString('es-CO')} COP</span>
+                        <span>
+                          {item.nombre} x {item.cantidad || 1} - {(item.precio * (item.cantidad || 1)).toLocaleString('es-CO')} COP
+                          {item.peticion && (
+                            <span className="carrito_item_peticion"> <br/><em>Petición: {item.peticion}</em></span>
+                          )}
+                        </span>
                       </li>
                     ))}
                   </ul>
                   <div className="carrito_pedido_total">
-                    {t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio, 0).toLocaleString('es-CO')} COP
+                    {t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio * (item.cantidad || 1), 0).toLocaleString('es-CO')} COP
                   </div>
                   {recomendaciones && (
                     <div className="carrito_pedido_recomendaciones">
@@ -311,10 +316,15 @@ export default function Carrito() {
                 <h3>{t('carrito_resumen')}</h3>
                 <ul>
                   {cartItems.map((item, i) => (
-                    <li key={i}>{item.nombre}: {item.precio.toLocaleString('es-CO')} COP</li>
+                    <li key={i}>
+                      {item.nombre} x {item.cantidad || 1}: {(item.precio * (item.cantidad || 1)).toLocaleString('es-CO')} COP
+                      {item.peticion && (
+                        <span className="carrito_item_peticion"> <br/><em>Petición: {item.peticion}</em></span>
+                      )}
+                    </li>
                   ))}
                 </ul>
-                <p><strong>{t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio, 0).toLocaleString('es-CO')} COP</strong></p>
+                <p><strong>{t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio * (item.cantidad || 1), 0).toLocaleString('es-CO')} COP</strong></p>
               </div>
             )}
           </div>

@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
 import { validarLogin } from '../../utils/validaciones';
 
-const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
+const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVerification }) => {
   const { login, loading } = useAuth();
   const [errors, setErrors] = useState({});
   const [globalError, setGlobalError] = useState('');
@@ -122,6 +122,16 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword }) => {
           {t('login_olvidaste_contrasena')}
         </button>
       </form>
+      {typeof window !== 'undefined' && localStorage.getItem('pendingVerificationEmail') && (
+        <button
+          className="formulario__boton-secundario"
+          type="button"
+          onClick={onShowVerification}
+          style={{ marginTop: '1rem' }}
+        >
+          {t('volver_a_verificar_email') || 'Verificar mi email'}
+        </button>
+      )}
     </div>
   );
 };
@@ -130,6 +140,7 @@ Login.propTypes = {
   onShowMessage: PropTypes.func.isRequired,
   onLoginSuccess: PropTypes.func.isRequired,
   onShowForgotPassword: PropTypes.func.isRequired,
+  onShowVerification: PropTypes.func.isRequired,
 };
 
 export default Login;

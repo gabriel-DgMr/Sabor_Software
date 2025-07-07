@@ -1,9 +1,9 @@
 const API_URL = 'http://localhost:3000/api';
 
 export const productoService = {
-    obtenerTodos: async () => {
+    obtenerTodos: async (idioma = 'es') => {
         try {
-            const response = await fetch(`${API_URL}/productos`, {
+            const response = await fetch(`${API_URL}/productos?lang=${idioma}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -131,11 +131,12 @@ export const productoService = {
             throw error;
         }
     },
-    getProductos: async (filtros = {}) => {
+    getProductos: async (filtros = {}, idioma = 'es') => {
         const params = new URLSearchParams();
         if (filtros.categoria) params.append('categoria', filtros.categoria);
         if (filtros.busqueda) params.append('busqueda', filtros.busqueda);
         if (filtros.orden) params.append('orden', filtros.orden);
+        params.append('lang', idioma);
         const url = `${API_URL}/productos?${params.toString()}`;
         const response = await fetch(url);
         if (!response.ok) throw new Error('Error al obtener productos');

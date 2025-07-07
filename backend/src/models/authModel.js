@@ -5,8 +5,7 @@ import crypto from 'crypto';
 
 const pool = mysql.createPool(dbConfig);
 
-// Register
-
+// Register - Ahora registra con activo = false y email_verificado = false
 export const registerUser = async (clienteData) => {
     const { nombre_cliente, email_cliente, telefono_cliente, contraseña_cliente } = clienteData;
     
@@ -32,39 +31,102 @@ export const registerUser = async (clienteData) => {
     // Encriptar contraseña
     const hashedPassword = await bcrypt.hash(contraseña_cliente, 10);
 
-    // Insertar nuevo cliente
+    // Insertar nuevo cliente con activo = false y email_verificado = false
     const [result] = await pool.query(
         `INSERT INTO clientes (
             nombre_cliente, 
             email_cliente, 
             telefono_cliente, 
             contraseña_cliente,
-            activo
-        ) VALUES (?, ?, ?, ?, ?)`,
-        [nombre_cliente, email_cliente, telefono_cliente, hashedPassword, true]
+            activo,
+            email_verificado
+        ) VALUES (?, ?, ?, ?, ?, ?)`,
+        [nombre_cliente, email_cliente, telefono_cliente, hashedPassword, false, false]
     );
 
     return result.insertId;
 };
 
-// Obtener usuario por email
+// Generar código de verificación
+export const generateVerificationCode = async (id_cliente) => {
+    // Generar código de 6 dígitos
+    const codigo = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Fecha de expiración (15 minutos)
+    const fecha_expiracion = new Date(Date.now() + 15 * 60 * 1000);
+    
+    // Eliminar códigos anteriores no usados
+    await pool.query(
+        'DELETE FROM codigos_verificacion WHERE id_cliente = ? AND usado = false',
+        [id_cliente]
+    );
+    
+    // Insertar nuevo código
+    await pool.query(
+        'INSERT INTO codigos_verificacion (id_cliente, codigo, fecha_expiracion) VALUES (?, ?, ?)',
+        [id_cliente, codigo, fecha_expiracion]
+    );
+    
+    return codigo;
+};
+
+// Verificar código de verificación
+export const verifyCode = async (id_cliente, codigo) => {
+    const [rows] = await pool.query(
+        `SELECT * FROM codigos_verificacion 
+         WHERE id_cliente = ? 
+         AND codigo = ? 
+         AND usado = false 
+         AND fecha_expiracion > NOW()`,
+        [id_cliente, codigo]
+    );
+    
+    if (rows.length === 0) {
+        return false;
+    }
+    
+    // Marcar código como usado
+    await pool.query(
+        'UPDATE codigos_verificacion SET usado = true WHERE id_codigo = ?',
+        [rows[0].id_codigo]
+    );
+    
+    // Activar cuenta y marcar email como verificado
+    await pool.query(
+        'UPDATE clientes SET activo = true, email_verificado = true WHERE id_cliente = ?',
+        [id_cliente]
+    );
+    
+    return true;
+};
+
+// Obtener usuario por email (solo usuarios activos y verificados)
 export const getUserByEmail = async (email_cliente) => {
     const [rows] = await pool.query(
-        'SELECT * FROM clientes WHERE email_cliente = ? AND activo = true',
+        'SELECT * FROM clientes WHERE email_cliente = ? AND activo = true AND email_verificado = true',
         [email_cliente]
     );
     return rows.length > 0 ? rows[0] : null;
 };
 
-// Login
+// Obtener usuario por email (incluyendo no verificados)
+export const getUserByEmailIncludingUnverified = async (email_cliente) => {
+    const [rows] = await pool.query(
+        'SELECT * FROM clientes WHERE email_cliente = ?',
+        [email_cliente]
+    );
+    return rows.length > 0 ? rows[0] : null;
+};
+
+// Login - Solo permite acceso a usuarios activos y verificados
 export const loginUser = async (email_cliente, contraseña_cliente) => {
     const [rows] = await pool.query(
-        'SELECT * FROM clientes WHERE email_cliente = ? AND activo = true',
+        'SELECT * FROM clientes WHERE email_cliente = ? AND activo = true AND email_verificado = true',
         [email_cliente]
     );
     
     if (!rows.length) {
-        throw new Error('Usuario no existe');
+        throw new Error('Usuario no existe o no está verificado');
     }
 
     const user = rows[0];

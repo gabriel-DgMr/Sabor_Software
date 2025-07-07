@@ -15,6 +15,7 @@ const ProductosAdministrar = () => {
   const [formData, setFormData] = useState({
     nombre_producto: '',
     descripcion_producto: '',
+    descripcion_en: '',
     precio_producto: '',
     id_categoria_producto: '',
     imagen_producto: null
@@ -120,6 +121,7 @@ const ProductosAdministrar = () => {
     setFormData({
       nombre_producto: producto.nombre_producto,
       descripcion_producto: producto.descripcion_producto,
+      descripcion_en: producto.descripcion_en || '',
       precio_producto: producto.precio_producto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'),
       id_categoria_producto: producto.id_categoria_producto,
       imagen_producto: null
@@ -202,6 +204,7 @@ const ProductosAdministrar = () => {
       setFormData({
         nombre_producto: '',
         descripcion_producto: '',
+        descripcion_en: '',
         precio_producto: '',
         id_categoria_producto: '',
         imagen_producto: null
@@ -449,6 +452,15 @@ const ProductosAdministrar = () => {
                 )}
               </div>
               <div className='descripcion__campo'>
+                <label className='campo_p'>Descripción (Inglés): </label>
+                <textarea  
+                  className="campo__input campo__input--textaera"
+                  name="descripcion_en"
+                  value={formData.descripcion_en}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className='descripcion__campo'>
                 <label className='campo_p'>Imagen: </label>
                 <input  
                   accept="image/*"
@@ -501,6 +513,7 @@ const ProductosAdministrar = () => {
                       setFormData({
                         nombre_producto: '',
                         descripcion_producto: '',
+                        descripcion_en: '',
                         precio_producto: '',
                         id_categoria_producto: '',
                         imagen_producto: null

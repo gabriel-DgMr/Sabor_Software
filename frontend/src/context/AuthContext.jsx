@@ -91,7 +91,12 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || 'Error en el registro');
       }
 
-      return { success: true, message: 'Registro exitoso' };
+      // Retornar información sobre si requiere verificación
+      return { 
+        success: true, 
+        message: data.message,
+        requiresVerification: data.requiresVerification || false
+      };
     } catch (error) {
       return { success: false, message: error.message };
     } finally {

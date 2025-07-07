@@ -20,7 +20,7 @@ export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
 // Rate limiter específico para autenticación
 export const authRateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 5, // máximo 5 intentos
+    max: 100, // máximo 5 intentos
     message: {
         message: 'Demasiados intentos de inicio de sesión. Inténtalo de nuevo en 15 minutos.'
     },
@@ -43,10 +43,10 @@ export const registerRateLimiter = rateLimit({
 export const helmetConfig = helmet({
     contentSecurityPolicy: {
         directives: {
-            defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            scriptSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "https:"],
+            defaultSrc: ['self'],
+            styleSrc: ['self', 'unsafe-inline'],
+            scriptSrc: ['self'],
+            imgSrc: ['self', 'data:', 'https:'],
         },
     },
     crossOriginEmbedderPolicy: false,
@@ -83,7 +83,8 @@ export const validateFileType = (allowedTypes) => {
         const fileType = req.file.mimetype;
         if (!allowedTypes.includes(fileType)) {
             return res.status(400).json({
-                message: `Tipo de archivo no permitido. Tipos permitidos: ${allowedTypes.join(', ')}`
+                code: 'security_file_type',
+                types: allowedTypes
             });
         }
 
@@ -101,7 +102,8 @@ export const validateFileSize = (maxSizeInMB) => {
         const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
         if (req.file.size > maxSizeInBytes) {
             return res.status(400).json({
-                message: `El archivo es demasiado grande. Tamaño máximo: ${maxSizeInMB}MB`
+                code: 'security_file_size',
+                max: maxSizeInMB
             });
         }
 
@@ -149,7 +151,7 @@ export const preventSQLInjection = (req, res, next) => {
 
     if (checkObject(req.body) || checkObject(req.query) || checkObject(req.params)) {
         return res.status(400).json({
-            message: 'Datos de entrada no válidos'
+            code: 'security_invalid_input'
         });
     }
 
@@ -162,7 +164,9 @@ export const validateFieldLength = (fieldName, maxLength) => {
         const value = req.body[fieldName];
         if (value && value.length > maxLength) {
             return res.status(400).json({
-                message: `El campo ${fieldName} no puede tener más de ${maxLength} caracteres`
+                code: 'security_field_length',
+                field: fieldName,
+                max: maxLength
             });
         }
         next();
@@ -177,7 +181,7 @@ export const validatePrice = (req, res, next) => {
         const price = parseFloat(precio_producto);
         if (isNaN(price) || price < 0 || price > 999999.99) {
             return res.status(400).json({
-                message: 'El precio debe ser un número válido entre 0 y 999999.99'
+                code: 'security_invalid_price'
             });
         }
     }
@@ -197,7 +201,8 @@ export const validateDateField = (fieldName) => {
         const dateValue = req.body[fieldName];
         if (dateValue && !validateDate(dateValue)) {
             return res.status(400).json({
-                message: `El campo ${fieldName} debe ser una fecha válida`
+                code: 'security_invalid_date',
+                field: fieldName
             });
         }
         next();

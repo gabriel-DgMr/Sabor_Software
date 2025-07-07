@@ -7,11 +7,15 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
 import { validarRegistro } from '../../utils/validaciones';
 
+import EmailVerification from './EmailVerification.jsx';
+
 const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegisterSuccess }) => {
   const { registerUser, loading } = useAuth();
   const [errors, setErrors] = useState({});
   const [globalError, setGlobalError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [showVerification, setShowVerification] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -70,12 +74,19 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
     });
 
     if (result && result.success) {
-      setSuccessMessage(result.message || t('registro_exitoso'));
-      setTimeout(() => {
-        setSuccessMessage('');
-        navigate('/');
-      }, 2000);
-      form.reset();
+      if (result.requiresVerification) {
+        // Mostrar pantalla de verificación
+        setRegisteredEmail(formData.email_cliente.trim());
+        setShowVerification(true);
+        localStorage.setItem('pendingVerificationEmail', formData.email_cliente.trim());
+      } else {
+        setSuccessMessage(result.message || t('registro_exitoso'));
+        setTimeout(() => {
+          setSuccessMessage('');
+          navigate('/');
+        }, 2000);
+        form.reset();
+      }
       return;
     } else {
       setGlobalError(result.message || t('error_registro'));
@@ -90,6 +101,38 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
       }, VISIBLE_DURATION);
     }
   };
+
+  const handleVerificationSuccess = () => {
+    setSuccessMessage(t('cuenta_activada_exitosamente'));
+    setTimeout(() => {
+      setSuccessMessage('');
+      setShowVerification(false);
+      localStorage.removeItem('pendingVerificationEmail');
+      if (_onRegisterSuccess) {
+        _onRegisterSuccess();
+      } else {
+        navigate('/');
+      }
+    }, 2000);
+  };
+
+  const handleBackToLogin = () => {
+    setShowVerification(false);
+    localStorage.removeItem('pendingVerificationEmail');
+    if (_onRegisterSuccess) {
+      _onRegisterSuccess();
+    }
+  };
+
+  if (showVerification) {
+    return (
+      <EmailVerification
+        email={registeredEmail}
+        onVerificationSuccess={handleVerificationSuccess}
+        onBackToLogin={handleBackToLogin}
+      />
+    );
+  }
 
   return (
     <div className="formulario__contenedor formulario__contenedor--register">

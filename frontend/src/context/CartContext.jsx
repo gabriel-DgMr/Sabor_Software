@@ -15,7 +15,23 @@ export const CartProvider = ({ children }) => {
         ...product,
         id: product.id || product.id_producto // Usa el campo correcto si existe
       };
-      return [...prevItems, productoConId];
+      // Buscar si ya existe el producto (por id o nombre)
+      const indexExistente = prevItems.findIndex(
+        item => (item.id && productoConId.id && item.id === productoConId.id) || item.nombre === productoConId.nombre
+      );
+      if (indexExistente !== -1) {
+        // Sumar la cantidad
+        const nuevosItems = [...prevItems];
+        nuevosItems[indexExistente] = {
+          ...nuevosItems[indexExistente],
+          cantidad: (nuevosItems[indexExistente].cantidad || 1) + (productoConId.cantidad || 1),
+          // Si la petición es diferente, concatenar (opcional)
+          peticion: productoConId.peticion ? ((nuevosItems[indexExistente].peticion ? nuevosItems[indexExistente].peticion + ' | ' : '') + productoConId.peticion) : nuevosItems[indexExistente].peticion
+        };
+        return nuevosItems;
+      }
+      // Si no existe, agregar con cantidad
+      return [...prevItems, { ...productoConId, cantidad: productoConId.cantidad || 1 }];
     });
   };
 
@@ -58,7 +74,8 @@ export const CartProvider = ({ children }) => {
       removeItemFromCart, 
       clearCart,
       closeCurrentOrder,
-      createNewOrder
+      createNewOrder,
+      cartCount: cartItems.reduce((sum, item) => sum + (item.cantidad || 1), 0)
     }}>
       {children}
     </CartContext.Provider>

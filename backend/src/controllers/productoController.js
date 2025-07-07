@@ -1,5 +1,6 @@
 import { productoModel } from '../models/productoModel.js';
 import { categoriaModel } from '../models/categoriaModel.js';
+import { productoTraduccionModel } from '../models/productoModel.js';
 
 export const productoController = {
 // Obtener todos los productos
@@ -8,7 +9,8 @@ export const productoController = {
             const filtros = {
                 categoria: req.query.categoria || '',
                 busqueda: req.query.busqueda || '',
-                orden: req.query.orden || ''
+                orden: req.query.orden || '',
+                idioma: req.query.lang || 'es'
             };
             const productos = await productoModel.getAllProductos(filtros);
             res.json(productos);
@@ -87,6 +89,12 @@ export const productoController = {
             // Crear el producto en la base de datos
             const nuevoProductoId = await productoModel.createProducto(productoData);
             
+            // Guardar traducción en inglés si viene en el body
+            const { descripcion_en } = req.body;
+            if (descripcion_en) {
+                await productoTraduccionModel.upsertProductoTraduccion(nuevoProductoId, 'en', descripcion_en);
+            }
+
             // Enviar respuesta exitosa
             res.status(201).json({ 
                 message: 'Producto creado exitosamente',
@@ -145,6 +153,12 @@ export const productoController = {
             
             if (!success) {
                 return res.status(404).json({ message: 'Producto no encontrado' });
+            }
+
+            // Guardar traducción en inglés si viene en el body
+            const { descripcion_en } = req.body;
+            if (descripcion_en) {
+                await productoTraduccionModel.upsertProductoTraduccion(req.params.id, 'en', descripcion_en);
             }
 
             res.json({ message: 'Producto actualizado exitosamente' });

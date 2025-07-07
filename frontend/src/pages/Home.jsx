@@ -1,36 +1,48 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FaQrcode } from "react-icons/fa";
+import { FaQrcode, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { FaCartShopping } from "react-icons/fa6";
 import { Link } from 'react-router-dom';
 import '../index.css';
 
-import MensajeExito from '../components/DialogoExito.jsx'
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
-<<<<<<< HEAD
-import { useCart } from '../context/CartContext.jsx';
+import ProductoCard from '../components/ProductoCard.jsx';
 import { useCategorias } from '../context/CategoriaContext';
-=======
-import { useCart } from '../context/useCart.js';
->>>>>>> 66cfb2625080fe09d6184a0e66e612dad10bf129
 import { useProductos } from '../context/ProductoContext';
-import { FormatPriceCOP } from '../utils/format.js';
+import { useCart } from '../context/useCart.js';
+import { useDebounce } from '../hooks/useDebounce.js';
 
 const Home = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  // Estados para el diálogo de éxito
-  const [exitoOpen, setExitoOpen] = useState(false);
-  const [mensajeExito, setMensajeExito] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
   const { t } = useTranslation();
+
+  // Obtener productos y categorías ANTES de cualquier uso de state
+  const { state, aplicarFiltrosLocales, getProductosFiltrados } = useProductos();
+  const { categorias, loading: loadingCategorias, error: errorCategorias } = useCategorias();
+  const { cartCount } = useCart();
 
   // NUEVOS ESTADOS PARA FILTRO Y ORDEN
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('');
   const [orden, setOrden] = useState('');
   const [busqueda, setBusqueda] = useState('');
+
+  // Aplicar debounce a la búsqueda para evitar llamadas innecesarias
+  const busquedaDebounced = useDebounce(busqueda, 500);
+
+  // Carrusel de imágenes de productos
+  const [indiceCarrusel, setIndiceCarrusel] = useState(0);
+  const carruselIntervalo = useRef(null);
+  const imagenesCarrusel = useMemo(() =>
+    state.productos.map(p => ({
+      src: `http://localhost:3000/uploads/productos/${p.imagen_producto}`,
+      alt: p.nombre_producto
+    })),
+    [state.productos]
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,37 +61,65 @@ const Home = () => {
     };
   }, []);
 
-  const { addItemToCart } = useCart();
-  const { state, getProductosFiltrados } = useProductos();
-  const { categorias, loading: loadingCategorias, error: errorCategorias } = useCategorias();
-  const [productoExpandido, setProductoExpandido] = useState(null);
-
-  // Obtener productos desde el backend cada vez que cambian los filtros
   useEffect(() => {
-    getProductosFiltrados({
-      categoria: categoriaSeleccionada,
-      busqueda,
-      orden
-    });
-  }, [categoriaSeleccionada, busqueda, orden]);
+    if (imagenesCarrusel.length === 0) return;
+    carruselIntervalo.current = setInterval(() => {
+      setIndiceCarrusel(prev => (prev + 1) % imagenesCarrusel.length);
+    }, 3500);
+    return () => clearInterval(carruselIntervalo.current);
+  }, [imagenesCarrusel.length]);
 
-  const productosMostrados = state.productos;
+  const irASiguiente = () => setIndiceCarrusel((prev) => (prev + 1) % imagenesCarrusel.length);
+  const irAAnterior = () => setIndiceCarrusel((prev) => (prev - 1 + imagenesCarrusel.length) % imagenesCarrusel.length);
+
+  // Función optimizada para aplicar filtros
+  const aplicarFiltros = useCallback((nuevosFiltros) => {
+    // Si solo hay filtros de orden y búsqueda, usar filtros locales (más rápido)
+    if (!nuevosFiltros.categoria && (nuevosFiltros.busqueda || nuevosFiltros.orden)) {
+      aplicarFiltrosLocales(nuevosFiltros);
+    } else {
+      // Si hay filtro de categoría, hacer llamada al backend
+      getProductosFiltrados(nuevosFiltros);
+    }
+  }, [aplicarFiltrosLocales, getProductosFiltrados]);
+
+  // Efecto optimizado para aplicar filtros
+  useEffect(() => {
+    const filtros = {
+      categoria: categoriaSeleccionada,
+      busqueda: busquedaDebounced,
+      orden
+    };
+
+    // Solo aplicar filtros si hay productos cargados
+    if (state.productos.length > 0) {
+      aplicarFiltros(filtros);
+    }
+  }, [categoriaSeleccionada, busquedaDebounced, orden, state.productos.length, aplicarFiltros]);
+
+  // Memoizar los productos mostrados para evitar re-renders innecesarios
+  const productosMostrados = useMemo(() => {
+    return state.productosFiltrados || state.productos;
+  }, [state.productosFiltrados, state.productos]);
 
   useEffect(() => {
     document.title = 'Sabor: Home';
   }, []);
 
-  // Función para agregar producto y mostrar mensaje de éxito
-  const handleAgregar = (producto) => {
-    addItemToCart({
-      nombre: producto.nombre_producto,
-      precio: producto.precio_producto
-    });
-    setMensajeExito(t('producto_agregado', { nombre: producto.nombre_producto }));
-    setExitoOpen(true);
-  };
+  // Handlers optimizados para los filtros
+  const handleCategoriaChange = useCallback((e) => {
+    setCategoriaSeleccionada(e.target.value);
+  }, []);
 
-  if (state.loading) return <LoadingScreen />;
+  const handleOrdenChange = useCallback((e) => {
+    setOrden(e.target.value);
+  }, []);
+
+  const handleBusquedaChange = useCallback((e) => {
+    setBusqueda(e.target.value);
+  }, []);
+
+  if (state.loading && state.productos.length === 0) return <LoadingScreen />;
   if (state.error) return <div>{t('error_cargar_productos', { error: state.error })}</div>;
 
   return (
@@ -91,6 +131,9 @@ const Home = () => {
       >
         <div className="carrito-icono">
           <FaCartShopping className='carrito' size={30}/>
+          {cartCount > 0 && (
+            <span className="carrito-burbuja-cantidad" aria-label={`Productos en el carrito: ${cartCount}`}>{cartCount}</span>
+          )}
         </div>
       </Link>
 
@@ -105,11 +148,38 @@ const Home = () => {
       <main className="pagina__contenido">
         {/* Sección de categorías */}
         <section className="seccion seccion--categorias">
-          <img
-            alt="Fondo hamburguesa"
-            className="seccion--categorias__imagen"
-            src="/images/Hamburguesa-fondo.jpeg"
-          />
+          <div className="carrusel-productos">
+            {imagenesCarrusel.length > 0 && (
+              <>
+                <button
+                  className="carrusel-productos__flecha carrusel-productos__flecha--izquierda"
+                  onClick={irAAnterior}
+                  aria-label="Anterior"
+                  type="button"
+                >
+                  <FaChevronLeft className="carrusel-productos__icono-flecha" aria-hidden="true" />
+                </button>
+                <div className="carrusel-productos__diapositiva">
+                  <img
+                    src={imagenesCarrusel[indiceCarrusel].src}
+                    alt={imagenesCarrusel[indiceCarrusel].alt}
+                    className="carrusel-productos__imagen carrusel-productos__imagen--full"
+                  />
+                  <div className="carrusel-productos__nombre">
+                    {imagenesCarrusel[indiceCarrusel].alt}
+                  </div>
+                </div>
+                <button
+                  className="carrusel-productos__flecha carrusel-productos__flecha--derecha"
+                  onClick={irASiguiente}
+                  aria-label="Siguiente"
+                  type="button"
+                >
+                  <FaChevronRight className="carrusel-productos__icono-flecha" aria-hidden="true" />
+                </button>
+              </>
+            )}
+          </div>
           <div className="contenedor__categorias">
             <div className="categorias">
               <h1 className="categorias__titulo">{t('que_ordenar')}</h1>
@@ -119,7 +189,7 @@ const Home = () => {
                   <img
                     alt="Platos Fuertes"
                     className="categorias__imagen"
-                    src="https://placehold.co/200x150/png?Text=Plato+Fuerte"
+                    src="/images/platosfuertes.png"
                   />
                 </div>
                 <div className="categorias__card">
@@ -127,7 +197,7 @@ const Home = () => {
                   <img
                     alt="Entradas"
                     className="categorias__imagen"
-                    src="https://placehold.co/200x150/png?Text=Entradas"
+                    src="/images/entradas.png"
                   />
                 </div>
                 <div className="categorias__card">
@@ -135,7 +205,7 @@ const Home = () => {
                   <img
                     alt="Bebidas"
                     className="categorias__imagen"
-                    src="https://placehold.co/200x150/png?Text=Bebidas"
+                    src="/images/bedidas.png"
                   />
                 </div>
               </div>
@@ -154,7 +224,7 @@ const Home = () => {
               <select
                 className="barra-navegacion__input"
                 value={categoriaSeleccionada}
-                onChange={e => setCategoriaSeleccionada(e.target.value)}
+                onChange={handleCategoriaChange}
                 disabled={loadingCategorias || !!errorCategorias}
               >
                 <option value="">{'Seleccionar categoría'}</option>
@@ -168,7 +238,7 @@ const Home = () => {
               <select
                 className="barra-navegacion__input"
                 value={orden}
-                onChange={e => setOrden(e.target.value)}
+                onChange={handleOrdenChange}
               >
                 <option value="">{'Ordenar por...'}</option>
                 <option value="precio_asc">{'Precio: menor a mayor'}</option>
@@ -183,7 +253,7 @@ const Home = () => {
                 placeholder={t('buscar')}
                 type="text"
                 value={busqueda}
-                onChange={e => setBusqueda(e.target.value)}
+                onChange={handleBusquedaChange}
               />
             </div>
           </div>
@@ -192,52 +262,23 @@ const Home = () => {
         {/* Sección de productos */}
         <section className="seccion seccion--productos">
           <div className="productos">
-            {state.loading ? (
-              <LoadingScreen />
+            {state.loading && state.productos.length > 0 ? (
+              <div className="productos__loading">
+                <div className="loading-spinner"></div>
+                <p>Aplicando filtros...</p>
+              </div>
             ) : productosMostrados.length === 0 ? (
               <div className="productos__mensaje-no-encontrado">
                 No hemos encontrado ese producto.
               </div>
             ) : (
               productosMostrados.map((producto) => (
-                <div
-                  key={producto.id_producto}
-                  className="productos__card-producto"
-                  onMouseEnter={() => setProductoExpandido(producto.id_producto)}
-                  onMouseLeave={() => setProductoExpandido(null)}
-                >
-                  <img
-                    alt={producto.nombre_producto}
-                    className="productos__imagen"
-                    src={`http://localhost:3000/uploads/productos/${producto.imagen_producto}`}
-                  />
-                  <div className="productos__info">
-                    <h4 className="productos__nombre">{producto.nombre_producto}</h4>
-                    <p
-                      className={`productos__descripcion${productoExpandido === producto.id_producto ? ' expandida' : ''}`}
-                    >
-                      {producto.descripcion_producto}
-                    </p>
-                    <div className="productos__footer">
-                      <p className="productos__precio">{FormatPriceCOP(producto.precio_producto)}</p>
-                      <button className="btn-agregarpr" onClick={() => handleAgregar(producto)}>
-                        {t('agregar')}
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <ProductoCard key={producto.id_producto} producto={producto} />
               ))
             )}
           </div>
         </section> 
       </main>
-      {/* Diálogo de éxito */}
-      <MensajeExito
-        duration={2000}
-        message={mensajeExito}
-        open={exitoOpen}
-        onClose={() => setExitoOpen(false)}
-      />
       <Footer />
     </div>
   );
