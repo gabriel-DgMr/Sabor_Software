@@ -19,18 +19,39 @@ export const reservaModel = {
    */
   createReserva: async (reservaData) => {
     try {
-      // Recibir id_cliente y otros datos necesarios para la reserva
-      const { id_cliente, personas, fecha, hora, peticiones } = reservaData;
+      const { id_cliente, numero_personas, fecha_reservacion, hora_reservacion, notas } = reservaData;
 
-      // Verificar disponibilidad antes de crear la reserva
-      const disponible = await reservaModel.checkDisponibilidad(fecha, hora);
+      // Validar que el cliente no tenga ya una reserva para ese horario
+      const [yaReservado] = await pool.query(
+        'SELECT id_reservacion FROM reservaciones WHERE id_cliente = ? AND fecha_reservacion = ? AND hora_reservacion = ?',
+        [id_cliente, fecha_reservacion, hora_reservacion]
+      );
+      if (yaReservado.length > 0) {
+        throw new Error('Ya tienes una reservación para ese horario.');
+      }
+
+      // Buscar una mesa disponible para la fecha y hora
+      const [mesas] = await pool.query('SELECT id_mesa FROM mesas');
+      const [ocupadas] = await pool.query(
+        'SELECT id_mesa FROM reservaciones WHERE fecha_reservacion = ? AND hora_reservacion = ?',
+        [fecha_reservacion, hora_reservacion]
+      );
+      const ocupadasSet = new Set(ocupadas.map(r => r.id_mesa));
+      const mesaLibre = mesas.find(m => !ocupadasSet.has(m.id_mesa));
+      if (!mesaLibre) {
+        throw new Error('No hay mesas disponibles para la fecha y hora seleccionada');
+      }
+      const id_mesa = mesaLibre.id_mesa;
+
+      // Verificar disponibilidad general (capacidad máxima del local)
+      const disponible = await reservaModel.checkDisponibilidad(fecha_reservacion, hora_reservacion);
       if (!disponible) {
         throw new Error('No hay disponibilidad para la fecha y hora seleccionada');
       }
 
       const [result] = await pool.query(
         'INSERT INTO reservaciones (id_cliente, numero_personas, fecha_reservacion, hora_reservacion, notas, id_mesa, id_estado) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [id_cliente, personas, fecha, hora, peticiones, 1, 1]
+        [id_cliente, numero_personas, fecha_reservacion, hora_reservacion, notas, id_mesa, 1]
       );
 
       return result.insertId;

@@ -230,8 +230,10 @@ export const loginUser = async(req, res) => {
         // Generar token JWT
         const token = jwt.sign(
             { 
-                userId: user.id_cliente,
-                email: user.email_cliente
+                id: user.id_cliente,
+                email: user.email_cliente,
+                rol: user.rol || 'user',
+                nombre: user.nombre_cliente
             },
             config.jwt.secret,
             { expiresIn: config.jwt.expiresIn }
@@ -267,7 +269,7 @@ export const logoutUser = (req, res) => {
 // Controlador para obtener perfil de usuario
 export const getUserProfile = async (req, res) => {
     try {
-        const userId = req.user.userId; // Asumiendo que viene del middleware de autenticación
+        const userId = req.user.id; // Corregido: usar 'id' en vez de 'userId'
         const user = await authModel.getUserByEmail(req.user.email);
         
         if (!user) {

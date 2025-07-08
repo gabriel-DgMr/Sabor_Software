@@ -1,0 +1,173 @@
+/* Fondo y centrado */
+.historial-reservas {
+  min-height: 90vh;
+  width: 100vw;
+  background: var(--neutral-50);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+}
+
+.historial-reservas h2 {
+  margin-top: 32px;
+  margin-bottom: 24px;
+  color: var(--primary-700);
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+/* Tabla de reservas */
+.historial-reservas table {
+  width: 100%;
+  max-width: 1300px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  border-collapse: collapse;
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+
+.historial-reservas thead {
+  background: var(--primary-700);
+  color: #fff;
+}
+
+.historial-reservas th {
+  padding: 24px 20px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
+}
+
+.historial-reservas tbody tr {
+  transition: background-color 0.2s;
+}
+
+.historial-reservas tbody tr:hover {
+  background-color: var(--secondary-50);
+}
+
+.historial-reservas tbody tr:nth-child(even) {
+  background-color: var(--neutral-100);
+}
+
+.historial-reservas tbody tr:nth-child(even):hover {
+  background-color: var(--secondary-50);
+}
+
+.historial-reservas td {
+  padding: 20px;
+  border-bottom: 1px solid var(--neutral-200);
+  color: var(--neutral-900);
+  font-size: 1.1rem;
+}
+
+/* Estados de reserva */
+.estado-reserva {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  text-align: center;
+  display: inline-block;
+  min-width: 80px;
+}
+
+.estado-reserva.activa {
+  background: var(--success-50);
+  color: var(--success-700);
+}
+
+.estado-reserva.finalizada {
+  background: var(--error-50);
+  color: var(--error-700);
+}
+
+.estado-reserva.pendiente {
+  background: var(--warning-50);
+  color: var(--warning-700);
+}
+
+.estado-reserva.cancelada {
+  background: var(--neutral-200);
+  color: var(--neutral-700);
+}
+
+/* Mensaje cuando no hay reservas */
+.historial-reservas p {
+  color: var(--secondary-800);
+  font-size: 1.1rem;
+  margin: 20px 0;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Mensajes de error y carga */
+.historial-reservas .error-message {
+  color: var(--error-700);
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 20px 0;
+  padding: 16px;
+  background: var(--error-50);
+  border-radius: 8px;
+  border-left: 4px solid var(--error-500);
+}
+
+.historial-reservas .loading-message {
+  color: var(--primary-700);
+  background: var(--primary-50);
+  border-left: 4px solid var(--primary-500);
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 20px 0;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .historial-reservas table {
+    max-width: 99vw;
+    margin: 0 2vw 40px 2vw;
+  }
+  
+  .historial-reservas th,
+  .historial-reservas td {
+    padding: 12px 8px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .historial-reservas h2 {
+    font-size: 1.8rem;
+    margin-top: 20px;
+    margin-bottom: 16px;
+  }
+  
+  .historial-reservas table {
+    margin: 0 1vw 30px 1vw;
+  }
+  
+  .historial-reservas th,
+  .historial-reservas td {
+    padding: 8px 4px;
+    font-size: 0.8rem;
+  }
+  
+  /* Ocultar columnas menos importantes en móvil */
+  .historial-reservas th:nth-child(4),
+  .historial-reservas td:nth-child(4),
+  .historial-reservas th:nth-child(5),
+  .historial-reservas td:nth-child(5) {
+    display: none;
+  }
+} 

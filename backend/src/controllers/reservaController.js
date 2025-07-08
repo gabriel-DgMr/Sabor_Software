@@ -7,6 +7,9 @@ import * as authModel from '../models/authModel.js'; // Importar authModel para 
  * @param {Object} res - El objeto de respuesta de Express.
  */
 export const hacerReserva = async (req, res) => {
+  console.log('BODY RECIBIDO EN BACKEND:', req.body);
+  // Permitir reservas sin autenticación
+  // Si req.user existe, usar su email, si no, usar el del body
   const datosReserva = req.body;
   console.log('Datos de reserva recibidos para validación y creación:', datosReserva);
 
@@ -45,39 +48,59 @@ export const hacerReserva = async (req, res) => {
   }
 
   try {
-    // 1. Buscar cliente por email
-    let cliente = await authModel.getUserByEmail(datosReserva.email);
+    // 1. Buscar cliente por email (incluyendo no verificados/inactivos)
+    let cliente = await authModel.getUserByEmailIncludingUnverified(datosReserva.email);
 
     // 2. Si el cliente no existe, crearlo
     if (!cliente) {
       console.log('Cliente no encontrado, creando nuevo...');
-      const nuevoClienteId = await authModel.registerUser({
-        nombre_cliente: datosReserva.nombre,
-        email_cliente: datosReserva.email,
-        telefono_cliente: datosReserva.telefono,
-        // Nota: Aquí no tenemos la contraseña, puede que necesites ajustarlo
-        // dependiendo de si los clientes deben registrarse completamente antes de reservar.
-        // Por ahora, asumiremos que se puede crear un cliente básico sin contraseña para reservas.
-        contraseña_cliente: 'temporal_password_for_reservation' // Considerar un manejo adecuado
-      });
-      // Obtener el objeto cliente recién creado para obtener el id
-      cliente = await authModel.getUserByEmail(datosReserva.email);
-      if (!cliente) {
-        throw new Error('Error al obtener el cliente recién creado.');
+      try {
+        const nuevoClienteId = await authModel.registerUser({
+          nombre_cliente: datosReserva.nombre,
+          email_cliente: datosReserva.email,
+          telefono_cliente: datosReserva.telefono,
+          contraseña_cliente: 'temporal_password_for_reservation'
+        });
+        // Obtener el objeto cliente recién creado para obtener el id
+        cliente = await authModel.getUserByEmailIncludingUnverified(datosReserva.email);
+        if (!cliente) {
+          throw new Error('Error al obtener el cliente recién creado.');
+        }
+        console.log('Cliente creado con ID:', cliente.id_cliente);
+      } catch (error) {
+        // Si el correo o teléfono ya existe, buscar el cliente existente y continuar
+        if (
+          error.message.includes('correo ya está registrado') ||
+          error.message.includes('teléfono ya está registrado')
+        ) {
+          cliente = await authModel.getUserByEmailIncludingUnverified(datosReserva.email);
+          if (!cliente) {
+            throw new Error('Error al obtener el cliente existente tras intento de registro.');
+          }
+          console.log('Cliente ya existía, usando ID:', cliente.id_cliente);
+        } else {
+          throw error;
+        }
       }
-      console.log('Cliente creado con ID:', cliente.id_cliente);
     }
 
     const id_cliente = cliente.id_cliente;
+
+    // Verificar si el cliente está activo y verificado
+    if (!cliente.activo || !cliente.email_verificado) {
+      return res.status(403).json({
+        message: 'No puedes crear una reservación hasta que verifiques tu cuenta. Por favor revisa tu correo electrónico.'
+      });
+    }
 
     // Usar el nuevo modelo para crear la reserva en la base de datos MySQL
     // Pasar id_cliente en lugar de nombre, telefono, email
     const reservaId = await reservaModel.createReserva({
       id_cliente: id_cliente,
-      personas: datosReserva.personas,
-      fecha: datosReserva.fecha,
-      hora: datosReserva.hora,
-      peticiones: datosReserva.peticiones
+      numero_personas: datosReserva.personas,
+      fecha_reservacion: datosReserva.fecha,
+      hora_reservacion: datosReserva.hora,
+      notas: datosReserva.peticiones
     });
 
     console.log('Reserva guardada con éxito con ID:', reservaId);
@@ -136,11 +159,11 @@ export const checkDisponibilidad = async (req, res) => {
 export const getHistorialReservas = async (req, res) => {
   try {
     console.log('req.user en getHistorialReservas:', req.user);
-    if (!req.user || !req.user.userId) {
-      console.log('Usuario no autenticado o userId faltante');
+    if (!req.user || !req.user.id) {
+      console.log('Usuario no autenticado o id faltante');
       return res.status(401).json({ message: 'No autorizado: usuario no autenticado.' });
     }
-    const id_cliente = req.user.userId;
+    const id_cliente = req.user.id;
     console.log('id_cliente usado para buscar reservas:', id_cliente);
     const reservas = await reservaModel.getReservasByUser(id_cliente);
     console.log('Reservas encontradas:', reservas);

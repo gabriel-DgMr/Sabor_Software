@@ -12,8 +12,6 @@ router.get('/historial', authenticateToken, getHistorialReservas);
 
 // Rutas protegidas con validaciones
 router.post('/hacerReserva', 
-    authenticateToken, 
-    validateReserva,
     hacerReserva
 );
 

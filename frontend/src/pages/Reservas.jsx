@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+// import { useNavigate } from 'react-router-dom';
 
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
+// import { useAuth } from '../context/AuthContext';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils.js';
 import { validarEmail, validarTelefono, validarLongitud, validarCaracteresEspeciales, validarEspaciosInicioFinal } from '../utils/validaciones.js';
 import '../index.css';
@@ -12,6 +14,8 @@ import '../index.css';
  * Implementa un formulario de múltiples pasos para recoger la información necesaria
  */
 const Reservas = () => {
+  // const { isAuthenticated } = useAuth();
+  // const navigate = useNavigate();
   // const [showLogin, setShowLogin] = useState(false); // Comentado para el linter, restaurar si se necesita un modal de login aquí
   const [step, setStep] = useState(1);
   // Estado para la fecha seleccionada
@@ -203,23 +207,27 @@ const Reservas = () => {
     } else if (step === 3) {
       if (validateStep3()) setStep(4);
     } else if (step === 4) {
+      console.log('Payload que se enviará:', formData);
       ('Reserva Confirmada:', formData);
 
       try {
+        const token = localStorage.getItem('token');
         const response = await fetch('/api/reservas/hacerReserva', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(formData),
         });
 
         const result = await response.json();
+        console.log('Respuesta del backend:', result);
 
         if (response.ok) {
           alert('¡Reserva realizada con éxito!');
 
-          // Aquí podrías redirigir al usuario o mostrar un mensaje de confirmación más elaborado
+          // crear mensaje de confirmacion mas bonito
         } else {
           alert(`Error al realizar la reserva: ${result.message || response.statusText}`);
           console.error('Error en la reserva:', result);
@@ -234,7 +242,7 @@ const Reservas = () => {
   const handlePreviousStep = () => {
     if (step > 1) {
       setStep(step - 1);
-      setFormErrors({}); // Limpiar errores al retroceder
+      setFormErrors({}); 
     }
   };
 

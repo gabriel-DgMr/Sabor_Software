@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import Header from '../components/Header.jsx';
+import Footer from '../components/Footer.jsx';
+import '../styles/historialReservas.css';
 
 const HistorialReservas = () => {
   const [reservas, setReservas] = useState([]);
@@ -40,40 +43,61 @@ const HistorialReservas = () => {
     fetchReservas();
   }, []);
 
-  if (loading) return <div>Cargando historial de reservaciones...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return (
+    <div>
+      <Header />
+      <div className="loading-message">Cargando historial de reservaciones...</div>
+      <Footer />
+    </div>
+  );
+  
+  if (error) return (
+    <div>
+      <Header />
+      <div className="error-message">{error}</div>
+      <Footer />
+    </div>
+  );
 
   return (
-    <div className="historial-reservas">
-      <h2>Historial de Reservaciones</h2>
-      {reservas.length === 0 ? (
-        <p>No tienes reservaciones registradas.</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Hora</th>
-              <th>Personas</th>
-              <th>Notas</th>
-              <th>Mesa</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reservas.map((reserva) => (
-              <tr key={reserva.id_reservacion}>
-                <td>{reserva.fecha_reservacion}</td>
-                <td>{reserva.hora_reservacion}</td>
-                <td>{reserva.numero_personas}</td>
-                <td>{reserva.notas || '-'}</td>
-                <td>{reserva.id_mesa || '-'}</td>
-                <td>{reserva.id_estado === 1 ? 'Activa' : 'Finalizada'}</td>
+    <div>
+      <Header />
+      <div className="historial-reservas">
+        <h2>Historial de Reservaciones</h2>
+        {reservas.length === 0 ? (
+          <p>No tienes reservaciones registradas.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Personas</th>
+                <th>Notas</th>
+                <th>Mesa</th>
+                <th>Estado</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {reservas.map((reserva) => (
+                <tr key={reserva.id_reservacion}>
+                  <td>{reserva.fecha_reservacion}</td>
+                  <td>{reserva.hora_reservacion}</td>
+                  <td>{reserva.numero_personas}</td>
+                  <td>{reserva.notas || '-'}</td>
+                  <td>{reserva.id_mesa || '-'}</td>
+                  <td>
+                    <span className={`estado-reserva ${reserva.id_estado === 1 ? 'activa' : 'finalizada'}`}>
+                      {reserva.id_estado === 1 ? 'Activa' : 'Finalizada'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+      <Footer />
     </div>
   );
 };

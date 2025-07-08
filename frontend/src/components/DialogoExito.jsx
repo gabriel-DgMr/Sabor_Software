@@ -24,6 +24,25 @@ const DialogoModal = ({
   return (
     <div className="success-dialog-overlay">
       <div className="success-dialog">
+        {/* Botón de cierre (X) */}
+        <button
+          className="success-dialog__close"
+          aria-label="Cerrar"
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            background: 'transparent',
+            border: 'none',
+            fontSize: 22,
+            cursor: 'pointer',
+            color: '#888',
+            zIndex: 2
+          }}
+        >
+          ×
+        </button>
         <span aria-label="icono" className="success-dialog__icon" role="img">{icon}</span>
         <p className="success-dialog__message">{message}</p>
         {(confirmText || cancelText) && (

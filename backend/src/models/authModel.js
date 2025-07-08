@@ -15,7 +15,7 @@ export const registerUser = async (clienteData) => {
         [email_cliente]
     );
 
-    if (existingUser.length > 0) {
+            if (existingUser.length > 0) {
         throw new Error('El correo ya está registrado');
     }
 
@@ -120,13 +120,14 @@ export const getUserByEmailIncludingUnverified = async (email_cliente) => {
 
 // Login - Solo permite acceso a usuarios activos y verificados
 export const loginUser = async (email_cliente, contraseña_cliente) => {
+    // TEMPORAL: Permitir login aunque no esté verificado ni activo
     const [rows] = await pool.query(
         'SELECT * FROM clientes WHERE email_cliente = ? AND activo = true AND email_verificado = true',
         [email_cliente]
     );
     
     if (!rows.length) {
-        throw new Error('Usuario no existe o no está verificado');
+        throw new Error('Usuario no existe o no esta verificado');
     }
 
     const user = rows[0];

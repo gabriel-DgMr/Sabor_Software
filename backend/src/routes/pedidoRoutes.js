@@ -5,6 +5,25 @@ import { validatePedido } from '../middleware/validateRequest.js';
 
 const router = express.Router();
 
+// === RUTAS DE CARRITO ===
+import {
+  getCarrito,
+  addProductoCarrito,
+  updateCantidadCarrito,
+  removeProducto,
+  vaciar,
+  confirmar,
+  getPedidoById
+} from '../controllers/pedidoController.js';
+
+// Carrito: todas protegidas
+router.get('/carrito', authenticateToken, getCarrito);
+router.post('/carrito/add', authenticateToken, addProductoCarrito);
+router.put('/carrito/update', authenticateToken, updateCantidadCarrito);
+router.delete('/carrito/remove', authenticateToken, removeProducto);
+router.delete('/carrito/vaciar', authenticateToken, vaciar);
+router.post('/carrito/confirmar', authenticateToken, confirmar);
+
 // Rutas protegidas con validaciones
 router.post('/', 
     authenticateToken, 
@@ -18,14 +37,8 @@ router.get('/',
     getPedidos
 );
 
-router.get('/:id', 
-    authenticateToken, 
-    checkPermission('read'),
-    (req, res) => {
-        // Implementar getPedidoById si es necesario
-        res.status(501).json({ message: 'Función no implementada' });
-    }
-);
+// Usar el controlador real para obtener pedido por id
+router.get('/:id', authenticateToken, checkPermission('read'), getPedidoById);
 
 router.put('/:id', 
     authenticateToken, 
@@ -39,23 +52,5 @@ router.delete('/:id',
     checkPermission('delete'),
     deletePedido
 );
-
-// === RUTAS DE CARRITO ===
-import {
-  getCarrito,
-  addProductoCarrito,
-  updateCantidadCarrito,
-  removeProducto,
-  vaciar,
-  confirmar
-} from '../controllers/pedidoController.js';
-
-// Carrito: todas protegidas
-router.get('/carrito', authenticateToken, getCarrito);
-router.post('/carrito/add', authenticateToken, addProductoCarrito);
-router.put('/carrito/update', authenticateToken, updateCantidadCarrito);
-router.delete('/carrito/remove', authenticateToken, removeProducto);
-router.delete('/carrito/vaciar', authenticateToken, vaciar);
-router.post('/carrito/confirmar', authenticateToken, confirmar);
 
 export default router; 

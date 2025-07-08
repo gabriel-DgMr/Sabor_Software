@@ -20,7 +20,7 @@ import HistorialReservas from './pages/HistorialReservas.jsx';
 import Home from './pages/Home.jsx';
 import ModificarPedido from './pages/ModificarPedido.jsx';
 import PaginaNoEncontrada from './pages/PaginaNoEncontrada.jsx';
-import PedidosAdministrar from './pages/pedidosAdministrar.jsx';
+import PedidosAdministrar from './pages/pedidosadministrar.jsx';
 import ProductosAdministrar from './pages/ProductosAdministrar.jsx';
 import QuienesSomos from './pages/QuienesSomos.jsx';
 import ReservasAdministrar from './pages/ReservacionesAdministrar.jsx';

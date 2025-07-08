@@ -1,81 +1,239 @@
 import PropTypes from 'prop-types';
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 
 const CartContext = createContext(null);
 
+const API_URL = 'http://localhost:3000/api';
+
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
-  const [closedOrders, setClosedOrders] = useState([]);
-  const [currentOrderId, setCurrentOrderId] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const addItemToCart = (product) => {
-    setCartItems((prevItems) => {
-      // Asegurarse de que el producto tenga un id
-      const productoConId = {
-        ...product,
-        id: product.id || product.id_producto // Usa el campo correcto si existe
-      };
-      // Buscar si ya existe el producto (por id o nombre)
-      const indexExistente = prevItems.findIndex(
-        item => (item.id && productoConId.id && item.id === productoConId.id) || item.nombre === productoConId.nombre
-      );
-      if (indexExistente !== -1) {
-        // Sumar la cantidad
-        const nuevosItems = [...prevItems];
-        nuevosItems[indexExistente] = {
-          ...nuevosItems[indexExistente],
-          cantidad: (nuevosItems[indexExistente].cantidad || 1) + (productoConId.cantidad || 1),
-          // Si la petición es diferente, concatenar (opcional)
-          peticion: productoConId.peticion ? ((nuevosItems[indexExistente].peticion ? nuevosItems[indexExistente].peticion + ' | ' : '') + productoConId.peticion) : nuevosItems[indexExistente].peticion
-        };
-        return nuevosItems;
+  // Cargar carrito desde la base de datos
+  const loadCart = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setCartItems([]);
+        return;
       }
-      // Si no existe, agregar con cantidad
-      return [...prevItems, { ...productoConId, cantidad: productoConId.cantidad || 1 }];
-    });
-  };
 
-  const removeItemFromCart = (indexToRemove) => {
-    setCartItems((prevItems) => prevItems.filter((_, index) => index !== indexToRemove));
-  };
+      const response = await fetch(`${API_URL}/pedidos/carrito`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
-  const clearCart = () => {
-    setCartItems([]);
-  };
-
-  const closeCurrentOrder = () => {
-    if (cartItems.length > 0) {
-      const orderToClose = {
-        id: currentOrderId,
-        items: [...cartItems],
-        recomendaciones: localStorage.getItem('recomendacionesPedido') || '',
-        fecha: new Date().toISOString()
-      };
-      
-      setClosedOrders(prev => [...prev, orderToClose]);
+      if (response.ok) {
+        const carrito = await response.json();
+        setCartItems(carrito.items || []);
+      } else if (response.status === 404) {
+        // No hay carrito, crear uno vacío
+        setCartItems([]);
+      } else {
+        throw new Error('Error al cargar el carrito');
+      }
+    } catch (error) {
+      console.error('Error al cargar carrito:', error);
+      setError(error.message);
       setCartItems([]);
-      setCurrentOrderId(prev => prev + 1);
-      localStorage.removeItem('recomendacionesPedido');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Cargar carrito al montar el componente
+  useEffect(() => {
+    loadCart();
+  }, [loadCart]);
+
+  const addItemToCart = async (product) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Debes iniciar sesión para agregar productos al carrito');
+      }
+
+      const response = await fetch(`${API_URL}/pedidos/carrito/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          id_producto: product.id || product.id_producto,
+          cantidad: product.cantidad || 1
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || 'Error al agregar producto al carrito');
+      }
+
+      // Recargar el carrito para obtener el estado actualizado
+      await loadCart();
+    } catch (error) {
+      console.error('Error al agregar producto:', error);
+      setError(error.message);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const createNewOrder = () => {
-    setCartItems([]);
-    setCurrentOrderId(prev => prev + 1);
-    localStorage.removeItem('recomendacionesPedido');
+  const removeItemFromCart = async (id_producto) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Debes iniciar sesión para modificar el carrito');
+      }
+
+      const response = await fetch(`${API_URL}/pedidos/carrito/remove`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ id_producto })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || 'Error al eliminar producto del carrito');
+      }
+
+      // Recargar el carrito
+      await loadCart();
+    } catch (error) {
+      console.error('Error al eliminar producto:', error);
+      setError(error.message);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const updateItemQuantity = async (id_producto, cantidad) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Debes iniciar sesión para modificar el carrito');
+      }
+
+      const response = await fetch(`${API_URL}/pedidos/carrito/update`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ id_producto, cantidad })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || 'Error al actualizar cantidad');
+      }
+
+      // Recargar el carrito
+      await loadCart();
+    } catch (error) {
+      console.error('Error al actualizar cantidad:', error);
+      setError(error.message);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearCart = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setCartItems([]);
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/pedidos/carrito/vaciar`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || 'Error al vaciar el carrito');
+      }
+
+      setCartItems([]);
+    } catch (error) {
+      console.error('Error al vaciar carrito:', error);
+      setError(error.message);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmarPedido = async (metodo_pago) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Debes iniciar sesión para confirmar el pedido');
+      }
+
+      const response = await fetch(`${API_URL}/pedidos/carrito/confirmar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ metodo_pago })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || 'Error al confirmar el pedido');
+      }
+
+      // Limpiar carrito después de confirmar
+      setCartItems([]);
+      return await response.json();
+    } catch (error) {
+      console.error('Error al confirmar pedido:', error);
+      setError(error.message);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cartCount = cartItems.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+  const cartTotal = cartItems.reduce((sum, item) => sum + (item.precio_unitario * (item.cantidad || 1)), 0);
 
   return (
     <CartContext.Provider value={{ 
       cartItems, 
-      closedOrders,
-      currentOrderId,
+      loading,
+      error,
+      cartCount,
+      cartTotal,
       addItemToCart, 
       removeItemFromCart, 
+      updateItemQuantity,
       clearCart,
-      closeCurrentOrder,
-      createNewOrder,
-      cartCount: cartItems.reduce((sum, item) => sum + (item.cantidad || 1), 0)
+      confirmarPedido,
+      loadCart
     }}>
       {children}
     </CartContext.Provider>

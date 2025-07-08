@@ -16,7 +16,15 @@ export default function Carrito() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { cartItems, clearCart, closedOrders, closeCurrentOrder, createNewOrder } = useCart();
+  const { 
+    cartItems, 
+    clearCart, 
+    loading: cartLoading, 
+    error: cartError,
+    confirmarPedido,
+    updateItemQuantity,
+    removeItemFromCart
+  } = useCart();
   const [recomendaciones, setRecomendaciones] = useState('');
   const [modal, setModal] = useState({ open: false, message: '', icon: '✅', onConfirm: null });
   const { t } = useTranslation();
@@ -29,29 +37,7 @@ export default function Carrito() {
     if (recomendacionesGuardadas) {
       setRecomendaciones(recomendacionesGuardadas);
     }
-
-    // Cargar pedidos cerrados desde el backend
-    const fetchClosedOrders = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (token) {
-
-          const response = await fetch(`${API_URL}/pedidos/cerrados`, { 
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (response.ok) {
-            // Eliminar la asignación a 'data' si no se usa después de eliminar el console.log.
-          } else {
-            console.error('Error al cargar pedidos cerrados:', response.status);
-          }
-        }
-      } catch (error) {
-        console.error('Error al cargar pedidos cerrados:', error);
-      }
-    };
-    fetchClosedOrders();
-
-  }, []); // Dependencias: [useCart, API_URL, navigate, setRecomendaciones, setLoading, setError]
+  }, []);
 
   const procesarPago = async () => {
     if (cartItems.length === 0) {
@@ -83,11 +69,11 @@ export default function Carrito() {
 
       // Mapear items del carrito a un formato adecuado para el backend
       const itemsParaBackend = cartItems.map(item => ({
-        id_producto: item.id,
-        cantidad: item.quantity || 1,
-        precio_unitario: item.precio
+        id_producto: item.id_producto,
+        cantidad: item.cantidad || 1,
+        precio_unitario: item.precio_unitario
       }));
-      const totalCarrito = cartItems.reduce((sum, item) => sum + item.precio * (item.quantity || 1), 0);
+      const totalCarrito = cartItems.reduce((sum, item) => sum + item.precio_unitario * (item.cantidad || 1), 0);
       const recomendacionesPedido = localStorage.getItem('recomendacionesPedido') || '';
 
       const nuevoPedido = {
@@ -110,7 +96,7 @@ export default function Carrito() {
          throw new Error(errorData.mensaje || `Error HTTP: ${response.status}`);
       }
       
-      clearCart();
+      await clearCart();
       localStorage.removeItem('recomendacionesPedido');
       setModal({
         open: true,
@@ -142,28 +128,74 @@ export default function Carrito() {
       icon: '🗑️',
       confirmText: 'Sí, eliminar',
       cancelText: 'Cancelar',
-      onConfirm: () => {
-        clearCart();
-        localStorage.removeItem('recomendacionesPedido');
-        setModal({ ...modal, open: false });
+      onConfirm: async () => {
+        try {
+          await clearCart();
+          localStorage.removeItem('recomendacionesPedido');
+          setModal({ ...modal, open: false });
+        } catch (error) {
+          setModal({
+            open: true,
+            message: `Error al eliminar carrito: ${error.message}`,
+            icon: '❌',
+            onConfirm: () => setModal({ ...modal, open: false })
+          });
+        }
       },
       onCancel: () => setModal({ ...modal, open: false })
     });
   };
 
-  const handleModificarPedido = () => {
-    navigate('/carrito/modificar/actual');
-  };
-
-  const handleCerrarPedido = () => {
+  const handleCerrarPedido = async () => {
     if (window.confirm(t('carrito_confirmar_cerrar'))) {
-      closeCurrentOrder();
-      createNewOrder();
-      localStorage.removeItem('recomendacionesPedido');
+      try {
+        // Usar un empleado por defecto (ID 1) y método de pago efectivo
+        await confirmarPedido(1, 'efectivo');
+        localStorage.removeItem('recomendacionesPedido');
+        setModal({
+          open: true,
+          message: 'Pedido cerrado exitosamente',
+          icon: '✅',
+          onConfirm: () => setModal({ ...modal, open: false })
+        });
+      } catch (error) {
+        setModal({
+          open: true,
+          message: `Error al cerrar pedido: ${error.message}`,
+          icon: '❌',
+          onConfirm: () => setModal({ ...modal, open: false })
+        });
+      }
     }
   };
 
-  if (loading) {
+  const handleUpdateQuantity = async (id_producto, nuevaCantidad) => {
+    try {
+      await updateItemQuantity(id_producto, nuevaCantidad);
+    } catch (error) {
+      setModal({
+        open: true,
+        message: `Error al actualizar cantidad: ${error.message}`,
+        icon: '❌',
+        onConfirm: () => setModal({ ...modal, open: false })
+      });
+    }
+  };
+
+  const handleRemoveItem = async (id_producto) => {
+    try {
+      await removeItemFromCart(id_producto);
+    } catch (error) {
+      setModal({
+        open: true,
+        message: `Error al eliminar producto: ${error.message}`,
+        icon: '❌',
+        onConfirm: () => setModal({ ...modal, open: false })
+      });
+    }
+  };
+
+  if (loading || cartLoading) {
     return (
       <>
         <Header />
@@ -175,13 +207,13 @@ export default function Carrito() {
     );
   }
 
-  if (error) {
+  if (error || cartError) {
     return (
       <>
         <Header />
         <main className="carrito_bg">
           <div className="carrito_error">
-            <p>{error}</p>
+            <p>{error || cartError}</p>
             <button className="carrito_btn reintentar" onClick={() => {
               setError(null);
               setLoading(true);
@@ -223,17 +255,40 @@ export default function Carrito() {
                   <ul className="carrito_pedido_lista">
                     {cartItems.map((item, i) => (
                       <li key={i} className="carrito_item">
-                        <span>
-                          {item.nombre} x {item.cantidad || 1} - {(item.precio * (item.cantidad || 1)).toLocaleString('es-CO')} COP
-                          {item.peticion && (
-                            <span className="carrito_item_peticion"> <br/><em>Petición: {item.peticion}</em></span>
-                          )}
-                        </span>
+                        <div className="carrito_item_info">
+                          <span className="carrito_item_nombre">
+                            {item.nombre_producto} x {item.cantidad || 1} - {(item.precio_unitario * (item.cantidad || 1)).toLocaleString('es-CO')} COP
+                          </span>
+                          <div className="carrito_item_controles">
+                            <button 
+                              className="carrito_btn_cantidad"
+                              onClick={() => handleUpdateQuantity(item.id_producto, Math.max(1, (item.cantidad || 1) - 1))}
+                            >
+                              -
+                            </button>
+                            <span className="carrito_cantidad">{item.cantidad || 1}</span>
+                            <button 
+                              className="carrito_btn_cantidad"
+                              onClick={() => handleUpdateQuantity(item.id_producto, (item.cantidad || 1) + 1)}
+                            >
+                              +
+                            </button>
+                            <button 
+                              className="carrito_btn_eliminar"
+                              onClick={() => handleRemoveItem(item.id_producto)}
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </div>
+                        {item.peticion && (
+                          <span className="carrito_item_peticion"> <br/><em>Petición: {item.peticion}</em></span>
+                        )}
                       </li>
                     ))}
                   </ul>
                   <div className="carrito_pedido_total">
-                    {t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio * (item.cantidad || 1), 0).toLocaleString('es-CO')} COP
+                    {t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio_unitario * (item.cantidad || 1), 0).toLocaleString('es-CO')} COP
                   </div>
                   {recomendaciones && (
                     <div className="carrito_pedido_recomendaciones">
@@ -250,12 +305,6 @@ export default function Carrito() {
                     🗑️ {t('carrito_eliminar')}
                   </button>
                   <button 
-                    className="carrito_btn modificar"
-                    onClick={handleModificarPedido}
-                  >
-                    ✍️ {t('carrito_modificar')}
-                  </button>
-                  <button 
                     className="carrito_btn cerrar"
                     onClick={handleCerrarPedido}
                   >
@@ -268,40 +317,6 @@ export default function Carrito() {
                     💳 {t('carrito_pagar')}
                   </button>
                 </div>
-              </div>
-            )}
-
-            {closedOrders.length > 0 && (
-              <div className="carrito_pedidos_cerrados">
-                <h2>{t('carrito_pedidos_cerrados')}</h2>
-                {closedOrders.map((order) => (
-                  <div key={order.id} className="carrito_pedido cerrado">
-                    <div className="carrito_pedido_info">
-                      <div className="carrito_pedido_titulo">
-                        <span aria-label="pedido-cerrado" role="img">
-                          📦
-                        </span>
-                        {t('carrito_pedido_numero', { id: order.id, fecha: new Date(order.fecha).toLocaleString() })}
-                      </div>
-                      <ul className="carrito_pedido_lista">
-                        {order.items.map((item, i) => (
-                          <li key={i} className="carrito_item">
-                            <span>{item.nombre} - {item.precio.toLocaleString('es-CO')} COP</span>
-                          </li>
-                        ))}
-                      </ul>
-                      <div className="carrito_pedido_total">
-                        {t('carrito_total')}: {order.items.reduce((sum, item) => sum + item.precio, 0).toLocaleString('es-CO')} COP
-                      </div>
-                      {order.recomendaciones && (
-                        <div className="carrito_pedido_recomendaciones">
-                          <h4>{t('carrito_recomendaciones')}</h4>
-                          <p>{order.recomendaciones}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
               </div>
             )}
           </div>
@@ -317,21 +332,24 @@ export default function Carrito() {
                 <ul>
                   {cartItems.map((item, i) => (
                     <li key={i}>
-                      {item.nombre} x {item.cantidad || 1}: {(item.precio * (item.cantidad || 1)).toLocaleString('es-CO')} COP
+                      {item.nombre_producto} x {item.cantidad || 1}: {(item.precio_unitario * (item.cantidad || 1)).toLocaleString('es-CO')} COP
                       {item.peticion && (
                         <span className="carrito_item_peticion"> <br/><em>Petición: {item.peticion}</em></span>
                       )}
                     </li>
                   ))}
                 </ul>
-                <p><strong>{t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio * (item.cantidad || 1), 0).toLocaleString('es-CO')} COP</strong></p>
+                <p><strong>{t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio_unitario * (item.cantidad || 1), 0).toLocaleString('es-CO')} COP</strong></p>
               </div>
             )}
           </div>
         </div>
       </main>
       <Footer />
-      <DialogoModal {...modal} />
+      <DialogoModal 
+        {...modal}
+        onClose={() => setModal(m => ({ ...m, open: false }))}
+      />
     </>
   );
 }
