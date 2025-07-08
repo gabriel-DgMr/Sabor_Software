@@ -1,6 +1,8 @@
+import PropTypes from 'prop-types';
 import React, { useState, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
 
 import { useCart } from '../context/useCart.js';
 import { FormatPriceCOP } from '../utils/format.js';
@@ -62,6 +64,24 @@ const ProductoCard = React.memo(({ producto }) => {
         />
         <div className="productos__info">
           <h4 className="productos__nombre">{producto.nombre_producto}</h4>
+          {/* Calificación en estrellas */}
+          <div className="productos__calificacion">
+            {(() => {
+              const estrellas = [];
+              const calificacion = Number(producto.calificacion) || 0;
+              for (let i = 1; i <= 5; i++) {
+                if (calificacion >= i) {
+                  estrellas.push(<FaStar key={i} className="productos__estrella productos__estrella--llena" />);
+                } else if (calificacion >= i - 0.5) {
+                  estrellas.push(<FaStarHalfAlt key={i} className="productos__estrella productos__estrella--media" />);
+                } else {
+                  estrellas.push(<FaRegStar key={i} className="productos__estrella productos__estrella--vacia" />);
+                }
+              }
+              return estrellas;
+            })()}
+            <span className="productos__calificacion-num">{!isNaN(Number(producto.calificacion)) ? Number(producto.calificacion).toFixed(1) : '0.0'}</span>
+          </div>
           <p
             className={`productos__descripcion${productoExpandido ? ' expandida' : ''}`}
           >
@@ -89,9 +109,9 @@ const ProductoCard = React.memo(({ producto }) => {
             <div className="dialogo-agregar-producto__contenido">
               <div className="dialogo-agregar-producto__izquierda">
                 <img
-                  src={`http://localhost:3000/uploads/productos/${producto.imagen_producto}`}
                   alt={producto.nombre_producto}
                   className="dialogo-agregar-producto__imagen"
+                  src={`http://localhost:3000/uploads/productos/${producto.imagen_producto}`}
                 />
                 <div className="dialogo-agregar-producto__info">
                   <h3 className="dialogo-agregar-producto__nombre">{producto.nombre_producto}</h3>
@@ -102,20 +122,20 @@ const ProductoCard = React.memo(({ producto }) => {
                 <label className="dialogo-agregar-producto__label">
                   Unidades:
                   <input
-                    type="number"
+                    className="dialogo-agregar-producto__input"
                     min="1"
+                    type="number"
                     value={cantidad}
                     onChange={e => setCantidad(e.target.value.replace(/[^0-9]/g, ''))}
-                    className="dialogo-agregar-producto__input"
                   />
                 </label>
                 <label className="dialogo-agregar-producto__label">
                   Petición especial:
                   <textarea
-                    value={peticion}
-                    onChange={e => setPeticion(e.target.value)}
                     className="dialogo-agregar-producto__textarea"
                     placeholder="¿Alguna petición especial para este producto?"
+                    value={peticion}
+                    onChange={e => setPeticion(e.target.value)}
                   />
                 </label>
                 <div className="dialogo-agregar-producto__acciones">
@@ -137,5 +157,15 @@ const ProductoCard = React.memo(({ producto }) => {
 });
 
 ProductoCard.displayName = 'ProductoCard';
+
+ProductoCard.propTypes = {
+  producto: PropTypes.shape({
+    nombre_producto: PropTypes.string.isRequired,
+    precio_producto: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    imagen_producto: PropTypes.string.isRequired,
+    calificacion: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    descripcion_producto: PropTypes.string,
+  }).isRequired,
+};
 
 export default ProductoCard; 

@@ -16,21 +16,21 @@ function PaginaNoEncontrada() {
   }, []);
 
   return (
-    <main className="pagina-no-encontrada" role="main" aria-label="Página no encontrada">
+    <main aria-label="Página no encontrada" className="pagina-no-encontrada" role="main">
       <img
-        src="/images/logo_sabor.png"
         alt="Logo Sabor"
         className="pagina-no-encontrada__icono"
-        width="120"
         height="120"
         loading="lazy"
+        src="/images/logo_sabor.png"
+        width="120"
       />
       <h1 className="pagina-no-encontrada__titulo">404 - Página no encontrada</h1>
       <p className="pagina-no-encontrada__descripcion">
         Lo sentimos, la página que buscas no existe o ha sido movida.<br />
         Por favor, verifica la URL o vuelve al inicio.
       </p>
-      <Link to="/" className="pagina-no-encontrada__boton" aria-label="Volver al inicio">
+      <Link aria-label="Volver al inicio" className="pagina-no-encontrada__boton" to="/">
         Volver al inicio
       </Link>
     </main>

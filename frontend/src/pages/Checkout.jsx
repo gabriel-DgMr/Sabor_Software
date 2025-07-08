@@ -353,11 +353,11 @@ export default function Checkout() {
                 <label htmlFor="nombre">Nombre en la tarjeta</label>
                 <input 
                   required 
+                  className={errors.nombre ? 'formulario__input--error' : ''} 
                   id="nombre" 
-                  type="text" 
+                  type="text"
                   value={formData.nombre}
                   onChange={handleInputChange}
-                  className={errors.nombre ? 'formulario__input--error' : ''}
                 />
                 {errors.nombre && <small className="cuentanos__mensaje-error">{errors.nombre}</small>}
               </div>
@@ -366,13 +366,13 @@ export default function Checkout() {
                 <label htmlFor="numero">Número de tarjeta</label>
                 <input 
                   required 
+                  className={errors.numero ? 'formulario__input--error' : ''} 
                   id="numero" 
-                  maxLength="19" 
+                  maxLength="19"
                   placeholder="1234 5678 9012 3456"
                   type="text"
                   value={formData.numero}
                   onChange={handleInputChange}
-                  className={errors.numero ? 'formulario__input--error' : ''}
                 />
                 {errors.numero && <small className="cuentanos__mensaje-error">{errors.numero}</small>}
               </div>
@@ -382,13 +382,13 @@ export default function Checkout() {
                   <label htmlFor="fecha">Fecha de expiración</label>
                   <input 
                     required 
+                    className={errors.fecha ? 'formulario__input--error' : ''} 
                     id="fecha" 
-                    maxLength="5" 
+                    maxLength="5"
                     placeholder="MM/YY"
                     type="text"
                     value={formData.fecha}
                     onChange={handleInputChange}
-                    className={errors.fecha ? 'formulario__input--error' : ''}
                   />
                   {errors.fecha && <small className="cuentanos__mensaje-error">{errors.fecha}</small>}
                 </div>
@@ -397,13 +397,13 @@ export default function Checkout() {
                   <label htmlFor="cvv">CVV</label>
                   <input 
                     required 
+                    className={errors.cvv ? 'formulario__input--error' : ''} 
                     id="cvv" 
                     pattern="[0-9]{3,4}" 
-                    placeholder="123" 
+                    placeholder="123"
                     type="text"
                     value={formData.cvv}
                     onChange={handleInputChange}
-                    className={errors.cvv ? 'formulario__input--error' : ''}
                   />
                   {errors.cvv && <small className="cuentanos__mensaje-error">{errors.cvv}</small>}
                 </div>
@@ -413,11 +413,11 @@ export default function Checkout() {
                 <label htmlFor="direccion">Dirección de facturación</label>
                 <input 
                   required 
-                  id="direccion" 
+                  className={errors.direccion ? 'formulario__input--error' : ''} 
+                  id="direccion"
                   type="text"
                   value={formData.direccion}
                   onChange={handleInputChange}
-                  className={errors.direccion ? 'formulario__input--error' : ''}
                 />
                 {errors.direccion && <small className="cuentanos__mensaje-error">{errors.direccion}</small>}
               </div>

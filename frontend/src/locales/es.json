@@ -116,18 +116,18 @@
   "modificar_confirmar_cambios": "Confirmar cambios",
   "modificar_regresar": "Regresar",
   "quienes_titulo": "¿Quiénes somos?",
-  "quienes_descripcion": "Somos un restaurante comprometido con la excelencia culinaria y la satisfacción de nuestros clientes. Nuestro equipo trabaja cada día para ofrecerte la mejor experiencia gastronómica.",
+  "quienes_descripcion": "Sabor es una plataforma web creada para revolucionar la gestión y experiencia gastronómica, facilitando la interacción entre clientes y restaurantes a través de soluciones digitales innovadoras.",
   "quienes_mision_titulo": "Misión",
   "quienes_mision": "Brindar a nuestros clientes una experiencia culinaria única, basada en ingredientes frescos, atención personalizada y un ambiente acogedor.",
   "quienes_vision_titulo": "Visión",
-  "quienes_vision": "Ser reconocidos como el restaurante líder en innovación y calidad en la región, superando siempre las expectativas de nuestros clientes.",
+  "quienes_vision": "Ser reconocidos como la plataforma web líder en innovación y calidad para la gestión de restaurantes, superando siempre las expectativas de nuestros usuarios y facilitando la experiencia digital en el sector gastronómico.",
   "quienes_valores_titulo": "Valores",
   "quienes_valor_1": "Pasión por la cocina",
   "quienes_valor_2": "Compromiso con la calidad",
   "quienes_valor_3": "Respeto y trabajo en equipo",
   "sobre_titulo": "Sobre Nosotros",
   "sobre_historia_titulo": "Nuestra Historia",
-  "sobre_historia": "Fundado en 2023, Sabor nació del sueño de compartir la pasión por la buena comida y el servicio excepcional. Desde entonces, hemos crecido gracias a la confianza de nuestros clientes.",
+  "sobre_historia": "Fundado en 2023, Sabor nació del sueño de compartir la pasión por la buena comida y el servicio excepcional. Desde entonces, hemos puesto manos en obra a realizar este proyecto.",
   "sobre_equipo_titulo": "Nuestro Equipo",
   "sobre_equipo": "Contamos con chefs, meseros y personal administrativo altamente capacitados y dedicados a brindar el mejor servicio.",
   "sobre_contacto_titulo": "Contacto",
@@ -196,5 +196,13 @@
   "security_invalid_input": "Datos de entrada no válidos",
   "security_field_length": "El campo {{field}} no puede tener más de {{max}} caracteres",
   "security_invalid_price": "El precio debe ser un número válido entre 0 y 999999.99",
-  "security_invalid_date": "El campo {{field}} debe ser una fecha válida"
+  "security_invalid_date": "El campo {{field}} debe ser una fecha válida",
+  "qr": {
+    "mensajeMesa": "Estás realizando un pedido desde la mesa {{mesa}}.",
+    "mensajeSinMesa": "Por favor, escanea el código QR de tu mesa para comenzar tu pedido."
+  },
+  "quienes_equipo_titulo": "Equipo de Desarrollo",
+  "quienes_dev_juan": "Apasionado por el desarrollo web, videojuegos y deportes, especializado en React y Node.js. Encargado de la arquitectura y la experiencia de usuario.",
+  "quienes_dev_gabriel": "Desarrollador integral con experiencia en backend y frontend, apasionado por los videojuegos. Responsable de la integración y la seguridad.",
+  "quienes_dev_miguel": "Apasionado por las hamburguesas y vender platanitos. Encargado de la calidad, pruebas y documentación del proyecto. Garantiza la robustez y claridad del sistema."
 } 

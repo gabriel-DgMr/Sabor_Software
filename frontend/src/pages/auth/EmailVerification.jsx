@@ -61,7 +61,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
           setTimeout(() => setError(''), ANIM_DURATION);
         }, VISIBLE_DURATION);
       }
-    } catch (error) {
+    } catch (_error) {
       setError('Error de conexión. Inténtalo de nuevo.');
     } finally {
       setLoading(false);
@@ -92,7 +92,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
       } else {
         setError(data.message);
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Error al reenviar código');
     } finally {
       setResendLoading(false);
@@ -119,16 +119,16 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
             {t('codigo_verificacion')}
           </label>
           <input
+            autoComplete="off"
             className={`formulario__input ${error ? 'input--error' : ''}`}
             disabled={loading}
             id="codigo-verification"
+            maxLength={6}
             name="codigo"
             placeholder="000000"
             type="text"
             value={codigo}
             onChange={handleInputChange}
-            maxLength={6}
-            autoComplete="off"
           />
           {error && <small className="formulario__mensaje-error">{error}</small>}
         </div>
@@ -152,8 +152,8 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
         <button
           className="formulario__boton-secundario"
           disabled={resendLoading || countdown > 0}
-          onClick={handleResendCode}
           type="button"
+          onClick={handleResendCode}
         >
           {resendLoading 
             ? t('reenviando') 
@@ -165,8 +165,8 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
 
         <button
           className="formulario__boton-secundario"
-          onClick={onBackToLogin}
           type="button"
+          onClick={onBackToLogin}
         >
           {t('volver_al_login')}
         </button>

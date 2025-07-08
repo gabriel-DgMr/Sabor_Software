@@ -123,8 +123,8 @@ const AuthPage = ({ isOpen, onClose }) => {
         return (
           <EmailVerification
             email={pendingVerificationEmail}
-            onVerificationSuccess={handleVerificationSuccess}
             onBackToLogin={handleBackToLogin}
+            onVerificationSuccess={handleVerificationSuccess}
           />
         );
       case 'forgot-password':

@@ -116,18 +116,18 @@
   "modificar_confirmar_cambios": "Confirm changes",
   "modificar_regresar": "Back",
   "quienes_titulo": "Who are we?",
-  "quienes_descripcion": "We are a restaurant committed to culinary excellence and customer satisfaction. Our team works every day to offer you the best gastronomic experience.",
+  "quienes_descripcion": "Sabor is a web platform created to revolutionize gastronomic management and experience, facilitating interaction between customers and restaurants through innovative digital solutions.",
   "quienes_mision_titulo": "Mission",
   "quienes_mision": "To provide our customers with a unique culinary experience, based on fresh ingredients, personalized attention, and a welcoming atmosphere.",
   "quienes_vision_titulo": "Vision",
-  "quienes_vision": "To be recognized as the leading restaurant in innovation and quality in the region, always exceeding our customers' expectations.",
+  "quienes_vision": "To be recognized as the leading web platform in innovation and quality for restaurant management, always exceeding our users' expectations and facilitating the digital experience in the gastronomic sector.",
   "quienes_valores_titulo": "Values",
   "quienes_valor_1": "Passion for cooking",
   "quienes_valor_2": "Commitment to quality",
   "quienes_valor_3": "Respect and teamwork",
   "sobre_titulo": "About Us",
   "sobre_historia_titulo": "Our History",
-  "sobre_historia": "Founded in 2023, Sabor was born from the dream of sharing a passion for good food and exceptional service. Since then, we have grown thanks to the trust of our customers.",
+  "sobre_historia": "Founded in 2023, Sabor was born from the dream of sharing a passion for good food and exceptional service. Since then, we have put our hands to work to make this project a reality.",
   "sobre_equipo_titulo": "Our Team",
   "sobre_equipo": "We have highly trained chefs, waiters, and administrative staff dedicated to providing the best service.",
   "sobre_contacto_titulo": "Contact",
@@ -196,5 +196,13 @@
   "security_invalid_input": "Invalid input data",
   "security_field_length": "The field {{field}} cannot have more than {{max}} characters",
   "security_invalid_price": "The price must be a valid number between 0 and 999999.99",
-  "security_invalid_date": "The field {{field}} must be a valid date"
+  "security_invalid_date": "The field {{field}} must be a valid date",
+  "qr": {
+    "mensajeMesa": "You are ordering from table {{mesa}}.",
+    "mensajeSinMesa": "Please scan your table's QR code to start your order."
+  },
+  "quienes_equipo_titulo": "Development Team",
+  "quienes_dev_juan": "Passionate about web development, video games, and sports, specialized in React and Node.js. In charge of architecture and user experience.",
+  "quienes_dev_gabriel": "Full-stack developer with experience in backend and frontend, passionate about video games. Responsible for integration and security.",
+  "quienes_dev_miguel": "Passionate about burgers and selling plantains. In charge of quality, testing, and project documentation. Ensures system robustness and clarity."
 } 

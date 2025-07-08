@@ -6,7 +6,7 @@ import { FaFacebook, FaTiktok, FaYoutube } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils';
-import { validarCaracteresEspeciales, validarLongitud, validarEspaciosInicioFinal } from '../utils/validaciones';
+import { validarCaracteresEspeciales, validarEspaciosInicioFinal } from '../utils/validaciones';
 
 const Footer = () => {
   const [experiencia, setExperiencia] = useState('');
@@ -14,41 +14,46 @@ const Footer = () => {
   const [error, setError] = useState('');
   const { t } = useTranslation();
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setError('');
     setMensaje('');
 
-    let errorMessage = '';
-    
-    // Validar que el campo no esté vacío
     if (!experiencia) {
-      errorMessage = 'El campo no puede estar vacío.';
-    } else {
-      // Validar longitud
-      const longitudError = validarLongitud(experiencia, 'experiencia', 5, 500);
-      if (longitudError) {
-        errorMessage = longitudError;
-      } else {
-        // Validar caracteres especiales
-        const caracteresError = validarCaracteresEspeciales(experiencia, 'experiencia');
-        if (caracteresError) {
-          errorMessage = caracteresError;
-        } else {
-          // Validar espacios al inicio y final
-          const espaciosError = validarEspaciosInicioFinal(experiencia, 'experiencia');
-          if (espaciosError) {
-            errorMessage = espaciosError;
-          }
-        }
-      }
-    }
-
-    if (errorMessage) {
-      setError(errorMessage);
-      setTimeout(() => animateElements('#error-footer', 'fade-in'), 0);
+      setError(t('campo_vacio'));
+      setTimeout(() => animateElements('#footer-error', 'fade-in'), 0);
       setTimeout(() => {
-        const el = document.querySelector('#error-footer');
+        const el = document.querySelector('#footer-error');
+        if (el) {
+          el.classList.remove('fade-in');
+          el.classList.add('fade-out');
+        }
+        setTimeout(() => setError(''), ANIM_DURATION);
+      }, VISIBLE_DURATION);
+      return;
+    }
+    // Validar espacios al inicio/final
+    const errorEspacios = validarEspaciosInicioFinal(experiencia, t('tu_experiencia'));
+    if (errorEspacios) {
+      setError(errorEspacios);
+      setTimeout(() => animateElements('#footer-error', 'fade-in'), 0);
+      setTimeout(() => {
+        const el = document.querySelector('#footer-error');
+        if (el) {
+          el.classList.remove('fade-in');
+          el.classList.add('fade-out');
+        }
+        setTimeout(() => setError(''), ANIM_DURATION);
+      }, VISIBLE_DURATION);
+      return;
+    }
+    // Validar caracteres especiales
+    const errorCaracteres = validarCaracteresEspeciales(experiencia, t('tu_experiencia'));
+    if (errorCaracteres) {
+      setError(errorCaracteres);
+      setTimeout(() => animateElements('#footer-error', 'fade-in'), 0);
+      setTimeout(() => {
+        const el = document.querySelector('#footer-error');
         if (el) {
           el.classList.remove('fade-in');
           el.classList.add('fade-out');
@@ -58,18 +63,37 @@ const Footer = () => {
       return;
     }
 
-    // Simulación de envío exitoso
-    setMensaje('¡Gracias por tu comentario!');
-    setExperiencia('');
-    setTimeout(() => animateElements('#exito-footer', 'fade-in'), 0);
-    setTimeout(() => {
-      const el = document.querySelector('#exito-footer');
-      if (el) {
-        el.classList.remove('fade-in');
-        el.classList.add('fade-out');
-      }
-      setTimeout(() => setMensaje(''), ANIM_DURATION);
-    }, VISIBLE_DURATION);
+    try {
+      const res = await fetch('/api/contacto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mensaje: experiencia })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al enviar el mensaje');
+      setMensaje(t('gracias_comentario'));
+      setExperiencia('');
+      setTimeout(() => animateElements('#footer-exito', 'fade-in'), 0);
+      setTimeout(() => {
+        const el = document.querySelector('#footer-exito');
+        if (el) {
+          el.classList.remove('fade-in');
+          el.classList.add('fade-out');
+        }
+        setTimeout(() => setMensaje(''), ANIM_DURATION);
+      }, VISIBLE_DURATION);
+    } catch (err) {
+      setError(err.message);
+      setTimeout(() => animateElements('#footer-error', 'fade-in'), 0);
+      setTimeout(() => {
+        const el = document.querySelector('#footer-error');
+        if (el) {
+          el.classList.remove('fade-in');
+          el.classList.add('fade-out');
+        }
+        setTimeout(() => setError(''), ANIM_DURATION);
+      }, VISIBLE_DURATION);
+    }
   };
 
   return (
@@ -99,11 +123,11 @@ const Footer = () => {
         <div className="pie-pagina__nosotros">
           <h3 className="pie-pagina__titulo">{t('sobre_nosotros')}</h3>
           <h4 className="pie-pagina__subtitulo">
-            <Link to="/quienes-somos" className='nosotros-opc'>{t('quienes_somos')}</Link>
-            <Link to="/sobre-nosotros" className='nosotros-opc'>{t('descubrenos')}</Link>
+            <Link className='nosotros-opc' to="/quienes-somos">{t('quienes_somos')}</Link>
+            <Link className='nosotros-opc' to="/sobre-nosotros">{t('descubrenos')}</Link>
           </h4>
         </div>
-        <form className="cuentanos" onSubmit={handleSubmit} noValidate>
+        <form noValidate className="cuentanos" onSubmit={handleSubmit}>
           <h3 className="pie-pagina__titulo">{t('cuentanos')}</h3>
           <textarea
             className="cuentanos__input"
@@ -111,19 +135,11 @@ const Footer = () => {
             value={experiencia}
             onChange={e => setExperiencia(e.target.value)}
           />
-          <button type="submit" className="cuentanos__boton">
+          <button className="cuentanos__boton" type="submit">
             {t('enviar')}
           </button>
-          {error && (
-            <p className="cuentanos__mensaje-error" id="error-footer">
-              {error}
-            </p>
-          )}
-          {mensaje && (
-            <p className="cuentanos__mensaje-exito" id="exito-footer">
-              {mensaje}
-            </p>
-          )}
+          {error && <p className="formulario__mensaje-error" id="footer-error">{error}</p>}
+          {mensaje && <p className="formulario__mensaje-exito" id="footer-exito">{mensaje}</p>}
         </form>
       </footer>
   );

@@ -28,8 +28,6 @@ export const productoService = {
                 throw new Error('No hay token de autenticación');
             }
 
-            console.log('Datos del producto a enviar:', producto);
-
             const formData = new FormData();
             
             // Agregar los campos del producto al FormData
@@ -42,12 +40,6 @@ export const productoService = {
                 throw new Error('La imagen es obligatoria');
             }
             formData.append('imagen_producto', producto.imagen_producto);
-
-            // Verificar que todos los campos estén en el FormData
-            console.log('Contenido del FormData:');
-            for (const pair of formData.entries()) {
-                console.log(pair[0] + ': ' + pair[1]);
-            }
 
             const response = await fetch(`${API_URL}/productos`, {
                 method: 'POST',

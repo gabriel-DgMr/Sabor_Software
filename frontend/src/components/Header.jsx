@@ -37,7 +37,7 @@ const Header = () => {
       <header className="encabezado">
         <div className="encabezado__contenedor">
 
-          <Link to="/"><img className="encabezado__logo" alt="Logo Sabor" src="/images/logo_sabor.png" /></Link>
+          <Link to="/"><img alt="Logo Sabor" className="encabezado__logo" src="/images/logo_sabor.png" /></Link>
           <div className="encabezado__informacion">
             <nav className="encabezado__links">              {/* Estas opciones solo deben mostrarse en escritorio */}
               {!isMobileMenu && (
@@ -56,7 +56,7 @@ const Header = () => {
                 type="button"
                 onClick={() => handleIdioma('es')}
               >
-                <ReactCountryFlag countryCode="ES" svg />
+                <ReactCountryFlag svg countryCode="ES" />
               </button>
               <button
                 aria-label="Cambiar a inglés"
@@ -66,7 +66,7 @@ const Header = () => {
                 type="button"
                 onClick={() => handleIdioma('en')}
               >
-                <ReactCountryFlag countryCode="US" svg />
+                <ReactCountryFlag svg countryCode="US" />
               </button>
             </nav>
 
@@ -95,21 +95,21 @@ const Header = () => {
                           className={`menu-perfil__idioma-boton${i18n.language === 'es' ? ' menu-perfil__idioma-boton--activo' : ''}`}
                           onClick={() => handleIdioma('es')}
                         >
-                          <ReactCountryFlag countryCode="ES" svg />
+                          <ReactCountryFlag svg countryCode="ES" />
                         </button>
                         <button
                           aria-label="Cambiar a inglés"
                           className={`menu-perfil__idioma-boton${i18n.language === 'en' ? ' menu-perfil__idioma-boton--activo' : ''}`}
                           onClick={() => handleIdioma('en')}
                         >
-                          <ReactCountryFlag countryCode="US" svg />
+                          <ReactCountryFlag svg countryCode="US" />
                         </button>
                       </div>
-                      <Link className="menu-perfil__opcion" onClick={closeMobileMenu} to="/quienes-somos">{t('quienes_somos')}</Link>
-                      <Link className="menu-perfil__opcion" onClick={closeMobileMenu} to="/sobre-nosotros">{t('sobre_nosotros')}</Link>
-                      <Link className="menu-perfil__opcion" onClick={closeMobileMenu} to="/historial-pedidos">{t('ver_historial_pedidos')}</Link>
-                      <Link className="menu-perfil__opcion" onClick={closeMobileMenu} to="/historial-reservas">{t('ver_historial_reservas')}</Link>
-                      <Link className="menu-perfil__opcion" onClick={closeMobileMenu} to="/actualizar-datos">{t('actualizar_datos')}</Link>
+                      <Link className="menu-perfil__opcion" to="/quienes-somos" onClick={closeMobileMenu}>{t('quienes_somos')}</Link>
+                      <Link className="menu-perfil__opcion" to="/sobre-nosotros" onClick={closeMobileMenu}>{t('sobre_nosotros')}</Link>
+                      <Link className="menu-perfil__opcion" to="/historial-pedidos" onClick={closeMobileMenu}>{t('ver_historial_pedidos')}</Link>
+                      <Link className="menu-perfil__opcion" to="/historial-reservas" onClick={closeMobileMenu}>{t('ver_historial_reservas')}</Link>
+                      <Link className="menu-perfil__opcion" to="/actualizar-datos" onClick={closeMobileMenu}>{t('actualizar_datos')}</Link>
                       <button className="menu-perfil__opcion menu-perfil__opcion--cerrar-sesion" onClick={() => { logout(); closeMobileMenu(); }}>{t('cerrar_sesion')}</button>
                     </div>
                   )}
@@ -138,18 +138,18 @@ const Header = () => {
                           className={`menu-perfil__idioma-boton${i18n.language === 'es' ? ' menu-perfil__idioma-boton--activo' : ''}`}
                           onClick={() => handleIdioma('es')}
                         >
-                          <ReactCountryFlag countryCode="ES" svg />
+                          <ReactCountryFlag svg countryCode="ES" />
                         </button>
                         <button
                           aria-label="Cambiar a inglés"
                           className={`menu-perfil__idioma-boton${i18n.language === 'en' ? ' menu-perfil__idioma-boton--activo' : ''}`}
                           onClick={() => handleIdioma('en')}
                         >
-                          <ReactCountryFlag countryCode="US" svg />
+                          <ReactCountryFlag svg countryCode="US" />
                         </button>
                       </div>
-                      <Link className="menu-perfil__opcion" onClick={closeMobileMenu} to="/quienes-somos">{t('quienes_somos')}</Link>
-                      <Link className="menu-perfil__opcion" onClick={closeMobileMenu} to="/sobre-nosotros">{t('sobre_nosotros')}</Link>
+                      <Link className="menu-perfil__opcion" to="/quienes-somos" onClick={closeMobileMenu}>{t('quienes_somos')}</Link>
+                      <Link className="menu-perfil__opcion" to="/sobre-nosotros" onClick={closeMobileMenu}>{t('sobre_nosotros')}</Link>
                       <button
                         className="menu-perfil__opcion"
                         onClick={() => { setShowLogin(true); closeMobileMenu(); }}
