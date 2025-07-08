@@ -8,8 +8,8 @@
 
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
 
@@ -67,7 +67,7 @@ const ResetPassword = ({ onShowMessage }) => {
     return () => {
       isMounted = false;
     };
-  }, [token, navigate, onShowMessage, isTokenVerified]);
+  }, [token, navigate, onShowMessage, isTokenVerified, t]);
 
   /**
    * Maneja los errores de validación de campos

@@ -21,6 +21,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import helmet from 'helmet';
+import mensajeContactoRoutes from './src/routes/contactoRoutes.js';
 
 const app = express();
 
@@ -39,7 +40,7 @@ app.use(helmet({
         },
     },
     crossOriginEmbedderPolicy: false,
-    crossOriginResourcePolicy: { policy: "cross-origin" }
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
 }));
 
 // Configuración de CORS más permisiva para desarrollo
@@ -81,6 +82,7 @@ app.use('/api/categorias', categoriaRoutes);
 app.use('/api/reservas', reservaRoutes);
 app.use('/api/pedidos', pedidoRoutes);
 app.use('/api/horarios', horarioRoutes);
+app.use('/api', mensajeContactoRoutes);
 
 // Servir archivos estáticos con validaciones de seguridad
 // Ruta principal para uploads

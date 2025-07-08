@@ -198,3 +198,29 @@ export const logAuthAttempt = (req, res, next) => {
 
     next();
 }; 
+
+// Middleware opcional: añade req.user si hay token, pero no obliga a estar autenticado
+export const authenticateTokenOptional = (req, res, next) => {
+    const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        req.user = null;
+        return next();
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key');
+        if (!decoded.id || !decoded.email || !decoded.rol) {
+            req.user = null;
+            return next();
+        }
+        req.user = {
+            id: decoded.id,
+            email: decoded.email,
+            rol: decoded.rol,
+            nombre: decoded.nombre || null
+        };
+        next();
+    } catch (error) {
+        req.user = null;
+        next();
+    }
+}; 

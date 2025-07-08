@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 
 import { useAuth } from '../context/AuthContext';
@@ -33,6 +34,10 @@ const ProtectedRoute = ({ children }) => {
     }
 
     return children;
+};
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default ProtectedRoute; 

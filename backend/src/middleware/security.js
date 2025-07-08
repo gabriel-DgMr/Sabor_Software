@@ -39,6 +39,17 @@ export const registerRateLimiter = rateLimit({
     legacyHeaders: false,
 });
 
+// Rate limiter para mensajes de contacto (máx 3 por día por IP)
+export const contactoRateLimiter = rateLimit({
+    windowMs: 24 * 60 * 60 * 1000, // 24 horas
+    max: 100,
+    message: {
+        message: 'Solo puedes enviar 3 mensajes de contacto por día desde esta IP.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 // Configuración de Helmet para headers de seguridad
 export const helmetConfig = helmet({
     contentSecurityPolicy: {

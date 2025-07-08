@@ -132,7 +132,7 @@ const Home = () => {
         <div className="carrito-icono">
           <FaCartShopping className='carrito' size={30}/>
           {cartCount > 0 && (
-            <span className="carrito-burbuja-cantidad" aria-label={`Productos en el carrito: ${cartCount}`}>{cartCount}</span>
+            <span aria-label={`Productos en el carrito: ${cartCount}`} className="carrito-burbuja-cantidad">{cartCount}</span>
           )}
         </div>
       </Link>
@@ -152,30 +152,30 @@ const Home = () => {
             {imagenesCarrusel.length > 0 && (
               <>
                 <button
-                  className="carrusel-productos__flecha carrusel-productos__flecha--izquierda"
-                  onClick={irAAnterior}
                   aria-label="Anterior"
+                  className="carrusel-productos__flecha carrusel-productos__flecha--izquierda"
                   type="button"
+                  onClick={irAAnterior}
                 >
-                  <FaChevronLeft className="carrusel-productos__icono-flecha" aria-hidden="true" />
+                  <FaChevronLeft aria-hidden="true" className="carrusel-productos__icono-flecha" />
                 </button>
                 <div className="carrusel-productos__diapositiva">
                   <img
-                    src={imagenesCarrusel[indiceCarrusel].src}
                     alt={imagenesCarrusel[indiceCarrusel].alt}
                     className="carrusel-productos__imagen carrusel-productos__imagen--full"
+                    src={imagenesCarrusel[indiceCarrusel].src}
                   />
                   <div className="carrusel-productos__nombre">
                     {imagenesCarrusel[indiceCarrusel].alt}
                   </div>
                 </div>
                 <button
-                  className="carrusel-productos__flecha carrusel-productos__flecha--derecha"
-                  onClick={irASiguiente}
                   aria-label="Siguiente"
+                  className="carrusel-productos__flecha carrusel-productos__flecha--derecha"
                   type="button"
+                  onClick={irASiguiente}
                 >
-                  <FaChevronRight className="carrusel-productos__icono-flecha" aria-hidden="true" />
+                  <FaChevronRight aria-hidden="true" className="carrusel-productos__icono-flecha" />
                 </button>
               </>
             )}
@@ -223,9 +223,9 @@ const Home = () => {
               <h3 className="barra-navegacion__titulo">{t('tipo_plato')}</h3>
               <select
                 className="barra-navegacion__input"
+                disabled={loadingCategorias || !!errorCategorias}
                 value={categoriaSeleccionada}
                 onChange={handleCategoriaChange}
-                disabled={loadingCategorias || !!errorCategorias}
               >
                 <option value="">{'Seleccionar categoría'}</option>
                 {categorias && categorias.map(cat => (
@@ -264,7 +264,7 @@ const Home = () => {
           <div className="productos">
             {state.loading && state.productos.length > 0 ? (
               <div className="productos__loading">
-                <div className="loading-spinner"></div>
+                <div className="loading-spinner" />
                 <p>Aplicando filtros...</p>
               </div>
             ) : productosMostrados.length === 0 ? (

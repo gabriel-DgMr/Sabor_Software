@@ -15,6 +15,7 @@ import Checkout from './pages/Checkout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import DashboardVentas from './pages/DashboardVentas.jsx';
 import EmpleadosHome from './pages/EmpleadosHome.jsx';
+import EscanearQR from './pages/EscanearQR.jsx';
 import HistorialPedidos from './pages/HistorialPedidos.jsx';
 import HistorialReservas from './pages/HistorialReservas.jsx';
 import Home from './pages/Home.jsx';
@@ -45,6 +46,7 @@ function App() {
               <Route element={<ModificarPedido />} path="/carrito/modificar/:id"/>
               <Route element={<QuienesSomos />} path="/quienes-somos" />
               <Route element={<SobreNosotros />} path="/sobre-nosotros" />
+              <Route element={<EscanearQR />} path="/escanear-qr" />
               
 
               {/* Rutas protegidas */}
@@ -120,7 +122,7 @@ function App() {
                 }
                 path="/historial-reservas"
               />
-              <Route path="*" element={<PaginaNoEncontrada />} />
+              <Route element={<PaginaNoEncontrada />} path="*" />
             </Routes>
           </CartProvider>
         </CategoriaProvider>

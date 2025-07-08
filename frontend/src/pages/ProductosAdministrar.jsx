@@ -34,26 +34,12 @@ const ProductosAdministrar = () => {
   useEffect(() => {
     const cargarProductos = async () => {
       try {
-        console.log('Iniciando carga de productos...');
         dispatch({ type: 'SET_LOADING', payload: true });
         
         const productos = await productoService.obtenerTodos();
-        console.log('Productos cargados:', productos);
-        console.log('Número de productos:', productos.length);
-        
-        if (productos.length === 0) {
-          console.log('No se encontraron productos');
-        } else {
-          console.log('Ejemplo de producto:', {
-            id: productos[0].id_producto,
-            nombre: productos[0].nombre_producto,
-            categoria: productos[0].nombre_categoria
-          });
-        }
         
         dispatch({ type: 'SET_PRODUCTOS', payload: productos });
       } catch (error) {
-        console.error('Error al cargar productos:', error);
         dispatch({ type: 'SET_ERROR', payload: error.message });
       } finally {
         dispatch({ type: 'SET_LOADING', payload: false });
@@ -218,7 +204,6 @@ const ProductosAdministrar = () => {
       }, 3000);
       
     } catch (error) {
-      console.error('Error al procesar el producto:', error);
       dispatch({ type: 'SET_ERROR', payload: error.message });
     } finally {
       setLoadingStates(prev => ({ ...prev, submit: false }));
@@ -245,11 +230,7 @@ const ProductosAdministrar = () => {
     return acc;
   }, {});
 
-  console.log('Productos agrupados por categoría:', productosPorCategoria);
-  console.log('Categorías encontradas:', Object.keys(productosPorCategoria));
-
   if (state.loading) {
-    console.log('Estado de carga: true');
     return (
       <div className='layout'>
         <MenuLateral />
@@ -264,7 +245,6 @@ const ProductosAdministrar = () => {
   }
 
   if (state.error) {
-    console.error('Error en el estado:', state.error);
     return (
       <div className='layout'>
         <MenuLateral />
@@ -284,7 +264,6 @@ const ProductosAdministrar = () => {
   }
 
   if (state.productos.length === 0) {
-    console.log('No hay productos para mostrar');
     return (
       <div className='layout'>
         <MenuLateral />

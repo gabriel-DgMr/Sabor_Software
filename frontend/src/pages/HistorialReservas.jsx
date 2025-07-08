@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import Header from '../components/Header.jsx';
 import Footer from '../components/Footer.jsx';
 import '../styles/historialReservas.css';
+import axios from 'axios';
 
 const HistorialReservas = () => {
   const [reservas, setReservas] = useState([]);

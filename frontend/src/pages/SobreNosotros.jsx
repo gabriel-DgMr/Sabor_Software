@@ -9,15 +9,17 @@ export default function SobreNosotros() {
   return (
     <>
       <Header />
-      <main className="sobre-nosotros__main" style={{padding: '2rem 0', minHeight: '60vh'}}>
-        <div className="container" style={{maxWidth: 800, margin: '0 auto', background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px #0001', padding: 32}}>
-          <h1>{t('sobre_titulo')}</h1>
-          <h2>{t('sobre_historia_titulo')}</h2>
-          <p>{t('sobre_historia')}</p>
-          <h2>{t('sobre_equipo_titulo')}</h2>
-          <p>{t('sobre_equipo')}</p>
-          <h2>{t('sobre_contacto_titulo')}</h2>
-          <p>{t('sobre_contacto')}</p>
+      <main className="sobre-nosotros__main">
+        <div className="sobre-nosotros__container">
+          <h1 className="sobre-nosotros__titulo">{t('sobre_titulo')}</h1>
+          <div className='sobre-nosotros__historia'>
+          <h2 className="sobre-nosotros__subtitulo">{t('sobre_historia_titulo')}</h2>
+          <p className="sobre-nosotros__texto">{t('sobre_historia')}</p>
+          </div>
+          <div className='sobre-nostros__contacto'>
+          <h2 className="sobre-nosotros__subtitulo">{t('sobre_contacto_titulo')}</h2>
+          <p className="sobre-nosotros__texto">{t('sobre_contacto')}</p>
+          </div>
         </div>
       </main>
       <Footer />

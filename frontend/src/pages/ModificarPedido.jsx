@@ -65,9 +65,7 @@ const ModificarPedido = () => {
                   {t('modificar_info_adicional')}
                 </div>
                 <textarea
-                  value={recomendaciones}
                   placeholder={t('modificar_placeholder')}
-                  onChange={(e) => setRecomendaciones(e.target.value)}
                   style={{
                     width: '100%',
                     minHeight: '100px',
@@ -77,6 +75,8 @@ const ModificarPedido = () => {
                     fontSize: '1rem',
                     resize: 'vertical'
                   }}
+                  value={recomendaciones}
+                  onChange={(e) => setRecomendaciones(e.target.value)}
                 />
               </div>
             </div>

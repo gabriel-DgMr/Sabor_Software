@@ -128,8 +128,8 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
     return (
       <EmailVerification
         email={registeredEmail}
-        onVerificationSuccess={handleVerificationSuccess}
         onBackToLogin={handleBackToLogin}
+        onVerificationSuccess={handleVerificationSuccess}
       />
     );
   }

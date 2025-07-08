@@ -125,9 +125,9 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
       {typeof window !== 'undefined' && localStorage.getItem('pendingVerificationEmail') && (
         <button
           className="formulario__boton-secundario"
+          style={{ marginTop: '1rem' }}
           type="button"
           onClick={onShowVerification}
-          style={{ marginTop: '1rem' }}
         >
           {t('volver_a_verificar_email') || 'Verificar mi email'}
         </button>
