@@ -3,8 +3,12 @@
 -- Fecha: 2024-01-01
 
 -- Crear base de datos
-DROP DATABASE IF EXISTS sabor_db_1;
-CREATE DATABASE sabor_db_1 
+-- En Docker, la base de datos ya existe, por lo que solo la usamos
+CREATE DATABASE IF NOT EXISTS sabor_db_1 
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
-USE sabor_db_1; 
+USE sabor_db_1;
+
+-- Registrar esta migration como ejecutada
+INSERT IGNORE INTO migration_history (migration_file, status) VALUES 
+('001_create_database.sql', 'success'); 

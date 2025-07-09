@@ -2,6 +2,9 @@
 -- Descripción: Insertar datos iniciales en las tablas del sistema
 -- Fecha: 2024-01-03
 
+-- Usar la base de datos sabor_db_1
+USE sabor_db_1;
+
 -- ========================
 -- INSERCIÓN DE DATOS BASE
 -- ========================
@@ -137,4 +140,8 @@ INSERT INTO configuracion_horarios (dia_semana, hora_inicio, hora_fin, capacidad
 ('DOMINGO', '14:00', '15:00', 20),
 ('DOMINGO', '19:00', '20:00', 20),
 ('DOMINGO', '20:00', '21:00', 20),
-('DOMINGO', '21:00', '22:00', 20); 
+('DOMINGO', '21:00', '22:00', 20);
+
+-- Registrar esta migration como ejecutada
+INSERT IGNORE INTO migration_history (migration_file, status) VALUES 
+('003_insert_initial_data.sql', 'success'); 

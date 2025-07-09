@@ -2,6 +2,9 @@
 -- Descripción: Crear triggers para automatizar operaciones en la base de datos
 -- Fecha: 2024-01-04
 
+-- Usar la base de datos sabor_db_1
+USE sabor_db_1;
+
 -- ========================
 -- TRIGGERS
 -- ========================
@@ -37,4 +40,8 @@ BEGIN
   UPDATE productos SET stock = stock + OLD.cantidad WHERE id_producto = OLD.id_producto;
 END//
 
-DELIMITER ; 
+DELIMITER ;
+
+-- Registrar esta migration como ejecutada
+INSERT IGNORE INTO migration_history (migration_file, status) VALUES 
+('004_create_triggers.sql', 'success'); 

@@ -1,0 +1,31 @@
+# Dockerfile para MySQL con inicialización automática de Migrations
+# Este contenedor crea la base de datos usando los archivos de migration
+
+FROM mysql:8.0
+
+# Configurar variables de entorno por defecto
+ENV MYSQL_ROOT_PASSWORD=rootpassword
+ENV MYSQL_DATABASE=sabor_db_1
+ENV MYSQL_USER=sabor_user
+ENV MYSQL_PASSWORD=sabor_password
+
+# Configurar MySQL para aceptar conexiones desde cualquier host
+ENV MYSQL_ROOT_HOST=%
+
+# Copiar todos los archivos SQL de migrations para inicialización automática
+# MySQL ejecuta automáticamente todos los .sql en /docker-entrypoint-initdb.d/ en orden alfabético
+COPY migrations/*.sql /docker-entrypoint-initdb.d/
+
+# Configurar charset y collation por defecto
+RUN echo '[mysqld]' >> /etc/mysql/conf.d/charset.cnf && \
+    echo 'character-set-server=utf8mb4' >> /etc/mysql/conf.d/charset.cnf && \
+    echo 'collation-server=utf8mb4_unicode_ci' >> /etc/mysql/conf.d/charset.cnf && \
+    echo 'default-authentication-plugin=mysql_native_password' >> /etc/mysql/conf.d/charset.cnf
+
+# Exponer puerto MySQL
+EXPOSE 3306
+
+# Etiquetas para identificación
+LABEL maintainer="Sistema Sabor"
+LABEL description="MySQL container with Sabor database migrations"
+LABEL version="1.0" 

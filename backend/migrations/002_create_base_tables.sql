@@ -2,6 +2,9 @@
 -- Descripción: Crear todas las tablas base del sistema
 -- Fecha: 2024-01-02
 
+-- Usar la base de datos sabor_db_1
+USE sabor_db_1;
+
 -- ========================
 -- TABLAS BASE
 -- ========================
@@ -181,4 +184,8 @@ CREATE TABLE excepciones_horarios (
     capacidad_maxima INT,
     motivo VARCHAR(255),
     activo BOOLEAN DEFAULT true
-); 
+);
+
+-- Registrar esta migration como ejecutada
+INSERT IGNORE INTO migration_history (migration_file, status) VALUES 
+('002_create_base_tables.sql', 'success'); 

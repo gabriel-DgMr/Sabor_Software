@@ -2,6 +2,9 @@
 -- Descripción: Crear índices para optimizar las consultas en la base de datos
 -- Fecha: 2024-01-05
 
+-- Usar la base de datos sabor_db_1
+USE sabor_db_1;
+
 -- ========================
 -- ÍNDICES
 -- ========================
@@ -19,4 +22,8 @@ CREATE INDEX idx_pedidos_empleado ON pedidos(id_empleado);
 CREATE INDEX idx_pedidos_estado ON pedidos(id_estado);
 
 -- Índice para búsquedas por fecha en reservaciones
-CREATE INDEX idx_reservaciones_fecha ON reservaciones(fecha_reservacion); 
+CREATE INDEX idx_reservaciones_fecha ON reservaciones(fecha_reservacion);
+
+-- Registrar esta migration como ejecutada
+INSERT IGNORE INTO migration_history (migration_file, status) VALUES 
+('005_create_indexes.sql', 'success'); 

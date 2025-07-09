@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # Servicio MySQL con migrations automáticas
+  mysql-sabor:
+    build:
+      context: .
+      dockerfile: Dockerfile.mysql
+    container_name: sabor-mysql
+    restart: always
+    environment:
+      # Configuración principal de MySQL
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-sabor_db_1}
+      MYSQL_USER: ${MYSQL_USER:-sabor_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-sabor_password}
+      
+      # Configuración adicional
+      MYSQL_ROOT_HOST: '%'
+      
+      # Timezone
+      TZ: America/Bogota
+    
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    
+    volumes:
+      # Volumen persistente para datos de MySQL
+      - mysql_data:/var/lib/mysql
+      
+      # Volumen para logs
+      - mysql_logs:/var/log/mysql
+      
+      # Configuración personalizada (opcional)
+      - ./mysql/conf.d:/etc/mysql/conf.d:ro
+    
+    networks:
+      - sabor-network
+    
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 40s
+    
+    # Configuración de recursos
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+# Volúmenes persistentes
+volumes:
+  mysql_data:
+    driver: local
+    name: sabor_mysql_data
+  mysql_logs:
+    driver: local
+    name: sabor_mysql_logs
+
+# Red personalizada
+networks:
+  sabor-network:
+    driver: bridge
+    name: sabor-network 

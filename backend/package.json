@@ -12,7 +12,13 @@
     "lint:fix": "eslint src/ --fix",
     "migrate:run": "node migrations/runMigrations.js run",
     "migrate:status": "node migrations/runMigrations.js status",
-    "migrate:help": "node migrations/runMigrations.js help"
+    "migrate:help": "node migrations/runMigrations.js help",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build mysql-sabor",
+    "docker:logs": "docker-compose logs -f mysql-sabor",
+    "docker:ps": "docker-compose ps",
+    "docker:mysql": "docker exec -it sabor-mysql mysql -u sabor_user -p sabor_db_1"
   },
   "author": "",
   "license": "ISC",
