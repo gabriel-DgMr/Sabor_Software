@@ -1,5 +1,10 @@
 import jwt from 'jsonwebtoken';
 
+// Validar que JWT_SECRET esté configurado
+if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET es requerido. Configurar en variables de entorno.');
+}
+
 export const authenticateToken = (req, res, next) => {
     try {
         const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
@@ -17,7 +22,9 @@ export const authenticateToken = (req, res, next) => {
                 code: 'TOKEN_INVALID_FORMAT'
             });
         }
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key');
+        
+        // ✅ MEJORADO: Solo usar variable de entorno, sin fallback
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         
         // Validar que el token contenga la información necesaria
         if (!decoded.id || !decoded.email || !decoded.rol) {
@@ -67,7 +74,7 @@ export const authenticateToken = (req, res, next) => {
     }
 };
 
-// Middleware para verificar roles
+// ✅ MEJORADO: Middleware para verificar roles sin exponer información sensible
 export const checkRole = (roles) => {
     return (req, res, next) => {
         if (!req.user) {
@@ -83,10 +90,9 @@ export const checkRole = (roles) => {
 
         if (!roles.includes(req.user.rol)) {
             return res.status(403).json({ 
-                message: 'No autorizado - Rol no permitido',
-                code: 'INSUFFICIENT_PERMISSIONS',
-                requiredRoles: roles,
-                userRole: req.user.rol
+                message: 'No autorizado - Permisos insuficientes',
+                code: 'INSUFFICIENT_PERMISSIONS'
+                // ❌ REMOVIDO: requiredRoles, userRole (información sensible)
             });
         }
 
@@ -125,7 +131,7 @@ export const checkOwnership = (resourceIdField = 'id') => {
     };
 };
 
-// Middleware para verificar permisos específicos
+// ✅ MEJORADO: Middleware para verificar permisos sin exponer información
 export const checkPermission = (permission) => {
     return (req, res, next) => {
         if (!req.user) {
@@ -146,10 +152,9 @@ export const checkPermission = (permission) => {
         
         if (!userPermissions.includes(permission)) {
             return res.status(403).json({ 
-                message: 'No autorizado - Permiso insuficiente',
-                code: 'INSUFFICIENT_PERMISSIONS',
-                requiredPermission: permission,
-                userPermissions: userPermissions
+                message: 'No autorizado - Permisos insuficientes',
+                code: 'INSUFFICIENT_PERMISSIONS'
+                // ❌ REMOVIDO: requiredPermission, userPermissions (información sensible)
             });
         }
 
@@ -199,7 +204,7 @@ export const logAuthAttempt = (req, res, next) => {
     next();
 }; 
 
-// Middleware opcional: añade req.user si hay token, pero no obliga a estar autenticado
+// ✅ MEJORADO: Middleware opcional sin clave hardcodeada
 export const authenticateTokenOptional = (req, res, next) => {
     const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
     if (!token) {
@@ -207,7 +212,7 @@ export const authenticateTokenOptional = (req, res, next) => {
         return next();
     }
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (!decoded.id || !decoded.email || !decoded.rol) {
             req.user = null;
             return next();

@@ -1,5 +1,10 @@
 import { reservaModel } from '../models/reservaModel.js'; // Importar el nuevo modelo de reserva
 import * as authModel from '../models/authModel.js'; // Importar authModel para manejar clientes
+import { generateReservationPassword } from '../utils/passwordGenerator.js';
+import { sendTemporaryPasswordEmail } from '../services/emailService.js';
+import { createSecureLogger } from '../utils/logger.js';
+
+const logger = createSecureLogger('reservaController');
 
 /** 
  * Maneja la solicitud para crear una nueva reserva.
@@ -7,11 +12,16 @@ import * as authModel from '../models/authModel.js'; // Importar authModel para 
  * @param {Object} res - El objeto de respuesta de Express.
  */
 export const hacerReserva = async (req, res) => {
-  console.log('BODY RECIBIDO EN BACKEND:', req.body);
-  // Permitir reservas sin autenticación
-  // Si req.user existe, usar su email, si no, usar el del body
+  const startTime = Date.now();
+  
+  // ✅ MEJORADO: Logging seguro
+  logger.info('Nueva solicitud de reserva recibida', {
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
+    hasAuth: !!req.user
+  });
+  
   const datosReserva = req.body;
-  console.log('Datos de reserva recibidos para validación y creación:', datosReserva);
 
   const errors = {};
 
@@ -43,7 +53,10 @@ export const hacerReserva = async (req, res) => {
 
   // Si hay errores de validación, enviar respuesta 400
   if (Object.keys(errors).length > 0) {
-    console.log('Errores de validación:', errors);
+    logger.warn('Errores de validación en reserva', {
+      errors: Object.keys(errors),
+      ip: req.ip
+    });
     return res.status(400).json({ message: 'Error en los datos de la reserva.', errors });
   }
 
@@ -51,24 +64,59 @@ export const hacerReserva = async (req, res) => {
     // 1. Buscar cliente por email (incluyendo no verificados/inactivos)
     let cliente = await authModel.getUserByEmailIncludingUnverified(datosReserva.email);
 
-    // 2. Si el cliente no existe, crearlo
+    // ✅ MEJORADO: Si el cliente no existe, crearlo con contraseña temporal segura
     if (!cliente) {
-      console.log('Cliente no encontrado, creando nuevo...');
+      logger.info('Cliente no encontrado, creando cuenta temporal', {
+        email: datosReserva.email.replace(/(.{3}).+(.{3}@.+)/, '$1***$2'),
+        ip: req.ip
+      });
+      
       try {
+        // ✅ MEJORADO: Generar contraseña temporal segura
+        const tempPasswordData = generateReservationPassword();
+        
+        // Crear usuario con contraseña temporal segura
         const nuevoClienteId = await authModel.registerUser({
           nombre_cliente: datosReserva.nombre,
           email_cliente: datosReserva.email,
           telefono_cliente: datosReserva.telefono,
-          contraseña_cliente: 'temporal_password_for_reservation'
+          contraseña_cliente: tempPasswordData.password
         });
-        // Obtener el objeto cliente recién creado para obtener el id
+        
+        // Obtener el objeto cliente recién creado
         cliente = await authModel.getUserByEmailIncludingUnverified(datosReserva.email);
         if (!cliente) {
           throw new Error('Error al obtener el cliente recién creado.');
         }
-        console.log('Cliente creado con ID:', cliente.id_cliente);
+        
+        // ✅ MEJORADO: Enviar email con contraseña temporal
+        try {
+          await sendTemporaryPasswordEmail({
+            email: datosReserva.email,
+            nombre: datosReserva.nombre,
+            password: tempPasswordData.password,
+            expiresIn: tempPasswordData.expiresIn,
+            reason: 'reserva'
+          });
+          
+          logger.info('Cuenta temporal creada y email enviado', {
+            clienteId: cliente.id_cliente,
+            email: datosReserva.email.replace(/(.{3}).+(.{3}@.+)/, '$1***$2'),
+            passwordStrength: tempPasswordData.strength.level
+          });
+          
+        } catch (emailError) {
+          logger.error('Error enviando email de contraseña temporal', {
+            clienteId: cliente.id_cliente,
+            error: emailError.message
+          });
+          
+          // No fallar la reserva por error de email, pero informar al usuario
+          logger.warn('Reserva continuará sin notificación por email');
+        }
+        
       } catch (error) {
-        // Si el correo o teléfono ya existe, buscar el cliente existente y continuar
+        // Si el correo o teléfono ya existe, buscar el cliente existente
         if (
           error.message.includes('correo ya está registrado') ||
           error.message.includes('teléfono ya está registrado')
@@ -77,8 +125,16 @@ export const hacerReserva = async (req, res) => {
           if (!cliente) {
             throw new Error('Error al obtener el cliente existente tras intento de registro.');
           }
-          console.log('Cliente ya existía, usando ID:', cliente.id_cliente);
+          
+          logger.info('Cliente ya existía, usando cuenta existente', {
+            clienteId: cliente.id_cliente,
+            email: datosReserva.email.replace(/(.{3}).+(.{3}@.+)/, '$1***$2')
+          });
         } else {
+          logger.error('Error creando cliente temporal', {
+            error: error.message,
+            email: datosReserva.email.replace(/(.{3}).+(.{3}@.+)/, '$1***$2')
+          });
           throw error;
         }
       }
@@ -88,13 +144,19 @@ export const hacerReserva = async (req, res) => {
 
     // Verificar si el cliente está activo y verificado
     if (!cliente.activo || !cliente.email_verificado) {
+      logger.warn('Intento de reserva con cuenta no verificada', {
+        clienteId: cliente.id_cliente,
+        activo: cliente.activo,
+        verificado: cliente.email_verificado,
+        ip: req.ip
+      });
+      
       return res.status(403).json({
         message: 'No puedes crear una reservación hasta que verifiques tu cuenta. Por favor revisa tu correo electrónico.'
       });
     }
 
     // Usar el nuevo modelo para crear la reserva en la base de datos MySQL
-    // Pasar id_cliente en lugar de nombre, telefono, email
     const reservaId = await reservaModel.createReserva({
       id_cliente: id_cliente,
       numero_personas: datosReserva.personas,
@@ -103,14 +165,39 @@ export const hacerReserva = async (req, res) => {
       notas: datosReserva.peticiones
     });
 
-    console.log('Reserva guardada con éxito con ID:', reservaId);
+    // ✅ MEJORADO: Logging seguro de reserva exitosa
+    const processingTime = Date.now() - startTime;
+    logger.info('Reserva creada exitosamente', {
+      reservaId: reservaId,
+      clienteId: id_cliente,
+      fecha: datosReserva.fecha,
+      hora: datosReserva.hora,
+      personas: datosReserva.personas,
+      processingTime: `${processingTime}ms`,
+      ip: req.ip
+    });
 
-    res.status(201).json({ message: 'Reserva creada con éxito!', reservaId: reservaId });
+    res.status(201).json({ 
+      message: 'Reserva creada con éxito!', 
+      reservaId: reservaId,
+      fecha: datosReserva.fecha,
+      hora: datosReserva.hora
+    });
   } catch (error) {
-    console.error('Error al guardar la reserva:', error);
+    const processingTime = Date.now() - startTime;
+    
+    // ✅ MEJORADO: Logging seguro de errores
+    logger.error('Error al crear reserva', {
+      error: error.message,
+      processingTime: `${processingTime}ms`,
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+    
     if (error.message.includes('No hay disponibilidad')) {
       return res.status(400).json({ message: error.message });
     }
+    
     res.status(500).json({ message: 'Error interno del servidor al crear la reserva.' });
   }
 };

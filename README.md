@@ -123,6 +123,18 @@ Si encuentras errores al ejecutar las migrations:
 3. Asegúrate de que el usuario tenga permisos para crear bases de datos
 4. Revisa los logs detallados que proporciona el sistema
 
+### 📊 Análisis de la Estructura de Base de Datos
+Para un análisis detallado de la estructura actual de la base de datos, incluyendo evaluación de normalización, principios SOLID, escalabilidad y recomendaciones de mejora, consulta:
+
+📖 **[Análisis Completo de la Base de Datos](backend/ANALISIS_BD.md)**
+
+Este documento incluye:
+- ✅ Evaluación de la estructura actual
+- 🔍 Análisis de normalización y principios SOLID
+- 📈 Recomendaciones de mejora
+- 🚀 Diseño propuesto para mejor escalabilidad
+- 📋 Plan de migración detallado
+
 ## Ejecución del Proyecto
 
 Para iniciar el servidor en modo desarrollo:
