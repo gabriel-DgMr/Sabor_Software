@@ -1,0 +1,22 @@
+-- Migration: 005_create_indexes.sql
+-- Descripción: Crear índices para optimizar las consultas en la base de datos
+-- Fecha: 2024-01-05
+
+-- ========================
+-- ÍNDICES
+-- ========================
+
+-- Índice para búsquedas por categoría en productos
+CREATE INDEX idx_productos_categoria ON productos(id_categoria);
+
+-- Índice para búsquedas por cliente en pedidos
+CREATE INDEX idx_pedidos_cliente ON pedidos(id_cliente);
+
+-- Índice para búsquedas por empleado en pedidos
+CREATE INDEX idx_pedidos_empleado ON pedidos(id_empleado);
+
+-- Índice para búsquedas por estado en pedidos
+CREATE INDEX idx_pedidos_estado ON pedidos(id_estado);
+
+-- Índice para búsquedas por fecha en reservaciones
+CREATE INDEX idx_reservaciones_fecha ON reservaciones(fecha_reservacion); 

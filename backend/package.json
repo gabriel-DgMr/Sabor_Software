@@ -9,7 +9,10 @@
     "start": "node index.js",
     "security-check": "npm audit",
     "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix"
+    "lint:fix": "eslint src/ --fix",
+    "migrate:run": "node migrations/runMigrations.js run",
+    "migrate:status": "node migrations/runMigrations.js status",
+    "migrate:help": "node migrations/runMigrations.js help"
   },
   "author": "",
   "license": "ISC",
