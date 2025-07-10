@@ -44,7 +44,7 @@ PORT=3000
 DB_HOST=localhost
 DB_USER=tu_usuario
 DB_PASSWORD=tu_contraseña
-DB_NAME=sabor_db_1
+DB_NAME=sabor_db
 JWT_SECRET=tu_secreto_jwt
 SESSION_SECRET=secret_key
 ```
@@ -103,7 +103,7 @@ npm run migrate:help
 - `npm run migrate:help` - Muestra información de ayuda
 
 #### ¿Qué incluyen las Migrations?
-- **001_create_database.sql**: Creación de la base de datos `sabor_db_1`
+- **001_create_database.sql**: Creación de la base de datos `sabor_db`
 - **002_create_base_tables.sql**: Creación de todas las tablas del sistema
 - **003_insert_initial_data.sql**: Inserción de datos iniciales (categorías, productos, mesas, horarios)
 - **004_create_triggers.sql**: Triggers para automatización de operaciones

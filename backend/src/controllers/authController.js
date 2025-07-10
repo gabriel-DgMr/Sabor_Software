@@ -269,14 +269,14 @@ export const logoutUser = (req, res) => {
 // Controlador para obtener perfil de usuario
 export const getUserProfile = async (req, res) => {
     try {
-        const userId = req.user.id; // Corregido: usar 'id' en vez de 'userId'
-        const user = await authModel.getUserByEmail(req.user.email);
-        
-        if (!user) {
-            return res.status(404).json({
-                message: 'Usuario no encontrado'
-            });
-        }
+        // Como el token JWT ya fue validado por el middleware,
+        // podemos confiar en la información del usuario
+        const user = {
+            id_cliente: req.user.id,
+            email_cliente: req.user.email,
+            nombre_cliente: req.user.nombre,
+            rol: req.user.rol
+        };
 
         res.json({ user });
     } catch (error) {

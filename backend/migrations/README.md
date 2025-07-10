@@ -30,7 +30,7 @@ Crear un archivo `.env` en el directorio raíz del backend:
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=tu_contraseña
-DB_NAME=sabor_db_1
+DB_NAME=sabor_db
 ```
 
 ### 3. Dar permisos de ejecución (Linux/Mac)
@@ -83,7 +83,7 @@ npm run migrate:status
 - **Contenido**: Tabla de control con campos para archivo, fecha de ejecución y estado
 
 ### 001_create_database.sql
-- **Propósito**: Crear la base de datos `sabor_db_1`
+- **Propósito**: Crear la base de datos `sabor_db`
 - **Contenido**: DROP/CREATE de la base de datos con configuración UTF8MB4
 
 ### 002_create_base_tables.sql
@@ -179,7 +179,7 @@ CREATE TABLE user_preferences (
 ### Error: "Database doesn't exist"
 ```bash
 # Asegurar que la base de datos se pueda crear
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS sabor_db_1;"
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS sabor_db;"
 ```
 
 ### Error: "Access denied"

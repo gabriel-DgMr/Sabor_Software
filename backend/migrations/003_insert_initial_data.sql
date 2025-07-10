@@ -2,8 +2,8 @@
 -- Descripción: Insertar datos iniciales en las tablas del sistema
 -- Fecha: 2024-01-03
 
--- Usar la base de datos sabor_db_1
-USE sabor_db_1;
+-- Usar la base de datos sabor_db
+USE sabor_db;
 
 -- ========================
 -- INSERCIÓN DE DATOS BASE

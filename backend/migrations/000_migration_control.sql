@@ -6,8 +6,8 @@
 -- TABLA DE CONTROL DE MIGRATIONS
 -- ========================
 
--- Usar la base de datos sabor_db_1
-USE sabor_db_1;
+-- Usar la base de datos sabor_db
+USE sabor_db;
 
 -- Crear tabla de control de migrations si no existe
 CREATE TABLE IF NOT EXISTS migration_history (

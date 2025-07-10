@@ -2,8 +2,8 @@
 -- Descripción: Crear todas las tablas base del sistema
 -- Fecha: 2024-01-02
 
--- Usar la base de datos sabor_db_1
-USE sabor_db_1;
+-- Usar la base de datos sabor_db
+USE sabor_db;
 
 -- ========================
 -- TABLAS BASE

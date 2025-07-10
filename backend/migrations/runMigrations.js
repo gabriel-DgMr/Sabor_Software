@@ -1,16 +1,35 @@
 #!/usr/bin/env node
 
+// Cargar variables de entorno desde .env
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Obtener la ruta del directorio actual
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Cargar variables de entorno desde el archivo .env en el directorio backend
+dotenv.config({ path: join(__dirname, '..', '.env') });
+
 import MigrationManager from './migrationManager.js';
 
 // Configuración de la base de datos
 const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'sabor_db_1',
+  host: process.env.DB_HOST || process.env.MYSQL_HOST || 'localhost',
+  user: process.env.DB_USER || process.env.MYSQL_USER || 'root',
+  password: process.env.DB_PASSWORD || process.env.MYSQL_PASSWORD || '',
+  database: process.env.DB_NAME || process.env.MYSQL_DATABASE || 'sabor_db',
+  port: parseInt(process.env.DB_PORT || process.env.MYSQL_PORT || '3306', 10),
   multipleStatements: true,
   charset: 'utf8mb4'
 };
+
+console.log('🔧 Configuración de base de datos:');
+console.log(`   Host: ${dbConfig.host}:${dbConfig.port}`);
+console.log(`   Usuario: ${dbConfig.user}`);
+console.log(`   Base de datos: ${dbConfig.database}`);
+console.log(`   Contraseña: ${dbConfig.password ? '***' : 'Sin contraseña'}\n`);
 
 async function main() {
   const args = process.argv.slice(2);
@@ -42,11 +61,13 @@ async function main() {
       console.log('  node runMigrations.js status');
       console.log('  npm run migrate:run');
       console.log('  npm run migrate:status\n');
-      console.log('Variables de entorno:');
-      console.log('  DB_HOST     - Host de la base de datos (default: localhost)');
-      console.log('  DB_USER     - Usuario de la base de datos (default: root)');
-      console.log('  DB_PASSWORD - Contraseña de la base de datos (default: "")');
-      console.log('  DB_NAME     - Nombre de la base de datos (default: sabor_db_1)\n');
+      console.log('Variables de entorno disponibles:');
+      console.log('  DB_HOST/MYSQL_HOST         - Host de la base de datos');
+      console.log('  DB_USER/MYSQL_USER         - Usuario de la base de datos');
+      console.log('  DB_PASSWORD/MYSQL_PASSWORD - Contraseña de la base de datos');
+      console.log('  DB_NAME/MYSQL_DATABASE     - Nombre de la base de datos');
+      console.log('  DB_PORT/MYSQL_PORT         - Puerto de la base de datos\n');
+      console.log('💡 Asegúrate de tener un archivo .env en el directorio backend con las variables configuradas.\n');
       break;
   }
 }

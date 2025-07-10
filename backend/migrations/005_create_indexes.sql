@@ -2,8 +2,8 @@
 -- Descripción: Crear índices para optimizar las consultas en la base de datos
 -- Fecha: 2024-01-05
 
--- Usar la base de datos sabor_db_1
-USE sabor_db_1;
+-- Usar la base de datos sabor_db
+USE sabor_db;
 
 -- ========================
 -- ÍNDICES

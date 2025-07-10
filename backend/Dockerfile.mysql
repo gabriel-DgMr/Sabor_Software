@@ -5,7 +5,7 @@ FROM mysql:8.0
 
 # Configurar variables de entorno por defecto
 ENV MYSQL_ROOT_PASSWORD=rootpassword
-ENV MYSQL_DATABASE=sabor_db_1
+ENV MYSQL_DATABASE=sabor_db
 ENV MYSQL_USER=sabor_user
 ENV MYSQL_PASSWORD=sabor_password
 
@@ -13,14 +13,11 @@ ENV MYSQL_PASSWORD=sabor_password
 ENV MYSQL_ROOT_HOST=%
 
 # Copiar todos los archivos SQL de migrations para inicialización automática
-# MySQL ejecuta automáticamente todos los .sql en /docker-entrypoint-initdb.d/ en orden alfabético
+# MySQL ejecuta automáticamente todos los archivos SQL en /docker-entrypoint-initdb.d/ en orden alfabético
 COPY migrations/*.sql /docker-entrypoint-initdb.d/
 
-# Configurar charset y collation por defecto
-RUN echo '[mysqld]' >> /etc/mysql/conf.d/charset.cnf && \
-    echo 'character-set-server=utf8mb4' >> /etc/mysql/conf.d/charset.cnf && \
-    echo 'collation-server=utf8mb4_unicode_ci' >> /etc/mysql/conf.d/charset.cnf && \
-    echo 'default-authentication-plugin=mysql_native_password' >> /etc/mysql/conf.d/charset.cnf
+# Copiar configuración personalizada de MySQL
+COPY mysql/conf.d/mysql.cnf /etc/mysql/conf.d/
 
 # Exponer puerto MySQL
 EXPOSE 3306

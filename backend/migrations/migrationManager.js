@@ -30,12 +30,103 @@ class MigrationManager {
     }
   }
 
+  // Helper method para procesar archivos SQL
+  processSQLFile(sqlContent) {
+    // Dividir por líneas y procesar
+    const lines = sqlContent.split('\n');
+    const statements = [];
+    let currentStatement = '';
+    let inBlock = false;
+    let blockDepth = 0;
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      
+      // Saltar líneas de comentarios y líneas vacías
+      if (trimmedLine.startsWith('--') || trimmedLine === '') {
+        continue;
+      }
+      
+      // Agregar línea al statement actual
+      currentStatement += line + '\n';
+      
+      // Detectar inicio de bloques (triggers, procedimientos, etc.)
+      if (trimmedLine.toUpperCase().includes('BEGIN')) {
+        inBlock = true;
+        blockDepth++;
+      }
+      
+      // Detectar fin de bloques
+      if (trimmedLine.toUpperCase().includes('END')) {
+        if (inBlock) {
+          blockDepth--;
+          if (blockDepth === 0) {
+            inBlock = false;
+          }
+        }
+      }
+      
+      // Si la línea termina con ';' y no estamos en un bloque, terminar el statement
+      if (trimmedLine.endsWith(';') && !inBlock) {
+        const statement = currentStatement.trim();
+        if (statement) {
+          statements.push(statement);
+        }
+        currentStatement = '';
+      }
+    }
+    
+    // Agregar último statement si no terminó con ';'
+    if (currentStatement.trim()) {
+      statements.push(currentStatement.trim());
+    }
+    
+    return statements;
+  }
+
+  // Helper method para ejecutar statements SQL
+  async executeStatement(statement) {
+    const trimmedStatement = statement.trim().toUpperCase();
+    
+    // Comandos que no son compatibles con prepared statements
+    const unsupportedCommands = [
+      'USE ', 
+      'CREATE DATABASE', 
+      'DROP DATABASE', 
+      'SHOW ', 
+      'DESCRIBE ', 
+      'DESC ',
+      'CREATE TRIGGER',
+      'DROP TRIGGER',
+      'CREATE PROCEDURE',
+      'DROP PROCEDURE',
+      'CREATE FUNCTION',
+      'DROP FUNCTION'
+    ];
+    const requiresQuery = unsupportedCommands.some(cmd => trimmedStatement.startsWith(cmd));
+    
+    if (requiresQuery) {
+      return await this.connection.query(statement);
+    } else {
+      return await this.connection.execute(statement);
+    }
+  }
+
   async initializeMigrationTable() {
     try {
       const migrationControlPath = path.join(this.migrationsPath, '000_migration_control.sql');
       const migrationControlSQL = fs.readFileSync(migrationControlPath, 'utf8');
       
-      await this.connection.execute(migrationControlSQL);
+      // Procesar el archivo SQL
+      const statements = this.processSQLFile(migrationControlSQL);
+      
+      // Ejecutar cada declaración
+      for (const statement of statements) {
+        if (statement.trim()) {
+          await this.executeStatement(statement);
+        }
+      }
+      
       console.log('📋 Tabla de control de migrations inicializada');
     } catch (error) {
       console.error('❌ Error al inicializar tabla de control:', error);
@@ -74,23 +165,20 @@ class MigrationManager {
       const migrationPath = path.join(this.migrationsPath, migrationFile);
       const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
       
-      // Dividir el SQL en declaraciones individuales
-      const statements = migrationSQL
-        .split(';')
-        .map(stmt => stmt.trim())
-        .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'));
+      // Procesar el archivo SQL
+      const statements = this.processSQLFile(migrationSQL);
       
       // Ejecutar cada declaración
       for (const statement of statements) {
         if (statement.trim()) {
-          await this.connection.execute(statement);
+          await this.executeStatement(statement);
         }
       }
       
       // Registrar el migration como ejecutado
       await this.connection.execute(
-        'INSERT INTO migration_history (migration_file) VALUES (?)',
-        [migrationFile]
+        'INSERT IGNORE INTO migration_history (migration_file, status) VALUES (?, ?)',
+        [migrationFile, 'success']
       );
       
       console.log(`✅ Migration ejecutado exitosamente: ${migrationFile}`);
@@ -98,10 +186,10 @@ class MigrationManager {
     } catch (error) {
       console.error(`❌ Error al ejecutar migration ${migrationFile}:`, error);
       
-      // Registrar el error en la tabla de control
+      // Registrar el error en la tabla de control usando INSERT IGNORE para evitar duplicados
       try {
         await this.connection.execute(
-          'INSERT INTO migration_history (migration_file, status, error_message) VALUES (?, ?, ?)',
+          'INSERT IGNORE INTO migration_history (migration_file, status, error_message) VALUES (?, ?, ?)',
           [migrationFile, 'error', error.message]
         );
       } catch (logError) {

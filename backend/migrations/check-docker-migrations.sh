@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Variables
 CONTAINER_NAME="sabor-mysql"
-DB_NAME="sabor_db_1"
+DB_NAME="sabor_db"
 DB_USER="sabor_user"
 
 echo -e "${BLUE}==============================================================================${NC}"
@@ -106,6 +106,6 @@ echo -e "${BLUE}================================================================
 # Comandos útiles
 echo -e "\n${BLUE}📚 COMANDOS ÚTILES:${NC}"
 echo -e "${YELLOW}• Ver logs: docker-compose logs -f mysql-sabor${NC}"
-echo -e "${YELLOW}• Conectar a MySQL: docker exec -it sabor-mysql mysql -u sabor_user -p sabor_db_1${NC}"
+echo -e "${YELLOW}• Conectar a MySQL: docker exec -it sabor-mysql mysql -u sabor_user -p sabor_db${NC}"
 echo -e "${YELLOW}• Detener: docker-compose down${NC}"
 echo -e "${YELLOW}• Reconstruir: docker-compose build mysql-sabor${NC}" 
