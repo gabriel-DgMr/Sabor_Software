@@ -1,9 +1,10 @@
-import * as authModel from '../models/authModel.js';
+import * as userModel from '../models/userModel.js';
 import validator from 'validator';
+
 // Obtener todos los clientes
 export const getAllClientes = async (req, res) => {
     try {
-        const clientes = await authModel.getAllClientes();
+        const clientes = await userModel.getAllClientes();
         res.json(clientes);
     } catch (error) {
         console.error('Error al obtener clientes:', error);
@@ -16,7 +17,7 @@ export const getAllClientes = async (req, res) => {
 // Obtener cliente por ID
 export const getClienteById = async (req, res) => {
     try {
-        const cliente = await authModel.getClienteById(req.params.id);
+        const cliente = await userModel.getClienteById(req.params.id);
         
         if (!cliente) {
             return res.status(404).json({
@@ -33,21 +34,80 @@ export const getClienteById = async (req, res) => {
     }
 };
 
-// Actualizar cliente
+// Obtener cliente por User ID
+export const getClienteByUserId = async (req, res) => {
+    try {
+        const cliente = await userModel.getClienteByUserId(req.params.userId);
+        
+        if (!cliente) {
+            return res.status(404).json({
+                message: 'Cliente no encontrado'
+            });
+        }
+
+        res.json(cliente);
+    } catch (error) {
+        console.error('Error al obtener cliente por user ID:', error);
+        res.status(500).json({
+            message: 'Error al obtener el cliente'
+        });
+    }
+};
+
+// Obtener perfil del cliente autenticado
+export const getClienteProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const cliente = await userModel.getClienteByUserId(userId);
+        
+        if (!cliente) {
+            return res.status(404).json({
+                message: 'Cliente no encontrado'
+            });
+        }
+
+        res.json(cliente);
+    } catch (error) {
+        console.error('Error al obtener perfil del cliente:', error);
+        res.status(500).json({
+            message: 'Error al obtener el perfil del cliente'
+        });
+    }
+};
+
+// Actualizar cliente (solo datos básicos)
 export const updateCliente = async (req, res) => {
     try {
         const { id } = req.params;
-        const { nombre_cliente, email_cliente, telefono_cliente } = req.body;
+        const { nombre, apellido, telefono, direccion } = req.body;
         
-        const success = await authModel.updateUser(id, {
-            nombre_cliente,
-            email_cliente,
-            telefono_cliente
+        // Validar teléfono si se proporciona
+        if (telefono && !validator.matches(telefono, /^\d{10}$/)) {
+            return res.status(400).json({
+                message: 'El teléfono debe tener 10 dígitos'
+            });
+        }
+
+        // Obtener cliente actual para verificar que existe
+        const cliente = await userModel.getClienteById(id);
+        if (!cliente) {
+            return res.status(404).json({
+                message: 'Cliente no encontrado'
+            });
+        }
+
+        // Actualizar usuario en la tabla users
+        const success = await userModel.updateUser(cliente.id_user, {
+            email: cliente.email, // Mantener email actual
+            nombre,
+            apellido,
+            telefono,
+            direccion
         });
 
         if (!success) {
-            return res.status(404).json({
-                message: 'Cliente no encontrado'
+            return res.status(400).json({
+                message: 'Error al actualizar el cliente'
             });
         }
 
@@ -62,25 +122,257 @@ export const updateCliente = async (req, res) => {
     }
 };
 
-// Eliminar cliente (soft delete)
+// Actualizar perfil del cliente autenticado
+export const updateClienteProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { nombre, apellido, telefono, direccion } = req.body;
+        
+        // Validar teléfono si se proporciona
+        if (telefono && !validator.matches(telefono, /^\d{10}$/)) {
+            return res.status(400).json({
+                message: 'El teléfono debe tener 10 dígitos'
+            });
+        }
+
+        // Obtener datos actuales del usuario
+        const currentUser = await userModel.getUserById(userId);
+        if (!currentUser) {
+            return res.status(404).json({
+                message: 'Usuario no encontrado'
+            });
+        }
+
+        // Actualizar usuario
+        const success = await userModel.updateUser(userId, {
+            email: currentUser.email, // Mantener email actual
+            nombre,
+            apellido,
+            telefono,
+            direccion
+        });
+
+        if (!success) {
+            return res.status(400).json({
+                message: 'Error al actualizar el perfil'
+            });
+        }
+
+        res.json({
+            message: 'Perfil actualizado exitosamente'
+        });
+    } catch (error) {
+        console.error('Error al actualizar perfil del cliente:', error);
+        res.status(500).json({
+            message: 'Error al actualizar el perfil'
+        });
+    }
+};
+
+// Desactivar cliente (soft delete)
 export const deleteCliente = async (req, res) => {
     try {
         const { id } = req.params;
-        const success = await authModel.deactivateUser(id);
-
-        if (!success) {
+        
+        // Obtener cliente para verificar que existe
+        const cliente = await userModel.getClienteById(id);
+        if (!cliente) {
             return res.status(404).json({
                 message: 'Cliente no encontrado'
             });
         }
 
+        // Desactivar usuario
+        const success = await userModel.deactivateUser(cliente.id_user);
+
+        if (!success) {
+            return res.status(400).json({
+                message: 'Error al desactivar el cliente'
+            });
+        }
+
         res.json({
-            message: 'Cliente eliminado exitosamente'
+            message: 'Cliente desactivado exitosamente'
         });
     } catch (error) {
-        console.error('Error al eliminar cliente:', error);
+        console.error('Error al desactivar cliente:', error);
         res.status(500).json({
-            message: 'Error al eliminar el cliente'
+            message: 'Error al desactivar el cliente'
+        });
+    }
+};
+
+// Activar cliente
+export const activateCliente = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Obtener cliente para verificar que existe
+        const cliente = await userModel.getClienteById(id);
+        if (!cliente) {
+            return res.status(404).json({
+                message: 'Cliente no encontrado'
+            });
+        }
+
+        // Activar usuario
+        const success = await userModel.activateUser(cliente.id_user);
+
+        if (!success) {
+            return res.status(400).json({
+                message: 'Error al activar el cliente'
+            });
+        }
+
+        res.json({
+            message: 'Cliente activado exitosamente'
+        });
+    } catch (error) {
+        console.error('Error al activar cliente:', error);
+        res.status(500).json({
+            message: 'Error al activar el cliente'
+        });
+    }
+};
+
+// Crear nuevo cliente (solo para administradores)
+export const createCliente = async (req, res) => {
+    try {
+        const { nombre, apellido, email, telefono, contraseña } = req.body;
+
+        // Validar campos requeridos
+        if (!nombre || !email || !contraseña) {
+            return res.status(400).json({
+                message: 'Nombre, email y contraseña son obligatorios'
+            });
+        }
+
+        // Validar correo
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({
+                message: 'Correo no válido'
+            });
+        }
+
+        // Validar teléfono si se proporciona
+        if (telefono && !validator.matches(telefono, /^\d{10}$/)) {
+            return res.status(400).json({
+                message: 'El teléfono debe tener 10 dígitos'
+            });
+        }
+
+        // Validar contraseña
+        if (!validator.isStrongPassword(contraseña, {
+            minLength: 8,
+            minLowercase: 1,
+            minUppercase: 1,
+            minNumbers: 1,
+            minSymbols: 1
+        })) {
+            return res.status(400).json({
+                message: 'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos'
+            });
+        }
+
+        // Crear cliente
+        const userId = await userModel.createUser({
+            email,
+            password: contraseña,
+            nombre,
+            apellido,
+            telefono,
+            tipo_usuario: 'cliente'
+        });
+
+        res.status(201).json({
+            message: 'Cliente creado exitosamente',
+            userId
+        });
+
+    } catch (error) {
+        console.error('Error al crear cliente:', error);
+        res.status(400).json({
+            message: error.message || 'Error al crear el cliente'
+        });
+    }
+};
+
+// Buscar clientes por término de búsqueda
+export const searchClientes = async (req, res) => {
+    try {
+        const { q } = req.query;
+        
+        if (!q || q.trim().length < 2) {
+            return res.status(400).json({
+                message: 'El término de búsqueda debe tener al menos 2 caracteres'
+            });
+        }
+
+        // Obtener todos los clientes y filtrar por término de búsqueda
+        const allClientes = await userModel.getAllClientes();
+        const filteredClientes = allClientes.filter(cliente => 
+            cliente.nombre.toLowerCase().includes(q.toLowerCase()) ||
+            cliente.email.toLowerCase().includes(q.toLowerCase()) ||
+            (cliente.apellido && cliente.apellido.toLowerCase().includes(q.toLowerCase())) ||
+            (cliente.telefono && cliente.telefono.includes(q))
+        );
+
+        res.json({
+            clientes: filteredClientes,
+            total: filteredClientes.length
+        });
+
+    } catch (error) {
+        console.error('Error al buscar clientes:', error);
+        res.status(500).json({
+            message: 'Error al buscar clientes'
+        });
+    }
+};
+
+// Obtener estadísticas de clientes
+export const getClienteStats = async (req, res) => {
+    try {
+        const stats = await userModel.getUserStats();
+        const clienteStats = stats.find(stat => stat.tipo_usuario === 'cliente');
+        
+        if (!clienteStats) {
+            return res.json({
+                total: 0,
+                activos: 0,
+                verificados: 0
+            });
+        }
+
+        res.json({
+            total: clienteStats.total,
+            activos: clienteStats.activos,
+            verificados: clienteStats.verificados
+        });
+
+    } catch (error) {
+        console.error('Error al obtener estadísticas de clientes:', error);
+        res.status(500).json({
+            message: 'Error al obtener estadísticas'
+        });
+    }
+};
+
+// Obtener clientes recientes
+export const getRecentClientes = async (req, res) => {
+    try {
+        const { limit = 10 } = req.query;
+        const recentUsers = await userModel.getRecentUsers(parseInt(limit));
+        
+        // Filtrar solo clientes
+        const recentClientes = recentUsers.filter(user => user.tipo_usuario === 'cliente');
+        
+        res.json(recentClientes);
+
+    } catch (error) {
+        console.error('Error al obtener clientes recientes:', error);
+        res.status(500).json({
+            message: 'Error al obtener clientes recientes'
         });
     }
 }; 
