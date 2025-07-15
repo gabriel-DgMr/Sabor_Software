@@ -4,7 +4,6 @@ import cookieParser from 'cookie-parser';
 import { config } from './src/config/config.js';
 import { errorHandler, notFoundHandler } from './src/middleware/errorHandler.js';
 import { 
-    helmetConfig, 
     createRateLimiter, 
     authRateLimiter, 
     registerRateLimiter,

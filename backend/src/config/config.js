@@ -11,65 +11,65 @@ dotenv.config({ path: join(__dirname, '../../.env') });
 
 // Validar variables de entorno requeridas
 const requiredEnvVars = [
-    'DB_PASSWORD',
-    'DB_HOST',
-    'DB_USER',
-    'DB_NAME',
-    'PORT',
-    'NODE_ENV',
-    'JWT_SECRET',
-    'COOKIE_SECRET',
-    'EMAIL_USER',
-    'EMAIL_PASSWORD'
+  'DB_PASSWORD',
+  'DB_HOST',
+  'DB_USER',
+  'DB_NAME',
+  'PORT',
+  'NODE_ENV',
+  'JWT_SECRET',
+  'COOKIE_SECRET',
+  'EMAIL_USER',
+  'EMAIL_PASSWORD'
 ];
 
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
-    throw new Error(
-        `Faltan las siguientes variables de entorno requeridas: ${missingEnvVars.join(', ')}`
-    );
+  throw new Error(
+    `Faltan las siguientes variables de entorno requeridas: ${missingEnvVars.join(', ')}`
+  );
 }
 
 export const config = {
-    // Configuración del servidor
-    server: {
-        port: process.env.PORT,
-        mode: process.env.NODE_ENV
-    },
+  // Configuración del servidor
+  server: {
+    port: process.env.PORT,
+    mode: process.env.NODE_ENV
+  },
 
-    // Configuración de la base de datos
-    db: {
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME,
-        port: process.env.DB_PORT
-    },
+  // Configuración de la base de datos
+  db: {
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT
+  },
 
-    // Configuración de JWT
-    jwt: {
-        secret: process.env.JWT_SECRET,
-        expiresIn: process.env.JWT_EXPIRES_IN
-    },
+  // Configuración de JWT
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    expiresIn: process.env.JWT_EXPIRES_IN
+  },
 
-    // Configuración de CORS
-    cors: {
-        origin: process.env.CORS_ORIGIN
-    },
+  // Configuración de CORS
+  cors: {
+    origin: process.env.CORS_ORIGIN
+  },
 
-    // Configuración de cookies
-    cookie: {
-        secret: process.env.COOKIE_SECRET
-    },
+  // Configuración de cookies
+  cookie: {
+    secret: process.env.COOKIE_SECRET
+  },
 
-    // Configuración de correo electrónico
-    email: {
-        user: process.env.EMAIL_USER,
-        password: process.env.EMAIL_PASSWORD
-    },
+  // Configuración de correo electrónico
+  email: {
+    user: process.env.EMAIL_USER,
+    password: process.env.EMAIL_PASSWORD
+  },
 
-    // URL del frontend
-    frontendUrl: process.env.FRONTEND_URL
+  // URL del frontend
+  frontendUrl: process.env.FRONTEND_URL
 };
 

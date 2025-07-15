@@ -25,28 +25,28 @@ router.get('/perfil', authenticateToken, authController.getUserProfile);
 
 // Rutas para gestión de clientes (solo admin)
 router.get('/clientes', 
-    authenticateToken, 
-    checkRole(['admin']), 
-    clienteController.getAllClientes
+  authenticateToken, 
+  checkRole(['admin']), 
+  clienteController.getAllClientes
 );
 
 router.get('/cliente/:id', 
-    authenticateToken, 
-    checkPermission('manage_users'),
-    clienteController.getClienteById
+  authenticateToken, 
+  checkPermission('manage_users'),
+  clienteController.getClienteById
 );
 
 router.put('/actualizarcliente/:id', 
-    authenticateToken, 
-    checkPermission('manage_users'),
-    validateUpdateCliente,
-    clienteController.updateCliente
+  authenticateToken, 
+  checkPermission('manage_users'),
+  validateUpdateCliente,
+  clienteController.updateCliente
 );
 
 router.delete('/eliminarcliente/:id', 
-    authenticateToken, 
-    checkRole(['admin']), 
-    clienteController.deleteCliente
+  authenticateToken, 
+  checkRole(['admin']), 
+  clienteController.deleteCliente
 );
 
 export default router;

@@ -1,0 +1,94 @@
+{
+  "timestamp": "2025-07-12T05:22:31.086Z",
+  "config": {
+    "host": "localhost",
+    "port": "3306",
+    "database": "sabor_db"
+  },
+  "results": [
+    {
+      "category": "Data Generation",
+      "insertedRecords": 2000,
+      "totalTime": 464.452055,
+      "success": true
+    },
+    {
+      "category": "Partition Info",
+      "tests": [
+        {
+          "name": "Partition Info View",
+          "executionTime": 11.488859,
+          "recordCount": 9,
+          "success": true
+        },
+        {
+          "name": "Partition Statistics",
+          "executionTime": 9.5572,
+          "recordCount": 3,
+          "success": true
+        },
+        {
+          "name": "Table Stats",
+          "executionTime": 6.449646,
+          "recordCount": 1,
+          "success": true
+        }
+      ],
+      "success": true
+    },
+    {
+      "category": "Query Performance",
+      "tests": [
+        {
+          "name": "Single Partition Query (Current Month)",
+          "executionTime": 4.120256,
+          "recordCount": 2,
+          "success": true
+        },
+        {
+          "name": "Multi-Partition Query (Last 3 Months)",
+          "executionTime": 10.673641,
+          "recordCount": 3,
+          "success": true
+        },
+        {
+          "name": "User Activity Query",
+          "executionTime": 4.32383,
+          "recordCount": 1,
+          "success": true
+        },
+        {
+          "name": "Action Pattern Analysis",
+          "executionTime": 8.64128,
+          "recordCount": 5,
+          "success": true
+        },
+        {
+          "name": "Specific User History",
+          "executionTime": 6.901812,
+          "recordCount": 5,
+          "success": true
+        }
+      ],
+      "success": true
+    },
+    {
+      "category": "Load Test",
+      "totalTime": 101.024208,
+      "totalQueries": 100,
+      "successfulQueries": 100,
+      "failedQueries": 0,
+      "avgQueryTime": 4.208078930000001,
+      "minTime": 1.766473,
+      "maxTime": 8.569636,
+      "queriesPerSecond": 989.8617566989489,
+      "success": true
+    }
+  ],
+  "summary": {
+    "totalTests": 4,
+    "successfulTests": 4,
+    "failedTests": 0,
+    "totalExecutionTime": 0
+  }
+}

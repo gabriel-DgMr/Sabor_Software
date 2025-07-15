@@ -58,15 +58,15 @@ export const createPedido = async (req, res) => {
 
     // Validar cada item en el array
     for (const item of items) {
-        if (!item.id_producto || typeof item.id_producto !== 'number') {
-            return res.status(400).json({ mensaje: 'Cada item debe tener un id_producto numérico válido' });
-        }
-        if (!item.cantidad || typeof item.cantidad !== 'number' || item.cantidad <= 0) {
-            return res.status(400).json({ mensaje: 'Cada item debe tener una cantidad numérica positiva' });
-        }
-         if (!item.precio_unitario || typeof item.precio_unitario !== 'number' || item.precio_unitario < 0) {
-            return res.status(400).json({ mensaje: 'Cada item debe tener un precio_unitario numérico no negativo' });
-        }
+      if (!item.id_producto || typeof item.id_producto !== 'number') {
+        return res.status(400).json({ mensaje: 'Cada item debe tener un id_producto numérico válido' });
+      }
+      if (!item.cantidad || typeof item.cantidad !== 'number' || item.cantidad <= 0) {
+        return res.status(400).json({ mensaje: 'Cada item debe tener una cantidad numérica positiva' });
+      }
+      if (!item.precio_unitario || typeof item.precio_unitario !== 'number' || item.precio_unitario < 0) {
+        return res.status(400).json({ mensaje: 'Cada item debe tener un precio_unitario numérico no negativo' });
+      }
     }
 
     if (!total || typeof total !== 'number' || total <= 0) {
@@ -75,7 +75,7 @@ export const createPedido = async (req, res) => {
 
     // Validar recomendaciones (opcional, puede ser un string vacío)
     if (recomendaciones !== undefined && typeof recomendaciones !== 'string') {
-        return res.status(400).json({ mensaje: 'Las recomendaciones deben ser un string' });
+      return res.status(400).json({ mensaje: 'Las recomendaciones deben ser un string' });
     }
 
     const pedidoGuardado = await createPedidoFromModel({ userId, items, total, recomendaciones });
