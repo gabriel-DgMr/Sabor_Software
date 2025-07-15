@@ -1,4 +1,5 @@
 import validator from 'validator';
+import { passwordStrength } from 'check-password-strength';
 
 // Función auxiliar para validar caracteres especiales
 const validateSpecialCharacters = (value, fieldName) => {
@@ -53,7 +54,49 @@ const validateEmailFormat = (email) => {
   return emailRegex.test(email);
 };
 
-export const validateRegister = (req, res, next) => {
+// Función helper para validar fortaleza de contraseña
+const validatePasswordStrength = (password) => {
+  const result = passwordStrength(password);
+  
+  // Configuración mínima requerida
+  const minRequiredStrength = 2; // 0: Too weak, 1: Weak, 2: Medium, 3: Strong
+  
+  if (result.id < minRequiredStrength) {
+    const suggestions = [];
+    
+    if (password.length < 8) {
+      suggestions.push('debe tener al menos 8 caracteres');
+    }
+    if (!/[a-z]/.test(password)) {
+      suggestions.push('debe incluir al menos una letra minúscula');
+    }
+    if (!/[A-Z]/.test(password)) {
+      suggestions.push('debe incluir al menos una letra mayúscula');
+    }
+    if (!/\d/.test(password)) {
+      suggestions.push('debe incluir al menos un número');
+    }
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
+      suggestions.push('debe incluir al menos un carácter especial');
+    }
+    
+    return {
+      isValid: false,
+      message: `La contraseña es demasiado débil. ${suggestions.join(', ')}.`,
+      strength: result.value,
+      suggestions: suggestions
+    };
+  }
+  
+  return {
+    isValid: true,
+    strength: result.value,
+    score: result.id
+  };
+};
+
+// Validación específica para registro de clientes usando campos legacy (_cliente)
+export const validateClienteRegisterLegacy = (req, res, next) => {
   const { nombre_cliente, email_cliente, telefono_cliente, contraseña_cliente } = req.body;
 
   // Validar campos requeridos
@@ -133,15 +176,10 @@ export const validateRegister = (req, res, next) => {
   }
 
   // Validar contraseña
-  if (!validator.isStrongPassword(contraseña_cliente, {
-    minLength: 8,
-    minLowercase: 1,
-    minUppercase: 1,
-    minNumbers: 1,
-    minSymbols: 1
-  })) {
+  const passwordStrengthResult = validatePasswordStrength(contraseña_cliente);
+  if (!passwordStrengthResult.isValid) {
     return res.status(400).json({
-      message: 'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos'
+      message: passwordStrengthResult.message
     });
   }
 
@@ -187,6 +225,296 @@ export const validateRegister = (req, res, next) => {
     
   const contraseñaSpaceError = validateSpaces(contraseña_cliente, 'contraseña');
   if (contraseñaSpaceError) validationErrors.push(contraseñaSpaceError);
+
+  if (validationErrors.length > 0) {
+    return res.status(400).json({
+      message: validationErrors.join(', ')
+    });
+  }
+
+  next();
+};
+
+// ===== VALIDACIONES SEPARADAS POR TIPO DE USUARIO =====
+
+// Validación para registro general de usuarios
+export const validateUserRegister = (req, res, next) => {
+  const { nombre, apellido, email, telefono, contraseña, tipo_usuario } = req.body;
+
+  // Validar campos requeridos
+  if (!nombre || !email || !contraseña) {
+    return res.status(400).json({
+      message: 'Nombre, email y contraseña son obligatorios'
+    });
+  }
+
+  // Validar tipo de usuario si se proporciona
+  if (tipo_usuario && !['cliente', 'empleado', 'administrador'].includes(tipo_usuario)) {
+    return res.status(400).json({
+      message: 'Tipo de usuario no válido'
+    });
+  }
+
+  // Validar longitud de campos
+  const lengthErrors = [];
+  const nombreError = validateLength(nombre, 'nombre', 2, 50);
+  if (nombreError) lengthErrors.push(nombreError);
+  
+  if (apellido) {
+    const apellidoError = validateLength(apellido, 'apellido', 2, 50);
+    if (apellidoError) lengthErrors.push(apellidoError);
+  }
+    
+  const emailError = validateLength(email, 'email', 5, 100);
+  if (emailError) lengthErrors.push(emailError);
+
+  if (lengthErrors.length > 0) {
+    return res.status(400).json({
+      message: lengthErrors.join(', ')
+    });
+  }
+
+  // Validar email
+  if (!validateEmailFormat(email)) {
+    return res.status(400).json({
+      message: 'El formato del email no es válido'
+    });
+  }
+
+  const emailWhitespaceError = validateNoWhitespace(email, 'email');
+  if (emailWhitespaceError) {
+    return res.status(400).json({
+      message: emailWhitespaceError
+    });
+  }
+
+  // Validar teléfono si se proporciona
+  if (telefono) {
+    if (!validator.matches(telefono, /^\d{10}$/)) {
+      return res.status(400).json({
+        message: 'El teléfono debe tener exactamente 10 dígitos numéricos'
+      });
+    }
+
+    const telefonoWhitespaceError = validateNoWhitespace(telefono, 'teléfono');
+    if (telefonoWhitespaceError) {
+      return res.status(400).json({
+        message: telefonoWhitespaceError
+      });
+    }
+  }
+
+  // Validar contraseña
+  const passwordStrengthResult = validatePasswordStrength(contraseña);
+  if (!passwordStrengthResult.isValid) {
+    return res.status(400).json({
+      message: passwordStrengthResult.message
+    });
+  }
+
+  // Validar caracteres especiales y espacios
+  const validationErrors = [];
+    
+  const nombreSpecialError = validateSpecialCharacters(nombre, 'nombre');
+  if (nombreSpecialError) validationErrors.push(nombreSpecialError);
+  
+  if (apellido) {
+    const apellidoSpecialError = validateSpecialCharacters(apellido, 'apellido');
+    if (apellidoSpecialError) validationErrors.push(apellidoSpecialError);
+  }
+
+  if (validationErrors.length > 0) {
+    return res.status(400).json({
+      message: validationErrors.join(', ')
+    });
+  }
+
+  next();
+};
+
+// Validación específica para registro de clientes
+export const validateClienteRegister = (req, res, next) => {
+  const { nombre, apellido, email, telefono, contraseña } = req.body;
+
+  // Validar campos requeridos
+  if (!nombre || !email || !contraseña) {
+    return res.status(400).json({
+      message: 'Nombre, email y contraseña son obligatorios'
+    });
+  }
+
+  // Validar longitud de campos
+  const lengthErrors = [];
+  const nombreError = validateLength(nombre, 'nombre', 2, 50);
+  if (nombreError) lengthErrors.push(nombreError);
+  
+  if (apellido) {
+    const apellidoError = validateLength(apellido, 'apellido', 2, 50);
+    if (apellidoError) lengthErrors.push(apellidoError);
+  }
+    
+  const emailError = validateLength(email, 'email', 5, 100);
+  if (emailError) lengthErrors.push(emailError);
+
+  if (lengthErrors.length > 0) {
+    return res.status(400).json({
+      message: lengthErrors.join(', ')
+    });
+  }
+
+  // Validar email
+  if (!validateEmailFormat(email)) {
+    return res.status(400).json({
+      message: 'El formato del email no es válido'
+    });
+  }
+
+  const emailWhitespaceError = validateNoWhitespace(email, 'email');
+  if (emailWhitespaceError) {
+    return res.status(400).json({
+      message: emailWhitespaceError
+    });
+  }
+
+  // Validar teléfono si se proporciona
+  if (telefono) {
+    if (!validator.matches(telefono, /^\d{10}$/)) {
+      return res.status(400).json({
+        message: 'El teléfono debe tener exactamente 10 dígitos numéricos'
+      });
+    }
+
+    const telefonoWhitespaceError = validateNoWhitespace(telefono, 'teléfono');
+    if (telefonoWhitespaceError) {
+      return res.status(400).json({
+        message: telefonoWhitespaceError
+      });
+    }
+  }
+
+  // Validar contraseña
+  const passwordStrengthResult = validatePasswordStrength(contraseña);
+  if (!passwordStrengthResult.isValid) {
+    return res.status(400).json({
+      message: passwordStrengthResult.message
+    });
+  }
+
+  // Validar caracteres especiales y espacios
+  const validationErrors = [];
+    
+  const nombreSpecialError = validateSpecialCharacters(nombre, 'nombre');
+  if (nombreSpecialError) validationErrors.push(nombreSpecialError);
+  
+  if (apellido) {
+    const apellidoSpecialError = validateSpecialCharacters(apellido, 'apellido');
+    if (apellidoSpecialError) validationErrors.push(apellidoSpecialError);
+  }
+
+  if (validationErrors.length > 0) {
+    return res.status(400).json({
+      message: validationErrors.join(', ')
+    });
+  }
+
+  next();
+};
+
+// Validación específica para registro de empleados
+export const validateEmpleadoRegister = (req, res, next) => {
+  const { nombre, apellido, email, telefono, contraseña, direccion, id_rol } = req.body;
+
+  // Validar campos requeridos
+  if (!nombre || !email || !contraseña || !id_rol) {
+    return res.status(400).json({
+      message: 'Nombre, email, contraseña y rol son obligatorios'
+    });
+  }
+
+  // Validar longitud de campos
+  const lengthErrors = [];
+  const nombreError = validateLength(nombre, 'nombre', 2, 50);
+  if (nombreError) lengthErrors.push(nombreError);
+  
+  if (apellido) {
+    const apellidoError = validateLength(apellido, 'apellido', 2, 50);
+    if (apellidoError) lengthErrors.push(apellidoError);
+  }
+    
+  const emailError = validateLength(email, 'email', 5, 100);
+  if (emailError) lengthErrors.push(emailError);
+
+  if (direccion) {
+    const direccionError = validateLength(direccion, 'dirección', 5, 200);
+    if (direccionError) lengthErrors.push(direccionError);
+  }
+
+  if (lengthErrors.length > 0) {
+    return res.status(400).json({
+      message: lengthErrors.join(', ')
+    });
+  }
+
+  // Validar email
+  if (!validateEmailFormat(email)) {
+    return res.status(400).json({
+      message: 'El formato del email no es válido'
+    });
+  }
+
+  const emailWhitespaceError = validateNoWhitespace(email, 'email');
+  if (emailWhitespaceError) {
+    return res.status(400).json({
+      message: emailWhitespaceError
+    });
+  }
+
+  // Validar teléfono si se proporciona
+  if (telefono) {
+    if (!validator.matches(telefono, /^\d{10}$/)) {
+      return res.status(400).json({
+        message: 'El teléfono debe tener exactamente 10 dígitos numéricos'
+      });
+    }
+
+    const telefonoWhitespaceError = validateNoWhitespace(telefono, 'teléfono');
+    if (telefonoWhitespaceError) {
+      return res.status(400).json({
+        message: telefonoWhitespaceError
+      });
+    }
+  }
+
+  // Validar ID de rol
+  if (!validator.isInt(id_rol.toString(), { min: 1 })) {
+    return res.status(400).json({
+      message: 'El ID de rol debe ser un número entero positivo'
+    });
+  }
+
+  // Validar contraseña
+  const passwordStrengthResult = validatePasswordStrength(contraseña);
+  if (!passwordStrengthResult.isValid) {
+    return res.status(400).json({
+      message: passwordStrengthResult.message
+    });
+  }
+
+  // Validar caracteres especiales y espacios
+  const validationErrors = [];
+    
+  const nombreSpecialError = validateSpecialCharacters(nombre, 'nombre');
+  if (nombreSpecialError) validationErrors.push(nombreSpecialError);
+  
+  if (apellido) {
+    const apellidoSpecialError = validateSpecialCharacters(apellido, 'apellido');
+    if (apellidoSpecialError) validationErrors.push(apellidoSpecialError);
+  }
+
+  if (direccion) {
+    const direccionSpecialError = validateSpecialCharacters(direccion, 'dirección');
+    if (direccionSpecialError) validationErrors.push(direccionSpecialError);
+  }
 
   if (validationErrors.length > 0) {
     return res.status(400).json({

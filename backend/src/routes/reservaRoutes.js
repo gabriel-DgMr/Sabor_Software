@@ -5,19 +5,19 @@ import { validateReserva } from '../middleware/validateRequest.js';
 
 const router = express.Router();
 
-// Rutas públicas para verificar disponibilidad
+// ===== RUTAS PÚBLICAS =====
 router.get('/horarios-disponibles', getHorariosDisponibles);
 router.get('/disponibilidad', checkDisponibilidad);
-router.get('/historial', authenticateToken, getHistorialReservas);
+router.post('/hacerReserva', hacerReserva);
 
-// Rutas protegidas con validaciones
-router.post('/hacerReserva', 
-  hacerReserva
-);
+// ===== APLICAR MIDDLEWARE A TODAS LAS RUTAS PROTEGIDAS =====
+router.use(authenticateToken);
 
-// Rutas adicionales para gestión (solo admin/manager)
+// ===== RUTAS PROTEGIDAS - USUARIO AUTENTICADO =====
+router.get('/historial', getHistorialReservas);
+
+// ===== RUTAS PROTEGIDAS - GESTIÓN (ADMINISTRADORES) =====
 router.get('/', 
-  authenticateToken, 
   checkPermission('read'),
   (req, res) => {
     // Implementar getAllReservas si es necesario
@@ -26,7 +26,6 @@ router.get('/',
 );
 
 router.get('/:id', 
-  authenticateToken, 
   checkPermission('read'),
   (req, res) => {
     // Implementar getReservaById si es necesario
@@ -35,7 +34,6 @@ router.get('/:id',
 );
 
 router.put('/:id', 
-  authenticateToken, 
   checkPermission('write'),
   validateReserva,
   (req, res) => {
@@ -45,7 +43,6 @@ router.put('/:id',
 );
 
 router.delete('/:id', 
-  authenticateToken, 
   checkPermission('delete'),
   (req, res) => {
     // Implementar deleteReserva si es necesario
