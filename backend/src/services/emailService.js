@@ -6,108 +6,109 @@ const logger = createSecureLogger('emailService');
 
 // ✅ MEJORADO: Servicio de email seguro
 class EmailService {
-    constructor() {
-        this.transporter = null;
-        this.isInitialized = false;
-        this.initialize();
-    }
+  constructor() {
+    this.transporter = null;
+    this.isInitialized = false;
+    this.initialize();
+  }
     
-    // ✅ MEJORADO: Inicializar transporter con validación
-    async initialize() {
-        try {
-            this.transporter = nodemailer.createTransporter({
-                service: secureConfig.email.service,
-                auth: {
-                    user: secureConfig.email.user,
-                    pass: secureConfig.email.password
-                },
-                timeout: secureConfig.email.timeout,
-                secure: secureConfig.email.secure,
-                requireTLS: secureConfig.email.requireTLS
-            });
+  // ✅ MEJORADO: Inicializar transporter con validación
+  async initialize() {
+    try {
+      this.transporter = nodemailer.createTransport({
+        service: secureConfig.email.service,
+        auth: {
+          user: secureConfig.email.user,
+          pass: secureConfig.email.password
+        },
+        timeout: secureConfig.email.timeout,
+        secure: secureConfig.email.secure,
+        requireTLS: secureConfig.email.requireTLS
+      });
             
-            // Verificar configuración
-            await this.transporter.verify();
-            this.isInitialized = true;
+      // Verificar configuración
+      await this.transporter.verify();
+      this.isInitialized = true;
             
-            logger.info('Servicio de email inicializado correctamente');
+      logger.info('Servicio de email inicializado correctamente');
             
-        } catch (error) {
-            logger.error('Error inicializando servicio de email', {
-                error: error.message
-            });
-            this.isInitialized = false;
-            throw new Error('Error de configuración del servicio de email');
+    } catch (error) {
+      logger.error('Error inicializando servicio de email', {
+        error: error.message
+      });
+      logger.warn('Servicio de email deshabilitado - la aplicación continuará funcionando');
+      this.isInitialized = false;
+      // No lanzar error, permitir que la aplicación continúe
+    }
+  }
+    
+  // ✅ MEJORADO: Enviar email de contraseña temporal
+  async sendTemporaryPasswordEmail(emailData) {
+    try {
+      if (!this.isInitialized) {
+        throw new Error('Servicio de email no inicializado');
+      }
+            
+      const { 
+        email, 
+        nombre, 
+        password, 
+        expiresIn = '24 horas',
+        reason = 'reserva'
+      } = emailData;
+            
+      const subject = 'Cuenta temporal creada - Restaurante Sabor';
+      const html = this.generateTempPasswordTemplate({
+        nombre,
+        password,
+        expiresIn,
+        reason,
+        email
+      });
+            
+      const mailOptions = {
+        from: `"${process.env.APP_NAME || 'Restaurante Sabor'}" <${secureConfig.email.from}>`,
+        to: email,
+        subject: subject,
+        html: html,
+        // ✅ MEJORADO: Headers adicionales de seguridad
+        headers: {
+          'X-Priority': '1',
+          'X-MSMail-Priority': 'High',
+          'Importance': 'high',
+          'X-Mailer': 'Sabor-Auth-System'
         }
+      };
+            
+      const result = await this.transporter.sendMail(mailOptions);
+            
+      logger.info('Email de contraseña temporal enviado exitosamente', {
+        messageId: result.messageId,
+        email: email.replace(/(.{3}).+(.{3}@.+)/, '$1***$2'), // Ocultar parte del email
+        reason: reason
+      });
+            
+      return {
+        success: true,
+        messageId: result.messageId
+      };
+            
+    } catch (error) {
+      logger.error('Error enviando email de contraseña temporal', {
+        error: error.message,
+        email: emailData.email?.replace(/(.{3}).+(.{3}@.+)/, '$1***$2')
+      });
+            
+      throw new Error('Error al enviar notificación por email');
     }
+  }
     
-    // ✅ MEJORADO: Enviar email de contraseña temporal
-    async sendTemporaryPasswordEmail(emailData) {
-        try {
-            if (!this.isInitialized) {
-                throw new Error('Servicio de email no inicializado');
-            }
-            
-            const { 
-                email, 
-                nombre, 
-                password, 
-                expiresIn = '24 horas',
-                reason = 'reserva'
-            } = emailData;
-            
-            const subject = 'Cuenta temporal creada - Restaurante Sabor';
-            const html = this.generateTempPasswordTemplate({
-                nombre,
-                password,
-                expiresIn,
-                reason,
-                email
-            });
-            
-            const mailOptions = {
-                from: `"${process.env.APP_NAME || 'Restaurante Sabor'}" <${secureConfig.email.from}>`,
-                to: email,
-                subject: subject,
-                html: html,
-                // ✅ MEJORADO: Headers adicionales de seguridad
-                headers: {
-                    'X-Priority': '1',
-                    'X-MSMail-Priority': 'High',
-                    'Importance': 'high',
-                    'X-Mailer': 'Sabor-Auth-System'
-                }
-            };
-            
-            const result = await this.transporter.sendMail(mailOptions);
-            
-            logger.info('Email de contraseña temporal enviado exitosamente', {
-                messageId: result.messageId,
-                email: email.replace(/(.{3}).+(.{3}@.+)/, '$1***$2'), // Ocultar parte del email
-                reason: reason
-            });
-            
-            return {
-                success: true,
-                messageId: result.messageId
-            };
-            
-        } catch (error) {
-            logger.error('Error enviando email de contraseña temporal', {
-                error: error.message,
-                email: emailData.email?.replace(/(.{3}).+(.{3}@.+)/, '$1***$2')
-            });
-            
-            throw new Error('Error al enviar notificación por email');
-        }
-    }
-    
-    // ✅ MEJORADO: Template HTML para contraseña temporal
-    generateTempPasswordTemplate({ nombre, password, expiresIn, reason, email }) {
-        const loginUrl = `${secureConfig.urls.frontend}/login`;
-        const supportEmail = secureConfig.email.from;
+  // ✅ MEJORADO: Template HTML para contraseña temporal
+  generateTempPasswordTemplate({ nombre, password, expiresIn, reason, email }) {
+    const loginUrl = `${secureConfig.urls.frontend}/login`;
+    const supportEmail = secureConfig.email.from;
         
-        return `
+    return `
         <!DOCTYPE html>
         <html lang="es">
         <head>
@@ -290,58 +291,58 @@ class EmailService {
         </body>
         </html>
         `;
-    }
+  }
     
-    // ✅ MEJORADO: Enviar email de verificación mejorado
-    async sendVerificationEmail(emailData) {
-        try {
-            if (!this.isInitialized) {
-                throw new Error('Servicio de email no inicializado');
-            }
+  // ✅ MEJORADO: Enviar email de verificación mejorado
+  async sendVerificationEmail(emailData) {
+    try {
+      if (!this.isInitialized) {
+        throw new Error('Servicio de email no inicializado');
+      }
             
-            const { email, nombre, codigo } = emailData;
+      const { email, nombre, codigo } = emailData;
             
-            const subject = 'Verifica tu cuenta - Restaurante Sabor';
-            const html = this.generateVerificationTemplate({ nombre, codigo });
+      const subject = 'Verifica tu cuenta - Restaurante Sabor';
+      const html = this.generateVerificationTemplate({ nombre, codigo });
             
-            const mailOptions = {
-                from: `"${process.env.APP_NAME || 'Restaurante Sabor'}" <${secureConfig.email.from}>`,
-                to: email,
-                subject: subject,
-                html: html,
-                headers: {
-                    'X-Priority': '1',
-                    'X-MSMail-Priority': 'High',
-                    'Importance': 'high',
-                    'X-Mailer': 'Sabor-Auth-System'
-                }
-            };
-            
-            const result = await this.transporter.sendMail(mailOptions);
-            
-            logger.info('Email de verificación enviado exitosamente', {
-                messageId: result.messageId,
-                email: email.replace(/(.{3}).+(.{3}@.+)/, '$1***$2')
-            });
-            
-            return {
-                success: true,
-                messageId: result.messageId
-            };
-            
-        } catch (error) {
-            logger.error('Error enviando email de verificación', {
-                error: error.message,
-                email: emailData.email?.replace(/(.{3}).+(.{3}@.+)/, '$1***$2')
-            });
-            
-            throw new Error('Error al enviar email de verificación');
+      const mailOptions = {
+        from: `"${process.env.APP_NAME || 'Restaurante Sabor'}" <${secureConfig.email.from}>`,
+        to: email,
+        subject: subject,
+        html: html,
+        headers: {
+          'X-Priority': '1',
+          'X-MSMail-Priority': 'High',
+          'Importance': 'high',
+          'X-Mailer': 'Sabor-Auth-System'
         }
+      };
+            
+      const result = await this.transporter.sendMail(mailOptions);
+            
+      logger.info('Email de verificación enviado exitosamente', {
+        messageId: result.messageId,
+        email: email.replace(/(.{3}).+(.{3}@.+)/, '$1***$2')
+      });
+            
+      return {
+        success: true,
+        messageId: result.messageId
+      };
+            
+    } catch (error) {
+      logger.error('Error enviando email de verificación', {
+        error: error.message,
+        email: emailData.email?.replace(/(.{3}).+(.{3}@.+)/, '$1***$2')
+      });
+            
+      throw new Error('Error al enviar email de verificación');
     }
+  }
     
-    // ✅ MEJORADO: Template de verificación mejorado
-    generateVerificationTemplate({ nombre, codigo }) {
-        return `
+  // ✅ MEJORADO: Template de verificación mejorado
+  generateVerificationTemplate({ nombre, codigo }) {
+    return `
         <!DOCTYPE html>
         <html lang="es">
         <head>
@@ -382,23 +383,23 @@ class EmailService {
         </body>
         </html>
         `;
-    }
+  }
     
-    // ✅ MEJORADO: Verificar estado del servicio
-    async healthCheck() {
-        try {
-            if (!this.isInitialized) {
-                return { status: 'error', message: 'Servicio no inicializado' };
-            }
+  // ✅ MEJORADO: Verificar estado del servicio
+  async healthCheck() {
+    try {
+      if (!this.isInitialized) {
+        return { status: 'error', message: 'Servicio no inicializado' };
+      }
             
-            await this.transporter.verify();
-            return { status: 'ok', message: 'Servicio de email funcionando correctamente' };
+      await this.transporter.verify();
+      return { status: 'ok', message: 'Servicio de email funcionando correctamente' };
             
-        } catch (error) {
-            logger.error('Health check falló', { error: error.message });
-            return { status: 'error', message: 'Error en el servicio de email' };
-        }
+    } catch (error) {
+      logger.error('Health check falló', { error: error.message });
+      return { status: 'error', message: 'Error en el servicio de email' };
     }
+  }
 }
 
 // ✅ MEJORADO: Instancia singleton
@@ -408,13 +409,13 @@ export default emailService;
 
 // ✅ MEJORADO: Funciones de conveniencia
 export const sendTemporaryPasswordEmail = (emailData) => {
-    return emailService.sendTemporaryPasswordEmail(emailData);
+  return emailService.sendTemporaryPasswordEmail(emailData);
 };
 
 export const sendVerificationEmail = (emailData) => {
-    return emailService.sendVerificationEmail(emailData);
+  return emailService.sendVerificationEmail(emailData);
 };
 
 export const checkEmailServiceHealth = () => {
-    return emailService.healthCheck();
+  return emailService.healthCheck();
 }; 

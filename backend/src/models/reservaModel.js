@@ -114,7 +114,7 @@ export const reservaModel = {
       const capacidadMaxima = await horarioModel.obtenerCapacidadMaxima(fecha, hora);
 
       if (capacidadMaxima === 0) {
-          return false; // No hay capacidad para este horario
+        return false; // No hay capacidad para este horario
       }
 
       // Contar reservas existentes usando 'reservaciones'

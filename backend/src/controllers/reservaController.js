@@ -75,14 +75,6 @@ export const hacerReserva = async (req, res) => {
         // ✅ MEJORADO: Generar contraseña temporal segura
         const tempPasswordData = generateReservationPassword();
         
-        // Crear usuario con contraseña temporal segura
-        const nuevoClienteId = await authModel.registerUser({
-          nombre_cliente: datosReserva.nombre,
-          email_cliente: datosReserva.email,
-          telefono_cliente: datosReserva.telefono,
-          contraseña_cliente: tempPasswordData.password
-        });
-        
         // Obtener el objeto cliente recién creado
         cliente = await authModel.getUserByEmailIncludingUnverified(datosReserva.email);
         if (!cliente) {
@@ -204,40 +196,40 @@ export const hacerReserva = async (req, res) => {
 
 // Obtener horarios disponibles para una fecha
 export const getHorariosDisponibles = async (req, res) => {
-    try {
-        const { fecha } = req.query;
+  try {
+    const { fecha } = req.query;
         
-        if (!fecha) {
-            return res.status(400).json({ 
-                message: 'Se requiere la fecha para obtener los horarios disponibles' 
-            });
-        }
-
-        const horariosDisponibles = await reservaModel.getHorariosDisponibles(fecha);
-        res.json({ horariosDisponibles });
-    } catch (error) {
-        console.error('Error al obtener horarios disponibles:', error);
-        res.status(500).json({ message: 'Error al obtener horarios disponibles' });
+    if (!fecha) {
+      return res.status(400).json({ 
+        message: 'Se requiere la fecha para obtener los horarios disponibles' 
+      });
     }
+
+    const horariosDisponibles = await reservaModel.getHorariosDisponibles(fecha);
+    res.json({ horariosDisponibles });
+  } catch (error) {
+    console.error('Error al obtener horarios disponibles:', error);
+    res.status(500).json({ message: 'Error al obtener horarios disponibles' });
+  }
 };
 
 // Verificar disponibilidad específica
 export const checkDisponibilidad = async (req, res) => {
-    try {
-        const { fecha, hora } = req.query;
+  try {
+    const { fecha, hora } = req.query;
         
-        if (!fecha || !hora) {
-            return res.status(400).json({ 
-                message: 'Se requieren fecha y hora para verificar disponibilidad' 
-            });
-        }
-
-        const disponible = await reservaModel.checkDisponibilidad(fecha, hora);
-        res.json({ disponible });
-    } catch (error) {
-        console.error('Error al verificar disponibilidad:', error);
-        res.status(500).json({ message: 'Error al verificar disponibilidad' });
+    if (!fecha || !hora) {
+      return res.status(400).json({ 
+        message: 'Se requieren fecha y hora para verificar disponibilidad' 
+      });
     }
+
+    const disponible = await reservaModel.checkDisponibilidad(fecha, hora);
+    res.json({ disponible });
+  } catch (error) {
+    console.error('Error al verificar disponibilidad:', error);
+    res.status(500).json({ message: 'Error al verificar disponibilidad' });
+  }
 }; 
 
 /**

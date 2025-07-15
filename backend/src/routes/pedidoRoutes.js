@@ -26,31 +26,31 @@ router.post('/carrito/confirmar', authenticateToken, confirmar);
 
 // Rutas protegidas con validaciones
 router.post('/', 
-    authenticateToken, 
-    validatePedido,
-    createPedido
+  authenticateToken, 
+  validatePedido,
+  createPedido
 );
 
 router.get('/', 
-    authenticateToken, 
-    checkPermission('read'),
-    getPedidos
+  authenticateToken, 
+  checkPermission('read'),
+  getPedidos
 );
 
 // Usar el controlador real para obtener pedido por id
 router.get('/:id', authenticateToken, checkPermission('read'), getPedidoById);
 
 router.put('/:id', 
-    authenticateToken, 
-    checkPermission('write'),
-    validatePedido,
-    updatePedido
+  authenticateToken, 
+  checkPermission('write'),
+  validatePedido,
+  updatePedido
 );
 
 router.delete('/:id', 
-    authenticateToken, 
-    checkPermission('delete'),
-    deletePedido
+  authenticateToken, 
+  checkPermission('delete'),
+  deletePedido
 );
 
 export default router; 
