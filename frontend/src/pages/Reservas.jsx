@@ -6,7 +6,13 @@ import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 // import { useAuth } from '../context/AuthContext';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils.js';
-import { validarEmail, validarTelefono, validarLongitud, validarCaracteresEspeciales, validarEspaciosInicioFinal } from '../utils/validaciones.js';
+import {
+  validarEmail,
+  validarTelefono,
+  validarLongitud,
+  validarCaracteresEspeciales,
+  validarEspaciosInicioFinal,
+} from '../utils/validaciones.js';
 import '../index.css';
 
 /**
@@ -72,7 +78,7 @@ const Reservas = () => {
     }
   };
 
-  const cargarHorariosDisponibles = async (fecha) => {
+  const cargarHorariosDisponibles = async fecha => {
     try {
       const response = await fetch(`/api/horarios/disponibles?fecha=${fecha}`);
       const data = await response.json();
@@ -82,7 +88,7 @@ const Reservas = () => {
     }
   };
 
-  const manejarErroresDeCampo = (newErrors) => {
+  const manejarErroresDeCampo = newErrors => {
     setFormErrors(newErrors);
     setTimeout(() => animateElements('.reservas__input-error', 'fade-in'), 0);
     setTimeout(() => {
@@ -106,7 +112,7 @@ const Reservas = () => {
 
   const validateStep2 = () => {
     const errors = {};
-    
+
     // Validar nombre
     if (!formData.nombre) {
       errors.nombre = t('reservas_error_nombre');
@@ -126,7 +132,7 @@ const Reservas = () => {
         }
       }
     }
-    
+
     // Validar teléfono
     if (!formData.telefono) {
       errors.telefono = t('reservas_error_telefono');
@@ -141,7 +147,7 @@ const Reservas = () => {
         }
       }
     }
-    
+
     // Validar email
     if (!formData.email) {
       errors.email = t('reservas_error_email');
@@ -156,14 +162,14 @@ const Reservas = () => {
         }
       }
     }
-    
+
     manejarErroresDeCampo(errors);
     return Object.keys(errors).length === 0;
   };
 
   const validateStep3 = () => {
     const errors = {};
-    
+
     // Validar peticiones (opcional pero si se llena debe ser válido)
     if (formData.peticiones && formData.peticiones.trim() !== '') {
       const longitudError = validarLongitud(formData.peticiones, 'peticiones', 5, 500);
@@ -181,7 +187,7 @@ const Reservas = () => {
         }
       }
     }
-    
+
     manejarErroresDeCampo(errors);
     return Object.keys(errors).length === 0;
   };
@@ -207,21 +213,34 @@ const Reservas = () => {
     } else if (step === 3) {
       if (validateStep3()) setStep(4);
     } else if (step === 4) {
-      console.log('Payload que se enviará:', formData);
-      ('Reserva Confirmada:', formData);
-
       try {
         const token = localStorage.getItem('token');
+        // Adaptar el payload a lo que espera el backend
+        const payload = {
+          personas: formData.personas,
+          fecha: formData.fecha,
+          hora: formData.hora ? formData.hora.slice(0, 5) : '', // Asegura formato HH:MM
+          nombre: formData.nombre,
+          telefono: formData.telefono,
+          email: formData.email,
+          peticiones: formData.peticiones || '',
+        };
+        console.log('Payload que se enviará:', payload);
         const response = await fetch('/api/reservas/hacerReserva', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
 
-        const result = await response.json();
+        let result;
+        try {
+          result = await response.json();
+        } catch (e) {
+          result = { message: 'Respuesta no válida del servidor.' };
+        }
         console.log('Respuesta del backend:', result);
 
         if (response.ok) {
@@ -242,7 +261,7 @@ const Reservas = () => {
   const handlePreviousStep = () => {
     if (step > 1) {
       setStep(step - 1);
-      setFormErrors({}); 
+      setFormErrors({});
     }
   };
 
@@ -307,17 +326,18 @@ const Reservas = () => {
     return (
       <div className="date_selector">
         {/* Botones para cada fecha disponible */}
-        {fechasDisponibles && fechasDisponibles.map((fecha, index) => (
-          <button
-            key={index}
-            className={`date_button ${selectedDate === fecha.fecha ? 'selected' : ''} ${fecha.disponible ? 'available' : 'unavailable'}`}
-            disabled={!fecha.disponible}
-            type="button"
-            onClick={() => fecha.disponible && handleDateSelect(fecha.fecha)}
-          >
-            {fecha.formato}
-          </button>
-        ))}
+        {fechasDisponibles &&
+          fechasDisponibles.map((fecha, index) => (
+            <button
+              key={index}
+              className={`date_button ${selectedDate === fecha.fecha ? 'selected' : ''} ${fecha.disponible ? 'available' : 'unavailable'}`}
+              disabled={!fecha.disponible}
+              type="button"
+              onClick={() => fecha.disponible && handleDateSelect(fecha.fecha)}
+            >
+              {fecha.formato}
+            </button>
+          ))}
         {/* Botón para abrir el calendario completo (no funcional, solo mueustra) */}
         {/* <button
           className="calendar_button"
@@ -393,7 +413,7 @@ const Reservas = () => {
           type="text"
           value={formData.nombre}
           onChange={handleInputChange}
-        /> 
+        />
         {formErrors.nombre && <small className="reservas__input-error">{formErrors.nombre}</small>}
       </div>
       <div className="campo">
@@ -439,7 +459,9 @@ const Reservas = () => {
           value={formData.peticiones}
           onChange={handleInputChange}
         />
-        {formErrors.peticiones && <small className="reservas__input-error">{formErrors.peticiones}</small>}
+        {formErrors.peticiones && (
+          <small className="reservas__input-error">{formErrors.peticiones}</small>
+        )}
       </div>
     </>
   );
@@ -480,10 +502,15 @@ const Reservas = () => {
   return (
     <div>
       <div>
-        <Header /* setShowLogin={setShowLogin} */ /> {/* Comentado para que el linter no este fastidiando*/}
+        <Header /* setShowLogin={setShowLogin} */ />{' '}
+        {/* Comentado para que el linter no este fastidiando*/}
         <main className="pagina__contenido-reservas">
           <section className="reservas__imagen">
-            <img alt="imagen-reservas" className='imagen-reservas' src="/images/imagen-reservas.jpg"/>
+            <img
+              alt="imagen-reservas"
+              className="imagen-reservas"
+              src="/images/imagen-reservas.jpg"
+            />
           </section>
           <section className="seccion_reservas">
             <h1 className="reservas__titulo">{t('reservas_titulo')}</h1>
@@ -503,7 +530,11 @@ const Reservas = () => {
                     </button>
                   )}
                   <button className="boton_siguiente" type="submit">
-                    {step === 4 ? t('reservas_confirmar_boton') : step === 3 ? t('reservas_ver_resumen') : t('reservas_siguiente')}
+                    {step === 4
+                      ? t('reservas_confirmar_boton')
+                      : step === 3
+                        ? t('reservas_ver_resumen')
+                        : t('reservas_siguiente')}
                   </button>
                 </div>
               </form>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import ReactCountryFlag from "react-country-flag";
+import ReactCountryFlag from 'react-country-flag';
 import { useTranslation } from 'react-i18next';
 import { FaUserCircle, FaBars, FaTimes } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
@@ -25,10 +25,10 @@ const Header = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const toggleMobileMenu = () => setShowMenu((prev) => !prev);
+  const toggleMobileMenu = () => setShowMenu(prev => !prev);
   const closeMobileMenu = () => setShowMenu(false);
 
-  const handleIdioma = (lang) => {
+  const handleIdioma = lang => {
     i18n.changeLanguage(lang);
   };
 
@@ -36,14 +36,21 @@ const Header = () => {
     <>
       <header className="encabezado">
         <div className="encabezado__contenedor">
-
-          <Link to="/"><img alt="Logo Sabor" className="encabezado__logo" src="/images/logo_sabor.png" /></Link>
+          <Link to="/">
+            <img alt="Logo Sabor" className="encabezado__logo" src="/images/logo_sabor.png" />
+          </Link>
           <div className="encabezado__informacion">
-            <nav className="encabezado__links">              {/* Estas opciones solo deben mostrarse en escritorio */}
+            <nav className="encabezado__links">
+              {' '}
+              {/* Estas opciones solo deben mostrarse en escritorio */}
               {!isMobileMenu && (
                 <>
-                  <Link className="encabezado__link" to="/quienes-somos">{t('quienes_somos')}</Link>
-                  <Link className="encabezado__link" to="/sobre-nosotros">{t('sobre_nosotros')}</Link>
+                  <Link className="encabezado__link" to="/quienes-somos">
+                    {t('quienes_somos')}
+                  </Link>
+                  <Link className="encabezado__link" to="/sobre-nosotros">
+                    {t('sobre_nosotros')}
+                  </Link>
                 </>
               )}
             </nav>
@@ -105,12 +112,50 @@ const Header = () => {
                           <ReactCountryFlag svg countryCode="US" />
                         </button>
                       </div>
-                      <Link className="menu-perfil__opcion" to="/quienes-somos" onClick={closeMobileMenu}>{t('quienes_somos')}</Link>
-                      <Link className="menu-perfil__opcion" to="/sobre-nosotros" onClick={closeMobileMenu}>{t('sobre_nosotros')}</Link>
-                      <Link className="menu-perfil__opcion" to="/historial-pedidos" onClick={closeMobileMenu}>{t('ver_historial_pedidos')}</Link>
-                      <Link className="menu-perfil__opcion" to="/historial-reservas" onClick={closeMobileMenu}>{t('ver_historial_reservas')}</Link>
-                      <Link className="menu-perfil__opcion" to="/actualizar-datos" onClick={closeMobileMenu}>{t('actualizar_datos')}</Link>
-                      <button className="menu-perfil__opcion menu-perfil__opcion--cerrar-sesion" onClick={() => { logout(); closeMobileMenu(); }}>{t('cerrar_sesion')}</button>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/quienes-somos"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('quienes_somos')}
+                      </Link>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/sobre-nosotros"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('sobre_nosotros')}
+                      </Link>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/historial-pedidos"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('ver_historial_pedidos')}
+                      </Link>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/historial-reservas"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('ver_historial_reservas')}
+                      </Link>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/actualizar-datos"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('actualizar_datos')}
+                      </Link>
+                      <button
+                        className="menu-perfil__opcion menu-perfil__opcion--cerrar-sesion"
+                        onClick={() => {
+                          logout();
+                          closeMobileMenu();
+                        }}
+                      >
+                        {t('cerrar_sesion')}
+                      </button>
                     </div>
                   )}
                 </div>
@@ -148,11 +193,26 @@ const Header = () => {
                           <ReactCountryFlag svg countryCode="US" />
                         </button>
                       </div>
-                      <Link className="menu-perfil__opcion" to="/quienes-somos" onClick={closeMobileMenu}>{t('quienes_somos')}</Link>
-                      <Link className="menu-perfil__opcion" to="/sobre-nosotros" onClick={closeMobileMenu}>{t('sobre_nosotros')}</Link>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/quienes-somos"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('quienes_somos')}
+                      </Link>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/sobre-nosotros"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('sobre_nosotros')}
+                      </Link>
                       <button
                         className="menu-perfil__opcion"
-                        onClick={() => { setShowLogin(true); closeMobileMenu(); }}
+                        onClick={() => {
+                          setShowLogin(true);
+                          closeMobileMenu();
+                        }}
                       >
                         {t('iniciar_sesion')}
                       </button>
@@ -160,33 +220,41 @@ const Header = () => {
                   )}
                 </div>
               )
+            ) : isAuthenticated ? (
+              <div
+                className="encabezado__usuario"
+                onMouseEnter={() => setShowMenu(true)}
+                onMouseLeave={() => setShowMenu(false)}
+              >
+                <p className="encabezado__nombre-usuario">
+                  {user?.nombre_cliente || user?.email_cliente}
+                </p>
+                <FaUserCircle className="encabezado__icono-usuario" size={32} />
+                {showMenu && (
+                  <div className="menu-perfil">
+                    <Link className="menu-perfil__opcion" to="/historial-pedidos">
+                      {t('ver_historial_pedidos')}
+                    </Link>
+                    <Link className="menu-perfil__opcion" to="/historial-reservas">
+                      {t('ver_historial_reservas')}
+                    </Link>
+                    <Link className="menu-perfil__opcion" to="/actualizar-datos">
+                      {t('actualizar_datos')}
+                    </Link>
+                    <button
+                      className="menu-perfil__opcion menu-perfil__opcion--cerrar-sesion"
+                      onClick={logout}
+                    >
+                      {t('cerrar_sesion')}
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
-              isAuthenticated ? (
-                <div
-                  className="encabezado__usuario"
-                  onMouseEnter={() => setShowMenu(true)}
-                  onMouseLeave={() => setShowMenu(false)}
-                >
-                  <p className="encabezado__nombre-usuario">{user?.nombre_cliente || user?.email_cliente}</p>
-                  <FaUserCircle className="encabezado__icono-usuario" size={32} />
-                  {showMenu && (
-                    <div className="menu-perfil">
-                      <div className="menu-perfil__opcion menu-perfil__opcion--usuario">
-                        <span>{user?.nombre_cliente || user?.email_cliente}</span>
-                      </div>
-                      <Link className="menu-perfil__opcion" to="/historial-pedidos">{t('ver_historial_pedidos')}</Link>
-                      <Link className="menu-perfil__opcion" to="/historial-reservas">{t('ver_historial_reservas')}</Link>
-                      <Link className="menu-perfil__opcion" to="/actualizar-datos">{t('actualizar_datos')}</Link>
-                      <button className="menu-perfil__opcion menu-perfil__opcion--cerrar-sesion" onClick={logout}>{t('cerrar_sesion')}</button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="encabezado__usuario" onClick={() => setShowLogin(true)}>
-                  <p className="encabezado__nombre-usuario">{t('iniciar_sesion')}</p>
-                  <FaUserCircle className="encabezado__icono-usuario" size={32} />
-                </div>
-              )
+              <div className="encabezado__usuario" onClick={() => setShowLogin(true)}>
+                <p className="encabezado__nombre-usuario">{t('iniciar_sesion')}</p>
+                <FaUserCircle className="encabezado__icono-usuario" size={32} />
+              </div>
             )}
           </div>
         </div>
