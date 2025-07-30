@@ -13,6 +13,18 @@ import { useCategorias } from '../context/CategoriaContext';
 import { useProductos } from '../context/ProductoContext';
 import { useCart } from '../context/useCart.js';
 import { useDebounce } from '../hooks/useDebounce.js';
+import { GoX } from 'react-icons/go';
+
+// Componente de error visualmente consistente para Home
+const HomeError = ({ message }) => {
+  if (!message) return null;
+  return (
+    <div className="error-global">
+      <GoX className="GoX" />
+      <span>{message}</span>
+    </div>
+  );
+};
 
 const Home = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -120,7 +132,7 @@ const Home = () => {
   }, []);
 
   if (state.loading && state.productos.length === 0) return <LoadingScreen />;
-  if (state.error) return <div>{t('error_cargar_productos', { error: state.error })}</div>;
+  if (state.error) return <HomeError message={t('error_cargar_productos', { error: state.error })} />;
 
   return (
     <div>

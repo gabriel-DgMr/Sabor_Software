@@ -8,6 +8,7 @@ import { useCart } from '../context/useCart.js';
 import { FormatPriceCOP } from '../utils/format.js';
 
 import MensajeExito from './DialogoExito.jsx';
+import { GoCheck, GoX } from 'react-icons/go';
 
 const ProductoCard = React.memo(({ producto }) => {
   const [productoExpandido, setProductoExpandido] = useState(false);
@@ -119,6 +120,7 @@ const ProductoCard = React.memo(({ producto }) => {
         message={mensajeExito}
         open={exitoOpen}
         onClose={() => setExitoOpen(false)}
+        icon={<GoCheck className="GoCheck" style={{ fontSize: '2.5rem' }} />}
       />
 
       {/* Diálogo de error */}
@@ -127,7 +129,7 @@ const ProductoCard = React.memo(({ producto }) => {
         message={mensajeError}
         open={errorOpen}
         onClose={() => setErrorOpen(false)}
-        icon="❌"
+        icon={<GoX className="GoX" style={{ fontSize: '2.5rem' }} />}
       />
 
       {dialogoAgregar && ReactDOM.createPortal(

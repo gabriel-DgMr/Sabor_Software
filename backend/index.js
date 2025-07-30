@@ -22,6 +22,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import helmet from 'helmet';
 import mensajeContactoRoutes from './src/routes/contactoRoutes.js';
+import mercadopagoRoutes from './src/routes/mercadopagoRoutes.js';
 
 const app = express();
 
@@ -31,17 +32,18 @@ const __dirname = dirname(__filename);
 // Configuración de seguridad con Helmet (modificada para permitir imágenes)
 app.use(helmet({
     contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            scriptSrc: ["'self'"],
-            imgSrc: ["'self'", "data:", "https:", "http://localhost:3000"],
-            fontSrc: ["'self'", "data:"],
-        },
+      directives: {
+        defaultSrc: ['\'self\''],
+        styleSrc: ['\'self\'', '\'unsafe-inline\''],
+        scriptSrc: ['\'self\''],
+        imgSrc: ['\'self\'', '\'data:\'', '\'https:\'', '\'http://localhost:3000\''],
+        fontSrc: ['\'self\'', '\'data:\''],
+      },
     },
     crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: { policy: 'cross-origin' }
-}));
+  }));
+  
 
 // Configuración de CORS más permisiva para desarrollo
 app.use(cors({
@@ -83,6 +85,7 @@ app.use('/api/reservas', reservaRoutes);
 app.use('/api/pedidos', pedidoRoutes);
 app.use('/api/horarios', horarioRoutes);
 app.use('/api', mensajeContactoRoutes);
+app.use('/api/mercadopago', mercadopagoRoutes);
 
 // Servir archivos estáticos con validaciones de seguridad
 // Ruta principal para uploads

@@ -5,6 +5,7 @@ import Header from '../components/Header.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils.js';
 import { validarEmail, validarTelefono, validarLongitud, validarCaracteresEspeciales, validarEspacios } from '../utils/validaciones.js';
+import { GoCheck, GoX } from 'react-icons/go';
 
 const ActualizarDatos = () => {
   const { user } = useAuth();
@@ -162,6 +163,20 @@ const ActualizarDatos = () => {
     }
   };
 
+  // Componente de alerta visualmente consistente
+  const DatosAlert = ({ type, message, id }) => {
+    if (!message) return null;
+    const icon = type === 'success'
+      ? <GoCheck className="GoCheck" />
+      : <GoX className="GoX" />;
+    return (
+      <div id={id} className="alerta-con-tarjeta">
+        {icon}
+        <span>{message}</span>
+      </div>
+    );
+  };
+
   return (
     <div>
       <Header />
@@ -220,8 +235,8 @@ const ActualizarDatos = () => {
               />
               <small className="actualizar-datos__ayuda">Para cambiar la contraseña, utiliza la opción de recuperación de contraseña.</small>
             </div>
-            {mensaje && <p className="actualizar-datos__mensaje-exito" id="mensaje-exito-actualizar">{mensaje}</p>}
-            {globalError && <p className="actualizar-datos__mensaje-error" id="mensaje-error-actualizar">{globalError}</p>}
+            {mensaje && <DatosAlert type="success" message={mensaje} id="mensaje-exito-actualizar" />}
+            {globalError && <DatosAlert type="error" message={globalError} id="mensaje-error-actualizar" />}
             <button className="actualizar-datos__boton" disabled={cargando} type="submit">{cargando ? 'Guardando...' : 'Guardar cambios'}</button>
           </form>
         </section>

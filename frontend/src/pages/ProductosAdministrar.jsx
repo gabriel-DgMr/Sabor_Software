@@ -6,8 +6,39 @@ import { useProductos } from '../context/ProductoContext';
 import { productoService } from '../services/productoService';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils';
 import { validarProducto, validarImagen } from '../utils/validaciones';
+import { GoCheck, GoX } from 'react-icons/go';
 
 import '../styles/empleados.css';
+
+// Componente de alerta visualmente consistente para productos
+const ProductosAlert = ({ type, message }) => {
+  if (!message) return null;
+  const icon = type === 'success'
+    ? <GoCheck className="GoCheck" />
+    : <GoX className="GoX" />;
+  return (
+    <div className="alerta-con-tarjeta">
+      {icon}
+      <span>{message}</span>
+    </div>
+  );
+};
+
+// Componente de error visualmente consistente para administración de productos
+const ProductosError = ({ message, onRetry }) => {
+  if (!message) return null;
+  return (
+    <div className="error-global">
+      <GoX className="GoX" />
+      <span>{message}</span>
+      {onRetry && (
+        <button onClick={onRetry}>
+          Reintentar
+        </button>
+      )}
+    </div>
+  );
+};
 
 const ProductosAdministrar = () => {
   const { state, dispatch } = useProductos();
@@ -249,15 +280,7 @@ const ProductosAdministrar = () => {
       <div className='layout'>
         <MenuLateral />
         <main className='productos__administrar'>
-          <div className="error-container">
-            <p>Error: {state.error}</p>
-            <button 
-              className="retry-button"
-              onClick={() => window.location.reload()}
-            >
-              Reintentar
-            </button>
-          </div>
+          <ProductosError message={`Error al cargar productos: ${state.error}`} onRetry={() => window.location.reload()} />
         </main>
       </div>
     );
@@ -335,20 +358,7 @@ const ProductosAdministrar = () => {
               {isEditing ? 'Editar Producto' : 'Agregar Nuevo Producto'}
             </h2>
             {successMessage && (
-              <div className="success-message">
-                <svg 
-                  fill="none"
-                  height="16"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  width="16"
-                >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-                {successMessage}
-              </div>
+              <ProductosAlert type="success" message={successMessage} />
             )}
             <form className='editor__descripcion' onSubmit={handleSubmit}>
               <div className='descripcion__campo'>

@@ -8,6 +8,25 @@ import Header from '../components/Header.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils.js';
 import { validarEmail, validarTelefono, validarLongitud, validarCaracteresEspeciales, validarEspaciosInicioFinal } from '../utils/validaciones.js';
 import '../index.css';
+import { GoCheck, GoX, GoAlert } from 'react-icons/go';
+
+// Alerta personalizada
+const CustomAlert = ({ open, type, message, onClose }) => {
+  if (!open) return null;
+  let icon = null;
+  if (type === 'success') icon = <GoCheck className="GoCheck" style={{ fontSize: '2.5rem' }} />;
+  else if (type === 'error') icon = <GoX className="GoX" style={{ fontSize: '2.5rem' }} />;
+  else icon = <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />;
+  return (
+    <div className="custom-alert-overlay">
+      <div className="custom-alert" style={{ background: '#fff', border: 'none', boxShadow: '0 4px 32px rgba(0,0,0,0.18)', borderRadius: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2.5rem 2.5rem 2rem 2.5rem', minWidth: '320px', maxWidth: '90vw', gap: '1.2rem' }}>
+        <span className="custom-alert__icon" style={{ display: 'block', textAlign: 'center', margin: '0 auto' }}>{icon}</span>
+        <span className="custom-alert__message" style={{ textAlign: 'center' }}>{message}</span>
+        <button className="custom-alert__close" style={{ marginTop: '1rem', background: '#ff6f00', color: '#fff', border: 'none', borderRadius: '1rem', padding: '0.7rem 2.2rem', fontSize: '1.5rem', fontWeight: 600, cursor: 'pointer' }} onClick={onClose}>Cerrar</button>
+      </div>
+    </div>
+  );
+};
 
 /**
  * Componente Reservas: Maneja el proceso de reservación de mesas
@@ -35,6 +54,9 @@ const Reservas = () => {
     peticiones: '', // Nuevo campo para el paso 3
   });
   const [formErrors, setFormErrors] = useState({}); // Estado para errores de validación
+
+  // Estado para alertas personalizadas
+  const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
 
   const { t } = useTranslation();
 
@@ -207,9 +229,6 @@ const Reservas = () => {
     } else if (step === 3) {
       if (validateStep3()) setStep(4);
     } else if (step === 4) {
-      console.log('Payload que se enviará:', formData);
-      ('Reserva Confirmada:', formData);
-
       try {
         const token = localStorage.getItem('token');
         const response = await fetch('/api/reservas/hacerReserva', {
@@ -220,21 +239,14 @@ const Reservas = () => {
           },
           body: JSON.stringify(formData),
         });
-
         const result = await response.json();
-        console.log('Respuesta del backend:', result);
-
         if (response.ok) {
-          alert('¡Reserva realizada con éxito!');
-
-          // crear mensaje de confirmacion mas bonito
+          setAlert({ open: true, type: 'success', message: '¡Reserva realizada con éxito!' });
         } else {
-          alert(`Error al realizar la reserva: ${result.message || response.statusText}`);
-          console.error('Error en la reserva:', result);
+          setAlert({ open: true, type: 'error', message: result.message || 'Error al realizar la reserva.' });
         }
       } catch (error) {
-        console.error('Error en la llamada API:', error);
-        alert('Hubo un problema al conectar con el servidor de reservas.');
+        setAlert({ open: true, type: 'error', message: 'Hubo un problema al conectar con el servidor de reservas.' });
       }
     }
   };
@@ -478,40 +490,37 @@ const Reservas = () => {
 
   // Estructura principal
   return (
-    <div>
-      <div>
-        <Header /* setShowLogin={setShowLogin} */ /> {/* Comentado para que el linter no este fastidiando*/}
-        <main className="pagina__contenido-reservas">
-          <section className="reservas__imagen">
-            <img alt="imagen-reservas" className='imagen-reservas' src="/images/imagen-reservas.jpg"/>
-          </section>
-          <section className="seccion_reservas">
-            <h1 className="reservas__titulo">{t('reservas_titulo')}</h1>
-            {renderStepIndicator()}
-
-            <div className="reservas__contenido">
-              <form onSubmit={handleSubmit}>
-                {step === 1 && renderPaso1()}
-                {step === 2 && renderPaso2()}
-                {step === 3 && renderPaso3()}
-                {step === 4 && renderPaso4()}
-
-                <div className="reservas__acciones">
-                  {step > 1 && (
-                    <button className="boton_regresar" type="button" onClick={handlePreviousStep}>
-                      {t('reservas_regresar')}
-                    </button>
-                  )}
-                  <button className="boton_siguiente" type="submit">
-                    {step === 4 ? t('reservas_confirmar_boton') : step === 3 ? t('reservas_ver_resumen') : t('reservas_siguiente')}
+    <div className="reservas-main-bg">
+      <Header />
+      <main className="pagina__contenido-reservas reservas-flex-layout">
+        <section className="reservas__imagen">
+          <img alt="imagen-reservas" className='imagen-reservas' src="/images/imagen-reservas.jpg"/>
+        </section>
+        <section className="seccion_reservas reservas-card">
+          <h1 className="reservas__titulo">{t('reservas_titulo')}</h1>
+          {renderStepIndicator()}
+          <div className="reservas__contenido">
+            <form onSubmit={handleSubmit}>
+              {step === 1 && renderPaso1()}
+              {step === 2 && renderPaso2()}
+              {step === 3 && renderPaso3()}
+              {step === 4 && renderPaso4()}
+              <div className="reservas__acciones">
+                {step > 1 && (
+                  <button className="boton_regresar" type="button" onClick={handlePreviousStep}>
+                    {t('reservas_regresar')}
                   </button>
-                </div>
-              </form>
-            </div>
-          </section>
-        </main>
-        <Footer />
-      </div>
+                )}
+                <button className="boton_siguiente" type="submit">
+                  {step === 4 ? t('reservas_reservar_boton') : step === 3 ? t('reservas_ver_resumen') : t('reservas_siguiente')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+        <CustomAlert open={alert.open} type={alert.type} message={alert.message} onClose={() => setAlert({ ...alert, open: false })} />
+      </main>
+      <Footer />
     </div>
   );
 };

@@ -3,12 +3,27 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ANIM_DURATION, VISIBLE_DURATION, animateElement } from '../../utils/animationUtils';
+import { GoCheck, GoX } from 'react-icons/go';
 
 import EmailVerification from './EmailVerification';
 import ForgotPassword from './ForgotPassword';
 import Login from './Login';
 import Register from './Register';
 import './AuthPage.css';
+
+// Componente de alerta visualmente consistente para auth
+const AuthAlert = ({ type, message }) => {
+  if (!message) return null;
+  const icon = type === 'success'
+    ? <GoCheck className="GoCheck" />
+    : <GoX className="GoX" />;
+  return (
+    <div className="alerta-sin-tarjeta">
+      {icon}
+      <span>{message}</span>
+    </div>
+  );
+};
 
 const AuthPage = ({ isOpen, onClose }) => {
   const [view, setView] = useState(() => {
@@ -148,10 +163,7 @@ const AuthPage = ({ isOpen, onClose }) => {
         {renderContent()}
 
         {globalMessage.text && (
-          <div
-            className={`auth-page__mensaje ${globalMessage.type === 'success' ? 'formulario__mensaje-exito' : 'formulario__mensaje-error'}`}>
-            {globalMessage.text}
-          </div>
+          <AuthAlert type={globalMessage.type} message={globalMessage.text} />
         )}
 
         {view !== 'forgot-password' && (

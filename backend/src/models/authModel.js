@@ -122,12 +122,12 @@ export const getUserByEmailIncludingUnverified = async (email_cliente) => {
 export const loginUser = async (email_cliente, contraseña_cliente) => {
     // TEMPORAL: Permitir login aunque no esté verificado ni activo
     const [rows] = await pool.query(
-        'SELECT * FROM clientes WHERE email_cliente = ? AND activo = true AND email_verificado = true',
+        'SELECT * FROM clientes WHERE email_cliente = ?',
         [email_cliente]
     );
     
     if (!rows.length) {
-        throw new Error('Usuario no existe o no esta verificado');
+        throw new Error('Usuario no existe');
     }
 
     const user = rows[0];

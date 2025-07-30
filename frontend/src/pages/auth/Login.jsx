@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
 import { validarLogin } from '../../utils/validaciones';
+import { GoX } from 'react-icons/go';
 
 const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVerification }) => {
   const { login, loading } = useAuth();
@@ -103,13 +104,7 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
           {errors.contraseña_cliente && <small className="formulario__mensaje-error">{errors.contraseña_cliente}</small>}
         </div>
         {globalError && (
-          <div
-            className="formulario__mensaje-error"
-            id="global-error-login"
-            style={{ textAlign: 'center', marginBottom: '1rem' }}
-          >
-            {globalError}
-          </div>
+          <LoginAlert message={globalError} id="global-error-login" />
         )}
         <button className="formulario__boton-principal" disabled={loading} type="submit">
           {loading ? t('login_iniciando') : t('iniciar_sesion')}
@@ -141,6 +136,17 @@ Login.propTypes = {
   onLoginSuccess: PropTypes.func.isRequired,
   onShowForgotPassword: PropTypes.func.isRequired,
   onShowVerification: PropTypes.func.isRequired,
+};
+
+// Componente de alerta visualmente consistente para login
+const LoginAlert = ({ message, id }) => {
+  if (!message) return null;
+  return (
+    <div id={id} className="alerta-sin-tarjeta alerta-sin-tarjeta--grande">
+      <GoX className="GoX" />
+      <span>{message}</span>
+    </div>
+  );
 };
 
 export default Login;

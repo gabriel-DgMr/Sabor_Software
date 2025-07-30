@@ -3,6 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import "../index.css";
 import "../styles/carrito.css";
+import { GoX, GoCheck, GoAlert } from "react-icons/go";
+import { GoTrash } from "react-icons/go";
+import { BsCashCoin } from "react-icons/bs";
+import { GoCreditCard } from "react-icons/go";
+import { IoCart } from "react-icons/io5";
+
 
 import DialogoModal from '../components/DialogoExito.jsx';
 import Footer from '../components/Footer.jsx';
@@ -11,6 +17,17 @@ import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useCart } from '../context/useCart.js';
 
 const API_URL = 'http://localhost:3000/api';
+
+// Componente de alerta visualmente consistente para el carrito
+const CarritoAlert = ({ message }) => {
+  if (!message) return null;
+  return (
+    <div className="alerta-con-tarjeta">
+      <GoAlert className="GoAlert" />
+      <span>{message}</span>
+    </div>
+  );
+};
 
 export default function Carrito() {
   const [loading, setLoading] = useState(true);
@@ -26,7 +43,7 @@ export default function Carrito() {
     removeItemFromCart
   } = useCart();
   const [recomendaciones, setRecomendaciones] = useState('');
-  const [modal, setModal] = useState({ open: false, message: '', icon: '✅', onConfirm: null });
+  const [modal, setModal] = useState({ open: false, message: '', icon: <GoCheck className="GoCheck"/>, onConfirm: null });
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -44,7 +61,7 @@ export default function Carrito() {
       setModal({
         open: true,
         message: 'El carrito está vacío.',
-        icon: '⚠️',
+        icon: <GoAlert className="GoAlert"/>,
         onConfirm: () => setModal({ ...modal, open: false })
       });
       return;
@@ -53,67 +70,25 @@ export default function Carrito() {
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setModal({
-          open: true,
-          message: t('carrito_debes_iniciar_sesion'),
-          icon: '⚠️',
-          onConfirm: () => {
-            setModal({ ...modal, open: false });
-            navigate('/login');
-          }
-        });
-        return;
-      }
 
-      // Mapear items del carrito a un formato adecuado para el backend
-      const itemsParaBackend = cartItems.map(item => ({
-        id_producto: item.id_producto,
-        cantidad: item.cantidad || 1,
-        precio_unitario: item.precio_unitario
-      }));
-      const totalCarrito = cartItems.reduce((sum, item) => sum + item.precio_unitario * (item.cantidad || 1), 0);
-      const recomendacionesPedido = localStorage.getItem('recomendacionesPedido') || '';
-
-      const nuevoPedido = {
-        items: itemsParaBackend,
-        total: totalCarrito,
-        recomendaciones: recomendacionesPedido
-      };
-
-      const response = await fetch(`${API_URL}/pedidos`, {
+      // Llama al backend para crear la preferencia de Mercado Pago
+      const response = await fetch('http://localhost:3000/api/mercadopago/preferencia', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(nuevoPedido),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: cartItems })
       });
-      
-      if (!response.ok) {
-         const errorData = await response.json();
-         throw new Error(errorData.mensaje || `Error HTTP: ${response.status}`);
-      }
-      
-      await clearCart();
-      localStorage.removeItem('recomendacionesPedido');
-      setModal({
-        open: true,
-        message: t('carrito_pedido_exito'),
-        icon: '✅',
-        onConfirm: () => {
-          setModal({ ...modal, open: false });
-          navigate('/');
-        }
-      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Error al crear preferencia de pago');
+
+      // Redirige al usuario a Mercado Pago
+      window.location.href = data.init_point;
 
     } catch (error) {
-      console.error('Error al procesar el pago:', error);
       setModal({
         open: true,
-        message: t('carrito_error_pago', { error: error.message }),
-        icon: '❌',
+        message: 'Error al procesar el pago con Mercado Pago',
+        icon: <GoX className="GoX"/>,
         onConfirm: () => setModal({ ...modal, open: false })
       });
     } finally {
@@ -125,7 +100,7 @@ export default function Carrito() {
     setModal({
       open: true,
       message: '¿Estás seguro de que deseas eliminar todo el carrito?',
-      icon: '🗑️',
+      icon: <GoTrash className="GoTrash"/> ,
       confirmText: 'Sí, eliminar',
       cancelText: 'Cancelar',
       onConfirm: async () => {
@@ -136,8 +111,8 @@ export default function Carrito() {
         } catch (error) {
           setModal({
             open: true,
-            message: `Error al eliminar carrito: ${error.message}`,
-            icon: '❌',
+            message: `Error al eliminar carrito`,
+            icon: <GoX className="GoX"/>,
             onConfirm: () => setModal({ ...modal, open: false })
           });
         }
@@ -155,14 +130,14 @@ export default function Carrito() {
         setModal({
           open: true,
           message: 'Pedido cerrado exitosamente',
-          icon: '✅',
+          icon: <GoCheck className="GoCheck"/>,
           onConfirm: () => setModal({ ...modal, open: false })
         });
       } catch (error) {
         setModal({
           open: true,
-          message: `Error al cerrar pedido: ${error.message}`,
-          icon: '❌',
+          message: `Error al cerrar pedido`,
+          icon: <GoX className="GoX"/>,
           onConfirm: () => setModal({ ...modal, open: false })
         });
       }
@@ -175,8 +150,8 @@ export default function Carrito() {
     } catch (error) {
       setModal({
         open: true,
-        message: `Error al actualizar cantidad: ${error.message}`,
-        icon: '❌',
+        message: `Error al actualizar cantidad`,
+        icon: <GoX className="GoX"/>,
         onConfirm: () => setModal({ ...modal, open: false })
       });
     }
@@ -189,7 +164,7 @@ export default function Carrito() {
       setModal({
         open: true,
         message: `Error al eliminar producto: ${error.message}`,
-        icon: '❌',
+        icon: <GoX className="GoX"/>,
         onConfirm: () => setModal({ ...modal, open: false })
       });
     }
@@ -235,10 +210,7 @@ export default function Carrito() {
         <div className="carrito_contenido">
           <div className="carrito_pedidos">
             <div className="carrito_alerta">
-              <span className="carrito_alerta_icono">❗</span>
-              {t('carrito_alerta')}
-              {' '}
-              <span className="carrito_alerta_link">{t('carrito_clic_aqui')}</span>
+              <CarritoAlert message={<>{t('carrito_alerta')} <span className="carrito_alerta_link">{t('carrito_clic_aqui')}</span></>} />
             </div>
             
             {cartItems.length === 0 ? (
@@ -248,7 +220,7 @@ export default function Carrito() {
                 <div className="carrito_pedido_info">
                   <div className="carrito_pedido_titulo">
                     <span aria-label="carrito" role="img">
-                      🛒
+                    <IoCart />
                     </span>
                     {t('carrito_pedido_actual')}
                   </div>
@@ -277,7 +249,7 @@ export default function Carrito() {
                               className="carrito_btn_eliminar"
                               onClick={() => handleRemoveItem(item.id_producto)}
                             >
-                              🗑️
+                              <GoTrash/>
                             </button>
                           </div>
                         </div>
@@ -302,19 +274,19 @@ export default function Carrito() {
                     className="carrito_btn eliminar"
                     onClick={handleEliminarCarrito}
                   >
-                    🗑️ {t('carrito_eliminar')}
+                    <GoTrash/> {t('carrito_eliminar')}
                   </button>
                   <button 
                     className="carrito_btn cerrar"
                     onClick={handleCerrarPedido}
                   >
-                    🔒 {t('carrito_cerrar_pedido')}
+                    <BsCashCoin /> {t('efectivo')}
                   </button>
                   <button 
                     className="carrito_btn pagar"
                     onClick={procesarPago}
                   >
-                    💳 {t('carrito_pagar')}
+                    <GoCreditCard /> {t('carrito_pagar')}
                   </button>
                 </div>
               </div>

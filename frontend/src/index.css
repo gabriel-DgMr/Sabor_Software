@@ -1257,10 +1257,6 @@ hr {
   height: 100%;
 }
 
-.reservas__imagen {
-  border-radius: 2rem;
-}
-
 .seccion--reservas {
   max-width: 1200px;
   margin: 0 auto;
@@ -2190,13 +2186,467 @@ hr {
   }
 }
 
+/* === RESERVAS NUEVO DISEÑO === */
+.reservas-main-bg {
+  min-height: 100vh;
+  background: var(--neutral-50);
+}
 
+.reservas-flex-layout {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 3rem;
+  padding: 3rem 0 4rem 0;
+}
 
+.reservas__imagen {
+  flex: 1 1 45%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 320px;
+  max-width: 600px;
+}
 
+.imagen-reservas {
+  width: 100%;
+  max-width: 100x0px;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+  object-fit: cover;
+}
 
+.reservas-card {
+  flex: 1 1 40%;
+  background: #fff;
+  border-radius: 2rem;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.13);
+  padding: 3rem 2.5rem 2.5rem 2.5rem;
+  margin-top: 0rem;
+  min-width: 320px;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
 
+.reservas__titulo {
+  color: var(--primary-600);
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 2.6rem;
+  font-weight: 700;
+}
 
+.reservas__contenido form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
 
+.reservas__acciones {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 2.5rem;
+  margin-top: 2rem;
+}
 
+@media (max-width: 600px) {
+  .reservas__acciones {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.2rem;
+  }
+}
 
+.boton_siguiente, .boton_regresar {
+  padding: 1.1rem 2.2rem;
+  border-radius: 1.2rem;
+  font-size: 1.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  border: none;
+}
+.boton_siguiente {
+  background: var(--primary-500);
+  color: #fff;
+}
+.boton_siguiente:hover {
+  background: var(--primary-700);
+}
+.boton_regresar {
+  background: var(--neutral-200);
+  color: var(--primary-700);
+}
+.boton_regresar:hover {
+  background: var(--neutral-400);
+}
 
+/* Alerta personalizada */
+.custom-alert-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.custom-alert {
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  min-width: 320px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  border: 2px solid var(--primary-200);
+}
+.custom-alert--success {
+  border-color: var(--success-400);
+}
+.custom-alert--error {
+  border-color: var(--error-400);
+}
+.custom-alert__icon {
+  font-size: 3.2rem;
+  margin-bottom: 0.5rem;
+}
+.custom-alert__message {
+  font-size: 1.7rem;
+  color: var(--neutral-900);
+  text-align: center;
+}
+.custom-alert__close {
+  margin-top: 1rem;
+  background: var(--primary-500);
+  color: #fff;
+  border: none;
+  border-radius: 1rem;
+  padding: 0.7rem 2.2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.custom-alert__close:hover {
+  background: var(--primary-700);
+}
+
+@media (max-width: 900px) {
+  .reservas-flex-layout {
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem 0 3rem 0;
+  }
+  .reservas__imagen, .reservas-card {
+    max-width: 98vw;
+    min-width: 0;
+  }
+}
+
+/* === RESERVAS STEP 1 MEJORADO === */
+.inputCantidadPersonas {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.cantidad-personas__input {
+  width: 120px;
+  padding: 1.1rem 1.2rem;
+  border-radius: 1.2rem;
+  border: 2px solid var(--primary-200);
+  font-size: 1.7rem;
+  text-align: center;
+  background: var(--neutral-100);
+  color: var(--neutral-900);
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.cantidad-personas__input:focus {
+  border: 2px solid var(--primary-500);
+  outline: none;
+  background: #fff;
+}
+
+.date_selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.date_button {
+  padding: 0.8rem 1.5rem;
+  border-radius: 1rem;
+  border: 2px solid var(--primary-200);
+  background: #fff;
+  color: var(--primary-700);
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.date_button.selected {
+  background: var(--primary-500);
+  color: #fff;
+  border: 2px solid var(--primary-600);
+}
+.date_button.available:hover {
+  background: var(--primary-100);
+  color: var(--primary-900);
+}
+.date_button.unavailable {
+  background: var(--neutral-200);
+  color: var(--neutral-500);
+  border: 2px dashed var(--neutral-300);
+  cursor: not-allowed;
+}
+
+.time_selector {
+  margin-bottom: 1.5rem;
+}
+.time_columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  justify-content: center;
+}
+.time_button {
+  padding: 0.8rem 1.5rem;
+  border-radius: 1rem;
+  border: 2px solid var(--primary-200);
+  background: #fff;
+  color: var(--primary-700);
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.time_button.selected {
+  background: var(--primary-500);
+  color: #fff;
+  border: 2px solid var(--primary-600);
+}
+.time_button.available:hover {
+  background: var(--primary-100);
+  color: var(--primary-900);
+}
+.time_button.unavailable {
+  background: var(--neutral-200);
+  color: var(--neutral-500);
+  border: 2px dashed var(--neutral-300);
+  cursor: not-allowed;
+}
+
+/* === BOTÓN CONFIRMAR RESERVA DESTACADO === */
+.boton_siguiente {
+  background: linear-gradient(90deg, var(--primary-500) 60%, var(--secondary-400) 100%);
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 700;
+  box-shadow: 0 2px 12px rgba(255,111,0,0.10);
+  border: none;
+  border-radius: 1.2rem;
+  padding: 1.2rem 2.8rem;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.boton_siguiente:hover {
+  background: linear-gradient(90deg, var(--primary-700) 60%, var(--secondary-600) 100%);
+  box-shadow: 0 4px 18px rgba(255,111,0,0.18);
+}
+
+@media (max-width: 600px) {
+  .inputCantidadPersonas {
+    flex-direction: column;
+    align-items: center;
+  }
+  .date_selector, .time_columns {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.GoCheck {
+  margin: 0 auto;
+  color: var(--primary-400);
+}
+
+.GoAlert {
+  margin: 0 auto;
+  color: var(--error-500)
+}
+
+.GoX {
+  margin: 0 auto;
+  color: var(--neutral-900)
+}
+
+.GoTrash {
+  margin: 0 auto;
+  color: var(--neutral-900)
+}
+
+/* Estilos para errores globales - más llamativos y centrados */
+.error-global {
+  background: #fff;
+  border: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  border-radius: 1.2rem;
+  padding: 2.5rem;
+  text-align: center;
+  margin: 2rem auto;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  position: relative;
+  animation: slideInError 0.3s ease-out;
+}
+
+.error-global .GoX {
+  font-size: 3.2rem;
+  display: block;
+  margin: 0 auto;
+  color: #dc3545;
+}
+
+.error-global span {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #333;
+  line-height: 1.4;
+}
+
+.error-global button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 0.8rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 0.5rem;
+}
+
+.error-global button:hover {
+  background: #0056b3;
+}
+
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilos para alertas sin tarjeta (login/register) */
+.alerta-sin-tarjeta {
+  text-align: center;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  animation: fadeInAlert 0.3s ease-out;
+}
+
+.alerta-sin-tarjeta .GoCheck,
+.alerta-sin-tarjeta .GoX {
+  font-size: 2.2rem;
+  display: block;
+  margin: 0 auto;
+}
+
+.alerta-sin-tarjeta .GoCheck {
+  color: #28a745;
+}
+
+.alerta-sin-tarjeta .GoX {
+  color: #dc3545;
+}
+
+.alerta-sin-tarjeta span {
+  text-align: center;
+  font-size: 1rem;
+  color: #333;
+}
+
+@keyframes fadeInAlert {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilos para alertas con tarjeta (otros componentes) */
+.alerta-con-tarjeta {
+  background: #fff;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  border-radius: 1rem;
+  padding: 1.2rem;
+  text-align: center;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.alerta-con-tarjeta .GoCheck,
+.alerta-con-tarjeta .GoX,
+.alerta-con-tarjeta .GoAlert {
+  font-size: 2.2rem;
+  display: block;
+  margin: 0 auto;
+}
+
+.alerta-con-tarjeta .GoCheck {
+  color: #28a745;
+}
+
+.alerta-con-tarjeta .GoX {
+  color: #dc3545;
+}
+
+.alerta-con-tarjeta .GoAlert {
+  color: #ffc107;
+}
+
+.alerta-con-tarjeta span {
+  text-align: center;
+  font-size: 1rem;
+  color: #333;
+}
+
+.alerta-sin-tarjeta--grande .GoCheck,
+.alerta-sin-tarjeta--grande .GoX {
+  font-size: 3rem;
+}
+
+.alerta-sin-tarjeta--grande span {
+  font-size: 1.3rem;
+  font-weight: 500;
+}

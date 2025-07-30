@@ -1,11 +1,12 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { GoX, GoCheck, GoAlert } from "react-icons/go";
 
 const DialogoModal = ({
   open,
   onClose,
   message,
-  icon = '✅',
+  icon = <GoCheck className="GoCheck" style={{ fontSize: '2.5rem' }} />,
   confirmText = null,
   cancelText = null,
   onConfirm = null,
@@ -23,7 +24,7 @@ const DialogoModal = ({
 
   return (
     <div className="success-dialog-overlay">
-      <div className="success-dialog">
+      <div className="success-dialog" style={{ background: '#fff', border: 'none', boxShadow: '0 4px 32px rgba(0,0,0,0.18)', borderRadius: '16px', minWidth: '320px', maxWidth: '90vw', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 32px 24px 32px' }}>
         {/* Botón de cierre (X) */}
         <button
           className="success-dialog__close"
@@ -43,8 +44,8 @@ const DialogoModal = ({
         >
           ×
         </button>
-        <span aria-label="icono" className="success-dialog__icon" role="img">{icon}</span>
-        <p className="success-dialog__message">{message}</p>
+        <span aria-label="icono" className="success-dialog__icon" role="img" style={{ display: 'block', textAlign: 'center', margin: '0 auto' }}>{icon}</span>
+        <p className="success-dialog__message" style={{ textAlign: 'center' }}>{message}</p>
         {(confirmText || cancelText) && (
           <div className="success-dialog__actions">
             {confirmText && <button className="success-dialog__btn" onClick={onConfirm}>{confirmText}</button>}

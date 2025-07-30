@@ -4,9 +4,23 @@ import { AiFillInstagram } from 'react-icons/ai';
 import { BsTwitterX } from 'react-icons/bs';
 import { FaFacebook, FaTiktok, FaYoutube } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { GoCheck, GoX } from 'react-icons/go';
 
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils';
 import { validarCaracteresEspeciales, validarEspaciosInicioFinal } from '../utils/validaciones';
+
+const FooterAlert = ({ type, message }) => {
+  if (!message) return null;
+  const icon = type === 'success'
+    ? <GoCheck className="GoCheck" />
+    : <GoX className="GoX" />;
+  return (
+    <div className="alerta-con-tarjeta">
+      {icon}
+      <span>{message}</span>
+    </div>
+  );
+};
 
 const Footer = () => {
   const [experiencia, setExperiencia] = useState('');
@@ -138,8 +152,7 @@ const Footer = () => {
           <button className="cuentanos__boton" type="submit">
             {t('enviar')}
           </button>
-          {error && <p className="formulario__mensaje-error" id="footer-error">{error}</p>}
-          {mensaje && <p className="formulario__mensaje-exito" id="footer-exito">{mensaje}</p>}
+          <FooterAlert type={error ? 'error' : 'success'} message={error || mensaje} />
         </form>
       </footer>
   );

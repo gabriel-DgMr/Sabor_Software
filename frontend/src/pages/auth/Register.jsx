@@ -6,8 +6,23 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
 import { validarRegistro } from '../../utils/validaciones';
+import { GoCheck, GoX } from 'react-icons/go';
 
 import EmailVerification from './EmailVerification.jsx';
+
+// Componente de alerta visualmente consistente para register
+const RegisterAlert = ({ type, message }) => {
+  if (!message) return null;
+  const icon = type === 'success'
+    ? <GoCheck className="GoCheck" />
+    : <GoX className="GoX" />;
+  return (
+    <div className="alerta-sin-tarjeta alerta-sin-tarjeta--grande">
+      {icon}
+      <span>{message}</span>
+    </div>
+  );
+};
 
 const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegisterSuccess }) => {
   const { registerUser, loading } = useAuth();
@@ -221,18 +236,11 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
         </div>
 
         {globalError && (
-          <div
-            className="formulario__mensaje-error"
-            id="global-error-register"
-          >
-            {globalError}
-          </div>
+          <RegisterAlert type="error" message={globalError} />
         )}
 
         {successMessage && (
-          <div className="formulario__mensaje-exito">
-            {successMessage}
-          </div>
+          <RegisterAlert type="success" message={successMessage} />
         )}
 
         <button className="formulario__boton-principal" disabled={loading} type="submit">

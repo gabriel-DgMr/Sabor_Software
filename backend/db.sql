@@ -156,8 +156,10 @@ CREATE TABLE pedidos (
   id_pedido int NOT NULL AUTO_INCREMENT,
   id_cliente int NOT NULL,
   id_empleado int NULL,
+  PRIMARY KEY (id_pedido)
+);
 
--- MIGRACIÓN AUTOMÁTICA DE DESCRIPCIONES DE PRODUCTOS A LA TABLA DE TRADUCCIONES
+-- MIGRACIÓN AUTOMÁTICA DE DESCRIPCIONES DE PRODUCTOS A LA TABLA DE TRADUCCIONES --
 INSERT INTO producto_traducciones (producto_id, idioma, descripcion)
 SELECT id_producto, 'es', descripcion_producto
 FROM productos;
@@ -258,6 +260,11 @@ CREATE TABLE excepciones_horarios (
 -- INSERCIÓN DE DATOS BASE
 -- ========================
 
+-- Limpiar y reiniciar IDs de productos y traducciones para asegurar correspondencia y evitar conflictos de claves foráneas
+TRUNCATE TABLE producto_traducciones;
+TRUNCATE TABLE productos;
+ALTER TABLE productos AUTO_INCREMENT = 1;
+
 INSERT INTO categorias (nombre_categoria, descripcion_categoria) VALUES
 ('Entradas', 'Platos ligeros para iniciar la comida'),
 ('Platos fuertes', 'Comidas principales que sacian el apetito'),
@@ -291,7 +298,7 @@ INSERT INTO mesas (id_mesa, capacidad_mesa, estado_mesa) VALUES
 (19, 4, 'disponible'),
 (20, 4, 'disponible');
 
--- Insertar productos ANTES de traducirlos
+-- Insertar productos SOLO UNA VEZ
 INSERT INTO productos (
   id_categoria,
   nombre_producto,
@@ -308,7 +315,7 @@ INSERT INTO productos (
 (2, 'Lechona Tolimense', 25000, 50, 5, 'Delicia tradicional del Tolima, consiste en un cerdo entero relleno de arroz, arvejas y especias, horneado lentamente hasta lograr una piel crujiente. Se sirve con arepa blanca y es infaltable en celebraciones especiales.', 'lechonatolimense_platosfuertes.png'),
 (1, 'Natilla con Buñuelos', 10000, 50, 5, 'Postre típico de la Navidad colombiana. La natilla se elabora con fécula de maíz, leche y panela, mientras que los buñuelos son esponjosas bolitas fritas de queso. Juntos, representan el dulce cierre de nuestras festividades.', 'natillaconbuñuelos_entradas.png');
 
--- Ahora sí: migración automática de descripción al idioma español
+-- Migrar descripciones al español
 INSERT INTO producto_traducciones (producto_id, idioma, descripcion)
 SELECT id_producto, 'es', descripcion_producto FROM productos;
 
