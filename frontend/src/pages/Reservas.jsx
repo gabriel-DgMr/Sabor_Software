@@ -1,14 +1,46 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+// import { useNavigate } from 'react-router-dom';
 
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
+// import { useAuth } from '../context/AuthContext';
+import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils.js';
+import {
+  validarEmail,
+  validarTelefono,
+  validarLongitud,
+  validarCaracteresEspeciales,
+  validarEspaciosInicioFinal,
+} from '../utils/validaciones.js';
 import '../index.css';
+import { GoCheck, GoX, GoAlert } from 'react-icons/go';
+
+// Alerta personalizada
+const CustomAlert = ({ open, type, message, onClose }) => {
+  if (!open) return null;
+  let icon = null;
+  if (type === 'success') icon = <GoCheck className="GoCheck" style={{ fontSize: '2.5rem' }} />;
+  else if (type === 'error') icon = <GoX className="GoX" style={{ fontSize: '2.5rem' }} />;
+  else icon = <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />;
+  return (
+    <div className="custom-alert-overlay">
+      <div className="custom-alert" style={{ background: '#fff', border: 'none', boxShadow: '0 4px 32px rgba(0,0,0,0.18)', borderRadius: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2.5rem 2.5rem 2rem 2.5rem', minWidth: '320px', maxWidth: '90vw', gap: '1.2rem' }}>
+        <span className="custom-alert__icon" style={{ display: 'block', textAlign: 'center', margin: '0 auto' }}>{icon}</span>
+        <span className="custom-alert__message" style={{ textAlign: 'center' }}>{message}</span>
+        <button className="custom-alert__close" style={{ marginTop: '1rem', background: '#ff6f00', color: '#fff', border: 'none', borderRadius: '1rem', padding: '0.7rem 2.2rem', fontSize: '1.5rem', fontWeight: 600, cursor: 'pointer' }} onClick={onClose}>Cerrar</button>
+      </div>
+    </div>
+  );
+};
 
 /**
  * Componente Reservas: Maneja el proceso de reservación de mesas
  * Implementa un formulario de múltiples pasos para recoger la información necesaria
  */
 const Reservas = () => {
+  // const { isAuthenticated } = useAuth();
+  // const navigate = useNavigate();
   // const [showLogin, setShowLogin] = useState(false); // Comentado para el linter, restaurar si se necesita un modal de login aquí
   const [step, setStep] = useState(1);
   // Estado para la fecha seleccionada
@@ -28,6 +60,11 @@ const Reservas = () => {
     peticiones: '', // Nuevo campo para el paso 3
   });
   const [formErrors, setFormErrors] = useState({}); // Estado para errores de validación
+
+  // Estado para alertas personalizadas
+  const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     document.title = 'Sabor: Reservas';
@@ -63,7 +100,7 @@ const Reservas = () => {
     }
   };
 
-  const cargarHorariosDisponibles = async (fecha) => {
+  const cargarHorariosDisponibles = async fecha => {
     try {
       const response = await fetch(`/api/horarios/disponibles?fecha=${fecha}`);
       const data = await response.json();
@@ -73,30 +110,107 @@ const Reservas = () => {
     }
   };
 
+  const manejarErroresDeCampo = newErrors => {
+    setFormErrors(newErrors);
+    setTimeout(() => animateElements('.reservas__input-error', 'fade-in'), 0);
+    setTimeout(() => {
+      document.querySelectorAll('.reservas__input-error').forEach(el => {
+        el.classList.remove('fade-in');
+        el.classList.add('fade-out');
+      });
+      setTimeout(() => setFormErrors({}), ANIM_DURATION);
+    }, VISIBLE_DURATION);
+  };
+
   const validateStep1 = () => {
     const errors = {};
     if (!formData.personas || formData.personas <= 0)
-      errors.personas = 'Ingrese un número válido de personas.';
-    if (!selectedDate) errors.fecha = 'Seleccione una fecha.';
-    if (!selectedTime) errors.hora = 'Seleccione una hora.';
-    setFormErrors(errors);
+      errors.personas = t('reservas_error_personas');
+    if (!selectedDate) errors.fecha = t('reservas_error_fecha');
+    if (!selectedTime) errors.hora = t('reservas_error_hora');
+    manejarErroresDeCampo(errors);
     return Object.keys(errors).length === 0;
   };
 
   const validateStep2 = () => {
     const errors = {};
-    if (!formData.nombre.trim()) errors.nombre = 'Obligatorio.';
-    if (!formData.telefono.trim()) {
-      errors.telefono = 'Obligatorio.';
-    } else if (!/^\d{10}$/.test(formData.telefono.trim())) {
-      errors.telefono = 'El teléfono debe tener 10 dígitos.';
+
+    // Validar nombre
+    if (!formData.nombre) {
+      errors.nombre = t('reservas_error_nombre');
+    } else {
+      const longitudError = validarLongitud(formData.nombre, 'nombre', 2, 50);
+      if (longitudError) {
+        errors.nombre = longitudError;
+      } else {
+        const caracteresError = validarCaracteresEspeciales(formData.nombre, 'nombre');
+        if (caracteresError) {
+          errors.nombre = caracteresError;
+        } else {
+          const espaciosError = validarEspaciosInicioFinal(formData.nombre, 'nombre');
+          if (espaciosError) {
+            errors.nombre = espaciosError;
+          }
+        }
+      }
     }
-    if (!formData.email.trim()) {
-      errors.email = 'El correo es obligatorio.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      errors.email = 'El formato del correo no es válido.';
+
+    // Validar teléfono
+    if (!formData.telefono) {
+      errors.telefono = t('reservas_error_telefono');
+    } else {
+      const telefonoError = validarTelefono(formData.telefono);
+      if (telefonoError) {
+        errors.telefono = telefonoError;
+      } else {
+        const espaciosError = validarEspaciosInicioFinal(formData.telefono, 'teléfono');
+        if (espaciosError) {
+          errors.telefono = espaciosError;
+        }
+      }
     }
-    setFormErrors(errors);
+
+    // Validar email
+    if (!formData.email) {
+      errors.email = t('reservas_error_email');
+    } else {
+      const emailError = validarEmail(formData.email);
+      if (emailError) {
+        errors.email = emailError;
+      } else {
+        const espaciosError = validarEspaciosInicioFinal(formData.email, 'email');
+        if (espaciosError) {
+          errors.email = espaciosError;
+        }
+      }
+    }
+
+    manejarErroresDeCampo(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateStep3 = () => {
+    const errors = {};
+
+    // Validar peticiones (opcional pero si se llena debe ser válido)
+    if (formData.peticiones && formData.peticiones.trim() !== '') {
+      const longitudError = validarLongitud(formData.peticiones, 'peticiones', 5, 500);
+      if (longitudError) {
+        errors.peticiones = longitudError;
+      } else {
+        const caracteresError = validarCaracteresEspeciales(formData.peticiones, 'peticiones');
+        if (caracteresError) {
+          errors.peticiones = caracteresError;
+        } else {
+          const espaciosError = validarEspaciosInicioFinal(formData.peticiones, 'peticiones');
+          if (espaciosError) {
+            errors.peticiones = espaciosError;
+          }
+        }
+      }
+    }
+
+    manejarErroresDeCampo(errors);
     return Object.keys(errors).length === 0;
   };
 
@@ -119,32 +233,45 @@ const Reservas = () => {
     } else if (step === 2) {
       if (validateStep2()) setStep(3);
     } else if (step === 3) {
-      setStep(4);
+      if (validateStep3()) setStep(4);
     } else if (step === 4) {
-      ('Reserva Confirmada:', formData);
-
       try {
+        const token = localStorage.getItem('token');
+        // Adaptar el payload a lo que espera el backend
+        const payload = {
+          personas: formData.personas,
+          fecha: formData.fecha,
+          hora: formData.hora ? formData.hora.slice(0, 5) : '', // Asegura formato HH:MM
+          nombre: formData.nombre,
+          telefono: formData.telefono,
+          email: formData.email,
+          peticiones: formData.peticiones || '',
+        };
+        console.log('Payload que se enviará:', payload);
         const response = await fetch('/api/reservas/hacerReserva', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
 
-        const result = await response.json();
+        let result;
+        try {
+          result = await response.json();
+        } catch (e) {
+          result = { message: 'Respuesta no válida del servidor.' };
+        }
+        console.log('Respuesta del backend:', result);
 
         if (response.ok) {
-          alert('¡Reserva realizada con éxito!');
-
-          // Aquí podrías redirigir al usuario o mostrar un mensaje de confirmación más elaborado
+          setAlert({ open: true, type: 'success', message: '¡Reserva realizada con éxito!' });
         } else {
-          alert(`Error al realizar la reserva: ${result.message || response.statusText}`);
-          console.error('Error en la reserva:', result);
+          setAlert({ open: true, type: 'error', message: result.message || 'Error al realizar la reserva.' });
         }
       } catch (error) {
-        console.error('Error en la llamada API:', error);
-        alert('Hubo un problema al conectar con el servidor de reservas.');
+        setAlert({ open: true, type: 'error', message: 'Hubo un problema al conectar con el servidor de reservas.' });
       }
     }
   };
@@ -152,7 +279,7 @@ const Reservas = () => {
   const handlePreviousStep = () => {
     if (step > 1) {
       setStep(step - 1);
-      setFormErrors({}); // Limpiar errores al retroceder
+      setFormErrors({});
     }
   };
 
@@ -167,9 +294,9 @@ const Reservas = () => {
       <div className="steps_container">
         {/*colores para estados de disponibilidad */}
         <div className="disponible_color">
-          <span className="disponible">Disponible</span>
-          <span className="no_disponible">No disponible</span>
-          <span className="seleccion">Selección</span>
+          <span className="disponible">{t('reservas_disponible')}</span>
+          <span className="no_disponible">{t('reservas_no_disponible')}</span>
+          <span className="seleccion">{t('reservas_seleccion')}</span>
         </div>
 
         <div className="steps">
@@ -217,17 +344,18 @@ const Reservas = () => {
     return (
       <div className="date_selector">
         {/* Botones para cada fecha disponible */}
-        {fechasDisponibles && fechasDisponibles.map((fecha, index) => (
-          <button
-            key={index}
-            className={`date_button ${selectedDate === fecha.fecha ? 'selected' : ''} ${fecha.disponible ? 'available' : 'unavailable'}`}
-            disabled={!fecha.disponible}
-            type="button"
-            onClick={() => fecha.disponible && handleDateSelect(fecha.fecha)}
-          >
-            {fecha.formato}
-          </button>
-        ))}
+        {fechasDisponibles &&
+          fechasDisponibles.map((fecha, index) => (
+            <button
+              key={index}
+              className={`date_button ${selectedDate === fecha.fecha ? 'selected' : ''} ${fecha.disponible ? 'available' : 'unavailable'}`}
+              disabled={!fecha.disponible}
+              type="button"
+              onClick={() => fecha.disponible && handleDateSelect(fecha.fecha)}
+            >
+              {fecha.formato}
+            </button>
+          ))}
         {/* Botón para abrir el calendario completo (no funcional, solo mueustra) */}
         {/* <button
           className="calendar_button"
@@ -245,7 +373,7 @@ const Reservas = () => {
   const renderTimeSelector = () => {
     return (
       <div className="time_selector">
-        <h3>HORA</h3>
+        <h3>{t('reservas_hora')}</h3>
         <div className="time_columns">
           <div className="time_column">
             {horariosDisponibles.map((horario, index) => (
@@ -274,7 +402,7 @@ const Reservas = () => {
           className={`cantidad-personas__input ${formErrors.personas ? 'reservas__input-error' : ''}`}
           min="1"
           name="personas"
-          placeholder="CANTIDAD DE PERSONAS"
+          placeholder={t('reservas_cantidad_personas')}
           type="number"
           value={formData.personas}
           onChange={handleInputChange}
@@ -286,18 +414,16 @@ const Reservas = () => {
       {renderDateSelector()}
       {renderTimeSelector()}
       <div className="info_contacto">
-        <p>Para mayor información, quejas o reclamos, por favor escribir a</p>
-        <p>Email: sabor.software@sabor.com</p>
-        <p>Tel: +57 3044541620</p>
+        <p>{t('reservas_info_contacto')}</p>
       </div>
     </>
   );
 
   const renderPaso2 = () => (
     <>
-      <h2 className="reservas__subtitulo">Información de Contacto</h2>
+      <h2 className="reservas__subtitulo">{t('reservas_info_contacto_titulo')}</h2>
       <div className="campo">
-        <label htmlFor="nombre">Nombre Completo:</label>
+        <label htmlFor="nombre">{t('nombre_completo')}:</label>
         <input
           className={`formulario__input ${formErrors.nombre ? 'reservas__input-error' : ''}`}
           id="nombre"
@@ -305,11 +431,11 @@ const Reservas = () => {
           type="text"
           value={formData.nombre}
           onChange={handleInputChange}
-        /> 
+        />
         {formErrors.nombre && <small className="reservas__input-error">{formErrors.nombre}</small>}
       </div>
       <div className="campo">
-        <label htmlFor="telefono">Teléfono (10 dígitos):</label>
+        <label htmlFor="telefono">{t('telefono_con_formato')}:</label>
         <input
           className={`formulario__input ${formErrors.telefono ? 'reservas__input-error' : ''}`}
           id="telefono"
@@ -323,7 +449,7 @@ const Reservas = () => {
         )}
       </div>
       <div className="campo">
-        <label htmlFor="email">Correo Electrónico:</label>
+        <label htmlFor="email">{t('correo_electronico')}:</label>
         <input
           className={`formulario__input ${formErrors.email ? 'reservas__input-error' : ''}`}
           id="email"
@@ -339,11 +465,9 @@ const Reservas = () => {
 
   const renderPaso3 = () => (
     <>
-      <h2 className="reservas__subtitulo">Peticiones Adicionales</h2>
+      <h2 className="reservas__subtitulo">{t('reservas_peticiones_titulo')}</h2>
       <div className="campo">
-        <label htmlFor="peticiones">
-          ¿Alguna petición especial? (ej. alergias, celebración, etc.)
-        </label>
+        <label htmlFor="peticiones">{t('reservas_peticiones_label')}</label>
         <br />
         <textarea
           className={`formulario__input ${formErrors.peticiones ? 'reservas__input-error' : ''}`}
@@ -353,41 +477,42 @@ const Reservas = () => {
           value={formData.peticiones}
           onChange={handleInputChange}
         />
+        {formErrors.peticiones && (
+          <small className="reservas__input-error">{formErrors.peticiones}</small>
+        )}
       </div>
     </>
   );
 
   const renderPaso4 = () => (
     <>
-      <h2 className="reservas__subtitulo">Confirmar Reserva</h2>
+      <h2 className="reservas__subtitulo">{t('reservas_confirmar_titulo')}</h2>
       <div className="resumen-reserva">
         <p>
-          <strong>Personas:</strong> {formData.personas}
+          <strong>{t('reservas_personas')}:</strong> {formData.personas}
         </p>
         <p>
-          <strong>Fecha:</strong> {formData.fecha}
+          <strong>{t('reservas_fecha')}:</strong> {formData.fecha}
         </p>
         <p>
-          <strong>Hora:</strong> {formData.hora}
+          <strong>{t('reservas_hora')}:</strong> {formData.hora}
         </p>
         <p>
-          <strong>Nombre:</strong> {formData.nombre}
+          <strong>{t('nombre_completo')}:</strong> {formData.nombre}
         </p>
         <p>
-          <strong>Teléfono:</strong> {formData.telefono}
+          <strong>{t('telefono')}:</strong> {formData.telefono}
         </p>
         <p>
-          <strong>Email:</strong> {formData.email}
+          <strong>{t('correo_electronico')}:</strong> {formData.email}
         </p>
         {formData.peticiones && (
           <p>
-            <strong>Peticiones:</strong> {formData.peticiones}
+            <strong>{t('reservas_peticiones')}:</strong> {formData.peticiones}
           </p>
         )}
       </div>
-      <p className="confirmacion-aviso">
-        Por favor, revisa que todos los datos sean correctos antes de confirmar.
-      </p>
+      <p className="confirmacion-aviso">{t('reservas_confirmar_aviso')}</p>
     </>
   );
 
@@ -395,13 +520,18 @@ const Reservas = () => {
   return (
     <div>
       <div>
-        <Header /* setShowLogin={setShowLogin} */ /> {/* Comentado para que el linter no este fastidiando*/}
+        <Header /* setShowLogin={setShowLogin} */ />{' '}
+        {/* Comentado para que el linter no este fastidiando*/}
         <main className="pagina__contenido-reservas">
           <section className="reservas__imagen">
-            <img src="/images/imagen-reservas.jpg" alt="imagen-reservas" className='imagen-reservas'/>
+            <img
+              alt="imagen-reservas"
+              className="imagen-reservas"
+              src="/images/imagen-reservas.jpg"
+            />
           </section>
           <section className="seccion_reservas">
-            <h1 className="reservas__titulo">Reservación</h1>
+            <h1 className="reservas__titulo">{t('reservas_titulo')}</h1>
             {renderStepIndicator()}
 
             <div className="reservas__contenido">
@@ -414,11 +544,15 @@ const Reservas = () => {
                 <div className="reservas__acciones">
                   {step > 1 && (
                     <button className="boton_regresar" type="button" onClick={handlePreviousStep}>
-                      Regresar
+                      {t('reservas_regresar')}
                     </button>
                   )}
                   <button className="boton_siguiente" type="submit">
-                    {step === 4 ? 'Confirmar Reserva' : step === 3 ? 'Ver Resumen' : 'Siguiente'}
+                    {step === 4
+                      ? t('reservas_confirmar_boton')
+                      : step === 3
+                        ? t('reservas_ver_resumen')
+                        : t('reservas_siguiente')}
                   </button>
                 </div>
               </form>

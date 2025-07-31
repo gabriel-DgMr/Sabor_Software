@@ -1,15 +1,26 @@
 import { productoModel } from '../models/productoModel.js';
 import { categoriaModel } from '../models/categoriaModel.js';
+import { productoTraduccionModel } from '../models/productoModel.js';
 
 export const productoController = {
 // Obtener todos los productos
     getAllProductos: async (req, res) => {
-    try {
-            const productos = await productoModel.getAllProductos();
-        res.json(productos);
-    } catch (error) {
-            res.status(500).json({ message: error.message });
-    }
+        try {
+            const filtros = {
+                categoria: req.query.categoria || '',
+                busqueda: req.query.busqueda || '',
+                orden: req.query.orden || '',
+                idioma: req.query.lang || 'es'
+            };
+            const productos = await productoModel.getAllProductos(filtros);
+            res.json(productos);
+            console.log('res.json(productos)');
+        } catch (error) {
+            res.status(500).json({ 
+                message: 'Error al obtener los productos',
+                error: error.message 
+            });
+        }
     },
 
 // Obtener producto por ID
@@ -35,7 +46,9 @@ export const productoController = {
                 nombre_producto, 
                 descripcion_producto, 
                 precio_producto, 
-                id_categoria_producto 
+                id_categoria_producto,
+                calificacion = 0,
+                ventas = 0
             } = req.body;
             
             // Validaciones
@@ -63,7 +76,9 @@ export const productoController = {
                 descripcion_producto,
                 precio_producto,
                 id_categoria_producto,
-                imagen_producto: req.file.filename
+                imagen_producto: req.file.filename,
+                calificacion: parseFloat(calificacion),
+                ventas: parseInt(ventas)
             };
 
             console.log('Nombre del archivo guardado en BD:', req.file.filename);
@@ -74,6 +89,12 @@ export const productoController = {
             // Crear el producto en la base de datos
             const nuevoProductoId = await productoModel.createProducto(productoData);
             
+            // Guardar traducción en inglés si viene en el body
+            const { descripcion_en } = req.body;
+            if (descripcion_en) {
+                await productoTraduccionModel.upsertProductoTraduccion(nuevoProductoId, 'en', descripcion_en);
+            }
+
             // Enviar respuesta exitosa
             res.status(201).json({ 
                 message: 'Producto creado exitosamente',
@@ -96,7 +117,9 @@ export const productoController = {
                 nombre_producto, 
                 descripcion_producto, 
                 precio_producto, 
-                id_categoria_producto 
+                id_categoria_producto,
+                calificacion,
+                ventas
             } = req.body;
 
             // Validaciones
@@ -116,7 +139,9 @@ export const productoController = {
                 nombre_producto,
                 descripcion_producto,
                 precio_producto,
-                id_categoria_producto
+                id_categoria_producto,
+                calificacion: calificacion ? parseFloat(calificacion) : undefined,
+                ventas: ventas ? parseInt(ventas) : undefined
             };
 
             // Si se subió una nueva imagen, actualizar el nombre del archivo
@@ -128,6 +153,12 @@ export const productoController = {
             
             if (!success) {
                 return res.status(404).json({ message: 'Producto no encontrado' });
+            }
+
+            // Guardar traducción en inglés si viene en el body
+            const { descripcion_en } = req.body;
+            if (descripcion_en) {
+                await productoTraduccionModel.upsertProductoTraduccion(req.params.id, 'en', descripcion_en);
             }
 
             res.json({ message: 'Producto actualizado exitosamente' });

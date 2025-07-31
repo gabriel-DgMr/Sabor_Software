@@ -1,20 +1,50 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import "../index.css";
 import "../styles/carrito.css";
+import { GoX, GoCheck, GoAlert } from "react-icons/go";
+import { GoTrash } from "react-icons/go";
+import { BsCashCoin } from "react-icons/bs";
+import { GoCreditCard } from "react-icons/go";
+import { IoCart } from "react-icons/io5";
 
+
+import DialogoModal from '../components/DialogoExito.jsx';
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
-import { useCart } from '../context/CartContext.jsx';
+import { useCart } from '../context/useCart.js';
+
 const API_URL = 'http://localhost:3000/api';
+
+// Componente de alerta visualmente consistente para el carrito
+const CarritoAlert = ({ message }) => {
+  if (!message) return null;
+  return (
+    <div className="alerta-con-tarjeta">
+      <GoAlert className="GoAlert" />
+      <span>{message}</span>
+    </div>
+  );
+};
 
 export default function Carrito() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { cartItems, clearCart, closedOrders, closeCurrentOrder, createNewOrder } = useCart();
+  const { 
+    cartItems, 
+    clearCart, 
+    loading: cartLoading, 
+    error: cartError,
+    confirmarPedido,
+    updateItemQuantity,
+    removeItemFromCart
+  } = useCart();
   const [recomendaciones, setRecomendaciones] = useState('');
+  const [modal, setModal] = useState({ open: false, message: '', icon: <GoCheck className="GoCheck"/>, onConfirm: null });
+  const { t } = useTranslation();
 
   useEffect(() => {
     document.title = 'Sabor: Carrito';
@@ -24,117 +54,123 @@ export default function Carrito() {
     if (recomendacionesGuardadas) {
       setRecomendaciones(recomendacionesGuardadas);
     }
-
-    // Cargar pedidos cerrados desde el backend
-    const fetchClosedOrders = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          // ** ASUMIR QUE ESTE ENDPOINT EXISTE EN EL BACKEND **
-          // ** Y QUE RETORNA LOS PEDIDOS NO PENDIENTES DEL USUARIO **
-          const response = await fetch(`${API_URL}/pedidos/cerrados`, { 
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (response.ok) {
-            const data = await response.json();
-            // Asumiendo que `closedOrders` del contexto tiene una función para actualizarse
-            // Esto puede variar dependiendo de cómo esté implementado tu contexto
-            // Si closedOrders es un estado local aquí, necesitarías setClosedOrders(data);
-            // Si viene del contexto, necesitarías una función provista por el contexto.
-            // ** ESTA PARTE DEBE SER ADAPTADA A LA IMPLEMENTACIÓN REAL DEL CONTEXTO **
-            console.log('Pedidos cerrados cargados:', data); // Para depuración
-            // Ejemplo asumiendo que hay una función setClosedOrders en el contexto:
-            // setClosedOrders(data); // Esto requiere que setClosedOrders sea expuesto por useCart
-          } else {
-            console.error('Error al cargar pedidos cerrados:', response.status);
-          }
-        }
-      } catch (error) {
-        console.error('Error al cargar pedidos cerrados:', error);
-      }
-    };
-    fetchClosedOrders();
-
-  }, []); // Dependencias: [useCart, API_URL, navigate, setRecomendaciones, setLoading, setError]
+  }, []);
 
   const procesarPago = async () => {
     if (cartItems.length === 0) {
-      alert('El carrito está vacío.');
+      setModal({
+        open: true,
+        message: 'El carrito está vacío.',
+        icon: <GoAlert className="GoAlert"/>,
+        onConfirm: () => setModal({ ...modal, open: false })
+      });
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('Debes iniciar sesión para finalizar el pedido.');
-        navigate('/login');
-        return;
-      }
 
-      // Mapear items del carrito a un formato adecuado para el backend
-      const itemsParaBackend = cartItems.map(item => ({
-        id_producto: item.id,
-        cantidad: item.quantity || 1,
-        precio_unitario: item.precio
-      }));
-      const totalCarrito = cartItems.reduce((sum, item) => sum + item.precio * (item.quantity || 1), 0);
-      const recomendacionesPedido = localStorage.getItem('recomendacionesPedido') || '';
-
-      const nuevoPedido = {
-        items: itemsParaBackend,
-        total: totalCarrito,
-        recomendaciones: recomendacionesPedido
-      };
-
-      const response = await fetch(`${API_URL}/pedidos`, {
+      // Llama al backend para crear la preferencia de Mercado Pago
+      const response = await fetch('http://localhost:3000/api/mercadopago/preferencia', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(nuevoPedido),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: cartItems })
       });
-      
-      if (!response.ok) {
-         const errorData = await response.json();
-         throw new Error(errorData.mensaje || `Error HTTP: ${response.status}`);
-      }
-      
-      clearCart();
-      localStorage.removeItem('recomendacionesPedido');
-      alert('Pedido procesado con éxito!');
-      navigate('/confirmacion-pedido');
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Error al crear preferencia de pago');
+
+      // Redirige al usuario a Mercado Pago
+      window.location.href = data.init_point;
 
     } catch (error) {
-      console.error('Error al procesar el pago:', error);
-      setError(`Error al procesar el pago: ${error.message}`);
+      setModal({
+        open: true,
+        message: 'Error al procesar el pago con Mercado Pago',
+        icon: <GoX className="GoX"/>,
+        onConfirm: () => setModal({ ...modal, open: false })
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleEliminarCarrito = () => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar todo el carrito?')) {
-      clearCart();
-      localStorage.removeItem('recomendacionesPedido');
+    setModal({
+      open: true,
+      message: '¿Estás seguro de que deseas eliminar todo el carrito?',
+      icon: <GoTrash className="GoTrash"/> ,
+      confirmText: 'Sí, eliminar',
+      cancelText: 'Cancelar',
+      onConfirm: async () => {
+        try {
+          await clearCart();
+          localStorage.removeItem('recomendacionesPedido');
+          setModal({ ...modal, open: false });
+        } catch (error) {
+          setModal({
+            open: true,
+            message: `Error al eliminar carrito`,
+            icon: <GoX className="GoX"/>,
+            onConfirm: () => setModal({ ...modal, open: false })
+          });
+        }
+      },
+      onCancel: () => setModal({ ...modal, open: false })
+    });
+  };
+
+  const handleCerrarPedido = async () => {
+    if (window.confirm(t('carrito_confirmar_cerrar'))) {
+      try {
+        // Usar un empleado por defecto (ID 1) y método de pago efectivo
+        await confirmarPedido(1, 'efectivo');
+        localStorage.removeItem('recomendacionesPedido');
+        setModal({
+          open: true,
+          message: 'Pedido cerrado exitosamente',
+          icon: <GoCheck className="GoCheck"/>,
+          onConfirm: () => setModal({ ...modal, open: false })
+        });
+      } catch (error) {
+        setModal({
+          open: true,
+          message: `Error al cerrar pedido`,
+          icon: <GoX className="GoX"/>,
+          onConfirm: () => setModal({ ...modal, open: false })
+        });
+      }
     }
   };
 
-  const handleModificarPedido = () => {
-    navigate('/carrito/modificar/actual');
-  };
-
-  const handleCerrarPedido = () => {
-    if (window.confirm('¿Estás seguro de que deseas cerrar este pedido y crear uno nuevo?')) {
-      closeCurrentOrder();
-      createNewOrder();
-      localStorage.removeItem('recomendacionesPedido');
+  const handleUpdateQuantity = async (id_producto, nuevaCantidad) => {
+    try {
+      await updateItemQuantity(id_producto, nuevaCantidad);
+    } catch (error) {
+      setModal({
+        open: true,
+        message: `Error al actualizar cantidad`,
+        icon: <GoX className="GoX"/>,
+        onConfirm: () => setModal({ ...modal, open: false })
+      });
     }
   };
 
-  if (loading) {
+  const handleRemoveItem = async (id_producto) => {
+    try {
+      await removeItemFromCart(id_producto);
+    } catch (error) {
+      setModal({
+        open: true,
+        message: `Error al eliminar producto: ${error.message}`,
+        icon: <GoX className="GoX"/>,
+        onConfirm: () => setModal({ ...modal, open: false })
+      });
+    }
+  };
+
+  if (loading || cartLoading) {
     return (
       <>
         <Header />
@@ -146,18 +182,18 @@ export default function Carrito() {
     );
   }
 
-  if (error) {
+  if (error || cartError) {
     return (
       <>
         <Header />
         <main className="carrito_bg">
           <div className="carrito_error">
-            <p>{error}</p>
-            <button onClick={() => {
+            <p>{error || cartError}</p>
+            <button className="carrito_btn reintentar" onClick={() => {
               setError(null);
               setLoading(true);
-            }} className="carrito_btn reintentar">
-              Reintentar
+            }}>
+              {t('carrito_reintentar')}
             </button>
           </div>
         </main>
@@ -170,41 +206,65 @@ export default function Carrito() {
     <>
       <Header />
       <main className="carrito_bg">
-        <h1 className="carrito_titulo">Carrito</h1>
+        <h1 className="carrito_titulo">{t('carrito_titulo')}</h1>
         <div className="carrito_contenido">
           <div className="carrito_pedidos">
             <div className="carrito_alerta">
-              <span className="carrito_alerta_icono">❗</span>
-              Si desea reportar un problema con su (s) pedidos haga{" "}
-              <span className="carrito_alerta_link">clic aquí</span>
+              <CarritoAlert message={<>{t('carrito_alerta')} <span className="carrito_alerta_link">{t('carrito_clic_aqui')}</span></>} />
             </div>
             
             {cartItems.length === 0 ? (
-              <div className="carrito_vacio">
-                No hay productos en el carrito.
-              </div>
+              <div className="carrito_vacio">{t('carrito_vacio')}</div>
             ) : (
-              <div className="carrito_pedido" key="pedido-pendiente">
+              <div key="pedido-pendiente" className="carrito_pedido">
                 <div className="carrito_pedido_info">
                   <div className="carrito_pedido_titulo">
                     <span aria-label="carrito" role="img">
-                      🛒
+                    <IoCart />
                     </span>
-                    Tu Pedido Actual
+                    {t('carrito_pedido_actual')}
                   </div>
                   <ul className="carrito_pedido_lista">
                     {cartItems.map((item, i) => (
                       <li key={i} className="carrito_item">
-                        <span>{item.nombre} - {item.precio.toLocaleString('es-CO')} COP</span>
+                        <div className="carrito_item_info">
+                          <span className="carrito_item_nombre">
+                            {item.nombre_producto} x {item.cantidad || 1} - {(item.precio_unitario * (item.cantidad || 1)).toLocaleString('es-CO')} COP
+                          </span>
+                          <div className="carrito_item_controles">
+                            <button 
+                              className="carrito_btn_cantidad"
+                              onClick={() => handleUpdateQuantity(item.id_producto, Math.max(1, (item.cantidad || 1) - 1))}
+                            >
+                              -
+                            </button>
+                            <span className="carrito_cantidad">{item.cantidad || 1}</span>
+                            <button 
+                              className="carrito_btn_cantidad"
+                              onClick={() => handleUpdateQuantity(item.id_producto, (item.cantidad || 1) + 1)}
+                            >
+                              +
+                            </button>
+                            <button 
+                              className="carrito_btn_eliminar"
+                              onClick={() => handleRemoveItem(item.id_producto)}
+                            >
+                              <GoTrash/>
+                            </button>
+                          </div>
+                        </div>
+                        {item.peticion && (
+                          <span className="carrito_item_peticion"> <br/><em>Petición: {item.peticion}</em></span>
+                        )}
                       </li>
                     ))}
                   </ul>
                   <div className="carrito_pedido_total">
-                    Total: {cartItems.reduce((sum, item) => sum + item.precio, 0).toLocaleString('es-CO')} COP
+                    {t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio_unitario * (item.cantidad || 1), 0).toLocaleString('es-CO')} COP
                   </div>
                   {recomendaciones && (
                     <div className="carrito_pedido_recomendaciones">
-                      <h4>Recomendaciones:</h4>
+                      <h4>{t('carrito_recomendaciones')}</h4>
                       <p>{recomendaciones}</p>
                     </div>
                   )}
@@ -214,85 +274,54 @@ export default function Carrito() {
                     className="carrito_btn eliminar"
                     onClick={handleEliminarCarrito}
                   >
-                    🗑️ Eliminar
-                  </button>
-                  <button 
-                    className="carrito_btn modificar"
-                    onClick={handleModificarPedido}
-                  >
-                    ✍️ Modificar
+                    <GoTrash/> {t('carrito_eliminar')}
                   </button>
                   <button 
                     className="carrito_btn cerrar"
                     onClick={handleCerrarPedido}
                   >
-                    🔒 Cerrar Pedido
+                    <BsCashCoin /> {t('efectivo')}
                   </button>
                   <button 
                     className="carrito_btn pagar"
                     onClick={procesarPago}
                   >
-                    💳 Pagar
+                    <GoCreditCard /> {t('carrito_pagar')}
                   </button>
                 </div>
               </div>
             )}
-
-            {closedOrders.length > 0 && (
-              <div className="carrito_pedidos_cerrados">
-                <h2>Pedidos Cerrados</h2>
-                {closedOrders.map((order) => (
-                  <div className="carrito_pedido cerrado" key={order.id}>
-                    <div className="carrito_pedido_info">
-                      <div className="carrito_pedido_titulo">
-                        <span aria-label="pedido-cerrado" role="img">
-                          📦
-                        </span>
-                        Pedido #{order.id} - {new Date(order.fecha).toLocaleString()}
-                      </div>
-                      <ul className="carrito_pedido_lista">
-                        {order.items.map((item, i) => (
-                          <li key={i} className="carrito_item">
-                            <span>{item.nombre} - {item.precio.toLocaleString('es-CO')} COP</span>
-                          </li>
-                        ))}
-                      </ul>
-                      <div className="carrito_pedido_total">
-                        Total: {order.items.reduce((sum, item) => sum + item.precio, 0).toLocaleString('es-CO')} COP
-                      </div>
-                      {order.recomendaciones && (
-                        <div className="carrito_pedido_recomendaciones">
-                          <h4>Recomendaciones:</h4>
-                          <p>{order.recomendaciones}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
           <div className="carrito_detalles">
-            <h2>Detalles de compra</h2>
+            <h2>{t('carrito_detalles_compra')}</h2>
             <p>
-              Aquí se mostrarán los detalles del pedido que usted seleccione (o del carrito actual).
+              {t('carrito_detalles_compra_desc')}
             </p>
             
             {cartItems.length > 0 && (
               <div>
-                <h3>Resumen del Carrito</h3>
+                <h3>{t('carrito_resumen')}</h3>
                 <ul>
                   {cartItems.map((item, i) => (
-                    <li key={i}>{item.nombre}: {item.precio.toLocaleString('es-CO')} COP</li>
+                    <li key={i}>
+                      {item.nombre_producto} x {item.cantidad || 1}: {(item.precio_unitario * (item.cantidad || 1)).toLocaleString('es-CO')} COP
+                      {item.peticion && (
+                        <span className="carrito_item_peticion"> <br/><em>Petición: {item.peticion}</em></span>
+                      )}
+                    </li>
                   ))}
                 </ul>
-                <p><strong>Total: {cartItems.reduce((sum, item) => sum + item.precio, 0).toLocaleString('es-CO')} COP</strong></p>
+                <p><strong>{t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio_unitario * (item.cantidad || 1), 0).toLocaleString('es-CO')} COP</strong></p>
               </div>
             )}
           </div>
         </div>
       </main>
       <Footer />
+      <DialogoModal 
+        {...modal}
+        onClose={() => setModal(m => ({ ...m, open: false }))}
+      />
     </>
   );
 }

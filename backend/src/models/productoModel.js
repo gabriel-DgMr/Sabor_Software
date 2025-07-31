@@ -1,21 +1,58 @@
-import { dbConfig } from '../config/dbconfig.js'
-import mysql from 'mysql2/promise'
+import { dbConfig } from '../config/dbconfig.js';
+import mysql from 'mysql2/promise';
 
-const pool = mysql.createPool(dbConfig)
+const pool = mysql.createPool(dbConfig);
 
 export const productoModel = {
-    // Obtener todos los productos
-    getAllProductos: async () => {
+    // Obtener todos los productos con filtros
+    getAllProductos: async (filtros = {}) => {
         try {
-            const [rows] = await pool.query(
-                `SELECT p.*, c.nombre_categoria 
+            const idioma = filtros.idioma || 'es';
+            let sql = `
+                SELECT 
+                    p.id_producto,
+                    p.nombre_producto,
+                    COALESCE(pt.descripcion, p.descripcion_producto) AS descripcion_producto,
+                    p.precio_producto,
+                    p.imagen_producto,
+                    p.id_categoria,
+                    c.nombre_categoria,
+                    p.activo,
+                    p.calificacion,
+                    p.ventas
                 FROM productos p 
                 LEFT JOIN categorias c ON p.id_categoria = c.id_categoria 
-                WHERE p.activo = 1`
-            )
-            return rows
+                LEFT JOIN producto_traducciones pt ON pt.producto_id = p.id_producto AND pt.idioma = ?
+                WHERE p.activo = 1
+            `;
+            const params = [idioma];
+            // Filtro por categoría
+            if (filtros.categoria) {
+                sql += ' AND c.nombre_categoria = ?';
+                params.push(filtros.categoria);
+            }
+            // Filtro por búsqueda
+            if (filtros.busqueda) {
+                sql += ' AND (p.nombre_producto LIKE ? OR p.descripcion_producto LIKE ? OR pt.descripcion LIKE ?)';
+                params.push(`%${filtros.busqueda}%`, `%${filtros.busqueda}%`, `%${filtros.busqueda}%`);
+            }
+            // Ordenamiento
+            if (filtros.orden === 'precio_asc') {
+                sql += ' ORDER BY p.precio_producto ASC';
+            } else if (filtros.orden === 'precio_desc') {
+                sql += ' ORDER BY p.precio_producto DESC';
+            } else if (filtros.orden === 'calificacion') {
+                sql += ' ORDER BY p.calificacion DESC';
+            } else if (filtros.orden === 'ventas') {
+                sql += ' ORDER BY p.ventas DESC';
+            } else {
+                sql += ' ORDER BY p.id_producto DESC';
+            }
+            const [rows] = await pool.query(sql, params);
+            return rows;
         } catch (error) {
-            throw new Error('Error al obtener productos: ' + error.message)
+            console.error('Error en getAllProductos (model):', error);
+            throw new Error('Error al obtener productos: ' + error.message);
         }
     },
 
@@ -25,10 +62,10 @@ export const productoModel = {
             const [rows] = await pool.query(
                 'SELECT * FROM productos WHERE id_producto = ? AND activo = 1',
                 [id]
-            )
-            return rows[0]
+            );
+            return rows[0];
         } catch (error) {
-            throw new Error('Error al obtener producto: ' + error.message)
+            throw new Error('Error al obtener producto: ' + error.message);
         }
     },
 
@@ -40,16 +77,18 @@ export const productoModel = {
                 descripcion_producto, 
                 precio_producto, 
                 id_categoria_producto, 
-                imagen_producto 
-            } = productoData
+                imagen_producto,
+                calificacion = 0, // Calificación de 1.0 a 5.0 (un decimal)
+                ventas = 0 // Número de ventas
+            } = productoData;
 
             const [result] = await pool.query(
-                'INSERT INTO productos (nombre_producto, descripcion_producto, precio_producto, id_categoria, imagen_producto) VALUES (?, ?, ?, ?, ?)',
-                [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto]
-            )
-            return result.insertId
+                'INSERT INTO productos (nombre_producto, descripcion_producto, precio_producto, id_categoria, imagen_producto, calificacion, ventas) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto, calificacion, ventas]
+            );
+            return result.insertId;
         } catch (error) {
-            throw new Error('Error al crear producto: ' + error.message)
+            throw new Error('Error al crear producto: ' + error.message);
         }
     },
 
@@ -61,16 +100,18 @@ export const productoModel = {
                 descripcion_producto, 
                 precio_producto, 
                 id_categoria_producto, 
-                imagen_producto 
-            } = productoData
+                imagen_producto,
+                calificacion, // Calificación de 1.0 a 5.0 (un decimal)
+                ventas // Número de ventas
+            } = productoData;
 
             const [result] = await pool.query(
-                'UPDATE productos SET nombre_producto = ?, descripcion_producto = ?, precio_producto = ?, id_categoria = ?, imagen_producto = ? WHERE id_producto = ?',
-                [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto, id]
-            )
-            return result.affectedRows > 0
+                'UPDATE productos SET nombre_producto = ?, descripcion_producto = ?, precio_producto = ?, id_categoria = ?, imagen_producto = ?, calificacion = ?, ventas = ? WHERE id_producto = ?',
+                [nombre_producto, descripcion_producto, precio_producto, id_categoria_producto, imagen_producto, calificacion, ventas, id]
+            );
+            return result.affectedRows > 0;
         } catch (error) {
-            throw new Error('Error al actualizar producto: ' + error.message)
+            throw new Error('Error al actualizar producto: ' + error.message);
         }
     },
 
@@ -80,10 +121,10 @@ export const productoModel = {
             const [result] = await pool.query(
                 'UPDATE productos SET activo = 0 WHERE id_producto = ?',
                 [id]
-            )
-            return result.affectedRows > 0
+            );
+            return result.affectedRows > 0;
         } catch (error) {
-            throw new Error('Error al eliminar producto: ' + error.message)
+            throw new Error('Error al eliminar producto: ' + error.message);
         }
     },
 
@@ -93,13 +134,13 @@ export const productoModel = {
             const [rows] = await pool.query(
                 'SELECT * FROM productos WHERE id_categoria = ? AND activo = 1',
                 [categoriaId]
-            )
-            return rows
+            );
+            return rows;
         } catch (error) {
-            throw new Error('Error al obtener productos por categoría: ' + error.message)
+            throw new Error('Error al obtener productos por categoría: ' + error.message);
         }
     }
-}
+};
 
 // Get Productos by Categoria
 
@@ -107,7 +148,7 @@ export const getProductosByCategoria = async (categoria) => {
     const pool = mysql.createPool(dbConfig);
     const [rows] = await pool.query('SELECT * FROM productos WHERE categoria = ?', [categoria]);
     return rows;
-}
+};
 
 // Search Productos
 
@@ -118,7 +159,7 @@ export const searchProductos = async (searchTerm) => {
         [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`]
     );
     return rows;
-}
+};
 
 // Update Producto Stock
 
@@ -129,4 +170,21 @@ export const updateProductoStock = async (id, cantidad) => {
         [cantidad, id]
     );
     return result.affectedRows;
-}
+};
+
+// Funciones para traducciones de productos
+const upsertProductoTraduccion = async (producto_id, idioma, descripcion) => {
+    if (!descripcion) return;
+    // Intenta actualizar, si no existe inserta
+    const [result] = await pool.query(
+        `INSERT INTO producto_traducciones (producto_id, idioma, descripcion)
+         VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE descripcion = VALUES(descripcion)`,
+        [producto_id, idioma, descripcion]
+    );
+    return result;
+};
+
+export const productoTraduccionModel = {
+    upsertProductoTraduccion
+};

@@ -1,8 +1,8 @@
-import * as authModel from '../models/authModel.js'
-import jwt from 'jsonwebtoken'
-import validator from 'validator'
-import { config } from '../config/config.js'
-import nodemailer from 'nodemailer'
+import * as authModel from '../models/authModel.js';
+import jwt from 'jsonwebtoken';
+import validator from 'validator';
+import { config } from '../config/config.js';
+import nodemailer from 'nodemailer';
 
 // Configurar el transporter de nodemailer
 const transporter = nodemailer.createTransport({
@@ -13,8 +13,40 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// controlador para registrar un nuevo usuario
+// Función para enviar email de verificación
+const sendVerificationEmail = async (email_cliente, nombre_cliente, codigo) => {
+    const mailOptions = {
+        from: config.email.user,
+        to: email_cliente,
+        subject: 'Verifica tu cuenta - Sabor',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #ff6f00;">¡Bienvenido a Sabor!</h2>
+                <p>Hola <strong>${nombre_cliente}</strong>,</p>
+                <p>Gracias por registrarte en Sabor. Para activar tu cuenta, necesitas verificar tu dirección de email.</p>
+                
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0;">
+                    <h3 style="color: #333; margin: 0;">Tu código de verificación es:</h3>
+                    <div style="font-size: 32px; font-weight: bold; color: #ff6f00; letter-spacing: 5px; margin: 15px 0;">
+                        ${codigo}
+                    </div>
+                    <p style="color: #666; margin: 0;">Este código expira en 15 minutos</p>
+                </div>
+                
+                <p>Si no solicitaste este registro, puedes ignorar este email.</p>
+                
+                <p style="color: #666; font-size: 14px;">
+                    Saludos,<br>
+                    El equipo de Sabor
+                </p>
+            </div>
+        `
+    };
 
+    await transporter.sendMail(mailOptions);
+};
+
+// controlador para registrar un nuevo usuario
 export const registerUser = async (req, res) => {
     try {
         const {nombre_cliente, email_cliente, telefono_cliente, contraseña_cliente} = req.body;
@@ -53,7 +85,7 @@ export const registerUser = async (req, res) => {
             });
         }
 
-        // Registrar usuario
+        // Registrar usuario (ahora con activo = false)
         const userId = await authModel.registerUser({
             nombre_cliente,
             email_cliente,
@@ -61,9 +93,16 @@ export const registerUser = async (req, res) => {
             contraseña_cliente
         });
 
+        // Generar código de verificación
+        const codigo = await authModel.generateVerificationCode(userId);
+
+        // Enviar email de verificación
+        await sendVerificationEmail(email_cliente, nombre_cliente, codigo);
+
         res.status(201).json({
-            message: 'Usuario registrado exitosamente',
-            userId
+            message: 'Usuario registrado exitosamente. Por favor, verifica tu email para activar tu cuenta.',
+            userId,
+            requiresVerification: true
         });
 
     } catch (error) {
@@ -72,7 +111,99 @@ export const registerUser = async (req, res) => {
             message: error.message || 'Error al registrar usuario'
         });
     }
-}
+};
+
+// Controlador para reenviar código de verificación
+export const resendVerificationCode = async (req, res) => {
+    try {
+        const { email_cliente } = req.body;
+
+        if (!email_cliente || !validator.isEmail(email_cliente)) {
+            return res.status(400).json({
+                message: 'Email válido requerido'
+            });
+        }
+
+        // Buscar usuario (incluyendo no verificados)
+        const user = await authModel.getUserByEmailIncludingUnverified(email_cliente);
+        
+        if (!user) {
+            return res.status(404).json({
+                message: 'Usuario no encontrado'
+            });
+        }
+
+        if (user.email_verificado) {
+            return res.status(400).json({
+                message: 'El email ya está verificado'
+            });
+        }
+
+        // Generar nuevo código
+        const codigo = await authModel.generateVerificationCode(user.id_cliente);
+
+        // Enviar email
+        await sendVerificationEmail(user.email_cliente, user.nombre_cliente, codigo);
+
+        res.json({
+            message: 'Código de verificación reenviado exitosamente'
+        });
+
+    } catch (error) {
+        console.error('Error al reenviar código:', error);
+        res.status(500).json({
+            message: 'Error al reenviar código de verificación'
+        });
+    }
+};
+
+// Controlador para verificar código
+export const verifyEmailCode = async (req, res) => {
+    try {
+        const { email_cliente, codigo } = req.body;
+
+        if (!email_cliente || !codigo) {
+            return res.status(400).json({
+                message: 'Email y código son requeridos'
+            });
+        }
+
+        // Buscar usuario
+        const user = await authModel.getUserByEmailIncludingUnverified(email_cliente);
+        
+        if (!user) {
+            return res.status(404).json({
+                message: 'Usuario no encontrado'
+            });
+        }
+
+        if (user.email_verificado) {
+            return res.status(400).json({
+                message: 'El email ya está verificado'
+            });
+        }
+
+        // Verificar código
+        const isValid = await authModel.verifyCode(user.id_cliente, codigo);
+
+        if (!isValid) {
+            return res.status(400).json({
+                message: 'Código inválido o expirado'
+            });
+        }
+
+        res.json({
+            message: 'Email verificado exitosamente. Tu cuenta ha sido activada.',
+            success: true
+        });
+
+    } catch (error) {
+        console.error('Error al verificar código:', error);
+        res.status(500).json({
+            message: 'Error al verificar código'
+        });
+    }
+};
 
 // Inicio de sesion
 export const loginUser = async(req, res) => {
@@ -99,8 +230,10 @@ export const loginUser = async(req, res) => {
         // Generar token JWT
         const token = jwt.sign(
             { 
-                userId: user.id_cliente,
-                email: user.email_cliente
+                id: user.id_cliente,
+                email: user.email_cliente,
+                rol: user.rol || 'user',
+                nombre: user.nombre_cliente
             },
             config.jwt.secret,
             { expiresIn: config.jwt.expiresIn }
@@ -125,18 +258,18 @@ export const loginUser = async(req, res) => {
             message: error.message || 'Error al iniciar sesión'
         });
     }
-}
+};
 
 // Controlador para cerrar sesión
 export const logoutUser = (req, res) => {
     res.clearCookie('token');
     res.json({ message: 'Sesión cerrada exitosamente' });
-}
+};
 
 // Controlador para obtener perfil de usuario
 export const getUserProfile = async (req, res) => {
     try {
-        const userId = req.user.userId; // Asumiendo que viene del middleware de autenticación
+        const userId = req.user.id; // Corregido: usar 'id' en vez de 'userId'
         const user = await authModel.getUserByEmail(req.user.email);
         
         if (!user) {
@@ -152,7 +285,7 @@ export const getUserProfile = async (req, res) => {
             message: 'Error al obtener perfil de usuario'
         });
     }
-}
+};
 
 // Verificar token y obtener perfil
 export const verifyToken = async (req, res) => {

@@ -10,9 +10,24 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ANIM_DURATION, VISIBLE_DURATION, animateElement } from '../../utils/animationUtils';
+import { GoCheck, GoX } from 'react-icons/go';
 
 import ResetPassword from './ResetPassword';
 import './AuthPage.css';
+
+// Componente de alerta visualmente consistente para reset password
+const ResetAlert = ({ type, message }) => {
+  if (!message) return null;
+  const icon = type === 'success'
+    ? <GoCheck className="GoCheck" />
+    : <GoX className="GoX" />;
+  return (
+    <div className="alerta-sin-tarjeta">
+      {icon}
+      <span>{message}</span>
+    </div>
+  );
+};
 
 const ResetPasswordContainer = () => {
   // Estado para manejar los mensajes globales
@@ -70,13 +85,7 @@ const ResetPasswordContainer = () => {
         
         {/* Mensaje global que se muestra sobre el formulario */}
         {globalMessage.text && (
-          <div
-            className={`auth-page__mensaje ${
-              globalMessage.type === 'success' ? 'formulario__mensaje-exito' : 'formulario__mensaje-error'
-            }`}
-          >
-            {globalMessage.text}
-          </div>
+          <ResetAlert type={globalMessage.type} message={globalMessage.text} />
         )}
       </div>
     </div>

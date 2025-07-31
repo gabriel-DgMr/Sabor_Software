@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { createContext, useContext, useState, useEffect } from 'react';
 
 import { categoriaService } from '../services/categoriaService.js';
@@ -32,6 +33,10 @@ export const CategoriaProvider = ({ children }) => {
             {children}
         </CategoriaContext.Provider>
     );
+};
+
+CategoriaProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export const useCategorias = () => {

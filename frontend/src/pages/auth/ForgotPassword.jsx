@@ -7,10 +7,13 @@
 
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
+import { validarEmail } from '../../utils/validaciones';
 
 const ForgotPassword = ({ onShowMessage }) => {
+  const { t } = useTranslation();
   // Estados para manejar la carga y errores del formulario
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -45,14 +48,17 @@ const ForgotPassword = ({ onShowMessage }) => {
     setErrors({});
 
     const form = e.target;
-    const email_cliente = form.email.value.trim();
+    const email_cliente = form.email.value;
 
-    // Validación del correo electrónico
+    // Validación del correo electrónico usando funciones centralizadas
     const newErrors = {};
     if (!email_cliente) {
-      newErrors.email = 'El correo es obligatorio.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email_cliente)) {
-      newErrors.email = 'El correo no es válido.';
+      newErrors.email = t('forgot_email_required');
+    } else {
+      const emailError = validarEmail(email_cliente);
+      if (emailError) {
+        newErrors.email = t('forgot_email_invalid');
+      }
     }
 
     // Si hay errores, mostrarlos y detener el proceso
@@ -69,17 +75,17 @@ const ForgotPassword = ({ onShowMessage }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email_cliente }),
+        body: JSON.stringify({ email_cliente: email_cliente.trim() }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error al solicitar recuperación de contraseña');
+        throw new Error(data.message || t('forgot_error_request'));
       }
 
       // Mostrar mensaje de éxito y limpiar el formulario
-      onShowMessage('success', 'Se ha enviado un correo con las instrucciones para recuperar tu contraseña.');
+      onShowMessage('success', t('forgot_success'));
       form.reset();
     } catch (error) {
       onShowMessage('error', error.message);
@@ -90,11 +96,11 @@ const ForgotPassword = ({ onShowMessage }) => {
 
   return (
     <div className="formulario__contenedor formulario__contenedor--forgot-password">
-      <h2 className="modal__titulo">Recuperar Contraseña</h2>
+      <h2 className="modal__titulo">{t('forgot_title')}</h2>
       <form noValidate className="formulario" onSubmit={handleSubmit}>
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="email-forgot">
-            Correo Electrónico*
+            {t('correo_electronico')}
           </label>
           <input
             autoComplete="email"
@@ -102,14 +108,14 @@ const ForgotPassword = ({ onShowMessage }) => {
             disabled={loading}
             id="email-forgot"
             name="email"
-            placeholder="Tu Correo Electrónico"
+            placeholder={t('login_placeholder_email')}
             type="email"
           />
           {errors.email && <small className="formulario__mensaje-error">{errors.email}</small>}
         </div>
 
         <button className="formulario__boton-principal" disabled={loading} type="submit">
-          {loading ? 'Enviando...' : 'Enviar Instrucciones'}
+          {loading ? t('forgot_sending') : t('forgot_send_instructions')}
         </button>
       </form>
     </div>

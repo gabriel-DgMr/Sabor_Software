@@ -5,8 +5,40 @@ import { useCategorias } from '../context/CategoriaContext.jsx';
 import { useProductos } from '../context/ProductoContext';
 import { productoService } from '../services/productoService';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils';
+import { validarProducto, validarImagen } from '../utils/validaciones';
+import { GoCheck, GoX } from 'react-icons/go';
 
 import '../styles/empleados.css';
+
+// Componente de alerta visualmente consistente para productos
+const ProductosAlert = ({ type, message }) => {
+  if (!message) return null;
+  const icon = type === 'success'
+    ? <GoCheck className="GoCheck" />
+    : <GoX className="GoX" />;
+  return (
+    <div className="alerta-con-tarjeta">
+      {icon}
+      <span>{message}</span>
+    </div>
+  );
+};
+
+// Componente de error visualmente consistente para administración de productos
+const ProductosError = ({ message, onRetry }) => {
+  if (!message) return null;
+  return (
+    <div className="error-global">
+      <GoX className="GoX" />
+      <span>{message}</span>
+      {onRetry && (
+        <button onClick={onRetry}>
+          Reintentar
+        </button>
+      )}
+    </div>
+  );
+};
 
 const ProductosAdministrar = () => {
   const { state, dispatch } = useProductos();
@@ -14,6 +46,7 @@ const ProductosAdministrar = () => {
   const [formData, setFormData] = useState({
     nombre_producto: '',
     descripcion_producto: '',
+    descripcion_en: '',
     precio_producto: '',
     id_categoria_producto: '',
     imagen_producto: null
@@ -21,15 +54,26 @@ const ProductosAdministrar = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [loadingStates, setLoadingStates] = useState({
+    delete: {},
+    edit: {},
+    submit: false
+  });
 
   useEffect(() => {
     const cargarProductos = async () => {
       try {
-        dispatch({ type: 'SET_LOADING' });
+        dispatch({ type: 'SET_LOADING', payload: true });
+        
         const productos = await productoService.obtenerTodos();
+        
         dispatch({ type: 'SET_PRODUCTOS', payload: productos });
       } catch (error) {
         dispatch({ type: 'SET_ERROR', payload: error.message });
+      } finally {
+        dispatch({ type: 'SET_LOADING', payload: false });
       }
     };
 
@@ -88,147 +132,112 @@ const ProductosAdministrar = () => {
     }));
   };
 
+  const handleEditProduct = (producto) => {
+    setIsEditing(true);
+    setEditingProductId(producto.id_producto);
+    setFormData({
+      nombre_producto: producto.nombre_producto,
+      descripcion_producto: producto.descripcion_producto,
+      descripcion_en: producto.descripcion_en || '',
+      precio_producto: producto.precio_producto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'),
+      id_categoria_producto: producto.id_categoria_producto,
+      imagen_producto: null
+    });
+    document.querySelector('.productos__editor').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleDeleteProduct = async (idProducto) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+      try {
+        setLoadingStates(prev => ({
+          ...prev,
+          delete: { ...prev.delete, [idProducto]: true }
+        }));
+        await productoService.eliminar(idProducto);
+        const productos = await productoService.obtenerTodos();
+        dispatch({ type: 'SET_PRODUCTOS', payload: productos });
+        setSuccessMessage('Producto eliminado exitosamente');
+        setTimeout(() => {
+          setSuccessMessage('');
+        }, 3000);
+      } catch (error) {
+        dispatch({ type: 'SET_ERROR', payload: error.message });
+      } finally {
+        setLoadingStates(prev => ({
+          ...prev,
+          delete: { ...prev.delete, [idProducto]: false }
+        }));
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch({ type: 'SET_LOADING' });
+    setLoadingStates(prev => ({ ...prev, submit: true }));
 
-    const newErrors = {};
-    if (!formData.nombre_producto) {
-      newErrors.nombre_producto = 'El nombre del producto es obligatorio.';
-    }
-    if (!formData.descripcion_producto) {
-      newErrors.descripcion_producto = 'La descripción es obligatoria.';
-    }
-    if (!formData.precio_producto) {
-      newErrors.precio_producto = 'El precio es obligatorio.';
-    } else {
-      // Convertir el precio formateado a número para validación
-      const precioNumerico = parseFloat(formData.precio_producto.replace(/\./g, '').replace(',', '.'));
-      if (isNaN(precioNumerico) || precioNumerico <= 0) {
-        newErrors.precio_producto = 'El precio debe ser un número positivo.';
+    // Usar validaciones centralizadas
+    const formDataForValidation = {
+      nombre_producto: formData.nombre_producto,
+      descripcion_producto: formData.descripcion_producto,
+      precio_producto: formData.precio_producto.replace(/\./g, '').replace(',', '.'),
+      id_categoria_producto: formData.id_categoria_producto
+    };
+
+    const validationErrors = validarProducto(formDataForValidation);
+
+    // Validar imagen si es un nuevo producto
+    if (!isEditing && formData.imagen_producto) {
+      const imagenError = validarImagen(formData.imagen_producto);
+      if (imagenError) {
+        validationErrors.imagen_producto = imagenError;
       }
-    }
-    if (!formData.id_categoria_producto) {
-      newErrors.id_categoria_producto = 'Debes seleccionar una categoría.';
-    }
-    if (!formData.imagen_producto) {
-      newErrors.imagen_producto = 'La imagen es obligatoria.';
+    } else if (!isEditing && !formData.imagen_producto) {
+      validationErrors.imagen_producto = 'La imagen es obligatoria para nuevos productos.';
     }
 
-    if (Object.keys(newErrors).length > 0) {
-      manejarErroresDeCampo(newErrors);
-      dispatch({ type: 'SET_LOADING', payload: false });
+    if (Object.keys(validationErrors).length > 0) {
+      manejarErroresDeCampo(validationErrors);
+      setLoadingStates(prev => ({ ...prev, submit: false }));
       return;
     }
 
     try {
-      // Preparar los datos para enviar, convirtiendo el precio a número
       const datosParaEnviar = {
         ...formData,
         precio_producto: parseFloat(formData.precio_producto.replace(/\./g, '').replace(',', '.'))
       };
 
-      console.log('Datos del formulario a enviar:', datosParaEnviar);
-      const response = await productoService.crear(datosParaEnviar);
-      console.log('Respuesta del servidor:', response);
-      
-      // Recargar la lista de productos
-      const productos = await productoService.obtenerTodos();
-      dispatch({ type: 'SET_PRODUCTOS', payload: productos });
-      
-      // Mostrar mensaje de éxito
-      setSuccessMessage('Producto creado exitosamente');
-      
-      // Limpiar el formulario
-      setFormData({
-        nombre_producto: '',
-        descripcion_producto: '',
-        precio_producto: '',
-        id_categoria_producto: '',
-        imagen_producto: null
-      });
-      
-      // Limpiar la vista previa de la imagen
-      setImagePreview(null);
-      
-      // Ocultar el mensaje de éxito después de 3 segundos
-      setTimeout(() => {
-        setSuccessMessage('');
-        dispatch({ type: 'SET_LOADING', payload: false });
-      }, 3000);
-      
-    } catch (error) {
-      console.error('Error al crear el producto:', error);
-      dispatch({ type: 'SET_ERROR', payload: error.message });
-      dispatch({ type: 'SET_LOADING', payload: false });
-
-    }
-    if (!formData.descripcion_producto) {
-      newErrors.descripcion_producto = 'La descripción es obligatoria.';
-    }
-    if (!formData.precio_producto) {
-      newErrors.precio_producto = 'El precio es obligatorio.';
-    } else {
-      // Convertir el precio formateado a número para validación
-      const precioNumerico = parseFloat(formData.precio_producto.replace(/\./g, '').replace(',', '.'));
-      if (isNaN(precioNumerico) || precioNumerico <= 0) {
-        newErrors.precio_producto = 'El precio debe ser un número positivo.';
+      if (isEditing) {
+        await productoService.actualizar(editingProductId, datosParaEnviar);
+        setSuccessMessage('Producto actualizado exitosamente');
+      } else {
+        await productoService.crear(datosParaEnviar);
+        setSuccessMessage('Producto creado exitosamente');
       }
-    }
-    if (!formData.id_categoria_producto) {
-      newErrors.id_categoria_producto = 'Debes seleccionar una categoría.';
-    }
-    if (!formData.imagen_producto) {
-      newErrors.imagen_producto = 'La imagen es obligatoria.';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      manejarErroresDeCampo(newErrors);
-      dispatch({ type: 'SET_LOADING', payload: false });
-      return;
-    }
-
-    try {
-      // Preparar los datos para enviar, convirtiendo el precio a número
-      const datosParaEnviar = {
-        ...formData,
-        precio_producto: parseFloat(formData.precio_producto.replace(/\./g, '').replace(',', '.'))
-      };
-
-      console.log('Datos del formulario a enviar:', datosParaEnviar);
-      const response = await productoService.crear(datosParaEnviar);
-      console.log('Respuesta del servidor:', response);
       
-      // Recargar la lista de productos
       const productos = await productoService.obtenerTodos();
       dispatch({ type: 'SET_PRODUCTOS', payload: productos });
       
-      // Mostrar mensaje de éxito
-      setSuccessMessage('Producto creado exitosamente');
-      
-      // Limpiar el formulario
       setFormData({
         nombre_producto: '',
         descripcion_producto: '',
+        descripcion_en: '',
         precio_producto: '',
         id_categoria_producto: '',
         imagen_producto: null
       });
-      
-      // Limpiar la vista previa de la imagen
       setImagePreview(null);
+      setIsEditing(false);
+      setEditingProductId(null);
       
-      // Ocultar el mensaje de éxito después de 3 segundos
       setTimeout(() => {
         setSuccessMessage('');
       }, 3000);
       
     } catch (error) {
-      console.error('Error al crear el producto:', error);
       dispatch({ type: 'SET_ERROR', payload: error.message });
     } finally {
-      // Asegurarnos de que el estado de carga se desactive
-      dispatch({ type: 'SET_LOADING', payload: false });
+      setLoadingStates(prev => ({ ...prev, submit: false }));
     }
   };
 
@@ -252,8 +261,43 @@ const ProductosAdministrar = () => {
     return acc;
   }, {});
 
-  if (state.loading) return <div>Cargando...</div>;
-  if (state.error) return <div>Error: {state.error}</div>;
+  if (state.loading) {
+    return (
+      <div className='layout'>
+        <MenuLateral />
+        <main className='productos__administrar'>
+          <div className="loading-container">
+            <div className="loading-spinner" />
+            <p>Cargando productos...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (state.error) {
+    return (
+      <div className='layout'>
+        <MenuLateral />
+        <main className='productos__administrar'>
+          <ProductosError message={`Error al cargar productos: ${state.error}`} onRetry={() => window.location.reload()} />
+        </main>
+      </div>
+    );
+  }
+
+  if (state.productos.length === 0) {
+    return (
+      <div className='layout'>
+        <MenuLateral />
+        <main className='productos__administrar'>
+          <div className="empty-state">
+            <p>No hay productos disponibles</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className='layout'>
@@ -265,16 +309,44 @@ const ProductosAdministrar = () => {
             {Object.entries(productosPorCategoria).map(([categoria, productosCategoria]) => (
               <article key={categoria} className='productos__vista'>
                 <h2 className='vista__titulo--primera'>Categoria: {categoria}</h2>
-                <div className='productos__card'>
+                <div className='productos__grid'>
                   {productosCategoria.map((producto) => (
-                    <div key={producto.id_producto} className="producto-card">
-                      <img 
+                    <div key={producto.id_producto} className="productos__card-producto">
+                      <img
                         alt={producto.nombre_producto}
-                        className='productos__img'
+                        className="productos__imagen"
                         src={`http://localhost:3000/uploads/productos/${producto.imagen_producto}`}
                       />
-                      <h3>{producto.nombre_producto}</h3>
-                      <p>Precio: {formatearPrecio(producto.precio_producto)}</p>
+                      <div className="productos__info">
+                        <h4 className="productos__nombre">{producto.nombre_producto}</h4>
+                        <p className="productos__precio">{formatearPrecio(producto.precio_producto)}</p>
+                        <div className="productos__acciones">
+                          <button
+                            className={`productos__boton productos__boton--editar ${loadingStates.edit[producto.id_producto] ? 'productos__boton--loading' : ''}`}
+                            disabled={loadingStates.edit[producto.id_producto] || loadingStates.delete[producto.id_producto]}
+                            type="button"
+                            onClick={() => handleEditProduct(producto)}
+                          >
+                            {loadingStates.edit[producto.id_producto] ? (
+                              <span className="loading-indicator" />
+                            ) : (
+                              'Editar'
+                            )}
+                          </button>
+                          <button
+                            className={`productos__boton productos__boton--eliminar ${loadingStates.delete[producto.id_producto] ? 'productos__boton--loading' : ''}`}
+                            disabled={loadingStates.edit[producto.id_producto] || loadingStates.delete[producto.id_producto]}
+                            type="button"
+                            onClick={() => handleDeleteProduct(producto.id_producto)}
+                          >
+                            {loadingStates.delete[producto.id_producto] ? (
+                              <span className="loading-indicator" />
+                            ) : (
+                              'Eliminar'
+                            )}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -282,22 +354,11 @@ const ProductosAdministrar = () => {
             ))}
           </div>
           <article className='productos__editor'>
-            <h2 className='editor__titulo'>Agregar Nuevo Producto</h2>
+            <h2 className='editor__titulo'>
+              {isEditing ? 'Editar Producto' : 'Agregar Nuevo Producto'}
+            </h2>
             {successMessage && (
-              <div className="success-message">
-                <svg 
-                  fill="none"
-                  height="16"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  width="16"
-                >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-                {successMessage}
-              </div>
+              <ProductosAlert type="success" message={successMessage} />
             )}
             <form className='editor__descripcion' onSubmit={handleSubmit}>
               <div className='descripcion__campo'>
@@ -346,9 +407,9 @@ const ProductosAdministrar = () => {
                             viewBox="0 0 24 24"
                             width="16"
                         >
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" x2="12" y1="8" y2="12" />
+                            <line x1="12" x2="12.01" y1="16" y2="16" />
                         </svg>
                         {categoriasError}
                     </label>
@@ -380,6 +441,15 @@ const ProductosAdministrar = () => {
                 )}
               </div>
               <div className='descripcion__campo'>
+                <label className='campo_p'>Descripción (Inglés): </label>
+                <textarea  
+                  className="campo__input campo__input--textaera"
+                  name="descripcion_en"
+                  value={formData.descripcion_en}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className='descripcion__campo'>
                 <label className='campo_p'>Imagen: </label>
                 <input  
                   accept="image/*"
@@ -409,7 +479,41 @@ const ProductosAdministrar = () => {
                   </div>
                 )}
               </div>
-              <button className='descripcion__boton' type="submit">Confirmar</button>
+              <div className="editor__botones">
+                <button 
+                  className={`descripcion__boton ${loadingStates.submit ? 'descripcion__boton--loading' : ''}`}
+                  disabled={loadingStates.submit}
+                  type="submit"
+                >
+                  {loadingStates.submit ? (
+                    <span className="loading-indicator" />
+                  ) : (
+                    isEditing ? 'Actualizar' : 'Confirmar'
+                  )}
+                </button>
+                {isEditing && (
+                  <button
+                    className='descripcion__boton descripcion__boton--cancelar'
+                    disabled={loadingStates.submit}
+                    type="button"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditingProductId(null);
+                      setFormData({
+                        nombre_producto: '',
+                        descripcion_producto: '',
+                        descripcion_en: '',
+                        precio_producto: '',
+                        id_categoria_producto: '',
+                        imagen_producto: null
+                      });
+                      setImagePreview(null);
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                )}
+              </div>
             </form>
           </article>
         </section>

@@ -8,11 +8,13 @@
 
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
 
 const ResetPassword = ({ onShowMessage }) => {
+  const { t } = useTranslation();
   // Estados para manejar la carga, errores y datos del formulario
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -45,12 +47,12 @@ const ResetPassword = ({ onShowMessage }) => {
           setEmail(data.email);
           setIsTokenVerified(true);
         } else {
-          onShowMessage('error', 'El enlace de recuperación no es válido o ha expirado.');
+          onShowMessage('error', t('reset_invalid_link'));
           setTimeout(() => navigate('/login'), VISIBLE_DURATION + ANIM_DURATION);
         }
       } catch (_error) {
         if (!isMounted) return;
-        onShowMessage('error', 'Error al verificar el enlace de recuperación.');
+        onShowMessage('error', t('reset_error_verifying_link'));
         setTimeout(() => navigate('/login'), VISIBLE_DURATION + ANIM_DURATION);
       } finally {
         if (isMounted) {
@@ -65,7 +67,7 @@ const ResetPassword = ({ onShowMessage }) => {
     return () => {
       isMounted = false;
     };
-  }, [token, navigate, onShowMessage, isTokenVerified]);
+  }, [token, navigate, onShowMessage, isTokenVerified, t]);
 
   /**
    * Maneja los errores de validación de campos
@@ -101,18 +103,18 @@ const ResetPassword = ({ onShowMessage }) => {
     // Validación de la nueva contraseña
     const newErrors = {};
     if (!contraseña_cliente) {
-      newErrors.password = 'La contraseña es obligatoria.';
+      newErrors.password = t('reset_password_required');
     } else if (contraseña_cliente.length < 8) {
-      newErrors.password = 'La contraseña debe tener al menos 8 caracteres.';
+      newErrors.password = t('reset_password_min_length');
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(contraseña_cliente)) {
-      newErrors.password = 'La contraseña debe incluir mayúsculas, minúsculas, números y símbolos.';
+      newErrors.password = t('reset_password_complexity');
     }
 
     // Validación de confirmación de contraseña
     if (!confirmarContraseña) {
-      newErrors.confirmPassword = 'Por favor confirma tu contraseña.';
+      newErrors.confirmPassword = t('reset_confirm_required');
     } else if (contraseña_cliente !== confirmarContraseña) {
-      newErrors.confirmPassword = 'Las contraseñas no coinciden.';
+      newErrors.confirmPassword = t('contrasenas_no_coinciden');
     }
 
     // Si hay errores, mostrarlos y detener el proceso
@@ -135,12 +137,12 @@ const ResetPassword = ({ onShowMessage }) => {
       const data = await response.json();
 
       if (response.ok) {
-        onShowMessage('success', '¡Contraseña actualizada exitosamente! Serás redirigido al inicio en unos segundos...');
+        onShowMessage('success', t('reset_success'));
       } else {
-        onShowMessage('error', data.message || 'Error al restablecer la contraseña.');
+        onShowMessage('error', data.message || t('reset_error'));
       }
     } catch (_error) {
-      onShowMessage('error', 'Error al conectar con el servidor.');
+      onShowMessage('error', t('reset_error_server'));
     } finally {
       setLoading(false);
     }
@@ -148,14 +150,14 @@ const ResetPassword = ({ onShowMessage }) => {
 
   return (
     <div className="formulario__contenedor formulario__contenedor--reset-password">
-      <h2 className="modal__titulo">Restablecer Contraseña</h2>
+      <h2 className="modal__titulo">{t('reset_title')}</h2>
       <p className="formulario__subtitulo">
-        Ingresa tu nueva contraseña para la cuenta: <strong>{email}</strong>
+        {t('reset_subtitle', { email })}
       </p>
       <form noValidate className="formulario" onSubmit={handleSubmit}>
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="password-reset">
-            Nueva Contraseña*
+            {t('reset_new_password')}
           </label>
           <input
             autoComplete="new-password"
@@ -163,7 +165,7 @@ const ResetPassword = ({ onShowMessage }) => {
             disabled={loading}
             id="password-reset"
             name="password"
-            placeholder="Tu Nueva Contraseña"
+            placeholder={t('reset_placeholder_password')}
             type="password"
           />
           {errors.password && <small className="formulario__mensaje-error">{errors.password}</small>}
@@ -171,7 +173,7 @@ const ResetPassword = ({ onShowMessage }) => {
 
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="confirm-password-reset">
-            Confirmar Contraseña*
+            {t('reset_confirm_password')}
           </label>
           <input
             autoComplete="new-password"
@@ -179,7 +181,7 @@ const ResetPassword = ({ onShowMessage }) => {
             disabled={loading}
             id="confirm-password-reset"
             name="confirmPassword"
-            placeholder="Confirma tu Nueva Contraseña"
+            placeholder={t('reset_placeholder_confirm')}
             type="password"
           />
           {errors.confirmPassword && (
@@ -188,7 +190,7 @@ const ResetPassword = ({ onShowMessage }) => {
         </div>
 
         <button className="formulario__boton-principal" disabled={loading} type="submit">
-          {loading ? 'Actualizando...' : 'Actualizar Contraseña'}
+          {loading ? t('reset_updating') : t('reset_update_password')}
         </button>
       </form>
     </div>

@@ -1,20 +1,56 @@
 import express from 'express';
 import { getPedidos, deletePedido, createPedido, updatePedido } from '../controllers/pedidoController.js';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken, checkPermission } from '../middleware/auth.js';
+import { validatePedido } from '../middleware/validateRequest.js';
 
 const router = express.Router();
 
-// GET /api/pedidos - Obtener todos los pedidos
-// Añadir middleware authenticateToken para proteger esta ruta
-router.get('/', authenticateToken, getPedidos);
+// === RUTAS DE CARRITO ===
+import {
+  getCarrito,
+  addProductoCarrito,
+  updateCantidadCarrito,
+  removeProducto,
+  vaciar,
+  confirmar,
+  getPedidoById
+} from '../controllers/pedidoController.js';
 
-// DELETE /api/pedidos/:id - Eliminar un pedido
-router.delete('/:id', deletePedido);
+// Carrito: todas protegidas
+router.get('/carrito', authenticateToken, getCarrito);
+router.post('/carrito/add', authenticateToken, addProductoCarrito);
+router.put('/carrito/update', authenticateToken, updateCantidadCarrito);
+router.delete('/carrito/remove', authenticateToken, removeProducto);
+router.delete('/carrito/vaciar', authenticateToken, vaciar);
+router.post('/carrito/confirmar', authenticateToken, confirmar);
 
-// POST /api/pedidos - Crear un nuevo pedido
-router.post('/', createPedido);
+// Rutas protegidas con validaciones
+router.post('/', 
+    authenticateToken, 
+    validatePedido,
+    createPedido
+);
 
-// PUT /api/pedidos/:id - Actualizar un pedido
-router.put('/:id', updatePedido);
+router.get('/', 
+    authenticateToken, 
+    checkPermission('read'),
+    getPedidos
+);
+
+// Usar el controlador real para obtener pedido por id
+router.get('/:id', authenticateToken, checkPermission('read'), getPedidoById);
+
+router.put('/:id', 
+    authenticateToken, 
+    checkPermission('write'),
+    validatePedido,
+    updatePedido
+);
+
+router.delete('/:id', 
+    authenticateToken, 
+    checkPermission('delete'),
+    deletePedido
+);
 
 export default router; 

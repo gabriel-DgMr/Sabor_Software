@@ -1,33 +1,258 @@
-import { useState } from 'react';
-import { FaUserCircle } from 'react-icons/fa';
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react';
+import ReactCountryFlag from 'react-country-flag';
+import { useTranslation } from 'react-i18next';
+import { FaUserCircle, FaBars, FaTimes } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext.jsx';
 import AuthPage from '../pages/auth/index.jsx';
 
 const Header = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isMobileMenu, setIsMobileMenu] = useState(false);
+  const { t, i18n } = useTranslation();
+
+  const handleResize = () => {
+    setIsMobileMenu(window.innerWidth <= 769);
+    if (window.innerWidth > 769) setShowMenu(false);
+  };
+
+  useEffect(() => {
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleMobileMenu = () => setShowMenu(prev => !prev);
+  const closeMobileMenu = () => setShowMenu(false);
+
+  const handleIdioma = lang => {
+    i18n.changeLanguage(lang);
+  };
 
   return (
     <>
       <header className="encabezado">
         <div className="encabezado__contenedor">
-          <Link to="/"><img alt="Logo Sabor" className="encabezado__logo" src="/images/logo_sabor.png" /></Link>
-
+          <Link to="/">
+            <img alt="Logo Sabor" className="encabezado__logo" src="/images/logo_sabor.png" />
+          </Link>
           <div className="encabezado__informacion">
-            <span aria-label="Bandera de España" className="encabezado__idioma" role="img">
-              🇪🇸
-            </span>
+            <nav className="encabezado__links">
+              {' '}
+              {/* Estas opciones solo deben mostrarse en escritorio */}
+              {!isMobileMenu && (
+                <>
+                  <Link className="encabezado__link" to="/quienes-somos">
+                    {t('quienes_somos')}
+                  </Link>
+                  <Link className="encabezado__link" to="/sobre-nosotros">
+                    {t('sobre_nosotros')}
+                  </Link>
+                </>
+              )}
+            </nav>
+            <nav aria-label="Selector de idioma" className="encabezado__idioma">
+              <button
+                aria-label="Cambiar a español"
+                aria-pressed={i18n.language === 'es'}
+                className={`menu-perfil__idioma-boton${i18n.language === 'es' ? ' menu-perfil__idioma-boton--activo' : ''}`}
+                title="Español"
+                type="button"
+                onClick={() => handleIdioma('es')}
+              >
+                <ReactCountryFlag svg countryCode="ES" />
+              </button>
+              <button
+                aria-label="Cambiar a inglés"
+                aria-pressed={i18n.language === 'en'}
+                className={`menu-perfil__idioma-boton${i18n.language === 'en' ? ' menu-perfil__idioma-boton--activo' : ''}`}
+                title="English"
+                type="button"
+                onClick={() => handleIdioma('en')}
+              >
+                <ReactCountryFlag svg countryCode="US" />
+              </button>
+            </nav>
 
-            {user ? (
-              <div className="encabezado__usuario" onClick={logout}>
-                <p className="encabezado__nombre-usuario">{user.nombre_cliente}</p>
+            {isMobileMenu ? (
+              isAuthenticated ? (
+                <div className="encabezado__usuario encabezado__usuario--mobile">
+                  <button
+                    aria-label="Abrir menú de usuario"
+                    className="menu-hamburguesa"
+                    onClick={toggleMobileMenu}
+                  >
+                    {!showMenu && <FaBars size={32} />}
+                  </button>
+                  {showMenu && (
+                    <div className="menu-perfil menu-perfil--mobile">
+                      <button
+                        aria-label="Cerrar menú"
+                        className="menu-perfil__cerrar"
+                        onClick={closeMobileMenu}
+                      >
+                        <FaTimes />
+                      </button>
+                      <div className="menu-perfil__opcion menu-perfil__opcion--idioma">
+                        <button
+                          aria-label="Cambiar a español"
+                          className={`menu-perfil__idioma-boton${i18n.language === 'es' ? ' menu-perfil__idioma-boton--activo' : ''}`}
+                          onClick={() => handleIdioma('es')}
+                        >
+                          <ReactCountryFlag svg countryCode="ES" />
+                        </button>
+                        <button
+                          aria-label="Cambiar a inglés"
+                          className={`menu-perfil__idioma-boton${i18n.language === 'en' ? ' menu-perfil__idioma-boton--activo' : ''}`}
+                          onClick={() => handleIdioma('en')}
+                        >
+                          <ReactCountryFlag svg countryCode="US" />
+                        </button>
+                      </div>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/quienes-somos"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('quienes_somos')}
+                      </Link>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/sobre-nosotros"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('sobre_nosotros')}
+                      </Link>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/historial-pedidos"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('ver_historial_pedidos')}
+                      </Link>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/historial-reservas"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('ver_historial_reservas')}
+                      </Link>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/actualizar-datos"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('actualizar_datos')}
+                      </Link>
+                      <button
+                        className="menu-perfil__opcion menu-perfil__opcion--cerrar-sesion"
+                        onClick={() => {
+                          logout();
+                          closeMobileMenu();
+                        }}
+                      >
+                        {t('cerrar_sesion')}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="encabezado__usuario encabezado__usuario--mobile">
+                  <button
+                    aria-label="Abrir menú"
+                    className="menu-hamburguesa"
+                    onClick={toggleMobileMenu}
+                  >
+                    {!showMenu && <FaBars size={32} />}
+                  </button>
+                  {showMenu && (
+                    <div className="menu-perfil menu-perfil--mobile">
+                      <button
+                        aria-label="Cerrar menú"
+                        className="menu-perfil__cerrar"
+                        onClick={closeMobileMenu}
+                      >
+                        <FaTimes />
+                      </button>
+                      <div className="menu-perfil__opcion menu-perfil__opcion--idioma">
+                        <button
+                          aria-label="Cambiar a español"
+                          className={`menu-perfil__idioma-boton${i18n.language === 'es' ? ' menu-perfil__idioma-boton--activo' : ''}`}
+                          onClick={() => handleIdioma('es')}
+                        >
+                          <ReactCountryFlag svg countryCode="ES" />
+                        </button>
+                        <button
+                          aria-label="Cambiar a inglés"
+                          className={`menu-perfil__idioma-boton${i18n.language === 'en' ? ' menu-perfil__idioma-boton--activo' : ''}`}
+                          onClick={() => handleIdioma('en')}
+                        >
+                          <ReactCountryFlag svg countryCode="US" />
+                        </button>
+                      </div>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/quienes-somos"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('quienes_somos')}
+                      </Link>
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/sobre-nosotros"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('sobre_nosotros')}
+                      </Link>
+                      <button
+                        className="menu-perfil__opcion"
+                        onClick={() => {
+                          setShowLogin(true);
+                          closeMobileMenu();
+                        }}
+                      >
+                        {t('iniciar_sesion')}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            ) : isAuthenticated ? (
+              <div
+                className="encabezado__usuario"
+                onMouseEnter={() => setShowMenu(true)}
+                onMouseLeave={() => setShowMenu(false)}
+              >
+                <p className="encabezado__nombre-usuario">
+                  {user?.nombre_cliente || user?.email_cliente}
+                </p>
                 <FaUserCircle className="encabezado__icono-usuario" size={32} />
+                {showMenu && (
+                  <div className="menu-perfil">
+                    <Link className="menu-perfil__opcion" to="/historial-pedidos">
+                      {t('ver_historial_pedidos')}
+                    </Link>
+                    <Link className="menu-perfil__opcion" to="/historial-reservas">
+                      {t('ver_historial_reservas')}
+                    </Link>
+                    <Link className="menu-perfil__opcion" to="/actualizar-datos">
+                      {t('actualizar_datos')}
+                    </Link>
+                    <button
+                      className="menu-perfil__opcion menu-perfil__opcion--cerrar-sesion"
+                      onClick={logout}
+                    >
+                      {t('cerrar_sesion')}
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="encabezado__usuario" onClick={() => setShowLogin(true)}>
-                <p className="encabezado__nombre-usuario">Iniciar sesión</p>
+                <p className="encabezado__nombre-usuario">{t('iniciar_sesion')}</p>
                 <FaUserCircle className="encabezado__icono-usuario" size={32} />
               </div>
             )}

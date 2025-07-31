@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 
 import { useAuth } from '../context/AuthContext';
@@ -26,13 +27,17 @@ const ProtectedRoute = ({ children }) => {
     if (!isAuthenticated) {
         return (
             <>
-                <AuthPage isOpen={showLogin} onClose={handleClose} canClose={isAuthenticated} />
+                <AuthPage canClose={isAuthenticated} isOpen={showLogin} onClose={handleClose} />
                 {children}
             </>
         );
     }
 
     return children;
+};
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default ProtectedRoute; 

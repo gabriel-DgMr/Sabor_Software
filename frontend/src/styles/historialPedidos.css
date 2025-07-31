@@ -1,0 +1,159 @@
+/* Fondo y centrado */
+.historial-pedidos-bg {
+  min-height: 90vh;
+  width: 100vw;
+  background: var(--neutral-50);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+}
+
+.historial-pedidos-titulo {
+  margin-top: 32px;
+  margin-bottom: 24px;
+}
+
+.historial-pedidos-titulo h2 {
+  color: var(--primary-700);
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.mensaje-ejemplo {
+  color: var(--secondary-800);
+  font-size: 1.1rem;
+  margin-bottom: 18px;
+  font-style: italic;
+  text-align: center;
+}
+
+.historial-pedidos-lista {
+  width: 100%;
+  max-width: 950px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.pedido-tarjeta {
+  width: 100%;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  padding: 32px 36px 24px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  position: relative;
+}
+.pedido-tarjeta:hover {
+  box-shadow: 0 8px 32px rgba(211, 84, 0, 0.13);
+  transform: translateY(-2px) scale(1.01);
+}
+.pedido-tarjeta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.pedido-fecha {
+  color: var(--neutral-700);
+  font-size: 1.05rem;
+}
+.pedido-estado {
+  padding: 4px 16px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  background: var(--secondary-100);
+  color: var(--primary-700);
+  text-transform: capitalize;
+  box-shadow: 0 1px 4px #0001;
+}
+.pedido-estado.completado {
+  background: var(--success-50);
+  color: var(--success-700);
+}
+.pedido-estado.pendiente {
+  background: var(--warning-50);
+  color: var(--warning-700);
+}
+.pedido-estado.cancelado {
+  background: var(--error-50);
+  color: var(--error-700);
+}
+.pedido-productos {
+  margin: 0 0 8px 0;
+}
+.pedido-productos h4 {
+  color: var(--primary-400);
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.pedido-productos ul {
+  list-style: disc inside;
+  margin: 0;
+  padding: 0 0 0 10px;
+}
+.producto-nombre {
+  color: var(--neutral-900);
+  font-weight: 500;
+}
+.producto-cantidad {
+  color: var(--secondary-800);
+  font-weight: 600;
+  margin-left: 4px;
+}
+.producto-precio {
+  color: var(--neutral-700);
+  margin-left: 4px;
+}
+.pedido-total {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary-700);
+  margin-top: 8px;
+}
+.pedido-total-monto {
+  color: var(--success-700);
+  font-size: 1.3rem;
+  margin-left: 8px;
+}
+.pedido-recomendaciones {
+  margin-top: 8px;
+  color: var(--neutral-700);
+  font-size: 1.05rem;
+  background: var(--secondary-100);
+  border-radius: 8px;
+  padding: 8px 14px;
+  display: inline-block;
+}
+.pedido-recomendaciones span {
+  color: var(--primary-700);
+  font-weight: 600;
+}
+@media (max-width: 900px) {
+  .historial-pedidos-lista {
+    max-width: 99vw;
+    padding: 0 2vw;
+  }
+  .pedido-tarjeta {
+    padding: 20px 8vw 18px 8vw;
+  }
+}
+@media (max-width: 600px) {
+  .pedido-tarjeta {
+    padding: 16px 2vw 14px 2vw;
+  }
+  .historial-pedidos-titulo h2 {
+    font-size: 1.5rem;
+  }
+} 

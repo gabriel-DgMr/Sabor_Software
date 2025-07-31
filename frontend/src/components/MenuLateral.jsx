@@ -33,29 +33,29 @@ const MenuLateral = () => {
     <>
       {/* Botón hamburguesa para tablet/móvil */}
       <button
-        className="menu-lateral__hamburguesa"
         aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+        className="menu-lateral__hamburguesa"
         onClick={toggleMenu}
       >
         {isOpen ? <FaTimes /> : <FaBars />}
       </button>
 
       <nav
-        className={`menu-lateral ${isOpen ? 'menu-lateral--abierto' : ''}`}
         aria-label="Menú lateral de navegación"
+        className={`menu-lateral ${isOpen ? 'menu-lateral--abierto' : ''}`}
       >
         <img
-          src="/images/logo_sabor.png"
           alt="Logo Sabor"
           className="menu-lateral__logo"
+          src="/images/logo_sabor.png"
         />
 
         <hr className="menu-lateral__separador" />
 
         <button
+          aria-label="Cerrar sesión"
           className="menu-lateral__usuario"
           onClick={() => { logout(); closeMenu(); }}
-          aria-label="Cerrar sesión"
         >
           <FaUserCircle size={32} />
           <span className="menu-lateral__usuario-nombre">
@@ -72,11 +72,11 @@ const MenuLateral = () => {
             {opcionesGenerales.map(({ nombre, ruta }) => (
               <li key={ruta} className="menu-lateral__item">
                 <button
+                  aria-current={location.pathname === ruta ? 'page' : undefined}
                   className={`menu-lateral__link ${
                     (location.pathname === ruta || (nombre === 'Panel de control' && enPanel)) ? 'menu-lateral__link--activo' : ''
                   }`}
                   onClick={() => { navigate(ruta); closeMenu(); }}
-                  aria-current={location.pathname === ruta ? 'page' : undefined}
                 >
                   {nombre}
                 </button>
@@ -92,11 +92,11 @@ const MenuLateral = () => {
               {opcionesPanel.map(({ nombre, ruta }) => (
                 <li key={ruta} className="menu-lateral__item">
                   <button
+                    aria-current={location.pathname === ruta ? 'page' : undefined}
                     className={`menu-lateral__link menu-lateral__link--panel ${
                       location.pathname === ruta ? 'menu-lateral__link--activo--panel menu-lateral__link--activo' : ''
                     }`}
                     onClick={() => { navigate(ruta); closeMenu(); }}
-                    aria-current={location.pathname === ruta ? 'page' : undefined}
                   >
                     {nombre}
                   </button>

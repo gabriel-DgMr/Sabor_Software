@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext.jsx';
 import { CategoriaProvider } from './context/CategoriaContext.jsx';
 import { ProductoProvider } from './context/ProductoContext.jsx';
+import ActualizarDatos from './pages/ActualizarDatos.jsx';
 import Login from './pages/auth/Login.jsx';
 import Register from './pages/auth/Register.jsx';
 import ResetPasswordContainer from './pages/auth/ResetPasswordContainer.jsx';
@@ -14,12 +15,18 @@ import Checkout from './pages/Checkout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import DashboardVentas from './pages/DashboardVentas.jsx';
 import EmpleadosHome from './pages/EmpleadosHome.jsx';
+import EscanearQR from './pages/EscanearQR.jsx';
+import HistorialPedidos from './pages/HistorialPedidos.jsx';
+import HistorialReservas from './pages/HistorialReservas.jsx';
 import Home from './pages/Home.jsx';
 import ModificarPedido from './pages/ModificarPedido.jsx';
-import PedidosAdministrar from './pages/PedidosAdministrar.jsx';
+import PaginaNoEncontrada from './pages/PaginaNoEncontrada.jsx';
+import PedidosAdministrar from './pages/pedidosadministrar.jsx';
 import ProductosAdministrar from './pages/ProductosAdministrar.jsx';
+import QuienesSomos from './pages/QuienesSomos.jsx';
 import ReservasAdministrar from './pages/ReservacionesAdministrar.jsx';
 import Reservas from './pages/Reservas.jsx';
+import SobreNosotros from './pages/SobreNosotros.jsx';
 
 function App() {
   return (
@@ -37,6 +44,9 @@ function App() {
               <Route element={<Carrito />} path="/carrito" />
               <Route element={<Checkout />} path="/checkout" />
               <Route element={<ModificarPedido />} path="/carrito/modificar/:id"/>
+              <Route element={<QuienesSomos />} path="/quienes-somos" />
+              <Route element={<SobreNosotros />} path="/sobre-nosotros" />
+              <Route element={<EscanearQR />} path="/escanear-qr" />
               
 
               {/* Rutas protegidas */}
@@ -88,6 +98,31 @@ function App() {
                 }
                 path="/administrar/panel/ventas"
               />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <ActualizarDatos />
+                  </ProtectedRoute>
+                }
+                path="/actualizar-datos"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <HistorialPedidos />
+                  </ProtectedRoute>
+                }
+                path="/historial-pedidos"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <HistorialReservas />
+                  </ProtectedRoute>
+                }
+                path="/historial-reservas"
+              />
+              <Route element={<PaginaNoEncontrada />} path="*" />
             </Routes>
           </CartProvider>
         </CategoriaProvider>

@@ -1,14 +1,20 @@
-import express from 'express'
-import * as authController from '../controllers/authController.js'
-import * as clienteController from '../controllers/clienteController.js'
-import { authenticateToken, checkRole } from '../middleware/auth.js'
-import { validateRegister, validateLogin } from '../middleware/validateRequest.js'
+import express from 'express';
+
+import * as authController from '../controllers/authController.js';
+import * as clienteController from '../controllers/clienteController.js';
+import { authenticateToken, checkRole, checkPermission, logAuthAttempt } from '../middleware/auth.js';
+import { validateRegister, validateLogin, validateUpdateCliente } from '../middleware/validateRequest.js';
 
 const router = express.Router();
+
+// Middleware de logging para todas las rutas de auth
+router.use(logAuthAttempt);
 
 // Rutas públicas
 router.post('/register', validateRegister, authController.registerUser);
 router.post('/login', validateLogin, authController.loginUser);
+router.post('/verify-email', authController.verifyEmailCode);
+router.post('/resend-verification', authController.resendVerificationCode);
 router.post('/forgot-password', authController.forgotPassword);
 router.get('/reset-password/:token', authController.verifyResetToken);
 router.post('/reset-password/:token', authController.resetPassword);
@@ -17,16 +23,30 @@ router.post('/reset-password/:token', authController.resetPassword);
 router.post('/logout', authenticateToken, authController.logoutUser);
 router.get('/perfil', authenticateToken, authController.getUserProfile);
 
-// Ruta para obtener todos los clientes
-router.get('/clientes' , clienteController.getAllClientes);
+// Rutas para gestión de clientes (solo admin)
+router.get('/clientes', 
+    authenticateToken, 
+    checkRole(['admin']), 
+    clienteController.getAllClientes
+);
 
-// Ruta para obtener un cliente
-router.get('/cliente/:id' , clienteController.getClienteById);
+router.get('/cliente/:id', 
+    authenticateToken, 
+    checkPermission('manage_users'),
+    clienteController.getClienteById
+);
 
-// Ruta para actualizar un cliente
-router.put('/actualizarcliente/:id' , clienteController.updateCliente);
+router.put('/actualizarcliente/:id', 
+    authenticateToken, 
+    checkPermission('manage_users'),
+    validateUpdateCliente,
+    clienteController.updateCliente
+);
 
-// Ruta para eliminar un cliente
-router.delete('/eliminarcliente/:id' , clienteController.deleteCliente);
+router.delete('/eliminarcliente/:id', 
+    authenticateToken, 
+    checkRole(['admin']), 
+    clienteController.deleteCliente
+);
 
 export default router;

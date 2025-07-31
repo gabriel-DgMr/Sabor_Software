@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import '../styles/carrito.css';
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
-import { useCart } from '../context/CartContext.jsx';
+import { useCart } from '../context/useCart.js';
 
 const ModificarPedido = () => {
   const navigate = useNavigate();
   const { cartItems, removeItemFromCart } = useCart();
   const [recomendaciones, setRecomendaciones] = useState('');
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Recuperar recomendaciones guardadas si existen
@@ -37,34 +39,22 @@ const ModificarPedido = () => {
     <>
       <Header />
       <main className="carrito_bg">
-        <div className="reservas__acciones" style={{ 
-          position: 'absolute',
-          top: '100px',
-          left: '20px'
-        }}>
-          <button 
-            className="carrito_btn__regresar"
-            onClick={() => navigate('/carrito')}
-          >
-            Regresar
-          </button>
-        </div>
-        <h1 className="carrito_titulo">Modificar pedido</h1>
+        <h1 className="carrito_titulo">{t('modificar_titulo')}</h1>
         <div className="carrito_contenido">
           <div className="carrito_pedidos">
             {cartItems.map((item, index) => (
-              <div className="carrito_pedido" key={index}>
+              <div key={index} className="carrito_pedido">
                 <div className="carrito_pedido_info">
                   <div className="carrito_pedido_titulo">{item.nombre}</div>
                   <div className="carrito_pedido_precio">
                     {item.precio.toLocaleString('es-CO')} COP
                   </div>
                 </div>
-                <button 
+                <button
                   className="carrito_btn eliminar"
                   onClick={() => eliminarItem(index)}
                 >
-                  🗑️ Eliminar
+                  🗑️ {t('carrito_eliminar')}
                 </button>
               </div>
             ))}
@@ -72,12 +62,10 @@ const ModificarPedido = () => {
             <div className="carrito_pedido" style={{ padding: '20px' }}>
               <div className="carrito_pedido_info" style={{ width: '100%' }}>
                 <div className="carrito_pedido_titulo" style={{ marginBottom: '10px' }}>
-                  Información adicional o recomendaciones para este pedido
+                  {t('modificar_info_adicional')}
                 </div>
                 <textarea
-                  value={recomendaciones}
-                  placeholder="Escribe aquí tus recomendaciones o información adicional para este pedido específico"
-                  onChange={(e) => setRecomendaciones(e.target.value)}
+                  placeholder={t('modificar_placeholder')}
                   style={{
                     width: '100%',
                     minHeight: '100px',
@@ -87,11 +75,13 @@ const ModificarPedido = () => {
                     fontSize: '1rem',
                     resize: 'vertical'
                   }}
+                  value={recomendaciones}
+                  onChange={(e) => setRecomendaciones(e.target.value)}
                 />
               </div>
             </div>
 
-            <button 
+            <button
               className="carrito_btn modificar"
               style={{
                 width: '100%',
@@ -101,20 +91,22 @@ const ModificarPedido = () => {
               }}
               onClick={agregarProducto}
             >
-              + Agregar producto
+              + {t('modificar_agregar_producto')}
             </button>
-            <button 
-              className="carrito_btn pagar"
-              style={{
-                width: '100%',
-                marginTop: '20px',
-                padding: '15px',
-                fontSize: '1.2rem'
-              }}
-              onClick={confirmarCambios}
-            >
-              Confirmar cambios
-            </button>
+            <div className='modificar__botones--pagarregresar'>
+              <button
+                className="carrito_btn__pagar"
+                onClick={confirmarCambios}
+              >
+                {t('modificar_confirmar_cambios')}
+              </button>
+              <button
+                className="carrito_btn__regresar"
+                onClick={() => navigate('/carrito')}
+              >
+                {t('modificar_regresar')}
+              </button>
+            </div>
           </div>
         </div>
       </main>

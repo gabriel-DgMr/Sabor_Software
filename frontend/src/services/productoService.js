@@ -1,10 +1,25 @@
 const API_URL = 'http://localhost:3000/api';
 
 export const productoService = {
-    obtenerTodos: async () => {
-        const response = await fetch(`${API_URL}/productos`);
-        if (!response.ok) throw new Error('Error al obtener los productos');
-        return response.json();
+    obtenerTodos: async (idioma = 'es') => {
+        try {
+            const response = await fetch(`${API_URL}/productos?lang=${idioma}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al obtener los productos');
+            }
+            
+            return response.json();
+        } catch (error) {
+            console.error('Error en obtener productos:', error);
+            throw error;
+        }
     },
     crear: async (producto) => {
         try {
@@ -12,8 +27,6 @@ export const productoService = {
             if (!token) {
                 throw new Error('No hay token de autenticación');
             }
-
-            console.log('Datos del producto a enviar:', producto);
 
             const formData = new FormData();
             
@@ -27,12 +40,6 @@ export const productoService = {
                 throw new Error('La imagen es obligatoria');
             }
             formData.append('imagen_producto', producto.imagen_producto);
-
-            // Verificar que todos los campos estén en el FormData
-            console.log('Contenido del FormData:');
-            for (let pair of formData.entries()) {
-                console.log(pair[0] + ': ' + pair[1]);
-            }
 
             const response = await fetch(`${API_URL}/productos`, {
                 method: 'POST',
@@ -115,5 +122,16 @@ export const productoService = {
             console.error('Error en eliminar producto:', error);
             throw error;
         }
+    },
+    getProductos: async (filtros = {}, idioma = 'es') => {
+        const params = new URLSearchParams();
+        if (filtros.categoria) params.append('categoria', filtros.categoria);
+        if (filtros.busqueda) params.append('busqueda', filtros.busqueda);
+        if (filtros.orden) params.append('orden', filtros.orden);
+        params.append('lang', idioma);
+        const url = `${API_URL}/productos?${params.toString()}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Error al obtener productos');
+        return await response.json();
     }
 };

@@ -1,156 +1,225 @@
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
+import { validarRegistro } from '../../utils/validaciones';
+import { GoCheck, GoX } from 'react-icons/go';
 
-const Register = ({ onShowMessage, onRegisterSuccess }) => {
+import EmailVerification from './EmailVerification.jsx';
+
+// Componente de alerta visualmente consistente para register
+const RegisterAlert = ({ type, message }) => {
+  if (!message) return null;
+  const icon = type === 'success'
+    ? <GoCheck className="GoCheck" />
+    : <GoX className="GoX" />;
+  return (
+    <div className="alerta-sin-tarjeta alerta-sin-tarjeta--grande">
+      {icon}
+      <span>{message}</span>
+    </div>
+  );
+};
+
+const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegisterSuccess }) => {
   const { registerUser, loading } = useAuth();
   const [errors, setErrors] = useState({});
+  const [globalError, setGlobalError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showVerification, setShowVerification] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     return () => setErrors({});
   }, []);
 
-  const manejarErroresDeCampo = newErrors => {
-    setErrors(newErrors);
-    setTimeout(() => animateElements('.formulario__mensaje-error', 'fade-in'), 0);
-    setTimeout(() => {
-      document.querySelectorAll('.formulario__mensaje-error').forEach(el => {
-        el.classList.remove('fade-in');
-        el.classList.add('fade-out');
-      });
-      setTimeout(() => setErrors({}), ANIM_DURATION);
-    }, VISIBLE_DURATION);
-  };
-
   const handleRegister = async e => {
     e.preventDefault();
     setErrors({});
+    setGlobalError('');
 
     const form = e.target;
-    const nombre_cliente = form.nombre.value.trim();
-    const email_cliente = form.email.value.trim();
-    const telefono_cliente = form.telefono.value.trim();
-    const contraseña_cliente = form.password.value;
+    const formData = {
+      nombre_cliente: form.nombre.value,
+      email_cliente: form.email.value,
+      telefono_cliente: form.telefono.value,
+      contraseña_cliente: form.password.value
+    };
     const confirmPassword = form.confirmPassword.value;
 
-    const newErrors = {};
-    if (!nombre_cliente) newErrors.nombre = 'El nombre es obligatorio.';
-    if (!email_cliente) {
-      newErrors.email = 'El correo es obligatorio.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email_cliente)) {
-      newErrors.email = 'El correo no es válido.';
-    }
-    if (!telefono_cliente) {
-      newErrors.telefono = 'El teléfono es obligatorio.';
-    } else if (!/^\d{10}$/.test(telefono_cliente)) {
-      newErrors.telefono = 'El teléfono debe tener 10 dígitos.';
-    }
-    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-    if (!contraseña_cliente) {
-      newErrors.password = 'La contraseña es obligatoria.';
-    } else if (!pwdRegex.test(contraseña_cliente)) {
-      newErrors.password = 'Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.';
-    }
+    // Usar validaciones centralizadas
+    const validationErrors = validarRegistro(formData);
+    
+    // Validar confirmación de contraseña
     if (!confirmPassword) {
-      newErrors.confirmPassword = 'Confirma tu contraseña.';
-    } else if (contraseña_cliente !== confirmPassword) {
-      newErrors.confirmPassword = 'Las contraseñas no coinciden.';
+      validationErrors.confirmPassword = t('confirma_contrasena');
+    } else if (confirmPassword !== formData.contraseña_cliente) {
+      validationErrors.confirmPassword = t('contrasenas_no_coinciden');
     }
+      
 
-    if (Object.keys(newErrors).length > 0) {
-      manejarErroresDeCampo(newErrors);
+    const manejarErroresDeCampo = newErrors => {
+      setErrors(newErrors);
+      setGlobalError('');
+      setTimeout(() => animateElements('.formulario__mensaje-error', 'fade-in'), 0);
+      setTimeout(() => {
+        document.querySelectorAll('.formulario__mensaje-error').forEach(el => {
+          el.classList.remove('fade-in');
+          el.classList.add('fade-out');
+        });
+        setTimeout(() => setErrors({}), ANIM_DURATION);
+      }, VISIBLE_DURATION);
+    };
+
+    if (Object.keys(validationErrors).length > 0) {
+      manejarErroresDeCampo(validationErrors);
       return;
     }
 
     const result = await registerUser({
-      nombre_cliente,
-      email_cliente,
-      telefono_cliente,
-      contraseña_cliente,
+      nombre_cliente: formData.nombre_cliente.trim(),
+      email_cliente: formData.email_cliente.trim(),
+      telefono_cliente: formData.telefono_cliente.trim(),
+      contraseña_cliente: formData.contraseña_cliente,
     });
 
     if (result && result.success) {
-      onShowMessage('success', result.message || 'Registro exitoso. Ahora puedes iniciar sesión.');
-      if (onRegisterSuccess) onRegisterSuccess();
-      form.reset();
+      if (result.requiresVerification) {
+        // Mostrar pantalla de verificación
+        setRegisteredEmail(formData.email_cliente.trim());
+        setShowVerification(true);
+        localStorage.setItem('pendingVerificationEmail', formData.email_cliente.trim());
+      } else {
+        setSuccessMessage(result.message || t('registro_exitoso'));
+        setTimeout(() => {
+          setSuccessMessage('');
+          navigate('/');
+        }, 2000);
+        form.reset();
+      }
+      return;
     } else {
-      onShowMessage('error', result.message || 'Error en el registro.');
+      setGlobalError(result.message || t('error_registro'));
+      setTimeout(() => animateElements('#global-error-register', 'fade-in'), 0);
+      setTimeout(() => {
+        const el = document.getElementById('global-error-register');
+        if (el) {
+          el.classList.remove('fade-in');
+          el.classList.add('fade-out');
+        }
+        setTimeout(() => setGlobalError(''), ANIM_DURATION);
+      }, VISIBLE_DURATION);
     }
   };
 
+  const handleVerificationSuccess = () => {
+    setSuccessMessage(t('cuenta_activada_exitosamente'));
+    setTimeout(() => {
+      setSuccessMessage('');
+      setShowVerification(false);
+      localStorage.removeItem('pendingVerificationEmail');
+      if (_onRegisterSuccess) {
+        _onRegisterSuccess();
+      } else {
+        navigate('/');
+      }
+    }, 2000);
+  };
+
+  const handleBackToLogin = () => {
+    setShowVerification(false);
+    localStorage.removeItem('pendingVerificationEmail');
+    if (_onRegisterSuccess) {
+      _onRegisterSuccess();
+    }
+  };
+
+  if (showVerification) {
+    return (
+      <EmailVerification
+        email={registeredEmail}
+        onBackToLogin={handleBackToLogin}
+        onVerificationSuccess={handleVerificationSuccess}
+      />
+    );
+  }
+
   return (
     <div className="formulario__contenedor formulario__contenedor--register">
-      <h2 className="modal__titulo">Crear Cuenta</h2>
+      <h2 className="modal__titulo">{t('crear_cuenta')}</h2>
       <form noValidate className="formulario" onSubmit={handleRegister}>
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="nombre-register">
-            Nombre Completo*
+            {t('nombre_completo')}
           </label>
           <input
             autoComplete="name"
-            className={`formulario__input ${errors.nombre ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.nombre_cliente ? 'input--error' : ''}`}
             disabled={loading}
             id="nombre-register"
             name="nombre"
-            placeholder="Juan Felipe Velasquez"
+            placeholder={t('ej_nombre')}
             type="text"
           />
-          {errors.nombre && <small className="formulario__mensaje-error">{errors.nombre}</small>}
+          {errors.nombre_cliente && <small className="formulario__mensaje-error">{errors.nombre_cliente}</small>}
         </div>
 
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="email-register">
-            Correo Electrónico*
+            {t('correo_electronico')}
           </label>
           <input
             autoComplete="email"
-            className={`formulario__input ${errors.email ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.email_cliente ? 'input--error' : ''}`}
             disabled={loading}
             id="email-register"
             name="email"
-            placeholder="Tu Correo Electrónico"
+            placeholder={t('ej_email')}
             type="email"
           />
-          {errors.email && <small className="formulario__mensaje-error">{errors.email}</small>}
+          {errors.email_cliente && <small className="formulario__mensaje-error">{errors.email_cliente}</small>}
         </div>
 
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="telefono-register">
-            Teléfono*
+            {t('telefono')}
           </label>
           <input
             autoComplete="tel"
-            className={`formulario__input ${errors.telefono ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.telefono_cliente ? 'input--error' : ''}`}
             disabled={loading}
             id="telefono-register"
             name="telefono"
-            placeholder="Tu Número de Teléfono (10 dígitos)"
+            placeholder={t('ej_telefono')}
             type="tel"
           />
-          {errors.telefono && <small className="formulario__mensaje-error">{errors.telefono}</small>}
+          {errors.telefono_cliente && <small className="formulario__mensaje-error">{errors.telefono_cliente}</small>}
         </div>
 
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="password-register">
-            Contraseña*
+            {t('contrasena')}
           </label>
           <input
             autoComplete="new-password"
-            className={`formulario__input ${errors.password ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.contraseña_cliente ? 'input--error' : ''}`}
             disabled={loading}
             id="password-register"
             name="password"
-            placeholder="Crea una Contraseña Segura"
+            placeholder={t('ej_contrasena')}
             type="password"
           />
-          {errors.password && <small className="formulario__mensaje-error">{errors.password}</small>}
+          {errors.contraseña_cliente && <small className="formulario__mensaje-error">{errors.contraseña_cliente}</small>}
         </div>
 
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="confirmPassword-register">
-            Confirmar Contraseña*
+            {t('confirmar_contrasena')}
           </label>
           <input
             autoComplete="new-password"
@@ -158,7 +227,7 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
             disabled={loading}
             id="confirmPassword-register"
             name="confirmPassword"
-            placeholder="Confirma tu Contraseña"
+            placeholder={t('ej_contrasena')}
             type="password"
           />
           {errors.confirmPassword && (
@@ -166,8 +235,16 @@ const Register = ({ onShowMessage, onRegisterSuccess }) => {
           )}
         </div>
 
+        {globalError && (
+          <RegisterAlert type="error" message={globalError} />
+        )}
+
+        {successMessage && (
+          <RegisterAlert type="success" message={successMessage} />
+        )}
+
         <button className="formulario__boton-principal" disabled={loading} type="submit">
-          {loading ? 'Registrando...' : 'Registrarse'}
+          {loading ? t('registrando') : t('registrarse')}
         </button>
       </form>
     </div>
