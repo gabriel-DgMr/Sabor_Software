@@ -2487,15 +2487,11 @@ hr {
   color: var(--error-500)
 }
 
-.GoX {
+.GoX .GoTrash{
   margin: 0 auto;
   color: var(--neutral-900)
 }
 
-.GoTrash {
-  margin: 0 auto;
-  color: var(--neutral-900)
-}
 
 /* Estilos para errores globales - más llamativos y centrados */
 .error-global {
