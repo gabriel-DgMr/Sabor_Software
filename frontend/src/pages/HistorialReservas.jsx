@@ -13,8 +13,9 @@ const HistorialReservas = () => {
     const fetchReservas = async () => {
       try {
         const token = localStorage.getItem('token');
+        console.log('Token enviado:', token);
         const res = await axios.get('/api/reservas/historial', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         setReservas(res.data);
       } catch (err) {
@@ -22,8 +23,8 @@ const HistorialReservas = () => {
           if (err.response.status === 401) {
             setError('No autorizado: Debes iniciar sesión para ver tu historial.');
           } else if (err.response.status === 403) {
-            localStorage.removeItem('token');
-            setError('Acceso prohibido: Token inválido o expirado. Por favor, inicia sesión nuevamente.');
+            // localStorage.removeItem('token');
+            // setError('Acceso prohibido: Token inválido o expirado. Por favor, inicia sesión nuevamente.');
           } else if (err.response.status === 404) {
             setError('No se encontró el recurso de historial de reservas.');
           } else if (err.response.status === 500) {
@@ -43,21 +44,23 @@ const HistorialReservas = () => {
     fetchReservas();
   }, []);
 
-  if (loading) return (
-    <div>
-      <Header />
-      <div className="loading-message">Cargando historial de reservaciones...</div>
-      <Footer />
-    </div>
-  );
-  
-  if (error) return (
-    <div>
-      <Header />
-      <div className="error-message">{error}</div>
-      <Footer />
-    </div>
-  );
+  if (loading)
+    return (
+      <div>
+        <Header />
+        <div className="loading-message">Cargando historial de reservaciones...</div>
+        <Footer />
+      </div>
+    );
+
+  if (error)
+    return (
+      <div>
+        <Header />
+        <div className="error-message">{error}</div>
+        <Footer />
+      </div>
+    );
 
   return (
     <div>
@@ -79,7 +82,7 @@ const HistorialReservas = () => {
               </tr>
             </thead>
             <tbody>
-              {reservas.map((reserva) => (
+              {reservas.map(reserva => (
                 <tr key={reserva.id_reservacion}>
                   <td>{reserva.fecha_reservacion}</td>
                   <td>{reserva.hora_reservacion}</td>
@@ -87,7 +90,9 @@ const HistorialReservas = () => {
                   <td>{reserva.notas || '-'}</td>
                   <td>{reserva.id_mesa || '-'}</td>
                   <td>
-                    <span className={`estado-reserva ${reserva.id_estado === 1 ? 'activa' : 'finalizada'}`}>
+                    <span
+                      className={`estado-reserva ${reserva.id_estado === 1 ? 'activa' : 'finalizada'}`}
+                    >
                       {reserva.id_estado === 1 ? 'Activa' : 'Finalizada'}
                     </span>
                   </td>
@@ -102,4 +107,4 @@ const HistorialReservas = () => {
   );
 };
 
-export default HistorialReservas; 
+export default HistorialReservas;
