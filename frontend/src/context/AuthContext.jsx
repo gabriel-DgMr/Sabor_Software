@@ -15,48 +15,26 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem('token');
-        console.log(
-          '🔍 AuthContext - Verificando token:',
-          token ? 'Token encontrado' : 'No hay token'
-        );
-
         if (token) {
-          console.log('🔍 AuthContext - Haciendo petición a /api/auth/perfil');
           const response = await fetch('http://localhost:3000/api/auth/perfil', {
             headers: {
-              Authorization: `Bearer ${token}`,
-            },
+              'Authorization': `Bearer ${token}`
+            }
           });
-
-          console.log(
-            '🔍 AuthContext - Respuesta del servidor:',
-            response.status,
-            response.statusText
-          );
-
+          
           if (response.ok) {
             const data = await response.json();
-            console.log('✅ AuthContext - Usuario autenticado:', data.user);
             setUser(data.user);
             setIsAuthenticated(true);
           } else {
-            console.log('❌ AuthContext - Token inválido, limpiando sesión');
             // Si el token no es válido, limpiar la sesión
             localStorage.removeItem('token');
             setUser(null);
             setIsAuthenticated(false);
           }
-        } else {
-          console.log('📭 AuthContext - No hay token, usuario no autenticado');
-          setUser(null);
-          setIsAuthenticated(false);
         }
       } catch (error) {
-        console.error('❌ AuthContext - Error al verificar autenticación:', error);
-        // En caso de error, limpiar la sesión por seguridad
-        localStorage.removeItem('token');
-        setUser(null);
-        setIsAuthenticated(false);
+        console.error('Error al verificar autenticación:', error);
       } finally {
         setLoading(false);
       }
@@ -96,7 +74,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const registerUser = async userData => {
+  const registerUser = async (userData) => {
     try {
       setLoading(true);
       const response = await fetch('http://localhost:3000/api/auth/register', {
@@ -114,10 +92,10 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Retornar información sobre si requiere verificación
-      return {
-        success: true,
+      return { 
+        success: true, 
         message: data.message,
-        requiresVerification: data.requiresVerification || false,
+        requiresVerification: data.requiresVerification || false
       };
     } catch (error) {
       return { success: false, message: error.message };
@@ -131,8 +109,8 @@ export const AuthProvider = ({ children }) => {
       await fetch('http://localhost:3000/api/auth/logout', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
@@ -144,16 +122,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        isAuthenticated,
-        login,
-        logout,
-        registerUser,
-      }}
-    >
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      isAuthenticated,
+      login,
+      logout,
+      registerUser
+    }}>
       {children}
     </AuthContext.Provider>
   );

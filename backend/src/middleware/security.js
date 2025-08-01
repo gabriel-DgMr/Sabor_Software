@@ -1,5 +1,7 @@
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import xss from "xss-clean";
+import hpp from "hpp";
 import validator from "validator";
 
 // Rate limiting para prevenir ataques de fuerza bruta
@@ -31,7 +33,7 @@ export const authRateLimiter = rateLimit({
 // Rate limiter para registro
 export const registerRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hora
-  max: 3, // máximo 3 registros por hora
+  max: 100, // máximo 3 registros por hora
   message: {
     message: "Demasiados intentos de registro. Inténtalo de nuevo en 1 hora.",
   },
@@ -54,10 +56,10 @@ export const contactoRateLimiter = rateLimit({
 export const helmetConfig = helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+      defaultSrc: ["self"],
+      styleSrc: ["self", "unsafe-inline"],
+      scriptSrc: ["self"],
+      imgSrc: ["self", "data:", "https:"],
     },
   },
   crossOriginEmbedderPolicy: false,

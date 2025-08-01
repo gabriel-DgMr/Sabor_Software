@@ -1,16 +1,11 @@
-import express from "express";
-import {
-  getPedidos,
-  deletePedido,
-  createPedido,
-  updatePedido,
-} from "../controllers/pedidoController.js";
-import { authenticateToken, checkPermission } from "../middleware/auth.js";
-import { validatePedido } from "../middleware/validateRequest.js";
+import express from 'express';
+import { getPedidos, deletePedido, createPedido, updatePedido } from '../controllers/pedidoController.js';
+import { authenticateToken, checkPermission } from '../middleware/auth.js';
+import { validatePedido } from '../middleware/validateRequest.js';
 
 const router = express.Router();
 
-// Importar controladores de carrito
+// === RUTAS DE CARRITO ===
 import {
   getCarrito,
   addProductoCarrito,
@@ -18,29 +13,44 @@ import {
   removeProducto,
   vaciar,
   confirmar,
-  getPedidoById,
-} from "../controllers/pedidoController.js";
+  getPedidoById
+} from '../controllers/pedidoController.js';
 
-// ===== APLICAR MIDDLEWARE A TODAS LAS RUTAS PROTEGIDAS =====
-router.use(authenticateToken);
+// Carrito: todas protegidas
+router.get('/carrito', authenticateToken, getCarrito);
+router.post('/carrito/add', authenticateToken, addProductoCarrito);
+router.put('/carrito/update', authenticateToken, updateCantidadCarrito);
+router.delete('/carrito/remove', authenticateToken, removeProducto);
+router.delete('/carrito/vaciar', authenticateToken, vaciar);
+router.post('/carrito/confirmar', authenticateToken, confirmar);
 
-// ===== RUTAS DE CARRITO =====
-router.get("/carrito", getCarrito);
-router.post("/carrito/add", addProductoCarrito);
-router.put("/carrito/update", updateCantidadCarrito);
-router.delete("/carrito/remove", removeProducto);
-router.delete("/carrito/vaciar", vaciar);
-router.post("/carrito/confirmar", confirmar);
+// Rutas protegidas con validaciones
+router.post('/', 
+    authenticateToken, 
+    validatePedido,
+    createPedido
+);
 
-// ===== RUTAS DE GESTIÓN DE PEDIDOS =====
-router.post("/", validatePedido, createPedido);
+router.get('/', 
+    authenticateToken, 
+    checkPermission('read'),
+    getPedidos
+);
 
-router.get("/", checkPermission("read"), getPedidos);
+// Usar el controlador real para obtener pedido por id
+router.get('/:id', authenticateToken, checkPermission('read'), getPedidoById);
 
-router.get("/:id", checkPermission("read"), getPedidoById);
+router.put('/:id', 
+    authenticateToken, 
+    checkPermission('write'),
+    validatePedido,
+    updatePedido
+);
 
-router.put("/:id", checkPermission("write"), validatePedido, updatePedido);
+router.delete('/:id', 
+    authenticateToken, 
+    checkPermission('delete'),
+    deletePedido
+);
 
-router.delete("/:id", checkPermission("delete"), deletePedido);
-
-export default router;
+export default router; 
