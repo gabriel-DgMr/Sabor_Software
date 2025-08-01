@@ -1,28 +1,29 @@
-import * as authModel from '../models/authModel.js';
-import jwt from 'jsonwebtoken';
-import validator from 'validator';
-import { config } from '../config/config.js';
-import nodemailer from 'nodemailer';
+import * as userModel from "../models/userModel.js";
+import jwt from "jsonwebtoken";
+import validator from "validator";
+import { passwordStrength } from "check-password-strength";
+import { config } from "../config/config.js";
+import nodemailer from "nodemailer";
 
 // Configurar el transporter de nodemailer
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: config.email.user,
-        pass: config.email.password
-    }
+  service: "gmail",
+  auth: {
+    user: config.email.user,
+    pass: config.email.password,
+  },
 });
 
 // Función para enviar email de verificación
-const sendVerificationEmail = async (email_cliente, nombre_cliente, codigo) => {
-    const mailOptions = {
-        from: config.email.user,
-        to: email_cliente,
-        subject: 'Verifica tu cuenta - Sabor',
-        html: `
+const sendVerificationEmail = async (email, nombre, codigo) => {
+  const mailOptions = {
+    from: config.email.user,
+    to: email,
+    subject: "Verifica tu cuenta - Sabor",
+    html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h2 style="color: #ff6f00;">¡Bienvenido a Sabor!</h2>
-                <p>Hola <strong>${nombre_cliente}</strong>,</p>
+                <p>Hola <strong>${nombre}</strong>,</p>
                 <p>Gracias por registrarte en Sabor. Para activar tu cuenta, necesitas verificar tu dirección de email.</p>
                 
                 <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0;">
@@ -40,387 +41,543 @@ const sendVerificationEmail = async (email_cliente, nombre_cliente, codigo) => {
                     El equipo de Sabor
                 </p>
             </div>
-        `
-    };
+        `,
+  };
 
-    await transporter.sendMail(mailOptions);
+  await transporter.sendMail(mailOptions);
 };
 
-// controlador para registrar un nuevo usuario
-export const registerUser = async (req, res) => {
-    try {
-        const {nombre_cliente, email_cliente, telefono_cliente, contraseña_cliente} = req.body;
+// Función helper para validar fortaleza de contraseña
+const validatePasswordStrength = (password) => {
+  const result = passwordStrength(password);
 
-        // Validar campos requeridos
-        if (!nombre_cliente || !email_cliente || !telefono_cliente || !contraseña_cliente) {
-            return res.status(400).json({
-                message: 'Todos los campos son obligatorios'
-            });
-        }
+  // Configuración mínima requerida
+  const minRequiredStrength = 2; // 0: Too weak, 1: Weak, 2: Medium, 3: Strong
 
-        // Validar correo
-        if (!validator.isEmail(email_cliente)) {
-            return res.status(400).json({
-                message: 'Correo no válido'
-            });
-        }
+  if (result.id < minRequiredStrength) {
+    const suggestions = [];
 
-        // Validar teléfono (10 dígitos)
-        if (!validator.matches(telefono_cliente, /^\d{10}$/)) {
-            return res.status(400).json({
-                message: 'El teléfono debe tener 10 dígitos'
-            });
-        }
-
-        // Validar contraseña
-        if (!validator.isStrongPassword(contraseña_cliente, {
-            minLength: 8,
-            minLowercase: 1,
-            minUppercase: 1,
-            minNumbers: 1,
-            minSymbols: 1
-        })) {
-            return res.status(400).json({
-                message: 'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos'
-            });
-        }
-
-        // Registrar usuario (ahora con activo = false)
-        const userId = await authModel.registerUser({
-            nombre_cliente,
-            email_cliente,
-            telefono_cliente,
-            contraseña_cliente
-        });
-
-        // Generar código de verificación
-        const codigo = await authModel.generateVerificationCode(userId);
-
-        // Enviar email de verificación
-        await sendVerificationEmail(email_cliente, nombre_cliente, codigo);
-
-        res.status(201).json({
-            message: 'Usuario registrado exitosamente. Por favor, verifica tu email para activar tu cuenta.',
-            userId,
-            requiresVerification: true
-        });
-
-    } catch (error) {
-        console.error('Error en registro:', error);
-        res.status(400).json({
-            message: error.message || 'Error al registrar usuario'
-        });
+    if (password.length < 8) {
+      suggestions.push("debe tener al menos 8 caracteres");
     }
+    if (!/[a-z]/.test(password)) {
+      suggestions.push("debe incluir al menos una letra minúscula");
+    }
+    if (!/[A-Z]/.test(password)) {
+      suggestions.push("debe incluir al menos una letra mayúscula");
+    }
+    if (!/\d/.test(password)) {
+      suggestions.push("debe incluir al menos un número");
+    }
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
+      suggestions.push("debe incluir al menos un carácter especial");
+    }
+
+    return {
+      isValid: false,
+      message: `La contraseña es demasiado débil. ${suggestions.join(", ")}.`,
+      strength: result.value,
+      suggestions: suggestions,
+    };
+  }
+
+  return {
+    isValid: true,
+    strength: result.value,
+    score: result.id,
+  };
+};
+
+// Controlador para registrar un nuevo usuario
+export const registerUser = async (req, res) => {
+  try {
+    const { nombre, apellido, email, telefono, contraseña, tipo_usuario } =
+      req.body;
+
+    // Validar campos requeridos
+    if (!nombre || !email || !contraseña) {
+      return res.status(400).json({
+        message: "Nombre, email y contraseña son obligatorios",
+      });
+    }
+
+    // Validar correo
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({
+        message: "Correo no válido",
+      });
+    }
+
+    // Validar teléfono (10 dígitos, opcional)
+    if (telefono && !validator.matches(telefono, /^\d{10}$/)) {
+      return res.status(400).json({
+        message: "El teléfono debe tener 10 dígitos",
+      });
+    }
+
+    // Validar contraseña
+    const passwordValidation = validatePasswordStrength(contraseña);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        message: passwordValidation.message,
+      });
+    }
+
+    // Crear usuario (por defecto como cliente)
+    const userId = await userModel.createUser({
+      email,
+      password: contraseña,
+      nombre,
+      apellido,
+      telefono,
+      tipo_usuario: tipo_usuario || "cliente",
+    });
+
+    // Generar código de verificación para clientes
+    if (tipo_usuario === "cliente" || !tipo_usuario) {
+      const codigo = await userModel.generateVerificationCode(userId);
+      await sendVerificationEmail(email, nombre, codigo);
+    }
+
+    res.status(201).json({
+      message:
+        tipo_usuario === "cliente" || !tipo_usuario
+          ? "Usuario registrado exitosamente. Por favor, verifica tu email para activar tu cuenta."
+          : "Usuario registrado exitosamente.",
+      userId,
+      requiresVerification: tipo_usuario === "cliente" || !tipo_usuario,
+    });
+  } catch (error) {
+    console.error("Error en registro:", error);
+    res.status(400).json({
+      message: error.message || "Error al registrar usuario",
+    });
+  }
 };
 
 // Controlador para reenviar código de verificación
 export const resendVerificationCode = async (req, res) => {
-    try {
-        const { email_cliente } = req.body;
+  try {
+    const { email } = req.body;
 
-        if (!email_cliente || !validator.isEmail(email_cliente)) {
-            return res.status(400).json({
-                message: 'Email válido requerido'
-            });
-        }
-
-        // Buscar usuario (incluyendo no verificados)
-        const user = await authModel.getUserByEmailIncludingUnverified(email_cliente);
-        
-        if (!user) {
-            return res.status(404).json({
-                message: 'Usuario no encontrado'
-            });
-        }
-
-        if (user.email_verificado) {
-            return res.status(400).json({
-                message: 'El email ya está verificado'
-            });
-        }
-
-        // Generar nuevo código
-        const codigo = await authModel.generateVerificationCode(user.id_cliente);
-
-        // Enviar email
-        await sendVerificationEmail(user.email_cliente, user.nombre_cliente, codigo);
-
-        res.json({
-            message: 'Código de verificación reenviado exitosamente'
-        });
-
-    } catch (error) {
-        console.error('Error al reenviar código:', error);
-        res.status(500).json({
-            message: 'Error al reenviar código de verificación'
-        });
+    if (!email || !validator.isEmail(email)) {
+      return res.status(400).json({
+        message: "Email válido requerido",
+      });
     }
+
+    // Buscar usuario
+    const user = await userModel.getUserByEmail(email);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "Usuario no encontrado",
+      });
+    }
+
+    if (user.email_verificado) {
+      return res.status(400).json({
+        message: "El email ya está verificado",
+      });
+    }
+
+    // Generar nuevo código
+    const codigo = await userModel.generateVerificationCode(user.id_user);
+
+    // Enviar email
+    await sendVerificationEmail(user.email, user.nombre, codigo);
+
+    res.json({
+      message: "Código de verificación reenviado exitosamente",
+    });
+  } catch (error) {
+    console.error("Error al reenviar código:", error);
+    res.status(500).json({
+      message: "Error al reenviar código de verificación",
+    });
+  }
 };
 
 // Controlador para verificar código
 export const verifyEmailCode = async (req, res) => {
-    try {
-        const { email_cliente, codigo } = req.body;
+  try {
+    const { email, codigo } = req.body;
 
-        if (!email_cliente || !codigo) {
-            return res.status(400).json({
-                message: 'Email y código son requeridos'
-            });
-        }
-
-        // Buscar usuario
-        const user = await authModel.getUserByEmailIncludingUnverified(email_cliente);
-        
-        if (!user) {
-            return res.status(404).json({
-                message: 'Usuario no encontrado'
-            });
-        }
-
-        if (user.email_verificado) {
-            return res.status(400).json({
-                message: 'El email ya está verificado'
-            });
-        }
-
-        // Verificar código
-        const isValid = await authModel.verifyCode(user.id_cliente, codigo);
-
-        if (!isValid) {
-            return res.status(400).json({
-                message: 'Código inválido o expirado'
-            });
-        }
-
-        res.json({
-            message: 'Email verificado exitosamente. Tu cuenta ha sido activada.',
-            success: true
-        });
-
-    } catch (error) {
-        console.error('Error al verificar código:', error);
-        res.status(500).json({
-            message: 'Error al verificar código'
-        });
+    if (!email || !codigo) {
+      return res.status(400).json({
+        message: "Email y código son requeridos",
+      });
     }
+
+    // Buscar usuario
+    const user = await userModel.getUserByEmail(email);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "Usuario no encontrado",
+      });
+    }
+
+    if (user.email_verificado) {
+      return res.status(400).json({
+        message: "El email ya está verificado",
+      });
+    }
+
+    // Verificar código
+    const isValid = await userModel.verifyCode(user.id_user, codigo);
+
+    if (!isValid) {
+      return res.status(400).json({
+        message: "Código inválido o expirado",
+      });
+    }
+
+    res.json({
+      message: "Email verificado exitosamente. Tu cuenta ha sido activada.",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Error al verificar código:", error);
+    res.status(500).json({
+      message: "Error al verificar código",
+    });
+  }
 };
 
-// Inicio de sesion
-export const loginUser = async(req, res) => {
-    try {
-        const {email_cliente, contraseña_cliente} = req.body;
+// Controlador para login
+export const loginUser = async (req, res) => {
+  try {
+    const { email, contraseña } = req.body;
 
-        // Validar campos requeridos
-        if (!email_cliente || !contraseña_cliente) {
-            return res.status(400).json({
-                message: 'Email y contraseña son requeridos'
-            });
-        }
-
-        // Validar correo
-        if (!validator.isEmail(email_cliente)) {
-            return res.status(400).json({
-                message: 'Correo no válido'
-            });
-        }
-
-        // Autenticar usuario
-        const user = await authModel.loginUser(email_cliente, contraseña_cliente);
-
-        // Generar token JWT
-        const token = jwt.sign(
-            { 
-                id: user.id_cliente,
-                email: user.email_cliente,
-                rol: user.rol || 'user',
-                nombre: user.nombre_cliente
-            },
-            config.jwt.secret,
-            { expiresIn: config.jwt.expiresIn }
-        );
-
-        // Configurar cookie
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: config.nodeEnv === 'production',
-            sameSite: 'strict',
-            maxAge: 24 * 60 * 60 * 1000 // 24 horas
-        });
-
-        res.json({
-            message: 'Login exitoso',
-            user,
-            token
-        });
-    } catch (error) {
-        console.error('Error en login:', error);
-        res.status(401).json({
-            message: error.message || 'Error al iniciar sesión'
-        });
+    if (!email || !contraseña) {
+      return res.status(400).json({
+        message: "Email y contraseña son requeridos",
+      });
     }
+
+    // Intentar login
+    const user = await userModel.loginUser(email, contraseña);
+
+    // Verificar si está activo y verificado
+    if (!user.activo || !user.email_verificado) {
+      return res.status(401).json({
+        message: "Usuario no activo o email no verificado",
+      });
+    }
+
+    // Generar token JWT
+    const token = jwt.sign(
+      {
+        id: user.id_user,
+        email: user.email,
+        tipo_usuario: user.tipo_usuario,
+      },
+      config.jwt.secret,
+      { expiresIn: config.jwt.expiresIn },
+    );
+
+    res.json({
+      message: "Login exitoso",
+      token,
+      user: {
+        id: user.id_user,
+        email: user.email,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        tipo_usuario: user.tipo_usuario,
+      },
+    });
+  } catch (error) {
+    console.error("Error en login:", error);
+    res.status(401).json({
+      message: error.message || "Error en autenticación",
+    });
+  }
 };
 
-// Controlador para cerrar sesión
+// Controlador para logout
 export const logoutUser = (req, res) => {
-    res.clearCookie('token');
-    res.json({ message: 'Sesión cerrada exitosamente' });
+  res.json({
+    message: "Logout exitoso",
+  });
 };
 
-// Controlador para obtener perfil de usuario
+// Controlador para obtener perfil del usuario
 export const getUserProfile = async (req, res) => {
-    try {
-        const userId = req.user.id; // Corregido: usar 'id' en vez de 'userId'
-        const user = await authModel.getUserByEmail(req.user.email);
-        
-        if (!user) {
-            return res.status(404).json({
-                message: 'Usuario no encontrado'
-            });
-        }
+  try {
+    const userId = req.user.id;
+    const user = await userModel.getUserCompleto(userId);
 
-        res.json({ user });
-    } catch (error) {
-        console.error('Error al obtener perfil:', error);
-        res.status(500).json({
-            message: 'Error al obtener perfil de usuario'
-        });
+    if (!user) {
+      return res.status(404).json({
+        message: "Usuario no encontrado",
+      });
     }
+
+    // Crear objeto userProfile excluyendo información sensible
+    const userProfile = {
+      id_user: user.id_user,
+      email: user.email,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      telefono: user.telefono,
+      direccion: user.direccion,
+      tipo_usuario: user.tipo_usuario,
+      activo: user.activo,
+      email_verificado: user.email_verificado,
+      fecha_creacion: user.fecha_creacion,
+      fecha_actualizacion: user.fecha_actualizacion,
+    };
+
+    res.json(userProfile);
+  } catch (error) {
+    console.error("Error al obtener perfil:", error);
+    res.status(500).json({
+      message: "Error al obtener perfil de usuario",
+    });
+  }
 };
 
-// Verificar token y obtener perfil
+// Controlador para verificar token
 export const verifyToken = async (req, res) => {
-    try {
-        const user = await authModel.getUserByEmail(req.user.email);
-        
-        if (!user) {
-            return res.status(404).json({
-                message: 'Usuario no encontrado'
-            });
-        }
+  try {
+    const userId = req.user.id;
+    const user = await userModel.getUserById(userId);
 
-        // No devolver la contraseña
-        const { contraseña_cliente, ...userWithoutPassword } = user;
-        res.json({ user: userWithoutPassword });
-    } catch (error) {
-        console.error('Error al verificar token:', error);
-        res.status(500).json({
-            message: 'Error al verificar la sesión'
-        });
+    if (!user) {
+      return res.status(404).json({
+        message: "Usuario no encontrado",
+      });
     }
+
+    res.json({
+      valid: true,
+      user: {
+        id: user.id_user,
+        email: user.email,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        tipo_usuario: user.tipo_usuario,
+      },
+    });
+  } catch (error) {
+    console.error("Error al verificar token:", error);
+    res.status(500).json({
+      message: "Error al verificar token",
+    });
+  }
 };
 
-// Solicitar recuperación de contraseña
+// Controlador para recuperar contraseña
 export const forgotPassword = async (req, res) => {
-    try {
-        const { email_cliente } = req.body;
+  try {
+    const { email } = req.body;
 
-        // Validar correo
-        if (!email_cliente || !validator.isEmail(email_cliente)) {
-            return res.status(400).json({
-                message: 'Correo electrónico no válido'
-            });
-        }
-
-        // Generar token de recuperación
-        const { resetToken, user } = await authModel.generatePasswordResetToken(email_cliente);
-
-        // Crear URL de recuperación
-        const resetUrl = `${config.frontendUrl}/reset-password/${resetToken}`;
-
-        // Enviar correo electrónico
-        const mailOptions = {
-            from: config.email.user,
-            to: user.email_cliente,
-            subject: 'Recuperación de Contraseña - Sabor',
-            html: `
-                <h1>Recuperación de Contraseña</h1>
-                <p>Hola ${user.nombre_cliente},</p>
-                <p>Has solicitado recuperar tu contraseña. Haz clic en el siguiente enlace para restablecerla:</p>
-                <a href="${resetUrl}">Restablecer Contraseña</a>
-                <p>Este enlace expirará en 1 hora.</p>
-                <p>Si no solicitaste este cambio, puedes ignorar este correo.</p>
-                <p>Saludos,<br>El equipo de SABOR</p>
-            `
-        };
-
-        await transporter.sendMail(mailOptions);
-
-        res.json({
-            message: 'Se ha enviado un correo con las instrucciones para recuperar tu contraseña'
-        });
-    } catch (error) {
-        console.error('Error en forgotPassword:', error);
-        // No revelar si el correo existe o no por seguridad
-        res.json({
-            message: 'Si el correo existe en nuestra base de datos, recibirás las instrucciones para recuperar tu contraseña'
-        });
+    if (!email || !validator.isEmail(email)) {
+      return res.status(400).json({
+        message: "Email válido requerido",
+      });
     }
+
+    // Generar token de recuperación
+    const { resetToken, user } =
+      await userModel.generatePasswordResetToken(email);
+
+    // Enviar email de recuperación
+    const mailOptions = {
+      from: config.email.user,
+      to: email,
+      subject: "Recuperación de contraseña - Sabor",
+      html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #ff6f00;">Recuperación de contraseña</h2>
+                    <p>Hola <strong>${user.nombre}</strong>,</p>
+                    <p>Has solicitado restablecer tu contraseña. Usa el siguiente enlace para crear una nueva contraseña:</p>
+                    
+                    <div style="text-align: center; margin: 20px 0;">
+                        <a href="${config.frontend.url}/reset-password/${resetToken}" 
+                           style="background-color: #ff6f00; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">
+                            Restablecer contraseña
+                        </a>
+                    </div>
+                    
+                    <p>Este enlace expira en 1 hora.</p>
+                    <p>Si no solicitaste este cambio, puedes ignorar este email.</p>
+                    
+                    <p style="color: #666; font-size: 14px;">
+                        Saludos,<br>
+                        El equipo de Sabor
+                    </p>
+                </div>
+            `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({
+      message: "Email de recuperación enviado exitosamente",
+    });
+  } catch (error) {
+    console.error("Error en recuperación de contraseña:", error);
+    res.status(500).json({
+      message: error.message || "Error al procesar solicitud de recuperación",
+    });
+  }
 };
 
-// Verificar token de recuperación
+// Controlador para verificar token de recuperación
 export const verifyResetToken = async (req, res) => {
-    try {
-        const { token } = req.params;
-        const user = await authModel.verifyResetToken(token);
+  try {
+    const { token } = req.params;
 
-        if (!user) {
-            return res.status(400).json({
-                message: 'Token inválido o expirado'
-            });
-        }
+    const user = await userModel.verifyResetToken(token);
 
-        res.json({
-            message: 'Token válido',
-            email: user.email_cliente
-        });
-    } catch (error) {
-        console.error('Error en verifyResetToken:', error);
-        res.status(500).json({
-            message: 'Error al verificar el token'
-        });
+    if (!user) {
+      return res.status(400).json({
+        message: "Token inválido o expirado",
+      });
     }
+
+    res.json({
+      message: "Token válido",
+      email: user.email,
+    });
+  } catch (error) {
+    console.error("Error al verificar token de recuperación:", error);
+    res.status(500).json({
+      message: "Error al verificar token",
+    });
+  }
 };
 
-// Restablecer contraseña
+// Controlador para resetear contraseña
 export const resetPassword = async (req, res) => {
-    try {
-        const { token } = req.params;
-        const { contraseña_cliente } = req.body;
+  try {
+    const { token, nuevaContraseña } = req.body;
 
-        // Validar contraseña
-        if (!validator.isStrongPassword(contraseña_cliente, {
-            minLength: 8,
-            minLowercase: 1,
-            minUppercase: 1,
-            minNumbers: 1,
-            minSymbols: 1
-        })) {
-            return res.status(400).json({
-                message: 'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos'
-            });
-        }
-
-        // Verificar token
-        const user = await authModel.verifyResetToken(token);
-        if (!user) {
-            return res.status(400).json({
-                message: 'Token inválido o expirado'
-            });
-        }
-
-        // Actualizar contraseña
-        const success = await authModel.updatePassword(user.id_cliente, contraseña_cliente);
-        if (!success) {
-            throw new Error('Error al actualizar la contraseña');
-        }
-
-        res.json({
-            message: 'Contraseña actualizada exitosamente'
-        });
-    } catch (error) {
-        console.error('Error en resetPassword:', error);
-        res.status(500).json({
-            message: 'Error al restablecer la contraseña'
-        });
+    if (!token || !nuevaContraseña) {
+      return res.status(400).json({
+        message: "Token y nueva contraseña son requeridos",
+      });
     }
+
+    // Validar nueva contraseña
+    const passwordValidation = validatePasswordStrength(nuevaContraseña);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        message: passwordValidation.message,
+      });
+    }
+
+    // Resetear contraseña
+    await userModel.resetPasswordWithToken(token, nuevaContraseña);
+
+    res.json({
+      message: "Contraseña restablecida exitosamente",
+    });
+  } catch (error) {
+    console.error("Error al resetear contraseña:", error);
+    res.status(500).json({
+      message: error.message || "Error al resetear contraseña",
+    });
+  }
+};
+
+// Controlador para actualizar perfil
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { nombre, apellido, telefono, direccion } = req.body;
+
+    // Validar teléfono si se proporciona
+    if (telefono && !validator.matches(telefono, /^\d{10}$/)) {
+      return res.status(400).json({
+        message: "El teléfono debe tener 10 dígitos",
+      });
+    }
+
+    // Obtener usuario actual para mantener el email
+    const currentUser = await userModel.getUserById(userId);
+    if (!currentUser) {
+      return res.status(404).json({
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Actualizar usuario
+    const success = await userModel.updateUser(userId, {
+      email: currentUser.email,
+      nombre,
+      apellido,
+      telefono,
+      direccion,
+    });
+
+    if (!success) {
+      return res.status(400).json({
+        message: "Error al actualizar perfil",
+      });
+    }
+
+    res.json({
+      message: "Perfil actualizado exitosamente",
+    });
+  } catch (error) {
+    console.error("Error al actualizar perfil:", error);
+    res.status(500).json({
+      message: error.message || "Error al actualizar perfil",
+    });
+  }
+};
+
+// Controlador para cambiar contraseña
+export const changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { contraseñaActual, nuevaContraseña } = req.body;
+
+    if (!contraseñaActual || !nuevaContraseña) {
+      return res.status(400).json({
+        message: "Contraseña actual y nueva contraseña son requeridas",
+      });
+    }
+
+    // Validar nueva contraseña
+    const passwordValidation = validatePasswordStrength(nuevaContraseña);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        message: passwordValidation.message,
+      });
+    }
+
+    // Verificar contraseña actual
+    const user = await userModel.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Verificar contraseña actual usando login
+    try {
+      await userModel.loginUser(user.email, contraseñaActual);
+    } catch (error) {
+      return res.status(400).json({
+        message: "Contraseña actual incorrecta",
+      });
+    }
+
+    // Actualizar contraseña
+    await userModel.updatePassword(userId, nuevaContraseña);
+
+    res.json({
+      message: "Contraseña cambiada exitosamente",
+    });
+  } catch (error) {
+    console.error("Error al cambiar contraseña:", error);
+    res.status(500).json({
+      message: "Error al cambiar contraseña",
+    });
+  }
 };
