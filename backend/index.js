@@ -11,6 +11,9 @@ import {
     preventSQLInjection 
 } from './src/middleware/security.js';
 import authRoutes from './src/routes/authRoutes.js';
+import userRoutes from './src/routes/userRoutes.js';
+import clienteRoutes from './src/routes/clienteRoutes.js';
+import empleadoRoutes from './src/routes/empleadoRoutes.js';
 import productoRoutes from './src/routes/productoRoutes.js';
 import categoriaRoutes from './src/routes/categoriaRoutes.js';
 import reservaRoutes from './src/routes/reservaRoutes.js';
@@ -74,6 +77,11 @@ app.use('/api/auth', (req, res, next) => {
 
 // Rutas con rate limiting específico
 app.use('/api/auth', authRateLimiter, authRoutes);
+
+// Rutas de usuarios, clientes y empleados
+app.use('/api/users', userRoutes);
+app.use('/api/clientes', clienteRoutes);
+app.use('/api/empleados', empleadoRoutes);
 
 // Rutas de productos con validaciones adicionales
 app.use('/api/productos', productoRoutes);

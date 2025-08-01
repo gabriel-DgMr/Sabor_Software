@@ -8,16 +8,18 @@ import { validateFileType, validateFileSize } from '../middleware/security.js';
 
 const router = express.Router();
 
-// Rutas públicas
+// ===== RUTAS PÚBLICAS =====
 router.get('/', productoController.getAllProductos);
 
-// Rutas protegidas
-router.get('/:id', authenticateToken, productoController.getProductoById);
-router.get('/categoria/:categoriaId', authenticateToken, productoController.getProductosByCategoria);
+// ===== APLICAR MIDDLEWARE A TODAS LAS RUTAS PROTEGIDAS =====
+router.use(authenticateToken);
 
-// Rutas protegidas con manejo de imágenes y validaciones
+// ===== RUTAS PROTEGIDAS - LECTURA =====
+router.get('/:id', productoController.getProductoById);
+router.get('/categoria/:categoriaId', productoController.getProductosByCategoria);
+
+// ===== RUTAS PROTEGIDAS - GESTIÓN (ADMINISTRADORES) =====
 router.post('/', 
-  authenticateToken, 
   checkPermission('manage_products'),
   upload.single('imagen_producto'), 
   validateFileType(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']),
@@ -29,7 +31,6 @@ router.post('/',
 );
 
 router.put('/:id', 
-  authenticateToken, 
   checkPermission('manage_products'),
   upload.single('imagen_producto'), 
   validateFileType(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']),
@@ -41,7 +42,6 @@ router.put('/:id',
 );
 
 router.delete('/:id', 
-  authenticateToken, 
   checkPermission('manage_products'),
   productoController.deleteProducto
 );
