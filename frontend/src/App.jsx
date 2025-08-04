@@ -43,11 +43,10 @@ function App() {
               <Route element={<Reservas />} path="/reservas" />
               <Route element={<Carrito />} path="/carrito" />
               <Route element={<Checkout />} path="/checkout" />
-              <Route element={<ModificarPedido />} path="/carrito/modificar/:id"/>
+              <Route element={<ModificarPedido />} path="/carrito/modificar/:id" />
               <Route element={<QuienesSomos />} path="/quienes-somos" />
               <Route element={<SobreNosotros />} path="/sobre-nosotros" />
               <Route element={<EscanearQR />} path="/escanear-qr" />
-              
 
               {/* Rutas protegidas */}
               <Route
