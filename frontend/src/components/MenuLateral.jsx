@@ -12,22 +12,22 @@ const MenuLateral = () => {
 
   const opcionesGenerales = [
     { nombre: 'Reservaciones', ruta: '/administrar/reservaciones' },
-    { nombre: 'Productos',    ruta: '/administrar/productos' },
-    { nombre: 'Pedidos',      ruta: '/administrar/pedidos' },
+    { nombre: 'Productos', ruta: '/administrar/productos' },
+    { nombre: 'Pedidos', ruta: '/administrar/pedidos' },
     { nombre: 'Panel de control', ruta: '/administrar/panel' },
   ];
 
   const opcionesPanel = [
-    { nombre: 'Ventas',       ruta: '/administrar/panel/ventas' },
-    { nombre: 'Clientes',     ruta: '/administrar/panel/clientes' },
+    { nombre: 'Ventas', ruta: '/administrar/panel/ventas' },
+    { nombre: 'clientes', ruta: '/administrar/panel/clientes' },
     { nombre: 'Trabajadores', ruta: '/administrar/panel/trabajadores' },
-    { nombre: 'Inventario',   ruta: '/administrar/panel/inventario' },
+    { nombre: 'Inventario', ruta: '/administrar/panel/inventario' },
   ];
 
   const enPanel = location.pathname.startsWith('/administrar/panel');
 
   const toggleMenu = () => setIsOpen(!isOpen);
-  const closeMenu  = () => setIsOpen(false);
+  const closeMenu = () => setIsOpen(false);
 
   return (
     <>
@@ -44,23 +44,20 @@ const MenuLateral = () => {
         aria-label="Menú lateral de navegación"
         className={`menu-lateral ${isOpen ? 'menu-lateral--abierto' : ''}`}
       >
-        <img
-          alt="Logo Sabor"
-          className="menu-lateral__logo"
-          src="/images/logo_sabor.png"
-        />
+        <img alt="Logo Sabor" className="menu-lateral__logo" src="/images/logo_sabor.png" />
 
         <hr className="menu-lateral__separador" />
 
         <button
           aria-label="Cerrar sesión"
-          className="menu-lateral__usuario"
-          onClick={() => { logout(); closeMenu(); }}
+          className="menu-lateral__cliente"
+          onClick={() => {
+            logout();
+            closeMenu();
+          }}
         >
           <FaUserCircle size={32} />
-          <span className="menu-lateral__usuario-nombre">
-            {user?.nombre_cliente || 'Invitado'}
-          </span>
+          <span className="menu-lateral__cliente-nombre">{user?.nombre_cliente || 'Invitado'}</span>
         </button>
 
         <hr className="menu-lateral__separador" />
@@ -74,9 +71,14 @@ const MenuLateral = () => {
                 <button
                   aria-current={location.pathname === ruta ? 'page' : undefined}
                   className={`menu-lateral__link ${
-                    (location.pathname === ruta || (nombre === 'Panel de control' && enPanel)) ? 'menu-lateral__link--activo' : ''
+                    location.pathname === ruta || (nombre === 'Panel de control' && enPanel)
+                      ? 'menu-lateral__link--activo'
+                      : ''
                   }`}
-                  onClick={() => { navigate(ruta); closeMenu(); }}
+                  onClick={() => {
+                    navigate(ruta);
+                    closeMenu();
+                  }}
                 >
                   {nombre}
                 </button>
@@ -94,9 +96,14 @@ const MenuLateral = () => {
                   <button
                     aria-current={location.pathname === ruta ? 'page' : undefined}
                     className={`menu-lateral__link menu-lateral__link--panel ${
-                      location.pathname === ruta ? 'menu-lateral__link--activo--panel menu-lateral__link--activo' : ''
+                      location.pathname === ruta
+                        ? 'menu-lateral__link--activo--panel menu-lateral__link--activo'
+                        : ''
                     }`}
-                    onClick={() => { navigate(ruta); closeMenu(); }}
+                    onClick={() => {
+                      navigate(ruta);
+                      closeMenu();
+                    }}
                   >
                     {nombre}
                   </button>

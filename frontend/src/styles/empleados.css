@@ -78,7 +78,7 @@
     height: 0.2rem;
     width: 100%;
   }
-  .menu-lateral__usuario {
+  .menu-lateral__cliente {
     display: flex;
     align-items: center;
     background: none;
@@ -86,7 +86,7 @@
     color: var(--neutral-50);
     cursor: pointer;
   }
-  .menu-lateral__usuario-nombre {
+  .menu-lateral__cliente-nombre {
     margin-left: 0.5rem;
   }
   .menu-lateral__seccion {

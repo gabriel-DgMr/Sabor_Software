@@ -22,7 +22,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
     }
   }, [countdown]);
 
-  const handleVerification = async (e) => {
+  const handleVerification = async e => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -34,9 +34,9 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email_cliente: email,
-          codigo: codigo
-        })
+          correo_usuario: email,
+          codigo: codigo,
+        }),
       });
 
       const data = await response.json();
@@ -79,8 +79,8 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email_cliente: email
-        })
+          correo_usuario: email,
+        }),
       });
 
       const data = await response.json();
@@ -99,7 +99,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 6);
     setCodigo(value);
   };
@@ -107,9 +107,11 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
   return (
     <div className="formulario__contenedor formulario__contenedor--verification">
       <h2 className="modal__titulo">{t('verificar_email')}</h2>
-      
+
       <div className="verification__info">
-        <p>{t('codigo_enviado_a')} <strong>{email}</strong></p>
+        <p>
+          {t('codigo_enviado_a')} <strong>{email}</strong>
+        </p>
         <p>{t('ingresa_codigo_6_digitos')}</p>
       </div>
 
@@ -133,15 +135,11 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
           {error && <small className="formulario__mensaje-error">{error}</small>}
         </div>
 
-        {success && (
-          <div className="formulario__mensaje-exito">
-            {success}
-          </div>
-        )}
+        {success && <div className="formulario__mensaje-exito">{success}</div>}
 
-        <button 
-          className="formulario__boton-principal" 
-          disabled={loading || codigo.length !== 6} 
+        <button
+          className="formulario__boton-principal"
+          disabled={loading || codigo.length !== 6}
           type="submit"
         >
           {loading ? t('verificando') : t('verificar_cuenta')}
@@ -155,19 +153,14 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
           type="button"
           onClick={handleResendCode}
         >
-          {resendLoading 
-            ? t('reenviando') 
-            : countdown > 0 
-              ? `${t('reenviar_en')} ${countdown}s` 
-              : t('reenviar_codigo')
-          }
+          {resendLoading
+            ? t('reenviando')
+            : countdown > 0
+              ? `${t('reenviar_en')} ${countdown}s`
+              : t('reenviar_codigo')}
         </button>
 
-        <button
-          className="formulario__boton-secundario"
-          type="button"
-          onClick={onBackToLogin}
-        >
+        <button className="formulario__boton-secundario" type="button" onClick={onBackToLogin}>
           {t('volver_al_login')}
         </button>
       </div>
@@ -181,4 +174,4 @@ EmailVerification.propTypes = {
   onBackToLogin: PropTypes.func.isRequired,
 };
 
-export default EmailVerification; 
+export default EmailVerification;

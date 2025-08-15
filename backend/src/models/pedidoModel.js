@@ -1,11 +1,12 @@
-import { dbConfig } from '../config/dbconfig.js';
-import mysql from 'mysql2/promise';
+import { dbConfig } from "../config/dbconfig.js";
+import mysql from "mysql2/promise";
 
 const pool = mysql.createPool(dbConfig);
 
 export const getPedidos = async (userId) => {
   try {
-    const [rows] = await pool.query(`
+    const [rows] = await pool.query(
+      `
       SELECT
         p.id_pedido AS _id,
         p.total_pedido AS total,
@@ -17,23 +18,25 @@ export const getPedidos = async (userId) => {
       JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
       JOIN productos pr ON dp.id_producto = pr.id_producto
       JOIN estados e ON p.id_estado = e.id_estado
-      WHERE p.id_cliente = ? AND p.id_estado != 1
+      WHERE p.id_usuario = ? AND p.id_estado != 1
       GROUP BY p.id_pedido
       ORDER BY p.fecha_pedido DESC
-    `, [userId]);
+    `,
+      [userId],
+    );
 
-    const pedidos = rows.map(row => ({
+    const pedidos = rows.map((row) => ({
       _id: row._id,
       total: row.total,
       createdAt: row.createdAt,
       estado: row.nombre_estado,
       recomendaciones: row.notas,
-      items: row.items_str ? row.items_str.split(', ') : []
+      items: row.items_str ? row.items_str.split(", ") : [],
     }));
 
     return pedidos;
   } catch (error) {
-    console.error('Error al obtener pedidos de MySQL:', error);
+    console.error("Error al obtener pedidos de MySQL:", error);
     throw error;
   }
 };
@@ -41,17 +44,22 @@ export const getPedidos = async (userId) => {
 export const deletePedido = async (id) => {
   try {
     const [result] = await pool.query(
-      'UPDATE pedidos SET id_estado = 4 WHERE id_pedido = ?',
-      [id]
+      "UPDATE pedidos SET id_estado = 4 WHERE id_pedido = ?",
+      [id],
     );
     return result.affectedRows > 0;
   } catch (error) {
-    console.error('Error al eliminar pedido:', error);
+    console.error("Error al eliminar pedido:", error);
     throw error;
   }
 };
 
-export const createPedido = async ({ userId, items, total, recomendaciones }) => {
+export const createPedido = async ({
+  userId,
+  items,
+  total,
+  recomendaciones,
+}) => {
   let connection;
   try {
     connection = await pool.getConnection();
@@ -60,28 +68,30 @@ export const createPedido = async ({ userId, items, total, recomendaciones }) =>
     // Verificar stock antes de crear el pedido
     for (const item of items) {
       const [stockResult] = await connection.query(
-        'SELECT stock FROM productos WHERE id_producto = ?',
-        [item.id_producto]
+        "SELECT stock FROM productos WHERE id_producto = ?",
+        [item.id_producto],
       );
       if (stockResult.length === 0) {
         throw new Error(`Producto con ID ${item.id_producto} no encontrado`);
       }
       if (stockResult[0].stock < item.cantidad) {
-        throw new Error(`Stock insuficiente para el producto con ID ${item.id_producto}`);
+        throw new Error(
+          `Stock insuficiente para el producto con ID ${item.id_producto}`,
+        );
       }
     }
 
     const [pedidoResult] = await connection.query(
-      'INSERT INTO pedidos (id_cliente, id_estado, total_pedido, notas, metodo_pago) VALUES (?, 2, ?, ?, ?)',
-      [userId, total, recomendaciones, 'efectivo']
+      "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, notas, metodo_pago) VALUES (?, 2, ?, ?, ?)",
+      [userId, total, recomendaciones, "efectivo"],
     );
 
     const pedidoId = pedidoResult.insertId;
 
     for (const item of items) {
       await connection.query(
-        'INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad, precio_unitario) VALUES (?, ?, ?, ?)',
-        [pedidoId, item.id_producto, item.cantidad, item.precio_unitario]
+        "INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad, precio_unitario) VALUES (?, ?, ?, ?)",
+        [pedidoId, item.id_producto, item.cantidad, item.precio_unitario],
       );
     }
 
@@ -89,12 +99,11 @@ export const createPedido = async ({ userId, items, total, recomendaciones }) =>
     console.log(`Pedido creado con ID: ${pedidoId}`);
 
     return { id_pedido: pedidoId, userId, items, total, recomendaciones };
-
   } catch (error) {
     if (connection) {
       await connection.rollback();
     }
-    console.error('Error al crear pedido en MySQL:', error);
+    console.error("Error al crear pedido en MySQL:", error);
     throw error;
   } finally {
     if (connection) {
@@ -107,41 +116,44 @@ export const updatePedido = async (id, pedidoData) => {
   try {
     const { items, total } = pedidoData;
     let connection;
-    
+
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
     if (items && Array.isArray(items)) {
       // Eliminar items existentes
-      await connection.query('DELETE FROM detalle_pedidos WHERE id_pedido = ?', [id]);
-      
+      await connection.query(
+        "DELETE FROM detalle_pedidos WHERE id_pedido = ?",
+        [id],
+      );
+
       // Insertar nuevos items
       for (const item of items) {
         await connection.query(
-          'INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad, precio_unitario) VALUES (?, ?, ?, ?)',
-          [id, item.id_producto, item.cantidad, item.precio_unitario]
+          "INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad, precio_unitario) VALUES (?, ?, ?, ?)",
+          [id, item.id_producto, item.cantidad, item.precio_unitario],
         );
       }
     }
 
     if (total) {
       await connection.query(
-        'UPDATE pedidos SET total_pedido = ? WHERE id_pedido = ?',
-        [total, id]
+        "UPDATE pedidos SET total_pedido = ? WHERE id_pedido = ?",
+        [total, id],
       );
     }
 
     await connection.commit();
-    
+
     // Obtener el pedido actualizado
     const [pedidoResult] = await connection.query(
-      'SELECT * FROM pedidos WHERE id_pedido = ?',
-      [id]
+      "SELECT * FROM pedidos WHERE id_pedido = ?",
+      [id],
     );
 
     return pedidoResult[0];
   } catch (error) {
-    console.error('Error al actualizar pedido:', error);
+    console.error("Error al actualizar pedido:", error);
     throw error;
   }
 };
@@ -149,8 +161,8 @@ export const updatePedido = async (id, pedidoData) => {
 export const getCarritoByUser = async (userId) => {
   try {
     const [carrito] = await pool.query(
-      'SELECT * FROM pedidos WHERE id_cliente = ? AND id_estado = 1 LIMIT 1',
-      [userId]
+      "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 1 LIMIT 1",
+      [userId],
     );
     if (carrito.length === 0) return null;
     const pedido = carrito[0];
@@ -159,11 +171,11 @@ export const getCarritoByUser = async (userId) => {
        FROM detalle_pedidos dp
        JOIN productos p ON dp.id_producto = p.id_producto
        WHERE dp.id_pedido = ?`,
-      [pedido.id_pedido]
+      [pedido.id_pedido],
     );
     return { ...pedido, items };
   } catch (error) {
-    console.error('Error al obtener el carrito:', error);
+    console.error("Error al obtener el carrito:", error);
     throw error;
   }
 };
@@ -171,114 +183,128 @@ export const getCarritoByUser = async (userId) => {
 export const createCarrito = async (userId) => {
   try {
     const [result] = await pool.query(
-      'INSERT INTO pedidos (id_cliente, id_estado, total_pedido, id_empleado, metodo_pago) VALUES (?, 1, 0, NULL, NULL)',
-      [userId]
+      "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, id_empleado, metodo_pago) VALUES (?, 1, 0, NULL, NULL)",
+      [userId],
     );
     return result.insertId;
   } catch (error) {
-    console.error('Error al crear carrito:', error);
+    console.error("Error al crear carrito:", error);
     throw error;
   }
 };
 
-export const addOrUpdateProductoCarrito = async (userId, id_producto, cantidad) => {
+export const addOrUpdateProductoCarrito = async (
+  userId,
+  id_producto,
+  cantidad,
+) => {
   let connection;
   try {
     connection = await pool.getConnection();
     await connection.beginTransaction();
-    
+
     // Verificar stock
     const [stockResult] = await connection.query(
-      'SELECT stock, precio_producto FROM productos WHERE id_producto = ?',
-      [id_producto]
+      "SELECT stock, precio_producto FROM productos WHERE id_producto = ?",
+      [id_producto],
     );
     if (stockResult.length === 0) {
-      throw new Error('Producto no encontrado');
+      throw new Error("Producto no encontrado");
     }
     if (stockResult[0].stock < cantidad) {
-      throw new Error('Stock insuficiente');
+      throw new Error("Stock insuficiente");
     }
-    
+
     const precio_unitario = stockResult[0].precio_producto;
-    
+
     const [carrito] = await connection.query(
-      'SELECT * FROM pedidos WHERE id_cliente = ? AND id_estado = 1 LIMIT 1',
-      [userId]
+      "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 1 LIMIT 1",
+      [userId],
     );
     let id_pedido;
     if (carrito.length === 0) {
       const [result] = await connection.query(
-        'INSERT INTO pedidos (id_cliente, id_estado, total_pedido, metodo_pago) VALUES (?, 1, 0, \'efectivo\')',
-        [userId]
+        "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, metodo_pago) VALUES (?, 1, 0, 'efectivo')",
+        [userId],
       );
       id_pedido = result.insertId;
     } else {
       id_pedido = carrito[0].id_pedido;
     }
-    
+
     const [detalle] = await connection.query(
-      'SELECT * FROM detalle_pedidos WHERE id_pedido = ? AND id_producto = ?',
-      [id_pedido, id_producto]
+      "SELECT * FROM detalle_pedidos WHERE id_pedido = ? AND id_producto = ?",
+      [id_pedido, id_producto],
     );
     if (detalle.length === 0) {
       await connection.query(
-        'INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)',
-        [id_pedido, id_producto, cantidad, precio_unitario, cantidad * precio_unitario]
+        "INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)",
+        [
+          id_pedido,
+          id_producto,
+          cantidad,
+          precio_unitario,
+          cantidad * precio_unitario,
+        ],
       );
     } else {
       const nuevaCantidad = detalle[0].cantidad + cantidad;
       if (stockResult[0].stock < nuevaCantidad) {
-        throw new Error('Stock insuficiente para la cantidad solicitada');
+        throw new Error("Stock insuficiente para la cantidad solicitada");
       }
       await connection.query(
-        'UPDATE detalle_pedidos SET cantidad = ?, subtotal = ? * precio_unitario WHERE id_pedido = ? AND id_producto = ?',
-        [nuevaCantidad, nuevaCantidad, id_pedido, id_producto]
+        "UPDATE detalle_pedidos SET cantidad = ?, subtotal = ? * precio_unitario WHERE id_pedido = ? AND id_producto = ?",
+        [nuevaCantidad, nuevaCantidad, id_pedido, id_producto],
       );
     }
     await connection.commit();
     return id_pedido;
   } catch (error) {
     if (connection) await connection.rollback();
-    console.error('Error al agregar producto al carrito:', error);
+    console.error("Error al agregar producto al carrito:", error);
     throw error;
   } finally {
     if (connection) connection.release();
   }
 };
 
-export const updateCantidadProductoCarrito = async (userId, id_producto, cantidad) => {
+export const updateCantidadProductoCarrito = async (
+  userId,
+  id_producto,
+  cantidad,
+) => {
   let connection;
   try {
     connection = await pool.getConnection();
     await connection.beginTransaction();
-    
+
     // Verificar stock
     const [stockResult] = await connection.query(
-      'SELECT stock FROM productos WHERE id_producto = ?',
-      [id_producto]
+      "SELECT stock FROM productos WHERE id_producto = ?",
+      [id_producto],
     );
     if (stockResult.length === 0) {
-      throw new Error('Producto no encontrado');
+      throw new Error("Producto no encontrado");
     }
     if (stockResult[0].stock < cantidad) {
-      throw new Error('Stock insuficiente');
+      throw new Error("Stock insuficiente");
     }
-    
+
     const [carrito] = await connection.query(
-      'SELECT * FROM pedidos WHERE id_cliente = ? AND id_estado = 1 LIMIT 1',
-      [userId]
+      "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 1 LIMIT 1",
+      [userId],
     );
-    if (carrito.length === 0) throw new Error('No hay carrito');
+    if (carrito.length === 0) throw new Error("No hay carrito");
     const id_pedido = carrito[0].id_pedido;
     await connection.query(
-      'UPDATE detalle_pedidos SET cantidad = ?, subtotal = ? * precio_unitario WHERE id_pedido = ? AND id_producto = ?',
-      [cantidad, cantidad, id_pedido, id_producto]
+      "UPDATE detalle_pedidos SET cantidad = ?, subtotal = ? * precio_unitario WHERE id_pedido = ? AND id_producto = ?",
+      [cantidad, cantidad, id_pedido, id_producto],
     );
     await connection.commit();
     return id_pedido;
   } catch (error) {
     if (connection) await connection.rollback();
-    console.error('Error al modificar cantidad en el carrito:', error);
+    console.error("Error al modificar cantidad en el carrito:", error);
     throw error;
   } finally {
     if (connection) connection.release();
@@ -291,20 +317,20 @@ export const removeProductoCarrito = async (userId, id_producto) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
     const [carrito] = await connection.query(
-      'SELECT * FROM pedidos WHERE id_cliente = ? AND id_estado = 1 LIMIT 1',
-      [userId]
+      "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 1 LIMIT 1",
+      [userId],
     );
-    if (carrito.length === 0) throw new Error('No hay carrito');
+    if (carrito.length === 0) throw new Error("No hay carrito");
     const id_pedido = carrito[0].id_pedido;
     await connection.query(
-      'DELETE FROM detalle_pedidos WHERE id_pedido = ? AND id_producto = ?',
-      [id_pedido, id_producto]
+      "DELETE FROM detalle_pedidos WHERE id_pedido = ? AND id_producto = ?",
+      [id_pedido, id_producto],
     );
     await connection.commit();
     return id_pedido;
   } catch (error) {
     if (connection) await connection.rollback();
-    console.error('Error al eliminar producto del carrito:', error);
+    console.error("Error al eliminar producto del carrito:", error);
     throw error;
   } finally {
     if (connection) connection.release();
@@ -317,20 +343,19 @@ export const vaciarCarrito = async (userId) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
     const [carrito] = await connection.query(
-      'SELECT * FROM pedidos WHERE id_cliente = ? AND id_estado = 1 LIMIT 1',
-      [userId]
+      "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 1 LIMIT 1",
+      [userId],
     );
-    if (carrito.length === 0) throw new Error('No hay carrito');
+    if (carrito.length === 0) throw new Error("No hay carrito");
     const id_pedido = carrito[0].id_pedido;
-    await connection.query(
-      'DELETE FROM detalle_pedidos WHERE id_pedido = ?',
-      [id_pedido]
-    );
+    await connection.query("DELETE FROM detalle_pedidos WHERE id_pedido = ?", [
+      id_pedido,
+    ]);
     await connection.commit();
     return id_pedido;
   } catch (error) {
     if (connection) await connection.rollback();
-    console.error('Error al vaciar el carrito:', error);
+    console.error("Error al vaciar el carrito:", error);
     throw error;
   } finally {
     if (connection) connection.release();
@@ -343,41 +368,47 @@ export const confirmarPedido = async (userId, id_empleado, metodo_pago) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
     const [carrito] = await connection.query(
-      'SELECT * FROM pedidos WHERE id_cliente = ? AND id_estado = 1 LIMIT 1',
-      [userId]
+      "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 1 LIMIT 1",
+      [userId],
     );
-    if (carrito.length === 0) throw new Error('No hay carrito');
+    if (carrito.length === 0) throw new Error("No hay carrito");
     const id_pedido = carrito[0].id_pedido;
     const [totalRow] = await connection.query(
-      'SELECT SUM(subtotal) as total FROM detalle_pedidos WHERE id_pedido = ?',
-      [id_pedido]
+      "SELECT SUM(subtotal) as total FROM detalle_pedidos WHERE id_pedido = ?",
+      [id_pedido],
     );
     const total = totalRow[0].total || 0;
     // Guardar NULL si id_empleado es null, undefined, 0, string vacío o no es un número válido
     let empleadoValue = null;
-    if (id_empleado !== undefined && id_empleado !== null && id_empleado !== '' && !isNaN(Number(id_empleado)) && Number(id_empleado) > 0) {
+    if (
+      id_empleado !== undefined &&
+      id_empleado !== null &&
+      id_empleado !== "" &&
+      !isNaN(Number(id_empleado)) &&
+      Number(id_empleado) > 0
+    ) {
       empleadoValue = Number(id_empleado);
     }
     await connection.query(
-      'UPDATE pedidos SET id_estado = 2, id_empleado = ?, total_pedido = ?, metodo_pago = ? WHERE id_pedido = ?',
-      [empleadoValue, total, metodo_pago, id_pedido]
+      "UPDATE pedidos SET id_estado = 2, id_empleado = ?, total_pedido = ?, metodo_pago = ? WHERE id_pedido = ?",
+      [empleadoValue, total, metodo_pago, id_pedido],
     );
     await connection.commit();
     return id_pedido;
   } catch (error) {
     if (connection) await connection.rollback();
-    console.error('Error al confirmar el pedido:', error);
+    console.error("Error al confirmar el pedido:", error);
     throw error;
   } finally {
     if (connection) connection.release();
   }
-}; 
+};
 
 export const getPedidoById = async (userId, pedidoId) => {
   try {
     const [pedidoRows] = await pool.query(
-      'SELECT * FROM pedidos WHERE id_pedido = ? AND id_cliente = ? LIMIT 1',
-      [pedidoId, userId]
+      "SELECT * FROM pedidos WHERE id_pedido = ? AND id_usuario = ? LIMIT 1",
+      [pedidoId, userId],
     );
     if (pedidoRows.length === 0) return null;
     const pedido = pedidoRows[0];
@@ -386,11 +417,11 @@ export const getPedidoById = async (userId, pedidoId) => {
        FROM detalle_pedidos dp
        JOIN productos p ON dp.id_producto = p.id_producto
        WHERE dp.id_pedido = ?`,
-      [pedido.id_pedido]
+      [pedido.id_pedido],
     );
     return { ...pedido, items };
   } catch (error) {
-    console.error('Error al obtener el pedido por ID:', error);
+    console.error("Error al obtener el pedido por ID:", error);
     throw error;
   }
-}; 
+};

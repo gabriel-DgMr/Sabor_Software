@@ -73,8 +73,8 @@
   --success-500: #1cb981;
   --success-600: #18a271;
   --success-700: #158b61;
-  --success-800: #117451;
-  --success-900: #0e5d41;
+  --success-800: #16a239;
+  --success-900: #0d810d;
 
   /* DarkMode */
   --darkmode-50: #244a4d;
@@ -179,13 +179,13 @@ hr {
     margin-left: 0;
     margin-right: 1.5rem;
   }
-  .encabezado__usuario--mobile {
+  .encabezado__cliente--mobile {
     margin-left: 1.5rem;
   }
-  .encabezado__usuario, .encabezado__idioma {
+  .encabezado__cliente, .encabezado__idioma {
     display: none;
   }
-  .encabezado__usuario--mobile {
+  .encabezado__cliente--mobile {
     display: flex !important;
     align-items: center;
     position: relative;
@@ -201,7 +201,7 @@ hr {
   }
 
   /* Permitir mostrar el login en móvil */
-  .encabezado__usuario:not(.encabezado__usuario--mobile) {
+  .encabezado__cliente:not(.encabezado__cliente--mobile) {
     display: flex !important;
     align-items: center;
     justify-content: center;
@@ -258,14 +258,14 @@ hr {
   margin-right: 1.6rem;
 }
 
-.encabezado__usuario {
+.encabezado__cliente {
   display: flex;
   align-items: center;
   cursor: pointer;
   position: relative;
 }
 
-.encabezado__nombre-usuario {
+.encabezado__nombre-cliente {
   margin-right: 1rem;
   font-weight: 600;
 }
@@ -280,13 +280,13 @@ hr {
     margin-left: 0;
     margin-right: 1.5rem;
   }
-  .encabezado__usuario--mobile {
+  .encabezado__cliente--mobile {
     margin-left: 1.5rem;
   }
-  .encabezado__usuario, .encabezado__idioma {
+  .encabezado__cliente, .encabezado__idioma {
     display: none;
   }
-  .encabezado__usuario--mobile {
+  .encabezado__cliente--mobile {
     display: flex !important;
     align-items: center;
     position: relative;
@@ -1520,7 +1520,7 @@ hr {
 }
 
 /* =====================
-   MENÚ DE USUARIO (PERFIL)
+   MENÚ DE cliente (PERFIL)
    ===================== */
 .menu-perfil {
   position: absolute;

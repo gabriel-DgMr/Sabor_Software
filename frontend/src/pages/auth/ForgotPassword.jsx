@@ -1,8 +1,8 @@
 /**
  * Componente ForgotPassword
- * 
+ *
  * Este componente maneja la solicitud inicial de recuperación de contraseña.
- * Permite al usuario ingresar su correo electrónico para recibir un enlace de recuperación.
+ * Permite al cliente ingresar su correo electrónico para recibir un enlace de recuperación.
  */
 
 import PropTypes from 'prop-types';
@@ -126,4 +126,4 @@ ForgotPassword.propTypes = {
   onShowMessage: PropTypes.func.isRequired,
 };
 
-export default ForgotPassword; 
+export default ForgotPassword;

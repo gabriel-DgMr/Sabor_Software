@@ -4,7 +4,13 @@ import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils.js';
-import { validarEmail, validarTelefono, validarLongitud, validarCaracteresEspeciales, validarEspacios } from '../utils/validaciones.js';
+import {
+  validarEmail,
+  validarTelefono,
+  validarLongitud,
+  validarCaracteresEspeciales,
+  validarEspacios,
+} from '../utils/validaciones.js';
 import { GoCheck, GoX } from 'react-icons/go';
 
 const ActualizarDatos = () => {
@@ -20,25 +26,29 @@ const ActualizarDatos = () => {
   useEffect(() => {
     document.title = 'Actualizar datos | Sabor';
     if (user) {
-      setNombre(user.nombre_cliente || '');
-      setCorreo(user.email_cliente || '');
-      setTelefono(user.telefono_cliente || '');
+      setNombre(user.nombre_usuario || '');
+      setCorreo(user.correo_usuario || '');
+      setTelefono(user.telefono_usuario || '');
     }
   }, [user]);
 
   const manejarErroresDeCampo = newErrors => {
     setErrors(newErrors);
     setTimeout(() => {
-      document.querySelectorAll('.actualizar-datos__campo .actualizar-datos__mensaje-error').forEach(el => {
-        animateElements(el, 'fade-in');
-      });
+      document
+        .querySelectorAll('.actualizar-datos__campo .actualizar-datos__mensaje-error')
+        .forEach(el => {
+          animateElements(el, 'fade-in');
+        });
     }, 0);
 
     setTimeout(() => {
-      document.querySelectorAll('.actualizar-datos__campo .actualizar-datos__mensaje-error').forEach(el => {
-        el.classList.remove('fade-in');
-        el.classList.add('fade-out');
-      });
+      document
+        .querySelectorAll('.actualizar-datos__campo .actualizar-datos__mensaje-error')
+        .forEach(el => {
+          el.classList.remove('fade-in');
+          el.classList.add('fade-out');
+        });
       setTimeout(() => setErrors({}), ANIM_DURATION);
     }, VISIBLE_DURATION);
   };
@@ -109,18 +119,21 @@ const ActualizarDatos = () => {
     setCargando(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/auth/actualizarcliente/${user.id_cliente}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          nombre_cliente: nombre.trim(),
-          email_cliente: correo.trim(),
-          telefono_cliente: telefono.trim(),
-        }),
-      });
+      const response = await fetch(
+        `http://localhost:3000/api/auth/actualizarusuario/${user.id_usuario}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            nombre_usuario: nombre.trim(),
+            correp_usuario: correo.trim(),
+            telefono_usuario: telefono.trim(),
+          }),
+        }
+      );
       const data = await response.json();
       if (response.ok) {
         setMensaje('¡Datos actualizados correctamente!');
@@ -166,9 +179,7 @@ const ActualizarDatos = () => {
   // Componente de alerta visualmente consistente
   const DatosAlert = ({ type, message, id }) => {
     if (!message) return null;
-    const icon = type === 'success'
-      ? <GoCheck className="GoCheck" />
-      : <GoX className="GoX" />;
+    const icon = type === 'success' ? <GoCheck className="GoCheck" /> : <GoX className="GoX" />;
     return (
       <div id={id} className="alerta-con-tarjeta">
         {icon}
@@ -185,7 +196,9 @@ const ActualizarDatos = () => {
           <h1 className="actualizar-datos__titulo">Actualizar datos</h1>
           <form autoComplete="off" className="actualizar-datos__formulario" onSubmit={handleSubmit}>
             <div className="actualizar-datos__campo">
-              <label className="actualizar-datos__label" htmlFor="nombre">Nombre</label>
+              <label className="actualizar-datos__label" htmlFor="nombre">
+                Nombre
+              </label>
               <input
                 required
                 className={`actualizar-datos__input ${errors.nombre ? 'input--error' : ''}`}
@@ -198,7 +211,9 @@ const ActualizarDatos = () => {
               {errors.nombre && <p className="actualizar-datos__mensaje-error">{errors.nombre}</p>}
             </div>
             <div className="actualizar-datos__campo">
-              <label className="actualizar-datos__label" htmlFor="correo">Correo electrónico</label>
+              <label className="actualizar-datos__label" htmlFor="correo">
+                Correo electrónico
+              </label>
               <input
                 required
                 className={`actualizar-datos__input ${errors.correo ? 'input--error' : ''}`}
@@ -211,7 +226,9 @@ const ActualizarDatos = () => {
               {errors.correo && <p className="actualizar-datos__mensaje-error">{errors.correo}</p>}
             </div>
             <div className="actualizar-datos__campo">
-              <label className="actualizar-datos__label" htmlFor="telefono">Teléfono</label>
+              <label className="actualizar-datos__label" htmlFor="telefono">
+                Teléfono
+              </label>
               <input
                 required
                 className={`actualizar-datos__input ${errors.telefono ? 'input--error' : ''}`}
@@ -222,10 +239,14 @@ const ActualizarDatos = () => {
                 value={telefono}
                 onChange={e => setTelefono(e.target.value)}
               />
-              {errors.telefono && <p className="actualizar-datos__mensaje-error">{errors.telefono}</p>}
+              {errors.telefono && (
+                <p className="actualizar-datos__mensaje-error">{errors.telefono}</p>
+              )}
             </div>
             <div className="actualizar-datos__campo">
-              <label className="actualizar-datos__label" htmlFor="contrasena">Nueva contraseña</label>
+              <label className="actualizar-datos__label" htmlFor="contrasena">
+                Nueva contraseña
+              </label>
               <input
                 disabled
                 className="actualizar-datos__input"
@@ -233,11 +254,19 @@ const ActualizarDatos = () => {
                 placeholder="Para cambiar la contraseña, usa la opción de recuperación."
                 type="password"
               />
-              <small className="actualizar-datos__ayuda">Para cambiar la contraseña, utiliza la opción de recuperación de contraseña.</small>
+              <small className="actualizar-datos__ayuda">
+                Para cambiar la contraseña, utiliza la opción de recuperación de contraseña.
+              </small>
             </div>
-            {mensaje && <DatosAlert type="success" message={mensaje} id="mensaje-exito-actualizar" />}
-            {globalError && <DatosAlert type="error" message={globalError} id="mensaje-error-actualizar" />}
-            <button className="actualizar-datos__boton" disabled={cargando} type="submit">{cargando ? 'Guardando...' : 'Guardar cambios'}</button>
+            {mensaje && (
+              <DatosAlert type="success" message={mensaje} id="mensaje-exito-actualizar" />
+            )}
+            {globalError && (
+              <DatosAlert type="error" message={globalError} id="mensaje-error-actualizar" />
+            )}
+            <button className="actualizar-datos__boton" disabled={cargando} type="submit">
+              {cargando ? 'Guardando...' : 'Guardar cambios'}
+            </button>
           </form>
         </section>
       </main>
@@ -246,4 +275,4 @@ const ActualizarDatos = () => {
   );
 };
 
-export default ActualizarDatos; 
+export default ActualizarDatos;

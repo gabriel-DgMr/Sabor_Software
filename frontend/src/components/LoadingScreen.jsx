@@ -6,15 +6,15 @@ const LoadingScreen = () => {
   const { t } = useTranslation();
 
   return (
-    <div class="loading-screen-c">
-      <div class="loading-container-c">
-        <div class="loading-logo-c">SABOR</div>
-        <div class="orbit-spinner">
-          <div class="orbit-circle"></div>
-          <div class="orbit-circle"></div>
-          <div class="orbit-circle"></div>
+    <div className="loading-screen-c">
+      <div className="loading-container-c">
+        <div className="loading-logo-c">SABOR</div>
+        <div className="orbit-spinner">
+          <div className="orbit-circle"></div>
+          <div className="orbit-circle"></div>
+          <div className="orbit-circle"></div>
         </div>
-        <div class="loading-title-c">Cargando, por favor espere</div>
+        <div className="loading-title-c">Cargando, por favor espere</div>
       </div>
     </div>
   );

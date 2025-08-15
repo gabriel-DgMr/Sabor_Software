@@ -1,9 +1,18 @@
-import express from 'express';
+import express from "express";
 
-import * as authController from '../controllers/authController.js';
-import * as clienteController from '../controllers/clienteController.js';
-import { authenticateToken, checkRole, checkPermission, logAuthAttempt } from '../middleware/auth.js';
-import { validateRegister, validateLogin, validateUpdateCliente } from '../middleware/validateRequest.js';
+import * as authController from "../controllers/authController.js";
+import * as usuarioController from "../controllers/usuarioController.js";
+import {
+  authenticateToken,
+  checkRole,
+  checkPermission,
+  logAuthAttempt,
+} from "../middleware/auth.js";
+import {
+  validateRegister,
+  validateLogin,
+  validateUpdateusuario,
+} from "../middleware/validateRequest.js";
 
 const router = express.Router();
 
@@ -11,42 +20,46 @@ const router = express.Router();
 router.use(logAuthAttempt);
 
 // Rutas públicas
-router.post('/register', validateRegister, authController.registerUser);
-router.post('/login', validateLogin, authController.loginUser);
-router.post('/verify-email', authController.verifyEmailCode);
-router.post('/resend-verification', authController.resendVerificationCode);
-router.post('/forgot-password', authController.forgotPassword);
-router.get('/reset-password/:token', authController.verifyResetToken);
-router.post('/reset-password/:token', authController.resetPassword);
+router.post("/register", validateRegister, authController.registerUser);
+router.post("/login", validateLogin, authController.loginUser);
+router.post("/verify-email", authController.verifyEmailCode);
+router.post("/resend-verification", authController.resendVerificationCode);
+router.post("/forgot-password", authController.forgotPassword);
+router.get("/reset-password/:token", authController.verifyResetToken);
+router.post("/reset-password/:token", authController.resetPassword);
 
 // Rutas protegidas
-router.post('/logout', authenticateToken, authController.logoutUser);
-router.get('/perfil', authenticateToken, authController.getUserProfile);
+router.post("/logout", authenticateToken, authController.logoutUser);
+router.get("/perfil", authenticateToken, authController.getUserProfile);
 
-// Rutas para gestión de clientes (solo admin)
-router.get('/clientes', 
-    authenticateToken, 
-    checkRole(['admin']), 
-    clienteController.getAllClientes
+// Rutas para gestión de usuarios (solo admin)
+router.get(
+  "/usuarios",
+  authenticateToken,
+  checkRole(["admin"]),
+  usuarioController.getAllusuarios,
 );
 
-router.get('/cliente/:id', 
-    authenticateToken, 
-    checkPermission('manage_users'),
-    clienteController.getClienteById
+router.get(
+  "/usuario/:id",
+  authenticateToken,
+  checkPermission("manage_users"),
+  usuarioController.getusuarioById,
 );
 
-router.put('/actualizarcliente/:id', 
-    authenticateToken, 
-    checkPermission('manage_users'),
-    validateUpdateCliente,
-    clienteController.updateCliente
+router.put(
+  "/actualizarusuario/:id",
+  authenticateToken,
+  checkPermission("manage_users"),
+  validateUpdateusuario,
+  usuarioController.updateusuario,
 );
 
-router.delete('/eliminarcliente/:id', 
-    authenticateToken, 
-    checkRole(['admin']), 
-    clienteController.deleteCliente
+router.delete(
+  "/eliminarusuario/:id",
+  authenticateToken,
+  checkRole(["admin"]),
+  usuarioController.deleteusuario,
 );
 
 export default router;

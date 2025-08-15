@@ -86,9 +86,9 @@ export const hacerReserva = async (req, res) => {
 
     // 2. Si el cliente no existe, crearlo
     if (!cliente) {
-      console.log("Cliente no encontrado, creando nuevo...");
+      console.log("cliente no encontrado, creando nuevo...");
       try {
-        const nuevoClienteId = await authModel.registerUser({
+        const nuevoclienteId = await authModel.registerUser({
           nombre_cliente: datosReserva.nombre,
           email_cliente: datosReserva.email,
           telefono_cliente: datosReserva.telefono,
@@ -101,7 +101,7 @@ export const hacerReserva = async (req, res) => {
         if (!cliente) {
           throw new Error("Error al obtener el cliente recién creado.");
         }
-        console.log("Cliente creado con ID:", cliente.id_cliente);
+        console.log("cliente creado con ID:", cliente.id_usuario);
       } catch (error) {
         // Si el correo o teléfono ya existe, buscar el cliente existente y continuar
         if (
@@ -116,14 +116,14 @@ export const hacerReserva = async (req, res) => {
               "Error al obtener el cliente existente tras intento de registro.",
             );
           }
-          console.log("Cliente ya existía, usando ID:", cliente.id_cliente);
+          console.log("cliente ya existía, usando ID:", cliente.id_usuario);
         } else {
           throw error;
         }
       }
     }
 
-    const id_cliente = cliente.id_cliente;
+    const id_usuario = cliente.id_usuario;
 
     // Verificar si el cliente está activo y verificado
     if (!cliente.activo || !cliente.email_verificado) {
@@ -134,9 +134,9 @@ export const hacerReserva = async (req, res) => {
     }
 
     // Usar el nuevo modelo para crear la reserva en la base de datos MySQL
-    // Pasar id_cliente en lugar de nombre, telefono, email
+    // Pasar id_usuario en lugar de nombre, telefono, email
     const reservaId = await reservaModel.createReserva({
-      id_cliente: id_cliente,
+      id_usuario: id_usuario,
       numero_personas: datosReserva.personas,
       fecha_reservacion: datosReserva.fecha,
       hora_reservacion: datosReserva.hora,
@@ -154,12 +154,10 @@ export const hacerReserva = async (req, res) => {
       return res.status(400).json({ message: error.message });
     }
     // Siempre responder con JSON en caso de error
-    res
-      .status(500)
-      .json({
-        message: "Error interno del servidor al crear la reserva.",
-        detalle: error.message,
-      });
+    res.status(500).json({
+      message: "Error interno del servidor al crear la reserva.",
+      detalle: error.message,
+    });
   }
 };
 
@@ -203,20 +201,20 @@ export const checkDisponibilidad = async (req, res) => {
 };
 
 /**
- * Obtener historial de reservaciones del usuario autenticado
+ * Obtener historial de reservaciones del cliente autenticado
  */
 export const getHistorialReservas = async (req, res) => {
   try {
     console.log("req.user en getHistorialReservas:", req.user);
     if (!req.user || !req.user.id) {
-      console.log("Usuario no autenticado o id faltante");
+      console.log("cliente no autenticado o id faltante");
       return res
         .status(401)
-        .json({ message: "No autorizado: usuario no autenticado." });
+        .json({ message: "No autorizado: cliente no autenticado." });
     }
-    const id_cliente = req.user.id;
-    console.log("id_cliente usado para buscar reservas:", id_cliente);
-    const reservas = await reservaModel.getReservasByUser(id_cliente);
+    const id_usuario = req.user.id;
+    console.log("id_usuario usado para buscar reservas:", id_usuario);
+    const reservas = await reservaModel.getReservasByUser(id_usuario);
     console.log("Reservas encontradas:", reservas);
     res.json(reservas);
   } catch (error) {
@@ -228,12 +226,10 @@ export const getHistorialReservas = async (req, res) => {
         .status(500)
         .json({ message: "Error en la consulta de la base de datos." });
     } else {
-      res
-        .status(500)
-        .json({
-          message: "Error al obtener historial de reservaciones",
-          detalle: error.message,
-        });
+      res.status(500).json({
+        message: "Error al obtener historial de reservaciones",
+        detalle: error.message,
+      });
     }
   }
 };

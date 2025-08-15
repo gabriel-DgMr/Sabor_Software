@@ -79,9 +79,9 @@ const Header = () => {
 
             {isMobileMenu ? (
               isAuthenticated ? (
-                <div className="encabezado__usuario encabezado__usuario--mobile">
+                <div className="encabezado__cliente encabezado__cliente--mobile">
                   <button
-                    aria-label="Abrir menú de usuario"
+                    aria-label="Abrir menú de cliente"
                     className="menu-hamburguesa"
                     onClick={toggleMobileMenu}
                   >
@@ -160,7 +160,7 @@ const Header = () => {
                   )}
                 </div>
               ) : (
-                <div className="encabezado__usuario encabezado__usuario--mobile">
+                <div className="encabezado__cliente encabezado__cliente--mobile">
                   <button
                     aria-label="Abrir menú"
                     className="menu-hamburguesa"
@@ -222,14 +222,14 @@ const Header = () => {
               )
             ) : isAuthenticated ? (
               <div
-                className="encabezado__usuario"
+                className="encabezado__cliente"
                 onMouseEnter={() => setShowMenu(true)}
                 onMouseLeave={() => setShowMenu(false)}
               >
-                <p className="encabezado__nombre-usuario">
-                  {user?.nombre_cliente || user?.email_cliente}
+                <p className="encabezado__nombre-cliente">
+                  {user?.nombre_usuario || user?.correo_usuario}
                 </p>
-                <FaUserCircle className="encabezado__icono-usuario" size={32} />
+                <FaUserCircle className="encabezado__icono-cliente" size={32} />
                 {showMenu && (
                   <div className="menu-perfil">
                     <Link className="menu-perfil__opcion" to="/historial-pedidos">
@@ -251,9 +251,9 @@ const Header = () => {
                 )}
               </div>
             ) : (
-              <div className="encabezado__usuario" onClick={() => setShowLogin(true)}>
-                <p className="encabezado__nombre-usuario">{t('iniciar_sesion')}</p>
-                <FaUserCircle className="encabezado__icono-usuario" size={32} />
+              <div className="encabezado__cliente" onClick={() => setShowLogin(true)}>
+                <p className="encabezado__nombre-cliente">{t('iniciar_sesion')}</p>
+                <FaUserCircle className="encabezado__icono-cliente" size={32} />
               </div>
             )}
           </div>

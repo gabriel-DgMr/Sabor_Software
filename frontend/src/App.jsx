@@ -27,6 +27,7 @@ import QuienesSomos from './pages/QuienesSomos.jsx';
 import ReservasAdministrar from './pages/ReservacionesAdministrar.jsx';
 import Reservas from './pages/Reservas.jsx';
 import SobreNosotros from './pages/SobreNosotros.jsx';
+import LoadingScreen from './components/LoadingScreen.jsx';
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
               <Route element={<QuienesSomos />} path="/quienes-somos" />
               <Route element={<SobreNosotros />} path="/sobre-nosotros" />
               <Route element={<EscanearQR />} path="/escanear-qr" />
+              <Route element={<LoadingScreen />} path="/loading-screen" />
 
               {/* Rutas protegidas */}
               <Route
