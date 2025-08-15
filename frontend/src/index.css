@@ -1746,6 +1746,7 @@ hr {
   min-width: 320px;
   max-width: 90vw;
   text-align: center;
+  position: relative;
 }
 
 .success-dialog__icon {
