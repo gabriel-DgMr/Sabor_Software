@@ -22,7 +22,7 @@ export const CartProvider = ({ children }) => {
       }
 
       const response = await fetch(`${API_URL}/pedidos/carrito`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -48,7 +48,7 @@ export const CartProvider = ({ children }) => {
     loadCart();
   }, [loadCart]);
 
-  const addItemToCart = async (product) => {
+  const addItemToCart = async product => {
     try {
       setLoading(true);
       setError(null);
@@ -61,12 +61,12 @@ export const CartProvider = ({ children }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           id_producto: product.id || product.id_producto,
-          cantidad: product.cantidad || 1
-        })
+          cantidad: product.cantidad || 1,
+        }),
       });
 
       if (!response.ok) {
@@ -85,7 +85,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const removeItemFromCart = async (id_producto) => {
+  const removeItemFromCart = async id_producto => {
     try {
       setLoading(true);
       setError(null);
@@ -98,10 +98,16 @@ export const CartProvider = ({ children }) => {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ id_producto })
+        body: JSON.stringify({ id_producto }),
       });
+
+      if (response.status === 404) {
+        setCartItems([]);
+        setError('Carrito vacío o no hay un pedido activo');
+        return;
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -132,10 +138,16 @@ export const CartProvider = ({ children }) => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ id_producto, cantidad })
+        body: JSON.stringify({ id_producto, cantidad }),
       });
+
+      if (response.status === 404) {
+        setCartItems([]);
+        setError('Carrito vacío o no hay un pedido activo');
+        return;
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -165,8 +177,14 @@ export const CartProvider = ({ children }) => {
 
       const response = await fetch(`${API_URL}/pedidos/carrito/vaciar`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (response.status === 404) {
+        setCartItems([]);
+        setError('Carrito vacío o no hay un pedido activo');
+        return;
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -183,7 +201,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const confirmarPedido = async (metodo_pago) => {
+  const confirmarPedido = async metodo_pago => {
     try {
       setLoading(true);
       setError(null);
@@ -196,9 +214,9 @@ export const CartProvider = ({ children }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ metodo_pago })
+        body: JSON.stringify({ metodo_pago }),
       });
 
       if (!response.ok) {
@@ -219,22 +237,27 @@ export const CartProvider = ({ children }) => {
   };
 
   const cartCount = cartItems.reduce((sum, item) => sum + (item.cantidad || 1), 0);
-  const cartTotal = cartItems.reduce((sum, item) => sum + (item.precio_unitario * (item.cantidad || 1)), 0);
+  const cartTotal = cartItems.reduce(
+    (sum, item) => sum + item.precio_unitario * (item.cantidad || 1),
+    0
+  );
 
   return (
-    <CartContext.Provider value={{ 
-      cartItems, 
-      loading,
-      error,
-      cartCount,
-      cartTotal,
-      addItemToCart, 
-      removeItemFromCart, 
-      updateItemQuantity,
-      clearCart,
-      confirmarPedido,
-      loadCart
-    }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        loading,
+        error,
+        cartCount,
+        cartTotal,
+        addItemToCart,
+        removeItemFromCart,
+        updateItemQuantity,
+        clearCart,
+        confirmarPedido,
+        loadCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
@@ -244,4 +267,4 @@ CartProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export { CartContext }; 
+export { CartContext };

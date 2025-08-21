@@ -285,21 +285,14 @@ export const vaciar = async (req, res) => {
 export const confirmar = async (req, res) => {
   try {
     const userId = req.user?.id;
-    const { id_empleado, metodo_pago } = req.body;
+    const { metodo_pago } = req.body;
     if (!metodo_pago) {
       return res.status(400).json({ mensaje: "metodo_pago es requerido" });
     }
     if (!userId) {
       return res.status(401).json({ mensaje: "Usuario no autenticado" });
     }
-    // id_empleado puede ser undefined/null
-    const idEmpleadoValue =
-      typeof id_empleado !== "undefined" ? id_empleado : null;
-    const id_pedido = await confirmarPedido(
-      userId,
-      idEmpleadoValue,
-      metodo_pago,
-    );
+    const id_pedido = await confirmarPedido(userId, metodo_pago);
     res.json({ mensaje: "Pedido confirmado", id_pedido });
   } catch (error) {
     console.error("[Pedido][Confirmar] Error:", {

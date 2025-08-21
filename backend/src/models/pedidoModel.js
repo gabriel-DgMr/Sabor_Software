@@ -196,7 +196,7 @@ export const getCarritoByUser = async (userId) => {
 export const createCarrito = async (userId) => {
   try {
     const [result] = await pool.query(
-      "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, id_empleado, metodo_pago) VALUES (?, 1, 0, NULL, NULL)",
+      "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, metodo_pago) VALUES (?, 1, 0, NULL)",
       [userId],
     );
     return result.insertId;
@@ -426,7 +426,7 @@ export const vaciarCarrito = async (userId) => {
   }
 };
 
-export const confirmarPedido = async (userId, id_empleado, metodo_pago) => {
+export const confirmarPedido = async (userId, metodo_pago) => {
   let connection;
   try {
     connection = await pool.getConnection();

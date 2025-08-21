@@ -13,7 +13,7 @@ import {
   validarCaracteresEspeciales,
   validarEspaciosInicioFinal,
 } from '../utils/validaciones.js';
-import '../index.css';
+import '../styles/reservas.css';
 import { GoCheck, GoX, GoAlert } from 'react-icons/go';
 
 // Alerta personalizada
@@ -25,10 +25,48 @@ const CustomAlert = ({ open, type, message, onClose }) => {
   else icon = <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />;
   return (
     <div className="custom-alert-overlay">
-      <div className="custom-alert" style={{ background: '#fff', border: 'none', boxShadow: '0 4px 32px rgba(0,0,0,0.18)', borderRadius: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2.5rem 2.5rem 2rem 2.5rem', minWidth: '320px', maxWidth: '90vw', gap: '1.2rem' }}>
-        <span className="custom-alert__icon" style={{ display: 'block', textAlign: 'center', margin: '0 auto' }}>{icon}</span>
-        <span className="custom-alert__message" style={{ textAlign: 'center' }}>{message}</span>
-        <button className="custom-alert__close" style={{ marginTop: '1rem', background: '#ff6f00', color: '#fff', border: 'none', borderRadius: '1rem', padding: '0.7rem 2.2rem', fontSize: '1.5rem', fontWeight: 600, cursor: 'pointer' }} onClick={onClose}>Cerrar</button>
+      <div
+        className="custom-alert"
+        style={{
+          background: '#fff',
+          border: 'none',
+          boxShadow: '0 4px 32px rgba(0,0,0,0.18)',
+          borderRadius: '1.5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: '2.5rem 2.5rem 2rem 2.5rem',
+          minWidth: '320px',
+          maxWidth: '90vw',
+          gap: '1.2rem',
+        }}
+      >
+        <span
+          className="custom-alert__icon"
+          style={{ display: 'block', textAlign: 'center', margin: '0 auto' }}
+        >
+          {icon}
+        </span>
+        <span className="custom-alert__message" style={{ textAlign: 'center' }}>
+          {message}
+        </span>
+        <button
+          className="custom-alert__close"
+          style={{
+            marginTop: '1rem',
+            background: '#ff6f00',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '1rem',
+            padding: '0.7rem 2.2rem',
+            fontSize: '1.5rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+          onClick={onClose}
+        >
+          Cerrar
+        </button>
       </div>
     </div>
   );
@@ -267,11 +305,35 @@ const Reservas = () => {
 
         if (response.ok) {
           setAlert({ open: true, type: 'success', message: '¡Reserva realizada con éxito!' });
+          // Limpiar formulario y volver al paso 1 después de un breve tiempo
+          setTimeout(() => {
+            setFormData({
+              personas: '',
+              fecha: '',
+              hora: '',
+              nombre: '',
+              telefono: '',
+              email: '',
+              peticiones: '',
+            });
+            setSelectedDate(null);
+            setSelectedTime(null);
+            setStep(1);
+            setAlert({ open: false, type: 'success', message: '' });
+          }, 2000);
         } else {
-          setAlert({ open: true, type: 'error', message: result.message || 'Error al realizar la reserva.' });
+          setAlert({
+            open: true,
+            type: 'error',
+            message: result.message || 'Error al realizar la reserva.',
+          });
         }
       } catch (error) {
-        setAlert({ open: true, type: 'error', message: 'Hubo un problema al conectar con el servidor de reservas.' });
+        setAlert({
+          open: true,
+          type: 'error',
+          message: 'Hubo un problema al conectar con el servidor de reservas.',
+        });
       }
     }
   };
@@ -356,7 +418,7 @@ const Reservas = () => {
               {fecha.formato}
             </button>
           ))}
-        {/* Botón para abrir el calendario completo (no funcional, solo mueustra) */}
+        {/* Botón para abrir el calendario completo (no funcional, solo mueestra) */}
         {/* <button
           className="calendar_button"
           type="button"
@@ -518,49 +580,616 @@ const Reservas = () => {
 
   // Estructura principal
   return (
-    <div>
-      <div>
-        <Header /* setShowLogin={setShowLogin} */ />{' '}
-        {/* Comentado para que el linter no este fastidiando*/}
-        <main className="pagina__contenido-reservas">
-          <section className="reservas__imagen">
-            <img
-              alt="imagen-reservas"
-              className="imagen-reservas"
-              src="/images/imagen-reservas.jpg"
-            />
-          </section>
-          <section className="seccion_reservas">
-            <h1 className="reservas__titulo">{t('reservas_titulo')}</h1>
-            {renderStepIndicator()}
-
-            <div className="reservas__contenido">
-              <form onSubmit={handleSubmit}>
-                {step === 1 && renderPaso1()}
-                {step === 2 && renderPaso2()}
-                {step === 3 && renderPaso3()}
-                {step === 4 && renderPaso4()}
-
-                <div className="reservas__acciones">
-                  {step > 1 && (
-                    <button className="boton_regresar" type="button" onClick={handlePreviousStep}>
-                      {t('reservas_regresar')}
-                    </button>
-                  )}
-                  <button className="boton_siguiente" type="submit">
-                    {step === 4
-                      ? t('reservas_confirmar_boton')
-                      : step === 3
-                        ? t('reservas_ver_resumen')
-                        : t('reservas_siguiente')}
-                  </button>
+    <div className="reservas-main-bg">
+      <Header />
+      <main className="reservas-flex-layout">
+        {/* Columna Izquierda: Imagen */}
+        <section className="reservas__imagen">
+          <img
+            alt="imagen-reservas"
+            className="imagen-reservas"
+            src="/images/imagen-reserva2.png"
+          />
+        </section>
+        {/* Columna Derecha: Formulario */}
+        <section className="reservas-card">
+          <h1 className="reservas__titulo">Reservación</h1>
+          {/* Wizard de pasos */}
+          <div className="reservas-wizard">
+            {[1, 2, 3, 4].map(num => (
+              <div
+                key={num}
+                className={`wizard-step${step === num ? ' wizard-step--active' : ''}${step > num ? ' wizard-step--done' : ''}`}
+              >
+                <div className="wizard-step__circle">{num}</div>
+                <span className="wizard-step__label">
+                  {num === 1
+                    ? 'Selección'
+                    : num === 2
+                      ? 'Información'
+                      : num === 3
+                        ? 'Adicional'
+                        : 'Confirmación'}
+                </span>
+                {num < 4 && <span className="wizard-step__bar"></span>}
+              </div>
+            ))}
+          </div>
+          <div className="reservas__contenido">
+            <form onSubmit={handleSubmit}>
+              {/* Paso 1: Cantidad, Fecha, Hora */}
+              {step === 1 && (
+                <div
+                  className="reservas-step reservas-step--1"
+                  style={{ display: 'flex', flexDirection: 'column', gap: '2.2rem' }}
+                >
+                  {/* Cantidad de personas */}
+                  <div
+                    className="inputCantidadPersonas"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '0.7rem',
+                      width: '100%',
+                    }}
+                  >
+                    <label
+                      htmlFor="personas"
+                      style={{
+                        fontWeight: 600,
+                        fontSize: '1.1rem',
+                        color: '#444',
+                        marginBottom: '0.2rem',
+                        alignSelf: 'flex-start',
+                      }}
+                    >
+                      Cantidad
+                    </label>
+                    <div
+                      className="cantidad-personas__wrapper"
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        width: '100%',
+                        gap: '1.2rem',
+                        background: '#f2f1f0',
+                        borderRadius: '1.2rem',
+                        padding: '0.5rem 1.2rem',
+                        boxShadow: '0 1px 6px #0001',
+                        maxWidth: '220px',
+                      }}
+                    >
+                      <button
+                        type="button"
+                        aria-label="Disminuir"
+                        className="cantidad-personas__btn"
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--primary-500)',
+                          fontSize: '2.1rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          padding: '0 0.7rem',
+                          borderRadius: '0.7rem',
+                          transition: 'background 0.18s',
+                        }}
+                        onClick={() =>
+                          setFormData(prev => ({
+                            ...prev,
+                            personas: Math.max(1, (prev.personas || 1) - 1),
+                          }))
+                        }
+                        tabIndex={0}
+                      >
+                        –
+                      </button>
+                      <input
+                        required
+                        className="cantidad-personas__input hide-number-spin"
+                        min="1"
+                        name="personas"
+                        id="personas"
+                        placeholder={t('reservas_cantidad_personas')}
+                        type="number"
+                        value={formData.personas}
+                        onChange={handleInputChange}
+                        style={{
+                          width: '70px',
+                          maxWidth: '100%',
+                          textAlign: 'center',
+                          fontSize: '1.5rem',
+                          background: 'none',
+                          border: 'none',
+                          outline: 'none',
+                          fontWeight: 600,
+                          color: '#222',
+                          MozAppearance: 'textfield',
+                        }}
+                      />
+                      <button
+                        type="button"
+                        aria-label="Aumentar"
+                        className="cantidad-personas__btn"
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--primary-500)',
+                          fontSize: '2.1rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          padding: '0 0.7rem',
+                          borderRadius: '0.7rem',
+                          transition: 'background 0.18s',
+                        }}
+                        onClick={() =>
+                          setFormData(prev => ({
+                            ...prev,
+                            personas: Math.max(1, (prev.personas || 1) + 1),
+                          }))
+                        }
+                        tabIndex={0}
+                      >
+                        +
+                      </button>
+                    </div>
+                    {formErrors.personas && (
+                      <small
+                        className="reservas__input-error"
+                        style={{ color: 'var(--error-500)', marginTop: '0.2rem', fontSize: '1rem' }}
+                      >
+                        {formErrors.personas}
+                      </small>
+                    )}
+                  </div>
+                  {/* Fechas disponibles */}
+                  <div
+                    className="date_selector"
+                    style={{
+                      display: 'flex',
+                      gap: '0.7rem',
+                      flexWrap: 'wrap',
+                      marginBottom: '0.5rem',
+                    }}
+                  >
+                    {fechasDisponibles &&
+                      fechasDisponibles.map((fecha, index) => (
+                        <button
+                          key={index}
+                          className={`date_button${selectedDate === fecha.fecha ? ' selected' : ''}${fecha.disponible ? ' available' : ' unavailable'}`}
+                          disabled={!fecha.disponible}
+                          type="button"
+                          onClick={() => fecha.disponible && handleDateSelect(fecha.fecha)}
+                          style={{
+                            background:
+                              selectedDate === fecha.fecha ? 'var(--primary-500)' : '#f2f1f0',
+                            color: selectedDate === fecha.fecha ? '#fff' : '#444',
+                            border: 'none',
+                            borderRadius: '1.1rem',
+                            padding: '0.9rem 1.5rem',
+                            fontWeight: 600,
+                            fontSize: '1.1rem',
+                            boxShadow:
+                              selectedDate === fecha.fecha
+                                ? '0 2px 12px #ff6b0033'
+                                : '0 1px 6px #0001',
+                            cursor: fecha.disponible ? 'pointer' : 'not-allowed',
+                            opacity: fecha.disponible ? 1 : 0.5,
+                            transition: 'all 0.18s',
+                            outline:
+                              selectedDate === fecha.fecha
+                                ? '2.5px solid var(--primary-500)'
+                                : 'none',
+                          }}
+                        >
+                          {fecha.formato}
+                        </button>
+                      ))}
+                    {formErrors.fecha && (
+                      <small
+                        className="reservas__input-error"
+                        style={{
+                          color: 'var(--error-500)',
+                          marginTop: '0.2rem',
+                          fontSize: '1rem',
+                          width: '100%',
+                        }}
+                      >
+                        {formErrors.fecha}
+                      </small>
+                    )}
+                  </div>
+                  {/* Horarios disponibles */}
+                  <div
+                    className="time_selector"
+                    style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}
+                  >
+                    <label
+                      style={{
+                        fontWeight: 600,
+                        fontSize: '1.1rem',
+                        color: '#444',
+                        marginBottom: '0.2rem',
+                      }}
+                    >
+                      {t('reservas_hora')}
+                    </label>
+                    <div
+                      className="time_columns"
+                      style={{ display: 'flex', gap: '0.7rem', flexWrap: 'wrap' }}
+                    >
+                      {horariosDisponibles.map((horario, index) => (
+                        <button
+                          key={index}
+                          className={`time_button${selectedTime === horario.hora ? ' selected' : ''}${horario.disponible ? ' available' : ' unavailable'}`}
+                          disabled={!horario.disponible}
+                          type="button"
+                          onClick={() => horario.disponible && handleTimeSelect(horario.hora)}
+                          style={{
+                            background:
+                              selectedTime === horario.hora ? 'var(--primary-500)' : '#f2f1f0',
+                            color: selectedTime === horario.hora ? '#fff' : '#444',
+                            border: 'none',
+                            borderRadius: '1.1rem',
+                            padding: '0.9rem 1.5rem',
+                            fontWeight: 600,
+                            fontSize: '1.1rem',
+                            boxShadow:
+                              selectedTime === horario.hora
+                                ? '0 2px 12px #ff6b0033'
+                                : '0 1px 6px #0001',
+                            cursor: horario.disponible ? 'pointer' : 'not-allowed',
+                            opacity: horario.disponible ? 1 : 0.5,
+                            transition: 'all 0.18s',
+                            outline:
+                              selectedTime === horario.hora
+                                ? '2.5px solid var(--primary-500)'
+                                : 'none',
+                          }}
+                        >
+                          {horario.hora}
+                        </button>
+                      ))}
+                    </div>
+                    {formErrors.hora && (
+                      <small
+                        className="reservas__input-error"
+                        style={{
+                          color: 'var(--error-500)',
+                          marginTop: '0.2rem',
+                          fontSize: '1rem',
+                          width: '100%',
+                        }}
+                      >
+                        {formErrors.hora}
+                      </small>
+                    )}
+                  </div>
+                  <div
+                    className="info_contacto"
+                    style={{ marginTop: '1.2rem', color: '#888', fontSize: '1.05rem' }}
+                  >
+                    <p>{t('reservas_info_contacto')}</p>
+                  </div>
                 </div>
-              </form>
-            </div>
-          </section>
-        </main>
-        <Footer />
-      </div>
+              )}
+              {/* Paso 2: Información de contacto */}
+              {step === 2 && (
+                <div
+                  className="reservas-step reservas-step--2"
+                  style={{ display: 'flex', flexDirection: 'column', gap: '1.7rem' }}
+                >
+                  <h2
+                    className="reservas__subtitulo"
+                    style={{
+                      fontWeight: 700,
+                      fontSize: '1.5rem',
+                      color: 'var(--primary-500)',
+                      marginBottom: '0.7rem',
+                    }}
+                  >
+                    {t('reservas_info_contacto_titulo')}
+                  </h2>
+                  <div
+                    className="campo"
+                    style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}
+                  >
+                    <label
+                      htmlFor="nombre"
+                      style={{ fontWeight: 600, fontSize: '1.1rem', color: '#444' }}
+                    >
+                      {t('nombre_completo')}:
+                    </label>
+                    <input
+                      className={`formulario__input${formErrors.nombre ? ' reservas__input-error' : ''}`}
+                      id="nombre"
+                      name="nombre"
+                      type="text"
+                      value={formData.nombre}
+                      onChange={handleInputChange}
+                      style={{
+                        background: '#f2f1f0',
+                        borderRadius: '1.1rem',
+                        padding: '0.8rem 1.2rem',
+                        fontSize: '1.1rem',
+                        border: 'none',
+                        outline: 'none',
+                        fontWeight: 500,
+                        color: '#222',
+                        boxShadow: '0 1px 6px #0001',
+                      }}
+                    />
+                    {formErrors.nombre && (
+                      <small
+                        className="reservas__input-error"
+                        style={{ color: 'var(--error-500)', fontSize: '1rem' }}
+                      >
+                        {formErrors.nombre}
+                      </small>
+                    )}
+                  </div>
+                  <div
+                    className="campo"
+                    style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}
+                  >
+                    <label
+                      htmlFor="telefono"
+                      style={{ fontWeight: 600, fontSize: '1.1rem', color: '#444' }}
+                    >
+                      {t('telefono_con_formato')}:
+                    </label>
+                    <input
+                      className={`formulario__input${formErrors.telefono ? ' reservas__input-error' : ''}`}
+                      id="telefono"
+                      name="telefono"
+                      type="tel"
+                      value={formData.telefono}
+                      onChange={handleInputChange}
+                      style={{
+                        background: '#f2f1f0',
+                        borderRadius: '1.1rem',
+                        padding: '0.8rem 1.2rem',
+                        fontSize: '1.1rem',
+                        border: 'none',
+                        outline: 'none',
+                        fontWeight: 500,
+                        color: '#222',
+                        boxShadow: '0 1px 6px #0001',
+                      }}
+                    />
+                    {formErrors.telefono && (
+                      <small
+                        className="reservas__input-error"
+                        style={{ color: 'var(--error-500)', fontSize: '1rem' }}
+                      >
+                        {formErrors.telefono}
+                      </small>
+                    )}
+                  </div>
+                  <div
+                    className="campo"
+                    style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}
+                  >
+                    <label
+                      htmlFor="email"
+                      style={{ fontWeight: 600, fontSize: '1.1rem', color: '#444' }}
+                    >
+                      {t('correo_electronico')}:
+                    </label>
+                    <input
+                      className={`formulario__input${formErrors.email ? ' reservas__input-error' : ''}`}
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      style={{
+                        background: '#f2f1f0',
+                        borderRadius: '1.1rem',
+                        padding: '0.8rem 1.2rem',
+                        fontSize: '1.1rem',
+                        border: 'none',
+                        outline: 'none',
+                        fontWeight: 500,
+                        color: '#222',
+                        boxShadow: '0 1px 6px #0001',
+                      }}
+                    />
+                    {formErrors.email && (
+                      <small
+                        className="reservas__input-error"
+                        style={{ color: 'var(--error-500)', fontSize: '1rem' }}
+                      >
+                        {formErrors.email}
+                      </small>
+                    )}
+                  </div>
+                </div>
+              )}
+              {/* Paso 3: Peticiones adicionales */}
+              {step === 3 && (
+                <div
+                  className="reservas-step reservas-step--3"
+                  style={{ display: 'flex', flexDirection: 'column', gap: '1.7rem' }}
+                >
+                  <h2
+                    className="reservas__subtitulo"
+                    style={{
+                      fontWeight: 700,
+                      fontSize: '1.5rem',
+                      color: 'var(--primary-500)',
+                      marginBottom: '0.7rem',
+                    }}
+                  >
+                    {t('reservas_peticiones_titulo')}
+                  </h2>
+                  <div
+                    className="campo"
+                    style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}
+                  >
+                    <label
+                      htmlFor="peticiones"
+                      style={{ fontWeight: 600, fontSize: '1.1rem', color: '#444' }}
+                    >
+                      {t('reservas_peticiones_label')}
+                    </label>
+                    <textarea
+                      className={`formulario__input${formErrors.peticiones ? ' reservas__input-error' : ''}`}
+                      id="peticiones"
+                      name="peticiones"
+                      rows="4"
+                      value={formData.peticiones}
+                      onChange={handleInputChange}
+                      style={{
+                        background: '#f2f1f0',
+                        borderRadius: '1.1rem',
+                        padding: '0.8rem 1.2rem',
+                        fontSize: '1.1rem',
+                        border: 'none',
+                        outline: 'none',
+                        fontWeight: 500,
+                        color: '#222',
+                        boxShadow: '0 1px 6px #0001',
+                        resize: 'vertical',
+                      }}
+                    />
+                    {formErrors.peticiones && (
+                      <small
+                        className="reservas__input-error"
+                        style={{ color: 'var(--error-500)', fontSize: '1rem' }}
+                      >
+                        {formErrors.peticiones}
+                      </small>
+                    )}
+                  </div>
+                </div>
+              )}
+              {/* Paso 4: Confirmación */}
+              {step === 4 && (
+                <div
+                  className="reservas-step reservas-step--4"
+                  style={{ display: 'flex', flexDirection: 'column', gap: '1.7rem' }}
+                >
+                  <h2
+                    className="reservas__subtitulo"
+                    style={{
+                      fontWeight: 700,
+                      fontSize: '1.5rem',
+                      color: 'var(--primary-500)',
+                      marginBottom: '0.7rem',
+                    }}
+                  >
+                    {t('reservas_confirmar_titulo')}
+                  </h2>
+                  <div
+                    className="resumen-reserva"
+                    style={{
+                      background: '#f2f1f0',
+                      borderRadius: '1.1rem',
+                      padding: '1.2rem 1.5rem',
+                      fontSize: '1.1rem',
+                      color: '#444',
+                      marginBottom: '0.7rem',
+                      boxShadow: '0 1px 6px #0001',
+                    }}
+                  >
+                    <p>
+                      <strong>{t('reservas_personas')}:</strong> {formData.personas}
+                    </p>
+                    <p>
+                      <strong>{t('reservas_fecha')}:</strong> {formData.fecha}
+                    </p>
+                    <p>
+                      <strong>{t('reservas_hora')}:</strong> {formData.hora}
+                    </p>
+                    <p>
+                      <strong>{t('nombre_completo')}:</strong> {formData.nombre}
+                    </p>
+                    <p>
+                      <strong>{t('telefono')}:</strong> {formData.telefono}
+                    </p>
+                    <p>
+                      <strong>{t('correo_electronico')}:</strong> {formData.email}
+                    </p>
+                    {formData.peticiones && (
+                      <p>
+                        <strong>{t('reservas_peticiones')}:</strong> {formData.peticiones}
+                      </p>
+                    )}
+                  </div>
+                  <p className="confirmacion-aviso" style={{ color: '#888', fontSize: '1.05rem' }}>
+                    {t('reservas_confirmar_aviso')}
+                  </p>
+                </div>
+              )}
+              {/* Acciones: Botones */}
+              <div
+                className="reservas__acciones"
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: '2.2rem',
+                  gap: '1.2rem',
+                }}
+              >
+                {step > 1 && (
+                  <button
+                    className="boton_regresar"
+                    type="button"
+                    onClick={handlePreviousStep}
+                    style={{
+                      background: '#f2f1f0',
+                      color: 'var(--primary-500)',
+                      borderRadius: '1.1rem',
+                      padding: '0.9rem 2.2rem',
+                      fontWeight: 700,
+                      fontSize: '1.15rem',
+                      boxShadow: '0 1px 6px #0001',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'background 0.18s, color 0.18s',
+                    }}
+                  >
+                    {t('reservas_regresar')}
+                  </button>
+                )}
+                <button
+                  className="boton_siguiente"
+                  type="submit"
+                  style={{
+                    background: 'var(--primary-500)',
+                    color: '#fff',
+                    borderRadius: '1.1rem',
+                    padding: '0.9rem 2.2rem',
+                    fontWeight: 700,
+                    fontSize: '1.15rem',
+                    boxShadow: '0 2px 12px #ff6b0033',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'background 0.18s, box-shadow 0.18s',
+                  }}
+                >
+                  {step === 4
+                    ? t('reservas_confirmar_boton')
+                    : step === 3
+                      ? t('reservas_ver_resumen')
+                      : t('reservas_siguiente')}
+                </button>
+              </div>
+            </form>
+            <CustomAlert
+              open={alert.open}
+              type={alert.type}
+              message={alert.message}
+              onClose={() => setAlert({ ...alert, open: false })}
+            />
+          </div>
+        </section>
+      </main>
+      <Footer />
     </div>
   );
 };
