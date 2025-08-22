@@ -63,23 +63,23 @@
   letter-spacing: -1px;
 }
 
-.reservas-wizard {
+.reservas-prog {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 2.5rem;
-  gap: 0.5rem;
 }
 
-.wizard-step {
+.prog-step {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
+  
 }
 
-.wizard-step__circle {
+.prog-step__circle {
   width: 2.6rem;
   height: 2.6rem;
   border-radius: 50%;
@@ -93,28 +93,28 @@
   border: 2.5px solid #e6e4e2;
   transition: all 0.2s;
 }
-.wizard-step--active .wizard-step__circle {
+.prog-step--active .prog-step__circle {
   background: var(--primary-500);
   color: #fff;
   border: 2.5px solid var(--primary-500);
 }
-.wizard-step__label {
+.prog-step__label {
   margin-top: 0.5rem;
   font-size: 1.1rem;
   color: #888;
   font-weight: 400;
   letter-spacing: -0.5px;
 }
-.wizard-step--active .wizard-step__label {
+.prog-step--active .prog-step__label {
   color: var(--primary-500);
   font-weight: 600;
 }
 
-.wizard-step__bar {
+.prog-step__bar {
   position: absolute;
   top: 1.3rem;
   left: 100%;
-  width: calc(100% - 2.6rem);
+  width: 100%;
   height: 3px;
   background: #e6e4e2;
   z-index: 0;
@@ -123,11 +123,11 @@
   overflow: hidden; 
 }
 
-.wizard-step--done .wizard-step__bar {
+.prog-step--done .prog-step__bar {
   background: transparent; 
 }
 
-.wizard-step--done .wizard-step__bar::after {
+.prog-step--done .prog-step__bar::after {
   content: "";
   display: block;
   height: 100%;
@@ -166,6 +166,8 @@
   width: 100%;
 }
 .inputCantidadPersonas label {
+  width: 100%;
+  text-align: center;
   font-weight: 600;
   font-size: 1.1rem;
   color: #444;
@@ -225,9 +227,11 @@
   margin-bottom: 0.5rem;
 }
 .date_button {
+  width: 80px;
+  height: 40px;
   background: #f2f1f0;
   color: #444;
-  border: none;
+  border: 0px;
   border-radius: 1.1rem;
   padding: 0.9rem 1.5rem;
   font-weight: 600;
@@ -243,6 +247,8 @@
   color: #fff;
   box-shadow: 0 2px 12px #ff6b0033;
   outline: 2.5px solid var(--primary-500);
+  transition: all 0s;
+  border: 0px;
 }
 .date_button.unavailable {
   cursor: not-allowed;
@@ -254,11 +260,14 @@
   flex-direction: column;
   gap: 0.7rem;
 }
+
 .time_selector label {
+  width: 100%;
   font-weight: 600;
-  font-size: 1.1rem;
-  color: #444;
+  font-size: 1.7rem;
+  color: #000000;
   margin-bottom: 0.2rem;
+  text-align: center;
 }
 .time_columns {
   display: flex;
@@ -266,9 +275,11 @@
   flex-wrap: wrap;
 }
 .time_button {
+  width: 80px;
+  height: 40px;
   background: #f2f1f0;
   color: #444;
-  border: none;
+  border: 0px;
   border-radius: 1.1rem;
   padding: 0.9rem 1.5rem;
   font-weight: 600;
@@ -284,6 +295,9 @@
   color: #fff;
   box-shadow: 0 2px 12px #ff6b0033;
   outline: 2.5px solid var(--primary-500);
+  transition: all 0s;
+  border: 0px;
+
 }
 .time_button.unavailable {
   cursor: not-allowed;
@@ -294,6 +308,11 @@
   margin-top: 1.2rem;
   color: #888;
   font-size: 1.05rem;
+}
+
+/* Íconos de alerta */
+.GoCheck, .GoX, .GoAlert {
+  font-size: 2.5rem;
 }
 
 .reservas__acciones {
@@ -350,4 +369,459 @@
     max-width: 100vw;
     padding: 2.2rem 1.2rem;
   }
+}
+
+/* Estilos para el Custom Alert */
+.custom-alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+}
+
+.custom-alert {
+  background: #fff;
+  border: none;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+  border-radius: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  min-width: 320px;
+  max-width: 90vw;
+  gap: 1.2rem;
+}
+
+.custom-alert__icon {
+  display: block;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.custom-alert__close {
+  margin-top: 1rem;
+  background: #ff6f00;
+  color: #fff;
+  border: none;
+  border-radius: 1rem;
+  padding: 0.7rem 2.2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.custom-alert__message {
+  text-align: center;
+}
+
+/* Estilos adicionales */
+.reservas-step {
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+}
+
+.reservas-step--2,
+.reservas-step--3,
+.reservas-step--4 {
+  gap: 1.7rem;
+}
+
+.reservas__acciones {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2.2rem;
+  gap: 1.2rem;
+}
+
+.boton_regresar,
+.boton_siguiente {
+  background: var(--primary-500);
+  color: #fff;
+  border-radius: 1.1rem;
+  padding: 0.9rem 2.2rem;
+  font-weight: 700;
+  font-size: 1.15rem;
+  box-shadow: 0 2px 12px #ff6b0033;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s;
+}
+
+.boton_regresar {
+  background: #f2f1f0;
+  color: var(--primary-500);
+  box-shadow: 0 1px 6px #0001;
+}
+
+.date_selector {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.date_button.selected {
+  background: var(--primary-500);
+  color: #fff;
+  box-shadow: 0 2px 12px #ff6b0033;
+  outline: 2.5px solid var(--primary-500);
+}
+
+.time_button.selected {
+  background: var(--primary-500);
+  color: #fff;
+  box-shadow: 0 2px 12px #ff6b0033;
+  outline: 2.5px solid var(--primary-500);
+}
+
+.reservas__input-error {
+  color: var(--error-500);
+  margin-top: 0.2rem;
+  font-size: 1rem;
+}
+
+.campo label {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #444;
+}
+
+.formulario__input {
+  background: #f2f1f0;
+  border-radius: 1.1rem;
+  padding: 0.8rem 1.2rem;
+  font-size: 1.1rem;
+  border: none;
+  outline: none;
+  font-weight: 500;
+  color: #222;
+  box-shadow: 0 1px 6px #0001;
+}
+
+.resumen-reserva {
+  background: #f2f1f0;
+  border-radius: 1.1rem;
+  padding: 1.2rem 1.5rem;
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 0.7rem;
+  box-shadow: 0 1px 6px #0001;
+}
+
+.confirmacion-aviso {
+  color: #888;
+  font-size: 1.05rem;
+}
+
+/* Estilos para los pasos del formulario */
+.reservas-step {
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+}
+
+.reservas-step--2,
+.reservas-step--3,
+.reservas-step--4 {
+  gap: 1.7rem;
+}
+
+/* Estilos para los campos del formulario */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.campo label {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #444;
+}
+
+.formulario__input {
+  background: #f2f1f0;
+  border-radius: 1.1rem;
+  padding: 0.8rem 1.2rem;
+  font-size: 1.1rem;
+  border: none;
+  outline: none;
+  font-weight: 500;
+  color: #222;
+  box-shadow: 0 1px 6px #0001;
+}
+
+textarea.formulario__input {
+  resize: vertical;
+}
+
+/* Estilos para los subtítulos */
+.reservas__subtitulo {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--primary-500);
+  margin-bottom: 0.7rem;
+}
+
+/* Estilos para mensajes de error */
+.reservas__input-error {
+  color: var(--error-500);
+  font-size: 1rem;
+  margin-top: 0.2rem;
+}
+
+/* Estilos para el resumen de la reserva */
+.resumen-reserva {
+  background: #f2f1f0;
+  border-radius: 1.1rem;
+  padding: 1.2rem 1.5rem;
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 0.7rem;
+  box-shadow: 0 1px 6px #0001;
+}
+
+.confirmacion-aviso {
+  color: #888;
+  font-size: 1.05rem;
+}
+
+/* Estilos adicionales para campos específicos */
+.reservas__input-error--full {
+  width: 100%;
+}
+
+/* Estilos para el selector de personas */
+.input-cantidad-personas__label {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 0.2rem;
+  align-self: flex-start;
+}
+
+.cantidad-personas__wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 1.2rem;
+  background: #f2f1f0;
+  border-radius: 1.2rem;
+  padding: 0.5rem 1.2rem;
+  box-shadow: 0 1px 6px #0001;
+  max-width: 220px;
+}
+
+.cantidad-personas__btn {
+  background: none;
+  border: none;
+  color: var(--primary-500);
+  font-size: 2.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 0.7rem;
+  border-radius: 0.7rem;
+  transition: background 0.18s;
+}
+
+.cantidad-personas__input {
+  width: 70px;
+  max-width: 100%;
+  text-align: center;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  outline: none;
+  font-weight: 600;
+  color: #222;
+  -moz-appearance: textfield;
+}
+
+/* Estilos para el selector de fechas */
+.date_selector {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.date_button {
+  background: #f2f1f0;
+  color: #444;
+  border: none;
+  border-radius: 1.1rem;
+  padding: 0.9rem 1.5rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  box-shadow: 0 1px 6px #0001;
+  cursor: pointer;
+  opacity: 1;
+  transition: all 0.18s;
+  outline: none;
+}
+
+.date_button.selected {
+  background: var(--primary-500);
+  color: #fff;
+  box-shadow: 0 2px 12px #ff6b0033;
+  outline: 2.5px solid var(--primary-500);
+}
+
+/* Estilos para el selector de hora */
+.time_selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.time_selector label {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 0.2rem;
+}
+
+.time_columns {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.time_button {
+  background: #f2f1f0;
+  color: #444;
+  border: none;
+  border-radius: 1.1rem;
+  padding: 0.9rem 1.5rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  box-shadow: 0 1px 6px #0001;
+  cursor: pointer;
+  opacity: 1;
+  transition: all 0.18s;
+  outline: none;
+}
+
+.time_button.selected {
+  background: var(--primary-500);
+  color: #fff;
+  box-shadow: 0 2px 12px #ff6b0033;
+  outline: 2.5px solid var(--primary-500);
+}
+
+.time_button.unavailable {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Estilos para campos específicos */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+/* Estilo para subtítulos de secciones */
+.reservas__subtitulo {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--primary-500);
+  margin-bottom: 0.7rem;
+}
+
+/* Estilos para mensajes de error */
+.reservas__input-error {
+  color: var(--error-500);
+  font-size: 1rem;
+  margin-top: 0.2rem;
+}
+
+.reservas__input-error--full {
+  width: 100%;
+}
+
+/* Acciones y navegación */
+.reservas__acciones {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2.2rem;
+  gap: 1.2rem;
+}
+
+/* Formulario y etiquetas */
+.formulario__input {
+  background: #f2f1f0;
+  border-radius: 1.1rem;
+  padding: 0.8rem 1.2rem;
+  font-size: 1.1rem;
+  border: none;
+  outline: none;
+  font-weight: 500;
+  color: #222;
+  box-shadow: 0 1px 6px #0001;
+}
+
+/* Botones de control */
+.boton_regresar {
+  background: #f2f1f0;
+  color: var(--primary-500);
+  border-radius: 1.1rem;
+  padding: 0.9rem 2.2rem;
+  font-weight: 700;
+  font-size: 1.15rem;
+  box-shadow: 0 1px 6px #0001;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+
+.boton_siguiente {
+  background: var(--primary-500);
+  color: #fff;
+  border-radius: 1.1rem;
+  padding: 0.9rem 2.2rem;
+  font-weight: 700;
+  font-size: 1.15rem;
+  box-shadow: 0 2px 12px #ff6b0033;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s;
+}
+
+/* Estilos para botones de navegación */
+.boton_regresar {
+  background: #f2f1f0;
+  color: var(--primary-500);
+  border-radius: 1.1rem;
+  padding: 0.9rem 2.2rem;
+  font-weight: 700;
+  font-size: 1.15rem;
+  box-shadow: 0 1px 6px #0001;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+
+.boton_siguiente {
+  background: var(--primary-500);
+  color: #fff;
+  border-radius: 1.1rem;
+  padding: 0.9rem 2.2rem;
+  font-weight: 700;
+  font-size: 1.15rem;
+  box-shadow: 0 2px 12px #ff6b0033;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s;
 }

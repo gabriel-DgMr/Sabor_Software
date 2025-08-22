@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
+import LoadingScreen from '../components/LoadingScreen.jsx';
 // import { useAuth } from '../context/AuthContext';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils.js';
 import {
@@ -20,51 +21,15 @@ import { GoCheck, GoX, GoAlert } from 'react-icons/go';
 const CustomAlert = ({ open, type, message, onClose }) => {
   if (!open) return null;
   let icon = null;
-  if (type === 'success') icon = <GoCheck className="GoCheck" style={{ fontSize: '2.5rem' }} />;
-  else if (type === 'error') icon = <GoX className="GoX" style={{ fontSize: '2.5rem' }} />;
-  else icon = <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />;
+  if (type === 'success') icon = <GoCheck className="GoCheck" />;
+  else if (type === 'error') icon = <GoX className="GoX" />;
+  else icon = <GoAlert className="GoAlert" />;
   return (
     <div className="custom-alert-overlay">
-      <div
-        className="custom-alert"
-        style={{
-          background: '#fff',
-          border: 'none',
-          boxShadow: '0 4px 32px rgba(0,0,0,0.18)',
-          borderRadius: '1.5rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: '2.5rem 2.5rem 2rem 2.5rem',
-          minWidth: '320px',
-          maxWidth: '90vw',
-          gap: '1.2rem',
-        }}
-      >
-        <span
-          className="custom-alert__icon"
-          style={{ display: 'block', textAlign: 'center', margin: '0 auto' }}
-        >
-          {icon}
-        </span>
-        <span className="custom-alert__message" style={{ textAlign: 'center' }}>
-          {message}
-        </span>
-        <button
-          className="custom-alert__close"
-          style={{
-            marginTop: '1rem',
-            background: '#ff6f00',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '1rem',
-            padding: '0.7rem 2.2rem',
-            fontSize: '1.5rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-          onClick={onClose}
-        >
+      <div className="custom-alert">
+        <span className="custom-alert__icon">{icon}</span>
+        <span className="custom-alert__message">{message}</span>
+        <button className="custom-alert__close" onClick={onClose}>
           Cerrar
         </button>
       </div>
@@ -101,6 +66,7 @@ const Reservas = () => {
 
   // Estado para alertas personalizadas
   const [alert, setAlert] = useState({ open: false, type: 'success', message: '' });
+  const [isLoading, setIsLoading] = useState(false);
 
   const { t } = useTranslation();
 
@@ -274,6 +240,7 @@ const Reservas = () => {
       if (validateStep3()) setStep(4);
     } else if (step === 4) {
       try {
+        setIsLoading(true);
         const token = localStorage.getItem('token');
         // Adaptar el payload a lo que espera el backend
         const payload = {
@@ -302,6 +269,7 @@ const Reservas = () => {
           result = { message: 'Respuesta no válida del servidor.' };
         }
         console.log('Respuesta del backend:', result);
+        setIsLoading(false);
 
         if (response.ok) {
           setAlert({ open: true, type: 'success', message: '¡Reserva realizada con éxito!' });
@@ -581,6 +549,7 @@ const Reservas = () => {
   // Estructura principal
   return (
     <div className="reservas-main-bg">
+      {isLoading && <LoadingScreen />}
       <Header />
       <main className="reservas-flex-layout">
         {/* Columna Izquierda: Imagen */}
@@ -594,15 +563,15 @@ const Reservas = () => {
         {/* Columna Derecha: Formulario */}
         <section className="reservas-card">
           <h1 className="reservas__titulo">Reservación</h1>
-          {/* Wizard de pasos */}
-          <div className="reservas-wizard">
+          {/* prog de pasos */}
+          <div className="reservas-prog">
             {[1, 2, 3, 4].map(num => (
               <div
                 key={num}
-                className={`wizard-step${step === num ? ' wizard-step--active' : ''}${step > num ? ' wizard-step--done' : ''}`}
+                className={`prog-step${step === num ? ' prog-step--active' : ''}${step > num ? ' prog-step--done' : ''}`}
               >
-                <div className="wizard-step__circle">{num}</div>
-                <span className="wizard-step__label">
+                <div className="prog-step__circle">{num}</div>
+                <span className="prog-step__label">
                   {num === 1
                     ? 'Selección'
                     : num === 2
@@ -611,7 +580,7 @@ const Reservas = () => {
                         ? 'Adicional'
                         : 'Confirmación'}
                 </span>
-                {num < 4 && <span className="wizard-step__bar"></span>}
+                {num < 4 && <span className="prog-step__bar"></span>}
               </div>
             ))}
           </div>
@@ -619,63 +588,17 @@ const Reservas = () => {
             <form onSubmit={handleSubmit}>
               {/* Paso 1: Cantidad, Fecha, Hora */}
               {step === 1 && (
-                <div
-                  className="reservas-step reservas-step--1"
-                  style={{ display: 'flex', flexDirection: 'column', gap: '2.2rem' }}
-                >
+                <div className="reservas-step reservas-step--1">
                   {/* Cantidad de personas */}
-                  <div
-                    className="inputCantidadPersonas"
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '0.7rem',
-                      width: '100%',
-                    }}
-                  >
-                    <label
-                      htmlFor="personas"
-                      style={{
-                        fontWeight: 600,
-                        fontSize: '1.1rem',
-                        color: '#444',
-                        marginBottom: '0.2rem',
-                        alignSelf: 'flex-start',
-                      }}
-                    >
+                  <div className="inputCantidadPersonas">
+                    <label htmlFor="personas" className="input-cantidad-personas__label">
                       Cantidad
                     </label>
-                    <div
-                      className="cantidad-personas__wrapper"
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        width: '100%',
-                        gap: '1.2rem',
-                        background: '#f2f1f0',
-                        borderRadius: '1.2rem',
-                        padding: '0.5rem 1.2rem',
-                        boxShadow: '0 1px 6px #0001',
-                        maxWidth: '220px',
-                      }}
-                    >
+                    <div className="cantidad-personas__wrapper">
                       <button
                         type="button"
                         aria-label="Disminuir"
                         className="cantidad-personas__btn"
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: 'var(--primary-500)',
-                          fontSize: '2.1rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          padding: '0 0.7rem',
-                          borderRadius: '0.7rem',
-                          transition: 'background 0.18s',
-                        }}
                         onClick={() =>
                           setFormData(prev => ({
                             ...prev,
@@ -696,38 +619,15 @@ const Reservas = () => {
                         type="number"
                         value={formData.personas}
                         onChange={handleInputChange}
-                        style={{
-                          width: '70px',
-                          maxWidth: '100%',
-                          textAlign: 'center',
-                          fontSize: '1.5rem',
-                          background: 'none',
-                          border: 'none',
-                          outline: 'none',
-                          fontWeight: 600,
-                          color: '#222',
-                          MozAppearance: 'textfield',
-                        }}
                       />
                       <button
                         type="button"
                         aria-label="Aumentar"
                         className="cantidad-personas__btn"
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: 'var(--primary-500)',
-                          fontSize: '2.1rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          padding: '0 0.7rem',
-                          borderRadius: '0.7rem',
-                          transition: 'background 0.18s',
-                        }}
                         onClick={() =>
                           setFormData(prev => ({
                             ...prev,
-                            personas: Math.max(1, (prev.personas || 1) + 1),
+                            personas: Math.max(1, (prev.personas || 0) + 1),
                           }))
                         }
                         tabIndex={0}
@@ -736,24 +636,11 @@ const Reservas = () => {
                       </button>
                     </div>
                     {formErrors.personas && (
-                      <small
-                        className="reservas__input-error"
-                        style={{ color: 'var(--error-500)', marginTop: '0.2rem', fontSize: '1rem' }}
-                      >
-                        {formErrors.personas}
-                      </small>
+                      <small className="reservas__input-error">{formErrors.personas}</small>
                     )}
                   </div>
                   {/* Fechas disponibles */}
-                  <div
-                    className="date_selector"
-                    style={{
-                      display: 'flex',
-                      gap: '0.7rem',
-                      flexWrap: 'wrap',
-                      marginBottom: '0.5rem',
-                    }}
-                  >
+                  <div className="date_selector">
                     {fechasDisponibles &&
                       fechasDisponibles.map((fecha, index) => (
                         <button
@@ -762,60 +649,19 @@ const Reservas = () => {
                           disabled={!fecha.disponible}
                           type="button"
                           onClick={() => fecha.disponible && handleDateSelect(fecha.fecha)}
-                          style={{
-                            background:
-                              selectedDate === fecha.fecha ? 'var(--primary-500)' : '#f2f1f0',
-                            color: selectedDate === fecha.fecha ? '#fff' : '#444',
-                            border: 'none',
-                            borderRadius: '1.1rem',
-                            padding: '0.9rem 1.5rem',
-                            fontWeight: 600,
-                            fontSize: '1.1rem',
-                            boxShadow:
-                              selectedDate === fecha.fecha
-                                ? '0 2px 12px #ff6b0033'
-                                : '0 1px 6px #0001',
-                            cursor: fecha.disponible ? 'pointer' : 'not-allowed',
-                            opacity: fecha.disponible ? 1 : 0.5,
-                            transition: 'all 0.18s',
-                            outline:
-                              selectedDate === fecha.fecha
-                                ? '2.5px solid var(--primary-500)'
-                                : 'none',
-                          }}
                         >
                           {fecha.formato}
                         </button>
                       ))}
                     {formErrors.fecha && (
-                      <small
-                        className="reservas__input-error"
-                        style={{
-                          color: 'var(--error-500)',
-                          marginTop: '0.2rem',
-                          fontSize: '1rem',
-                          width: '100%',
-                        }}
-                      >
+                      <small className="reservas__input-error reservas__input-error--full">
                         {formErrors.fecha}
                       </small>
                     )}
                   </div>
                   {/* Horarios disponibles */}
-                  <div
-                    className="time_selector"
-                    style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}
-                  >
-                    <label
-                      style={{
-                        fontWeight: 600,
-                        fontSize: '1.1rem',
-                        color: '#444',
-                        marginBottom: '0.2rem',
-                      }}
-                    >
-                      {t('reservas_hora')}
-                    </label>
+                  <div className="time_selector">
+                    <label className="time_selector__label">{t('reservas_hora')}</label>
                     <div
                       className="time_columns"
                       style={{ display: 'flex', gap: '0.7rem', flexWrap: 'wrap' }}
@@ -827,71 +673,26 @@ const Reservas = () => {
                           disabled={!horario.disponible}
                           type="button"
                           onClick={() => horario.disponible && handleTimeSelect(horario.hora)}
-                          style={{
-                            background:
-                              selectedTime === horario.hora ? 'var(--primary-500)' : '#f2f1f0',
-                            color: selectedTime === horario.hora ? '#fff' : '#444',
-                            border: 'none',
-                            borderRadius: '1.1rem',
-                            padding: '0.9rem 1.5rem',
-                            fontWeight: 600,
-                            fontSize: '1.1rem',
-                            boxShadow:
-                              selectedTime === horario.hora
-                                ? '0 2px 12px #ff6b0033'
-                                : '0 1px 6px #0001',
-                            cursor: horario.disponible ? 'pointer' : 'not-allowed',
-                            opacity: horario.disponible ? 1 : 0.5,
-                            transition: 'all 0.18s',
-                            outline:
-                              selectedTime === horario.hora
-                                ? '2.5px solid var(--primary-500)'
-                                : 'none',
-                          }}
                         >
                           {horario.hora}
                         </button>
                       ))}
                     </div>
                     {formErrors.hora && (
-                      <small
-                        className="reservas__input-error"
-                        style={{
-                          color: 'var(--error-500)',
-                          marginTop: '0.2rem',
-                          fontSize: '1rem',
-                          width: '100%',
-                        }}
-                      >
+                      <small className="reservas__input-error reservas__input-error--full">
                         {formErrors.hora}
                       </small>
                     )}
                   </div>
-                  <div
-                    className="info_contacto"
-                    style={{ marginTop: '1.2rem', color: '#888', fontSize: '1.05rem' }}
-                  >
+                  <div className="info_contacto">
                     <p>{t('reservas_info_contacto')}</p>
                   </div>
                 </div>
               )}
               {/* Paso 2: Información de contacto */}
               {step === 2 && (
-                <div
-                  className="reservas-step reservas-step--2"
-                  style={{ display: 'flex', flexDirection: 'column', gap: '1.7rem' }}
-                >
-                  <h2
-                    className="reservas__subtitulo"
-                    style={{
-                      fontWeight: 700,
-                      fontSize: '1.5rem',
-                      color: 'var(--primary-500)',
-                      marginBottom: '0.7rem',
-                    }}
-                  >
-                    {t('reservas_info_contacto_titulo')}
-                  </h2>
+                <div className="reservas-step reservas-step--2">
+                  <h2 className="reservas__subtitulo">{t('reservas_info_contacto_titulo')}</h2>
                   <div
                     className="campo"
                     style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}
@@ -922,12 +723,7 @@ const Reservas = () => {
                       }}
                     />
                     {formErrors.nombre && (
-                      <small
-                        className="reservas__input-error"
-                        style={{ color: 'var(--error-500)', fontSize: '1rem' }}
-                      >
-                        {formErrors.nombre}
-                      </small>
+                      <small className="reservas__input-error">{formErrors.nombre}</small>
                     )}
                   </div>
                   <div
@@ -960,12 +756,7 @@ const Reservas = () => {
                       }}
                     />
                     {formErrors.telefono && (
-                      <small
-                        className="reservas__input-error"
-                        style={{ color: 'var(--error-500)', fontSize: '1rem' }}
-                      >
-                        {formErrors.telefono}
-                      </small>
+                      <small className="reservas__input-error">{formErrors.telefono}</small>
                     )}
                   </div>
                   <div
@@ -998,33 +789,15 @@ const Reservas = () => {
                       }}
                     />
                     {formErrors.email && (
-                      <small
-                        className="reservas__input-error"
-                        style={{ color: 'var(--error-500)', fontSize: '1rem' }}
-                      >
-                        {formErrors.email}
-                      </small>
+                      <small className="reservas__input-error">{formErrors.email}</small>
                     )}
                   </div>
                 </div>
               )}
               {/* Paso 3: Peticiones adicionales */}
               {step === 3 && (
-                <div
-                  className="reservas-step reservas-step--3"
-                  style={{ display: 'flex', flexDirection: 'column', gap: '1.7rem' }}
-                >
-                  <h2
-                    className="reservas__subtitulo"
-                    style={{
-                      fontWeight: 700,
-                      fontSize: '1.5rem',
-                      color: 'var(--primary-500)',
-                      marginBottom: '0.7rem',
-                    }}
-                  >
-                    {t('reservas_peticiones_titulo')}
-                  </h2>
+                <div className="reservas-step reservas-step--3">
+                  <h2 className="reservas__subtitulo">{t('reservas_peticiones_titulo')}</h2>
                   <div
                     className="campo"
                     style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}
@@ -1042,59 +815,18 @@ const Reservas = () => {
                       rows="4"
                       value={formData.peticiones}
                       onChange={handleInputChange}
-                      style={{
-                        background: '#f2f1f0',
-                        borderRadius: '1.1rem',
-                        padding: '0.8rem 1.2rem',
-                        fontSize: '1.1rem',
-                        border: 'none',
-                        outline: 'none',
-                        fontWeight: 500,
-                        color: '#222',
-                        boxShadow: '0 1px 6px #0001',
-                        resize: 'vertical',
-                      }}
                     />
                     {formErrors.peticiones && (
-                      <small
-                        className="reservas__input-error"
-                        style={{ color: 'var(--error-500)', fontSize: '1rem' }}
-                      >
-                        {formErrors.peticiones}
-                      </small>
+                      <small className="reservas__input-error">{formErrors.peticiones}</small>
                     )}
                   </div>
                 </div>
               )}
               {/* Paso 4: Confirmación */}
               {step === 4 && (
-                <div
-                  className="reservas-step reservas-step--4"
-                  style={{ display: 'flex', flexDirection: 'column', gap: '1.7rem' }}
-                >
-                  <h2
-                    className="reservas__subtitulo"
-                    style={{
-                      fontWeight: 700,
-                      fontSize: '1.5rem',
-                      color: 'var(--primary-500)',
-                      marginBottom: '0.7rem',
-                    }}
-                  >
-                    {t('reservas_confirmar_titulo')}
-                  </h2>
-                  <div
-                    className="resumen-reserva"
-                    style={{
-                      background: '#f2f1f0',
-                      borderRadius: '1.1rem',
-                      padding: '1.2rem 1.5rem',
-                      fontSize: '1.1rem',
-                      color: '#444',
-                      marginBottom: '0.7rem',
-                      boxShadow: '0 1px 6px #0001',
-                    }}
-                  >
+                <div className="reservas-step reservas-step--4">
+                  <h2 className="reservas__subtitulo">{t('reservas_confirmar_titulo')}</h2>
+                  <div className="resumen-reserva">
                     <p>
                       <strong>{t('reservas_personas')}:</strong> {formData.personas}
                     </p>
@@ -1119,59 +851,17 @@ const Reservas = () => {
                       </p>
                     )}
                   </div>
-                  <p className="confirmacion-aviso" style={{ color: '#888', fontSize: '1.05rem' }}>
-                    {t('reservas_confirmar_aviso')}
-                  </p>
+                  <p className="confirmacion-aviso">{t('reservas_confirmar_aviso')}</p>
                 </div>
               )}
               {/* Acciones: Botones */}
-              <div
-                className="reservas__acciones"
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginTop: '2.2rem',
-                  gap: '1.2rem',
-                }}
-              >
+              <div className="reservas__acciones">
                 {step > 1 && (
-                  <button
-                    className="boton_regresar"
-                    type="button"
-                    onClick={handlePreviousStep}
-                    style={{
-                      background: '#f2f1f0',
-                      color: 'var(--primary-500)',
-                      borderRadius: '1.1rem',
-                      padding: '0.9rem 2.2rem',
-                      fontWeight: 700,
-                      fontSize: '1.15rem',
-                      boxShadow: '0 1px 6px #0001',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'background 0.18s, color 0.18s',
-                    }}
-                  >
+                  <button className="boton_regresar" type="button" onClick={handlePreviousStep}>
                     {t('reservas_regresar')}
                   </button>
                 )}
-                <button
-                  className="boton_siguiente"
-                  type="submit"
-                  style={{
-                    background: 'var(--primary-500)',
-                    color: '#fff',
-                    borderRadius: '1.1rem',
-                    padding: '0.9rem 2.2rem',
-                    fontWeight: 700,
-                    fontSize: '1.15rem',
-                    boxShadow: '0 2px 12px #ff6b0033',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'background 0.18s, box-shadow 0.18s',
-                  }}
-                >
+                <button className="boton_siguiente" type="submit">
                   {step === 4
                     ? t('reservas_confirmar_boton')
                     : step === 3
