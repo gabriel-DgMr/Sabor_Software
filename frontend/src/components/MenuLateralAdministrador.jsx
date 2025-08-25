@@ -58,7 +58,7 @@ const MenuLateral = () => {
           }}
         >
           <FaUserCircle size={32} />
-          <span className="menu-lateral__usuario-nombre">{user?.nombre_cliente || 'Invitado'}</span>
+          <span className="menu-lateral__cliente-nombre">{user?.nombre_usuario || 'Invitado'}</span>
         </button>
 
         <hr className="menu-lateral__separador" />

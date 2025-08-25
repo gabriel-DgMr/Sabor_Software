@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from "react-router-dom";
-import "../index.css";
-import "../styles/carrito.css";
-import { GoX, GoCheck, GoAlert } from "react-icons/go";
-import { GoTrash } from "react-icons/go";
-import { BsCashCoin } from "react-icons/bs";
-import { GoCreditCard } from "react-icons/go";
-import { IoCart } from "react-icons/io5";
-
+import { useNavigate } from 'react-router-dom';
+import '../index.css';
+import '../styles/carrito.css';
+import { GoX, GoCheck, GoAlert } from 'react-icons/go';
+import { GoTrash } from 'react-icons/go';
+import { BsCash } from 'react-icons/bs';
+import { GoCreditCard } from 'react-icons/go';
+import { IoCart } from 'react-icons/io5';
 
 import DialogoModal from '../components/DialogoExito.jsx';
 import Footer from '../components/Footer.jsx';
@@ -33,17 +32,22 @@ export default function Carrito() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { 
-    cartItems, 
-    clearCart, 
-    loading: cartLoading, 
+  const {
+    cartItems,
+    clearCart,
+    loading: cartLoading,
     error: cartError,
     confirmarPedido,
     updateItemQuantity,
-    removeItemFromCart
+    removeItemFromCart,
   } = useCart();
   const [recomendaciones, setRecomendaciones] = useState('');
-  const [modal, setModal] = useState({ open: false, message: '', icon: <GoCheck className="GoCheck"/>, onConfirm: null });
+  const [modal, setModal] = useState({
+    open: false,
+    message: '',
+    icon: <GoCheck className="GoCheck" />,
+    onConfirm: null,
+  });
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -61,8 +65,8 @@ export default function Carrito() {
       setModal({
         open: true,
         message: 'El carrito está vacío.',
-        icon: <GoAlert className="GoAlert"/>,
-        onConfirm: () => setModal({ ...modal, open: false })
+        icon: <GoAlert className="GoAlert" />,
+        onConfirm: () => setModal({ ...modal, open: false }),
       });
       return;
     }
@@ -75,21 +79,20 @@ export default function Carrito() {
       const response = await fetch('http://localhost:3000/api/mercadopago/preferencia', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: cartItems })
+        body: JSON.stringify({ items: cartItems }),
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Error al crear preferencia de pago');
 
-      // Redirige al usuario a Mercado Pago
+      // Redirige al cliente a Mercado Pago
       window.location.href = data.init_point;
-
     } catch (error) {
       setModal({
         open: true,
         message: 'Error al procesar el pago con Mercado Pago',
-        icon: <GoX className="GoX"/>,
-        onConfirm: () => setModal({ ...modal, open: false })
+        icon: <GoX className="GoX" />,
+        onConfirm: () => setModal({ ...modal, open: false }),
       });
     } finally {
       setLoading(false);
@@ -100,7 +103,7 @@ export default function Carrito() {
     setModal({
       open: true,
       message: '¿Estás seguro de que deseas eliminar todo el carrito?',
-      icon: <GoTrash className="GoTrash"/> ,
+      icon: <GoTrash className="GoTrash" />,
       confirmText: 'Sí, eliminar',
       cancelText: 'Cancelar',
       onConfirm: async () => {
@@ -112,36 +115,43 @@ export default function Carrito() {
           setModal({
             open: true,
             message: `Error al eliminar carrito`,
-            icon: <GoX className="GoX"/>,
-            onConfirm: () => setModal({ ...modal, open: false })
+            icon: <GoX className="GoX" />,
+            onConfirm: () => setModal({ ...modal, open: false }),
           });
         }
       },
-      onCancel: () => setModal({ ...modal, open: false })
+      onCancel: () => setModal({ ...modal, open: false }),
     });
   };
 
-  const handleCerrarPedido = async () => {
-    if (window.confirm(t('carrito_confirmar_cerrar'))) {
-      try {
-        // Usar un empleado por defecto (ID 1) y método de pago efectivo
-        await confirmarPedido(1, 'efectivo');
-        localStorage.removeItem('recomendacionesPedido');
-        setModal({
-          open: true,
-          message: 'Pedido cerrado exitosamente',
-          icon: <GoCheck className="GoCheck"/>,
-          onConfirm: () => setModal({ ...modal, open: false })
-        });
-      } catch (error) {
-        setModal({
-          open: true,
-          message: `Error al cerrar pedido`,
-          icon: <GoX className="GoX"/>,
-          onConfirm: () => setModal({ ...modal, open: false })
-        });
-      }
-    }
+  const handlePagoEfectivo = async () => {
+    setModal({
+      open: true,
+      message: '¿Deseas pagar tu pedido en efectivo?',
+      icon: <BsCash className="BsCash" style={{ color: '#ff9800', fontSize: '2.5rem' }} />,
+      confirmText: 'Sí, pagar en efectivo',
+      cancelText: 'Cancelar',
+      onConfirm: async () => {
+        try {
+          await confirmarPedido(1, 'efectivo');
+          localStorage.removeItem('recomendacionesPedido');
+          setModal({
+            open: true,
+            message: '¡Pago en efectivo registrado exitosamente!',
+            icon: <GoCheck className="GoCheck" style={{ color: '#00a600', fontSize: '2.5rem' }} />,
+            onConfirm: () => setModal(m => ({ ...m, open: false })),
+          });
+        } catch (error) {
+          setModal({
+            open: true,
+            message: `Error al registrar el pago en efectivo`,
+            icon: <GoX className="GoX" style={{ color: '#e53935', fontSize: '2.5rem' }} />,
+            onConfirm: () => setModal(m => ({ ...m, open: false })),
+          });
+        }
+      },
+      onCancel: () => setModal(m => ({ ...m, open: false })),
+    });
   };
 
   const handleUpdateQuantity = async (id_producto, nuevaCantidad) => {
@@ -151,21 +161,21 @@ export default function Carrito() {
       setModal({
         open: true,
         message: `Error al actualizar cantidad`,
-        icon: <GoX className="GoX"/>,
-        onConfirm: () => setModal({ ...modal, open: false })
+        icon: <GoX className="GoX" />,
+        onConfirm: () => setModal({ ...modal, open: false }),
       });
     }
   };
 
-  const handleRemoveItem = async (id_producto) => {
+  const handleRemoveItem = async id_producto => {
     try {
       await removeItemFromCart(id_producto);
     } catch (error) {
       setModal({
         open: true,
         message: `Error al eliminar producto: ${error.message}`,
-        icon: <GoX className="GoX"/>,
-        onConfirm: () => setModal({ ...modal, open: false })
+        icon: <GoX className="GoX" />,
+        onConfirm: () => setModal({ ...modal, open: false }),
       });
     }
   };
@@ -189,10 +199,13 @@ export default function Carrito() {
         <main className="carrito_bg">
           <div className="carrito_error">
             <p>{error || cartError}</p>
-            <button className="carrito_btn reintentar" onClick={() => {
-              setError(null);
-              setLoading(true);
-            }}>
+            <button
+              className="carrito_btn reintentar"
+              onClick={() => {
+                setError(null);
+                setLoading(true);
+              }}
+            >
               {t('carrito_reintentar')}
             </button>
           </div>
@@ -210,9 +223,16 @@ export default function Carrito() {
         <div className="carrito_contenido">
           <div className="carrito_pedidos">
             <div className="carrito_alerta">
-              <CarritoAlert message={<>{t('carrito_alerta')} <span className="carrito_alerta_link">{t('carrito_clic_aqui')}</span></>} />
+              <CarritoAlert
+                message={
+                  <>
+                    {t('carrito_alerta')}{' '}
+                    <span className="carrito_alerta_link">{t('carrito_clic_aqui')}</span>
+                  </>
+                }
+              />
             </div>
-            
+
             {cartItems.length === 0 ? (
               <div className="carrito_vacio">{t('carrito_vacio')}</div>
             ) : (
@@ -220,7 +240,7 @@ export default function Carrito() {
                 <div className="carrito_pedido_info">
                   <div className="carrito_pedido_titulo">
                     <span aria-label="carrito" role="img">
-                    <IoCart />
+                      <IoCart />
                     </span>
                     {t('carrito_pedido_actual')}
                   </div>
@@ -228,39 +248,70 @@ export default function Carrito() {
                     {cartItems.map((item, i) => (
                       <li key={i} className="carrito_item">
                         <div className="carrito_item_info">
+                          {item.imagen_producto && (
+                            <img
+                              className="carrito_item_imagen"
+                              src={`http://localhost:3000/uploads/productos/${item.imagen_producto}`}
+                              alt={item.nombre_producto}
+                              style={{
+                                width: '48px',
+                                height: '48px',
+                                objectFit: 'cover',
+                                borderRadius: '8px',
+                                marginRight: '12px',
+                              }}
+                            />
+                          )}
                           <span className="carrito_item_nombre">
-                            {item.nombre_producto} x {item.cantidad || 1} - {(item.precio_unitario * (item.cantidad || 1)).toLocaleString('es-CO')} COP
+                            {item.nombre_producto} x {item.cantidad || 1} -{' '}
+                            {(item.precio_unitario * (item.cantidad || 1)).toLocaleString('es-CO')}{' '}
+                            COP
                           </span>
                           <div className="carrito_item_controles">
-                            <button 
+                            <button
                               className="carrito_btn_cantidad"
-                              onClick={() => handleUpdateQuantity(item.id_producto, Math.max(1, (item.cantidad || 1) - 1))}
+                              onClick={() =>
+                                handleUpdateQuantity(
+                                  item.id_producto,
+                                  Math.max(1, (item.cantidad || 1) - 1)
+                                )
+                              }
                             >
                               -
                             </button>
                             <span className="carrito_cantidad">{item.cantidad || 1}</span>
-                            <button 
+                            <button
                               className="carrito_btn_cantidad"
-                              onClick={() => handleUpdateQuantity(item.id_producto, (item.cantidad || 1) + 1)}
+                              onClick={() =>
+                                handleUpdateQuantity(item.id_producto, (item.cantidad || 1) + 1)
+                              }
                             >
                               +
                             </button>
-                            <button 
+                            <button
                               className="carrito_btn_eliminar"
                               onClick={() => handleRemoveItem(item.id_producto)}
                             >
-                              <GoTrash/>
+                              <GoTrash />
                             </button>
                           </div>
                         </div>
                         {item.peticion && (
-                          <span className="carrito_item_peticion"> <br/><em>Petición: {item.peticion}</em></span>
+                          <span className="carrito_item_peticion">
+                            {' '}
+                            <br />
+                            <em>Petición: {item.peticion}</em>
+                          </span>
                         )}
                       </li>
                     ))}
                   </ul>
                   <div className="carrito_pedido_total">
-                    {t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio_unitario * (item.cantidad || 1), 0).toLocaleString('es-CO')} COP
+                    {t('carrito_total')}:{' '}
+                    {cartItems
+                      .reduce((sum, item) => sum + item.precio_unitario * (item.cantidad || 1), 0)
+                      .toLocaleString('es-CO')}{' '}
+                    COP
                   </div>
                   {recomendaciones && (
                     <div className="carrito_pedido_recomendaciones">
@@ -270,23 +321,23 @@ export default function Carrito() {
                   )}
                 </div>
                 <div className="carrito_pedido_acciones">
-                  <button 
-                    className="carrito_btn eliminar"
-                    onClick={handleEliminarCarrito}
-                  >
-                    <GoTrash/> {t('carrito_eliminar')}
+                  <button className="carrito_btn eliminar" onClick={handleEliminarCarrito}>
+                    <span className="text">{t('carrito_eliminar')}</span>
+                    <span className="GoTrash">
+                      <GoTrash />
+                    </span>
                   </button>
-                  <button 
-                    className="carrito_btn cerrar"
-                    onClick={handleCerrarPedido}
-                  >
-                    <BsCashCoin /> {t('efectivo')}
+                  <button className="carrito_btn cerrar" onClick={handlePagoEfectivo}>
+                    <span className="text">Efectivo</span>
+                    <span className="BsCash">
+                      <BsCash />
+                    </span>
                   </button>
-                  <button 
-                    className="carrito_btn pagar"
-                    onClick={procesarPago}
-                  >
-                    <GoCreditCard /> {t('carrito_pagar')}
+                  <button className="carrito_btn pagar" onClick={procesarPago}>
+                    <span className="text">{t('Tarjeta')}</span>
+                    <span className="GoCreditCard">
+                      <GoCreditCard />
+                    </span>
                   </button>
                 </div>
               </div>
@@ -294,34 +345,42 @@ export default function Carrito() {
           </div>
           <div className="carrito_detalles">
             <h2>{t('carrito_detalles_compra')}</h2>
-            <p>
-              {t('carrito_detalles_compra_desc')}
-            </p>
-            
+            <p>{t('carrito_detalles_compra_desc')}</p>
+
             {cartItems.length > 0 && (
               <div>
                 <h3>{t('carrito_resumen')}</h3>
                 <ul>
                   {cartItems.map((item, i) => (
                     <li key={i}>
-                      {item.nombre_producto} x {item.cantidad || 1}: {(item.precio_unitario * (item.cantidad || 1)).toLocaleString('es-CO')} COP
+                      {item.nombre_producto} x {item.cantidad || 1}:{' '}
+                      {(item.precio_unitario * (item.cantidad || 1)).toLocaleString('es-CO')} COP
                       {item.peticion && (
-                        <span className="carrito_item_peticion"> <br/><em>Petición: {item.peticion}</em></span>
+                        <span className="carrito_item_peticion">
+                          {' '}
+                          <br />
+                          <em>Petición: {item.peticion}</em>
+                        </span>
                       )}
                     </li>
                   ))}
                 </ul>
-                <p><strong>{t('carrito_total')}: {cartItems.reduce((sum, item) => sum + item.precio_unitario * (item.cantidad || 1), 0).toLocaleString('es-CO')} COP</strong></p>
+                <p>
+                  <strong>
+                    {t('carrito_total')}:{' '}
+                    {cartItems
+                      .reduce((sum, item) => sum + item.precio_unitario * (item.cantidad || 1), 0)
+                      .toLocaleString('es-CO')}{' '}
+                    COP
+                  </strong>
+                </p>
               </div>
             )}
           </div>
         </div>
       </main>
       <Footer />
-      <DialogoModal 
-        {...modal}
-        onClose={() => setModal(m => ({ ...m, open: false }))}
-      />
+      <DialogoModal {...modal} onClose={() => setModal(m => ({ ...m, open: false }))} />
     </>
   );
 }

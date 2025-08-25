@@ -13,9 +13,7 @@ import EmailVerification from './EmailVerification.jsx';
 // Componente de alerta visualmente consistente para register
 const RegisterAlert = ({ type, message }) => {
   if (!message) return null;
-  const icon = type === 'success'
-    ? <GoCheck className="GoCheck" />
-    : <GoX className="GoX" />;
+  const icon = type === 'success' ? <GoCheck className="GoCheck" /> : <GoX className="GoX" />;
   return (
     <div className="alerta-sin-tarjeta alerta-sin-tarjeta--grande">
       {icon}
@@ -45,23 +43,22 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
 
     const form = e.target;
     const formData = {
-      nombre_cliente: form.nombre.value,
-      email_cliente: form.email.value,
-      telefono_cliente: form.telefono.value,
-      contraseña_cliente: form.password.value
+      nombre_usuario: form.nombre.value,
+      correo_usuario: form.email.value,
+      telefono_usuario: form.telefono.value,
+      contraseña_usuario: form.password.value,
     };
     const confirmPassword = form.confirmPassword.value;
 
     // Usar validaciones centralizadas
     const validationErrors = validarRegistro(formData);
-    
+
     // Validar confirmación de contraseña
     if (!confirmPassword) {
       validationErrors.confirmPassword = t('confirma_contrasena');
-    } else if (confirmPassword !== formData.contraseña_cliente) {
+    } else if (confirmPassword !== formData.contraseña_usuario) {
       validationErrors.confirmPassword = t('contrasenas_no_coinciden');
     }
-      
 
     const manejarErroresDeCampo = newErrors => {
       setErrors(newErrors);
@@ -82,18 +79,18 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
     }
 
     const result = await registerUser({
-      nombre_cliente: formData.nombre_cliente.trim(),
-      email_cliente: formData.email_cliente.trim(),
-      telefono_cliente: formData.telefono_cliente.trim(),
-      contraseña_cliente: formData.contraseña_cliente,
+      nombre_usuario: formData.nombre_usuario.trim(),
+      correo_usuario: formData.correo_usuario.trim(),
+      telefono_usuario: formData.telefono_usuario.trim(),
+      contraseña_usuario: formData.contraseña_usuario,
     });
 
     if (result && result.success) {
       if (result.requiresVerification) {
         // Mostrar pantalla de verificación
-        setRegisteredEmail(formData.email_cliente.trim());
+        setRegisteredEmail(formData.correo_usuario.trim());
         setShowVerification(true);
-        localStorage.setItem('pendingVerificationEmail', formData.email_cliente.trim());
+        localStorage.setItem('pendingVerificationEmail', formData.correo_usuario.trim());
       } else {
         setSuccessMessage(result.message || t('registro_exitoso'));
         setTimeout(() => {
@@ -159,14 +156,16 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
           </label>
           <input
             autoComplete="name"
-            className={`formulario__input ${errors.nombre_cliente ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.nombre_usuario ? 'input--error' : ''}`}
             disabled={loading}
             id="nombre-register"
             name="nombre"
             placeholder={t('ej_nombre')}
             type="text"
           />
-          {errors.nombre_cliente && <small className="formulario__mensaje-error">{errors.nombre_cliente}</small>}
+          {errors.nombre_usuario && (
+            <small className="formulario__mensaje-error">{errors.nombre_usuario}</small>
+          )}
         </div>
 
         <div className="formulario__campo">
@@ -175,14 +174,16 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
           </label>
           <input
             autoComplete="email"
-            className={`formulario__input ${errors.email_cliente ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.correo_usuario ? 'input--error' : ''}`}
             disabled={loading}
             id="email-register"
             name="email"
             placeholder={t('ej_email')}
             type="email"
           />
-          {errors.email_cliente && <small className="formulario__mensaje-error">{errors.email_cliente}</small>}
+          {errors.correo_usuario && (
+            <small className="formulario__mensaje-error">{errors.correo_usuario}</small>
+          )}
         </div>
 
         <div className="formulario__campo">
@@ -191,14 +192,16 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
           </label>
           <input
             autoComplete="tel"
-            className={`formulario__input ${errors.telefono_cliente ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.telefono_usuario ? 'input--error' : ''}`}
             disabled={loading}
             id="telefono-register"
             name="telefono"
             placeholder={t('ej_telefono')}
             type="tel"
           />
-          {errors.telefono_cliente && <small className="formulario__mensaje-error">{errors.telefono_cliente}</small>}
+          {errors.telefono_usuario && (
+            <small className="formulario__mensaje-error">{errors.telefono_usuario}</small>
+          )}
         </div>
 
         <div className="formulario__campo">
@@ -207,14 +210,16 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
           </label>
           <input
             autoComplete="new-password"
-            className={`formulario__input ${errors.contraseña_cliente ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.contraseña_usuario ? 'input--error' : ''}`}
             disabled={loading}
             id="password-register"
             name="password"
             placeholder={t('ej_contrasena')}
             type="password"
           />
-          {errors.contraseña_cliente && <small className="formulario__mensaje-error">{errors.contraseña_cliente}</small>}
+          {errors.contraseña_usuario && (
+            <small className="formulario__mensaje-error">{errors.contraseña_usuario}</small>
+          )}
         </div>
 
         <div className="formulario__campo">
@@ -235,13 +240,9 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
           )}
         </div>
 
-        {globalError && (
-          <RegisterAlert type="error" message={globalError} />
-        )}
+        {globalError && <RegisterAlert type="error" message={globalError} />}
 
-        {successMessage && (
-          <RegisterAlert type="success" message={successMessage} />
-        )}
+        {successMessage && <RegisterAlert type="success" message={successMessage} />}
 
         <button className="formulario__boton-principal" disabled={loading} type="submit">
           {loading ? t('registrando') : t('registrarse')}
