@@ -1,3 +1,12 @@
+/* Ocultar flechas nativas de los input[type=number] para cantidad personas */
+.hide-number-spin::-webkit-outer-spin-button,
+.hide-number-spin::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.hide-number-spin {
+  -moz-appearance: textfield;
+}
 /* =====================
    VARIABLES Y FUENTES
    ===================== */
@@ -73,8 +82,8 @@
   --success-500: #1cb981;
   --success-600: #18a271;
   --success-700: #158b61;
-  --success-800: #117451;
-  --success-900: #0e5d41;
+  --success-800: #16a239;
+  --success-900: #0d810d;
 
   /* DarkMode */
   --darkmode-50: #244a4d;
@@ -181,13 +190,13 @@ hr {
     margin-left: 0;
     margin-right: 1.5rem;
   }
-  .encabezado__usuario--mobile {
+  .encabezado__cliente--mobile {
     margin-left: 1.5rem;
   }
-  .encabezado__usuario, .encabezado__idioma {
+  .encabezado__cliente, .encabezado__idioma {
     display: none;
   }
-  .encabezado__usuario--mobile {
+  .encabezado__cliente--mobile {
     display: flex !important;
     align-items: center;
     position: relative;
@@ -203,7 +212,7 @@ hr {
   }
 
   /* Permitir mostrar el login en móvil */
-  .encabezado__usuario:not(.encabezado__usuario--mobile) {
+  .encabezado__cliente:not(.encabezado__cliente--mobile) {
     display: flex !important;
     align-items: center;
     justify-content: center;
@@ -260,14 +269,14 @@ hr {
   margin-right: 1.6rem;
 }
 
-.encabezado__usuario {
+.encabezado__cliente {
   display: flex;
   align-items: center;
   cursor: pointer;
   position: relative;
 }
 
-.encabezado__nombre-usuario {
+.encabezado__nombre-cliente {
   margin-right: 1rem;
   font-weight: 600;
 }
@@ -282,13 +291,13 @@ hr {
     margin-left: 0;
     margin-right: 1.5rem;
   }
-  .encabezado__usuario--mobile {
+  .encabezado__cliente--mobile {
     margin-left: 1.5rem;
   }
-  .encabezado__usuario, .encabezado__idioma {
+  .encabezado__cliente, .encabezado__idioma {
     display: none;
   }
-  .encabezado__usuario--mobile {
+  .encabezado__cliente--mobile {
     display: flex !important;
     align-items: center;
     position: relative;
@@ -1313,6 +1322,11 @@ hr {
   height: 100%;
 }
 
+.imagen-reservas {
+  border-radius:2rem;
+
+}
+
 .seccion--reservas {
   max-width: 1200px;
   margin: 0 auto;
@@ -1323,6 +1337,10 @@ hr {
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 2rem;
+}
+
+.pie-reservas{
+  position: absolute;
 }
 
 .steps_container {
@@ -1574,9 +1592,18 @@ hr {
 .boton_regresar:hover {
   background-color: #e65c00;
 }
+/* Estilos para el botón Agregar Producto en la página de inicio */
+
+.pie-pagina--fixed {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  z-index: 100;
+}
 
 /* =====================
-   MENÚ DE USUARIO (PERFIL)
+   MENÚ DE cliente (PERFIL)
    ===================== */
 .menu-perfil {
   position: absolute;
@@ -1802,6 +1829,7 @@ hr {
   min-width: 320px;
   max-width: 90vw;
   text-align: center;
+  position: relative;
 }
 
 .success-dialog__icon {
@@ -2630,337 +2658,4 @@ hr {
 .alerta-sin-tarjeta--grande span {
   font-size: 1.3rem;
   font-weight: 500;
-}
-
-/* ========================
-   SOBRE NOSOTROS
-   ======================== */
-
-.sobre-nosotros {
-  min-height: 100vh;
-  background: linear-gradient(135deg, var(--neutral-50) 0%, var(--neutral-100) 100%);
-}
-
-/* Hero Section */
-.sobre-nosotros__hero {
-  background: var(--neutral-200);
-  padding: 6rem 0 4rem;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.sobre-nosotros__hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  opacity: 0.1;
-  animation: float 20s ease-in-out infinite;
-}
-
-.sobre-nosotros__hero-contenedor {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-  position: relative;
-  z-index: 2;
-}
-
-.sobre-nosotros__titulo-principal {
-  font-size: 3.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  animation: fadeInUp 1s ease-out;
-  color: var(--darkmode-900);
-
-}
-
-.sobre-nosotros__subtitulo-hero {
-  font-size: 1.25rem;
-  font-weight: 300;
-  opacity: 0.9;
-  max-width: 600px;
-  margin: 0 auto;
-  animation: fadeInUp 1s ease-out 0.3s both;
-  color: var(--darkmode-900);
-
-}
-
-.sobre-nosotros__seccion--equipo {
-  background: white;
-  padding: 4rem 0;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-}
-
-.sobre-nosotros__seccion--contacto {
-  background: linear-gradient(135deg, var(--error-600) 0%, var(--error-700) 100%);
-  color: white;
-  padding: 4rem 0;
-}
-
-.sobre-nosotros__contenedor,
-.sobre-nosotros__contenedor--equipo {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-}
-
-.sobre-nosotros__contenedor--equipo {
-  align-items: end;
-}
-
-@media (max-width: 768px) {
-  .sobre-nosotros__contenedor--equipo,
-  .sobre-nosotros__contenedor {
-    align-items: center;
-  }
-}
-
-/* Artículos */
-
-.sobre-nosotros__historia,
-.sobre-nosotros__equipo {
-  width: 50%;
-}
-
-.sobre-nosotros__historia,
-.sobre-nosotros__equipo,
-.sobre-nosotros__contacto {
-  animation: fadeInUp 1s ease-out;
-}
-
-.sobre-nosotros__encabezado {
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.sobre-nosotros__titulo-seccion {
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--neutral-800);
-}
-
-.sobre-nosotros__seccion--contacto .sobre-nosotros__titulo-seccion {
-  color: var(--neutral-50);
-}
-
-.sobre-nosotros__decorador {
-  width: 80px;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary-500), var(--secondary-500));
-  margin: 0 auto;
-  border-radius: 2px;
-  position: relative;
-}
-
-.sobre-nosotros__seccion--contacto .sobre-nosotros__decorador {
-  background: linear-gradient(90deg, var(--neutral-50), var(--neutral-100));
-}
-
-.sobre-nosotros__decorador::before,
-.sobre-nosotros__decorador::after {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 4px;
-  background: inherit;
-  border-radius: 2px;
-}
-
-.sobre-nosotros__decorador::before {
-  left: -30px;
-}
-
-.sobre-nosotros__decorador::after {
-  right: -30px;
-}
-
-.sobre-nosotros__texto-contenedor {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.sobre-nosotros__parrafo {
-  font-size: 1.4rem;
-  line-height: 1.8;
-  margin-bottom: 2rem;
-  color: var(--neutral-700);
-  text-align: justify;
-}
-
-.sobre-nosotros__seccion--contacto .sobre-nosotros__parrafo {
-  color: var(--neutral-100);
-}
-
-/* Información de Contacto */
-.sobre-nosotros__info-contacto {
-  background: rgba(255,255,255,0.1);
-  padding: 2rem;
-  border-radius: 12px;
-  margin-top: 2rem;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.2);
-}
-
-.sobre-nosotros__item-contacto {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
-.sobre-nosotros__item-contacto:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-}
-
-.sobre-nosotros__etiqueta {
-  font-weight: 600;
-  min-width: 100px;
-  margin-right: 1rem;
-  color: var(--neutral-50);
-}
-
-.sobre-nosotros__enlace {
-  color: var(--neutral-50);
-  text-decoration: none;
-  transition: all 0.3s ease;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-}
-
-.sobre-nosotros__enlace:hover {
-  background: rgba(255,255,255,0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  color: var(--neutral-50);
-}
-
-/* Animaciones */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .sobre-nosotros__titulo-principal {
-    font-size: 2.5rem;
-  }
-  
-  .sobre-nosotros__subtitulo-hero {
-    font-size: 1.1rem;
-  }
-  
-  .sobre-nosotros__titulo-seccion {
-    font-size: 2rem;
-  }
-  
-  .sobre-nosotros__parrafo {
-    font-size: 1rem;
-    text-align: left;
-  }
-  
-  .sobre-nosotros__item-contacto {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .sobre-nosotros__etiqueta {
-    min-width: auto;
-    margin-bottom: 0.5rem;
-  }
-  
-  .sobre-nosotros__hero-contenedor,
-  .sobre-nosotros__contenedor {
-    padding: 0 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .sobre-nosotros__titulo-principal {
-    font-size: 2rem;
-  }
-  
-  .sobre-nosotros__hero {
-    padding: 4rem 0 2rem;
-  }
-  
-  .sobre-nosotros__contenido {
-    padding: 2rem 0;
-  }
-  
-  .sobre-nosotros__seccion {
-    margin-bottom: 2rem;
-  }
-  
-  .sobre-nosotros__seccion--equipo {
-    padding: 2rem 0;
-  }
-  
-  .sobre-nosotros__seccion--contacto {
-    padding: 2rem 0;
-  }
-}
-
-/* Efectos de hover y transiciones */
-.sobre-nosotros__enlace {
-  position: relative;
-  overflow: hidden;
-}
-
-.sobre-nosotros__enlace::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s;
-}
-
-.sobre-nosotros__enlace:hover::before {
-  left: 100%;
-}
-
-/* Mejoras de accesibilidad */
-.sobre-nosotros__enlace:focus {
-  outline: 2px solid rgba(255,255,255,0.5);
-  outline-offset: 2px;
-}
-
-/* Optimizaciones de rendimiento */
-.sobre-nosotros__hero,
-.sobre-nosotros__seccion--contacto {
-  will-change: transform;
-}
-
-.sobre-nosotros__decorador {
-  will-change: transform;
 }

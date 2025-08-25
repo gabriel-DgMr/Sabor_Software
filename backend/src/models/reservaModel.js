@@ -14,13 +14,13 @@ const pool = mysql.createPool(dbConfig);
 export const reservaModel = {
   /**
    * Crea una nueva reserva en la base de datos.
-   * @param {Object} reservaData - Los datos de la reserva (ahora incluye id_cliente).
+   * @param {Object} reservaData - Los datos de la reserva (ahora incluye id_usuario).
    * @returns {Promise<number>} El ID de la reserva insertada.
    */
   createReserva: async (reservaData) => {
     try {
       const {
-        id_cliente,
+        id_usuario,
         numero_personas,
         fecha_reservacion,
         hora_reservacion,
@@ -29,8 +29,8 @@ export const reservaModel = {
 
       // Validar que el cliente no tenga ya una reserva para ese horario
       const [yaReservado] = await pool.query(
-        "SELECT id_reservacion FROM reservaciones WHERE id_cliente = ? AND fecha_reservacion = ? AND hora_reservacion = ?",
-        [id_cliente, fecha_reservacion, hora_reservacion],
+        "SELECT id_reservacion FROM reservaciones WHERE id_usuario = ? AND fecha_reservacion = ? AND hora_reservacion = ?",
+        [id_usuario, fecha_reservacion, hora_reservacion],
       );
       if (yaReservado.length > 0) {
         throw new Error("Ya tienes una reservación para ese horario.");
@@ -63,9 +63,9 @@ export const reservaModel = {
       }
 
       const [result] = await pool.query(
-        "INSERT INTO reservaciones (id_cliente, numero_personas, fecha_reservacion, hora_reservacion, notas, id_mesa, id_estado) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO reservaciones (id_usuario, numero_personas, fecha_reservacion, hora_reservacion, notas, id_mesa, id_estado) VALUES (?, ?, ?, ?, ?, ?, ?)",
         [
-          id_cliente,
+          id_usuario,
           numero_personas,
           fecha_reservacion,
           hora_reservacion,
@@ -111,15 +111,15 @@ export const reservaModel = {
   // },
 
   /**
-   * Obtiene el historial de reservaciones de un usuario.
-   * @param {number} id_cliente - El ID del cliente.
+   * Obtiene el historial de reservaciones de un cliente.
+   * @param {number} id_usuario - El ID del cliente.
    * @returns {Promise<Array>} Lista de reservaciones.
    */
-  getReservasByUser: async (id_cliente) => {
+  getReservasByUser: async (id_usuario) => {
     try {
       const [rows] = await pool.query(
-        "SELECT id_reservacion, fecha_reservacion, hora_reservacion, numero_personas, notas, id_estado, id_mesa FROM reservaciones WHERE id_cliente = ? ORDER BY fecha_reservacion DESC, hora_reservacion DESC",
-        [id_cliente],
+        "SELECT id_reservacion, fecha_reservacion, hora_reservacion, numero_personas, notas, id_estado, id_mesa FROM reservaciones WHERE id_usuario = ? ORDER BY fecha_reservacion DESC, hora_reservacion DESC",
+        [id_usuario],
       );
       return rows;
     } catch (error) {
@@ -154,114 +154,34 @@ export const reservaModel = {
     }
   },
 
-  // Obtener todas las reservaciones con información completa
-  getAllReservaciones: async () => {
-    try {
-      const [rows] = await pool.query(`
-            SELECT 
-                r.id_reservacion,
-                r.fecha_reservacion,
-                r.hora_reservacion,
-                r.numero_personas,
-                r.notas,
-                r.fecha_creacion,
-                u.nombre_usuario as nombre_cliente,
-                u.telefono_usuario as telefono_cliente,
-                u.correo_usuario as email_cliente,
-                m.id_mesa as numero_mesa,
-                e.nombre_estado as estado
-            FROM reservaciones r
-            JOIN usuarios u ON r.id_usuario = u.id_usuario
-            JOIN mesas m ON r.id_mesa = m.id_mesa
-            JOIN estados e ON r.id_estado = e.id_estado
-            ORDER BY r.fecha_reservacion DESC, r.hora_reservacion ASC
-        `);
-      return rows;
-    } catch (error) {
-      console.error("Error al obtener todas las reservaciones:", error);
-      throw error;
-    }
-  },
-
-  // Obtener reservaciones por fecha con información completa
-  getReservacionesByFecha: async (fecha) => {
+  /**
+   * Obtiene los detalles de una reserva específica por su ID.
+   * @param {number} id_reservacion - El ID de la reserva.
+   * @returns {Promise<Object>} Los detalles de la reserva.
+   */
+  getReservaById: async (id_reservacion) => {
     try {
       const [rows] = await pool.query(
-        `
-            SELECT 
-                r.id_reservacion,
-                r.fecha_reservacion,
-                r.hora_reservacion,
-                r.numero_personas,
-                r.notas,
-                r.fecha_creacion,
-                u.nombre_usuario as nombre_cliente,
-                u.telefono_usuario as telefono_cliente,
-                u.correo_usuario as email_cliente,
-                m.id_mesa as numero_mesa,
-                e.nombre_estado as estado
-            FROM reservaciones r
-            JOIN usuarios u ON r.id_usuario = u.id_usuario
-            JOIN mesas m ON r.id_mesa = m.id_mesa
-            JOIN estados e ON r.id_estado = e.id_estado
-            WHERE r.fecha_reservacion = ?
-            ORDER BY r.hora_reservacion ASC
-        `,
-        [fecha],
-      );
-      return rows;
-    } catch (error) {
-      console.error("Error al obtener reservaciones por fecha:", error);
-      throw error;
-    }
-  },
-
-  // Actualizar estado de reservación
-  updateReservacionEstado: async (id, estado) => {
-    try {
-      // Primero obtener el id_estado basado en el nombre del estado
-      const [estadoRow] = await pool.query(
-        "SELECT id_estado FROM estados WHERE nombre_estado = ?",
-        [estado],
+        `SELECT 
+          r.*,
+          m.id_mesa,
+          u.nombre_usuario,
+          u.correo_usuario,
+          u.telefono_usuario
+        FROM reservaciones r
+        JOIN mesas m ON r.id_mesa = m.id_mesa
+        JOIN usuarios u ON r.id_usuario = u.id_usuario
+        WHERE r.id_reservacion = ?`,
+        [id_reservacion],
       );
 
-      if (estadoRow.length === 0) {
-        throw new Error("Estado no válido");
+      if (rows.length === 0) {
+        throw new Error("Reserva no encontrada");
       }
 
-      const id_estado = estadoRow[0].id_estado;
-
-      const [result] = await pool.query(
-        "UPDATE reservaciones SET id_estado = ? WHERE id_reservacion = ?",
-        [id_estado, id],
-      );
-
-      if (result.affectedRows === 0) {
-        throw new Error("Reservación no encontrada");
-      }
-
-      return true;
+      return rows[0];
     } catch (error) {
-      console.error("Error al actualizar estado de reservación:", error);
-      throw error;
-    }
-  },
-
-  // Eliminar reservación
-  deleteReservacion: async (id) => {
-    try {
-      const [result] = await pool.query(
-        "DELETE FROM reservaciones WHERE id_reservacion = ?",
-        [id],
-      );
-
-      if (result.affectedRows === 0) {
-        throw new Error("Reservación no encontrada");
-      }
-
-      return true;
-    } catch (error) {
-      console.error("Error al eliminar reservación:", error);
+      console.error("Error en reservaModel.getReservaById:", error);
       throw error;
     }
   },

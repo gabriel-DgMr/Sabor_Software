@@ -36,8 +36,8 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
 
     const form = e.target;
     const formData = {
-      email_cliente: form.email.value,
-      contraseña_cliente: form.password.value
+      correo_usuario: form.email.value,
+      contraseña_usuario: form.password.value,
     };
 
     // Usar validaciones centralizadas
@@ -48,7 +48,7 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
       return;
     }
 
-    const result = await login(formData.email_cliente.trim(), formData.contraseña_cliente);
+    const result = await login(formData.correo_usuario.trim(), formData.contraseña_usuario);
 
     if (result && result.success) {
       onShowMessage('success', t('login_exito'));
@@ -78,14 +78,16 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
           </label>
           <input
             autoComplete="email"
-            className={`formulario__input ${errors.email_cliente ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.correo_usuario ? 'input--error' : ''}`}
             disabled={loading}
             id="email-login"
             name="email"
             placeholder={t('login_placeholder_email')}
             type="email"
           />
-          {errors.email_cliente && <small className="formulario__mensaje-error">{errors.email_cliente}</small>}
+          {errors.correo_usuario && (
+            <small className="formulario__mensaje-error">{errors.correo_usuario}</small>
+          )}
         </div>
 
         <div className="formulario__campo">
@@ -94,18 +96,18 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
           </label>
           <input
             autoComplete="current-password"
-            className={`formulario__input ${errors.contraseña_cliente ? 'input--error' : ''}`}
+            className={`formulario__input ${errors.contraseña_usuario ? 'input--error' : ''}`}
             disabled={loading}
             id="password-login"
             name="password"
             placeholder={t('login_placeholder_password')}
             type="password"
           />
-          {errors.contraseña_cliente && <small className="formulario__mensaje-error">{errors.contraseña_cliente}</small>}
+          {errors.contraseña_usuario && (
+            <small className="formulario__mensaje-error">{errors.contraseña_usuario}</small>
+          )}
         </div>
-        {globalError && (
-          <LoginAlert message={globalError} id="global-error-login" />
-        )}
+        {globalError && <LoginAlert message={globalError} id="global-error-login" />}
         <button className="formulario__boton-principal" disabled={loading} type="submit">
           {loading ? t('login_iniciando') : t('iniciar_sesion')}
         </button>

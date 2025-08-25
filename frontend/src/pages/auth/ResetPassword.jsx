@@ -1,9 +1,9 @@
 /**
  * Componente ResetPassword
- * 
+ *
  * Este componente maneja el proceso de restablecimiento de contraseña.
- * Se muestra cuando el usuario hace clic en el enlace de recuperación enviado por correo.
- * Permite al usuario establecer una nueva contraseña después de verificar el token.
+ * Se muestra cuando el cliente hace clic en el enlace de recuperación enviado por correo.
+ * Permite al cliente establecer una nueva contraseña después de verificar el token.
  */
 
 import PropTypes from 'prop-types';
@@ -39,7 +39,7 @@ const ResetPassword = ({ onShowMessage }) => {
         // Verificar el token con el servidor
         const response = await fetch(`http://localhost:3000/api/auth/reset-password/${token}`);
         const data = await response.json();
-        
+
         // Evitar actualizaciones si el componente se desmontó
         if (!isMounted) return;
 
@@ -106,7 +106,9 @@ const ResetPassword = ({ onShowMessage }) => {
       newErrors.password = t('reset_password_required');
     } else if (contraseña_cliente.length < 8) {
       newErrors.password = t('reset_password_min_length');
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(contraseña_cliente)) {
+    } else if (
+      !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(contraseña_cliente)
+    ) {
       newErrors.password = t('reset_password_complexity');
     }
 
@@ -151,9 +153,7 @@ const ResetPassword = ({ onShowMessage }) => {
   return (
     <div className="formulario__contenedor formulario__contenedor--reset-password">
       <h2 className="modal__titulo">{t('reset_title')}</h2>
-      <p className="formulario__subtitulo">
-        {t('reset_subtitle', { email })}
-      </p>
+      <p className="formulario__subtitulo">{t('reset_subtitle', { email })}</p>
       <form noValidate className="formulario" onSubmit={handleSubmit}>
         <div className="formulario__campo">
           <label className="formulario__label" htmlFor="password-reset">
@@ -168,7 +168,9 @@ const ResetPassword = ({ onShowMessage }) => {
             placeholder={t('reset_placeholder_password')}
             type="password"
           />
-          {errors.password && <small className="formulario__mensaje-error">{errors.password}</small>}
+          {errors.password && (
+            <small className="formulario__mensaje-error">{errors.password}</small>
+          )}
         </div>
 
         <div className="formulario__campo">
@@ -201,4 +203,4 @@ ResetPassword.propTypes = {
   onShowMessage: PropTypes.func.isRequired,
 };
 
-export default ResetPassword; 
+export default ResetPassword;

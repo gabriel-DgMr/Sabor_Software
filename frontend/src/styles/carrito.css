@@ -35,7 +35,7 @@
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 20px;
-  color: #856404;
+  color: var(--primary-700);
   font-size: 1.3rem;
 }
 
@@ -45,7 +45,7 @@
 }
 
 .carrito_alerta_link {
-  color: #007bff;
+  color: var(--primary-600);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -58,7 +58,7 @@
 }
 
 .carrito_pedido {
-  background: #e4e5e6;
+  background: var(--neutral-100);
   border-radius: 16px;
   padding: 40px 30px;
   margin-bottom: 40px;
@@ -118,7 +118,7 @@
 }
 
 .carrito_btn_cantidad {
-  background: var(--primary-400);
+  background: var(--secondary-600);
   color: white;
   border: none;
   border-radius: 50%;
@@ -134,20 +134,20 @@
 }
 
 .carrito_btn_cantidad:hover {
-  background: var(--primary-600);
+  background: var(--primary-300);
   transform: scale(1.1);
 }
 
 .carrito_cantidad {
   font-weight: bold;
-  color: var(--primary-800);
+  color: var(--neutral-900);
   min-width: 38px;
   text-align: center;
   font-size: 1.5rem;
 }
 
 .carrito_btn_eliminar {
-  background: var(--error-500);
+  background: var(--error-700);
   color: white;
   border: none;
   border-radius: 50%;
@@ -162,7 +162,6 @@
 }
 
 .carrito_btn_eliminar:hover {
-  background: var(--error-700);
   transform: scale(1.1);
 }
 
@@ -176,7 +175,7 @@
 .carrito_pedido_total {
   font-size: 2rem;
   font-weight: bold;
-  color: var(--success-600);
+  color: var(--neutral-900);
   text-align: right;
   padding: 25px;
   border-radius: 12px;
@@ -226,44 +225,235 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
+
+
+/* BOTON ELIMINAR */
 .carrito_btn.eliminar {
-  background: var(--error-500);
-  color: #fff;
+  width: 150px;
+  height: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: #e53935; 
+  border: none;
+  border-radius: 6px;
+  box-shadow: 5px 5px 10px rgba(0,0,0,0.15);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.carrito_btn.eliminar .text {
+  flex: 1;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.carrito_btn.eliminar .GoTrash {
+  font-size: medium;
+  color: var(--neutral-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 100%;
+  border-left: 1px solid #ffffff7b; 
+  transition: all 0.33s ease;
 }
 
 .carrito_btn.eliminar:hover {
-  background: var(--error-700);
+  background: #c62828; 
+  justify-content: center;
 }
 
-.carrito_btn.modificar {
-  background: var(--warning-400);
-  color: var(--neutral-900);
+.carrito_btn.eliminar:hover .text {
+  color: transparent;
+  width: 0;
 }
 
-.carrito_btn.modificar:hover {
-  background: var(--warning-600);
-  color: #fff;
+.carrito_btn.eliminar:hover .GoTrash {
+  font-size: x-large;
+  border-left: none;
+  width: 100%;
 }
 
+.carrito_btn.eliminar:active .GoTrash svg {
+  transform: scale(0.9);
+}
+
+
+/* BOTON CERRAR */
 .carrito_btn.cerrar {
-  background: var(--neutral-400);
-  color: var(--neutral-900);
+  width: 150px;
+  height: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: #ff9800; /* Naranja base */
+  border: none;
+  border-radius: 6px;
+  box-shadow: 5px 5px 10px rgba(0,0,0,0.15);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.carrito_btn.cerrar .text {
+  flex: 1;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.carrito_btn.cerrar .BsCash {
+  font-size: medium;
+  color: var(--neutral-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 100%;
+  border-left: 1px solid #ffffff7b; 
+  transition: all 0.3s ease;
 }
 
 .carrito_btn.cerrar:hover {
-  background: var(--neutral-700);
-  color: #fff;
+  background: #e68900;
+  justify-content: center;
+}
+
+.carrito_btn.cerrar:hover .text {
+  color: transparent;
+  width: 0;
+}
+
+.carrito_btn.cerrar:hover .BsCash {
+  font-size: x-large;
+  border-left: none;
+  width: 100%;
+}
+
+.carrito_btn.cerrar:active .BsCash svg {
+  transform: scale(0.9);
+}
+
+.carrito_btn {
+  font-size: 1.7rem;
+  padding: 18px 38px;
+  border-radius: 12px;
+  font-weight: 700;
+  margin: 0 16px 0 0;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.09);
+  border: none;
+}
+.carrito_btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.carrito_btn {
+  font-size: 1.15rem;
+  padding: 12px 0;
+  border-radius: 10px;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.09);
+  border: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+}
+.carrito_btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+/* Imagen del producto en el item del carrito */
+.carrito_item_img {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  margin-right: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+/* BOTON PAGAR */
+
+.GoCreditCard {
+  color: var(--neutral-100);
 }
 
 .carrito_btn.pagar {
-  background: var(--success-500);
-  color: #fff;
+  width: 150px;
+  height: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: #00a600;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 5px 5px 10px rgba(0,0,0,0.15);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.carrito_btn.pagar .text {
+  flex: 1;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.carrito_btn.pagar .GoCreditCard {
+  font-size: medium;
+  color:var(--neutral-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 100%;
+  border-left: 1px solid #ffffff7b; 
+  transition: all 0.3s ease;
 }
 
 .carrito_btn.pagar:hover {
-  background: var(--success-700);
+  background: #008000; 
+  justify-content: center;
 }
 
+.carrito_btn.pagar:hover .text {
+  color: transparent;
+  width: 0;
+}
+
+.carrito_btn.pagar:hover .GoCreditCard {
+  font-size: x-large;
+  color:var(--neutral-100);
+  border-left: none;
+  width: 100%;
+}
+
+.carrito_btn.pagar:active .GoCreditCard svg {
+  transform: scale(0.9);
+}
+
+.carrito_btn.pagar::after .GoCreditCard {
+  vertical-align: middle;
+  display: inline-block;
+}
+
+/* BOTON REINTENTAR */
 .carrito_btn.reintentar {
   background: var(--primary-400);
   color: #fff;

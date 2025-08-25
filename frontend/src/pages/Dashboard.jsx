@@ -28,7 +28,7 @@ const Dashboard = () => {
                   className="acciones-principales__boton dashboard__acciones"
                   onClick={() => navigate('/administrar/panel/clientes')}
                 >
-                  Clientes
+                  Clientes{' '}
                 </button>
               </li>
               <li className="acciones-principales__item">

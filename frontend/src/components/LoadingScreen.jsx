@@ -6,13 +6,18 @@ const LoadingScreen = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="pantallaDeCarga">
-      <div className="cargaSpinner">
-        <div className="spinner" />
+    <div className="loading-screen-c">
+      <div className="loading-container-c">
+        <div className="loading-logo-c">SABOR</div>
+        <div className="orbit-spinner">
+          <div className="orbit-circle"></div>
+          <div className="orbit-circle"></div>
+          <div className="orbit-circle"></div>
+        </div>
+        <div className="loading-title-c">Cargando, por favor espere</div>
       </div>
-      <p className="textoDeCarga">{t('cargando')}</p>
     </div>
   );
 };
 
-export default LoadingScreen; 
+export default LoadingScreen;

@@ -18,10 +18,10 @@ export const AuthProvider = ({ children }) => {
         if (token) {
           const response = await fetch('http://localhost:3000/api/auth/perfil', {
             headers: {
-              'Authorization': `Bearer ${token}`
-            }
+              Authorization: `Bearer ${token}`,
+            },
           });
-          
+
           if (response.ok) {
             const data = await response.json();
             setUser(data.user);
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async (email_cliente, contraseña_cliente) => {
+  const login = async (correo_usuario, contraseña_usuario) => {
     try {
       setLoading(true);
       const response = await fetch('http://localhost:3000/api/auth/login', {
@@ -52,13 +52,13 @@ export const AuthProvider = ({ children }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email_cliente,
-          contraseña_cliente,
+          correo_usuario,
+          contraseña_usuario,
         }),
       });
 
       const data = await response.json();
-
+      console.log(data);
       if (!response.ok) {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const registerUser = async (userData) => {
+  const registerUser = async userData => {
     try {
       setLoading(true);
       const response = await fetch('http://localhost:3000/api/auth/register', {
@@ -92,10 +92,10 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Retornar información sobre si requiere verificación
-      return { 
-        success: true, 
+      return {
+        success: true,
         message: data.message,
-        requiresVerification: data.requiresVerification || false
+        requiresVerification: data.requiresVerification || false,
       };
     } catch (error) {
       return { success: false, message: error.message };
@@ -109,8 +109,8 @@ export const AuthProvider = ({ children }) => {
       await fetch('http://localhost:3000/api/auth/logout', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       });
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
@@ -122,14 +122,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      loading,
-      isAuthenticated,
-      login,
-      logout,
-      registerUser
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        isAuthenticated,
+        login,
+        logout,
+        registerUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

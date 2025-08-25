@@ -51,14 +51,14 @@ const MenuLateral = () => {
 
         <button
           aria-label="Cerrar sesión"
-          className="menu-lateral__usuario"
+          className="menu-lateral__cliente"
           onClick={() => {
             logout();
             closeMenu();
           }}
         >
           <FaUserCircle size={32} />
-          <span className="menu-lateral__usuario-nombre">{user?.nombre_cliente || 'Invitado'}</span>
+          <span className="menu-lateral__cliente-nombre">{user?.nombre_cliente || 'Invitado'}</span>
         </button>
 
         <hr className="menu-lateral__separador" />

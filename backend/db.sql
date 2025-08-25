@@ -51,13 +51,19 @@ CREATE TABLE roles (
   PRIMARY KEY (id_rol)
 );
 
+INSERT INTO roles (nombre_rol) VALUES
+("Usuario"),
+("Empleado"),
+("Administrador");
+
+
 CREATE TABLE usuarios (
   id_usuario int NOT NULL AUTO_INCREMENT,
-  id_rol int NOT NULL,
+  id_rol int NOT NULL ,
   nombre_usuario varchar(100) NOT NULL,
   correo_usuario varchar(100) NOT NULL UNIQUE,
   contraseña_usuario varchar(255) NOT NULL,
-  telefono_usuario varchar(15) NOT NULL,
+  telefono_usuario varchar(10) NOT NULL,
   imagen_usuario varchar(255),
   fecha_registro timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   fecha_modificacion timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -119,8 +125,7 @@ CREATE TABLE producto_traducciones (
 
 CREATE TABLE pedidos (
   id_pedido int NOT NULL AUTO_INCREMENT,
-  id_cliente int NOT NULL,
-  id_empleado int,
+  id_usuario int NOT NULL,
   id_mesa int,
   id_estado int NOT NULL,
   fecha_pedido timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -365,8 +370,6 @@ DELIMITER ;
 -- ÍNDICES
 -- ========================
 CREATE INDEX idx_productos_categoria ON productos(id_categoria);
-CREATE INDEX idx_pedidos_cliente ON pedidos(id_cliente);
-CREATE INDEX idx_pedidos_empleado ON pedidos(id_empleado);
 CREATE INDEX idx_pedidos_estado ON pedidos(id_estado);
 CREATE INDEX idx_reservaciones_fecha ON reservaciones(fecha_reservacion);
 CREATE INDEX idx_categoria_traducciones_idioma ON categoria_traducciones(idioma);
@@ -378,5 +381,5 @@ CREATE INDEX idx_categoria_traducciones_categoria ON categoria_traducciones(cate
 
 -- Permitir NULL en metodo_pago e id_empleado
 ALTER TABLE pedidos 
-  MODIFY metodo_pago ENUM('efectivo','tarjeta','transferencia') DEFAULT NULL,
-  MODIFY id_empleado int NULL DEFAULT NULL;
+  MODIFY metodo_pago ENUM('efectivo','tarjeta','transferencia') DEFAULT NULL;
+  
