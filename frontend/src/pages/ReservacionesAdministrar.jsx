@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import MenuLateral from '../components/MenuLateral';
+import MenuLateral from '../components/MenuLateralAdministrador';
 import LoadingScreen from '../components/LoadingScreen';
 import '../styles/empleados.css';
 

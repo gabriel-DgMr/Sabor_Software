@@ -29,6 +29,7 @@ import QuienesSomos from './pages/QuienesSomos.jsx';
 import ReservasAdministrar from './pages/ReservacionesAdministrar.jsx';
 import Reservas from './pages/Reservas.jsx';
 import SobreNosotros from './pages/SobreNosotros.jsx';
+import HomeEmpleados from './pages/HomeEmpleados.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 
 function App() {
