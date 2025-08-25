@@ -51,6 +51,10 @@ CREATE TABLE roles (
   PRIMARY KEY (id_rol)
 );
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> feature/paginasAdministrador
 INSERT INTO roles (nombre_rol) VALUES
 ("Usuario"),
 ("Empleado"),
@@ -382,4 +386,3 @@ CREATE INDEX idx_categoria_traducciones_categoria ON categoria_traducciones(cate
 -- Permitir NULL en metodo_pago e id_empleado
 ALTER TABLE pedidos 
   MODIFY metodo_pago ENUM('efectivo','tarjeta','transferencia') DEFAULT NULL;
-  
