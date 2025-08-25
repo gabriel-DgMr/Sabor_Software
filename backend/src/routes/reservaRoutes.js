@@ -1,56 +1,51 @@
-import express from 'express';
-import { hacerReserva, getHorariosDisponibles, checkDisponibilidad, getHistorialReservas } from '../controllers/reservaController.js';
-import { authenticateToken, checkPermission } from '../middleware/auth.js';
-import { validateReserva } from '../middleware/validateRequest.js';
+import express from "express";
+import {
+  hacerReserva,
+  getHorariosDisponibles,
+  checkDisponibilidad,
+  getHistorialReservas,
+  getAllReservaciones,
+  getReservacionesByFecha,
+  updateEstadoReservacion,
+  deleteReservacion,
+} from "../controllers/reservaController.js";
+import { authenticateToken, checkPermission } from "../middleware/auth.js";
+import { validateReserva } from "../middleware/validateRequest.js";
 
 const router = express.Router();
 
 // Rutas públicas para verificar disponibilidad
-router.get('/horarios-disponibles', getHorariosDisponibles);
-router.get('/disponibilidad', checkDisponibilidad);
-router.get('/historial', authenticateToken, getHistorialReservas);
+router.get("/horarios-disponibles", getHorariosDisponibles);
+router.get("/disponibilidad", checkDisponibilidad);
+router.get("/historial", authenticateToken, getHistorialReservas);
 
 // Rutas protegidas con validaciones
-router.post('/hacerReserva', 
-    hacerReserva
+router.post("/hacerReserva", hacerReserva);
+
+// Rutas para administración de reservaciones
+router.get(
+  "/",
+  authenticateToken,
+  checkPermission("read"),
+  getAllReservaciones,
+);
+router.get(
+  "/fecha/:fecha",
+  authenticateToken,
+  checkPermission("read"),
+  getReservacionesByFecha,
+);
+router.put(
+  "/:id/estado",
+  authenticateToken,
+  checkPermission("write"),
+  updateEstadoReservacion,
+);
+router.delete(
+  "/:id",
+  authenticateToken,
+  checkPermission("delete"),
+  deleteReservacion,
 );
 
-// Rutas adicionales para gestión (solo admin/manager)
-router.get('/', 
-    authenticateToken, 
-    checkPermission('read'),
-    (req, res) => {
-        // Implementar getAllReservas si es necesario
-        res.status(501).json({ message: 'Función no implementada' });
-    }
-);
-
-router.get('/:id', 
-    authenticateToken, 
-    checkPermission('read'),
-    (req, res) => {
-        // Implementar getReservaById si es necesario
-        res.status(501).json({ message: 'Función no implementada' });
-    }
-);
-
-router.put('/:id', 
-    authenticateToken, 
-    checkPermission('write'),
-    validateReserva,
-    (req, res) => {
-        // Implementar updateReserva si es necesario
-        res.status(501).json({ message: 'Función no implementada' });
-    }
-);
-
-router.delete('/:id', 
-    authenticateToken, 
-    checkPermission('delete'),
-    (req, res) => {
-        // Implementar deleteReserva si es necesario
-        res.status(501).json({ message: 'Función no implementada' });
-    }
-);
-
-export default router; 
+export default router;

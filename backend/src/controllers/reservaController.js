@@ -154,12 +154,10 @@ export const hacerReserva = async (req, res) => {
       return res.status(400).json({ message: error.message });
     }
     // Siempre responder con JSON en caso de error
-    res
-      .status(500)
-      .json({
-        message: "Error interno del servidor al crear la reserva.",
-        detalle: error.message,
-      });
+    res.status(500).json({
+      message: "Error interno del servidor al crear la reserva.",
+      detalle: error.message,
+    });
   }
 };
 
@@ -228,12 +226,63 @@ export const getHistorialReservas = async (req, res) => {
         .status(500)
         .json({ message: "Error en la consulta de la base de datos." });
     } else {
-      res
-        .status(500)
-        .json({
-          message: "Error al obtener historial de reservaciones",
-          detalle: error.message,
-        });
+      res.status(500).json({
+        message: "Error al obtener historial de reservaciones",
+        detalle: error.message,
+      });
     }
+  }
+};
+
+// Obtener todas las reservaciones (para administración)
+export const getAllReservaciones = async (req, res) => {
+  try {
+    const reservaciones = await reservaModel.getAllReservaciones();
+    res.json(reservaciones);
+  } catch (error) {
+    console.error("Error al obtener todas las reservaciones:", error);
+    res.status(500).json({ message: "Error al obtener reservaciones" });
+  }
+};
+
+// Obtener reservaciones por fecha (para administración)
+export const getReservacionesByFecha = async (req, res) => {
+  try {
+    const { fecha } = req.params;
+    const reservaciones = await reservaModel.getReservacionesByFecha(fecha);
+    res.json(reservaciones);
+  } catch (error) {
+    console.error("Error al obtener reservaciones por fecha:", error);
+    res
+      .status(500)
+      .json({ message: "Error al obtener reservaciones por fecha" });
+  }
+};
+
+// Actualizar estado de reservación
+export const updateEstadoReservacion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { estado } = req.body;
+
+    await reservaModel.updateReservacionEstado(parseInt(id), estado);
+    res.json({ message: "Estado de reservación actualizado correctamente" });
+  } catch (error) {
+    console.error("Error al actualizar estado de reservación:", error);
+    res
+      .status(500)
+      .json({ message: "Error al actualizar estado de reservación" });
+  }
+};
+
+// Eliminar reservación
+export const deleteReservacion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await reservaModel.deleteReservacion(parseInt(id));
+    res.json({ message: "Reservación eliminada correctamente" });
+  } catch (error) {
+    console.error("Error al eliminar reservación:", error);
+    res.status(500).json({ message: "Error al eliminar reservación" });
   }
 };

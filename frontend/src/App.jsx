@@ -1,5 +1,7 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -14,7 +16,7 @@ import Carrito from './pages/carrito.jsx';
 import Checkout from './pages/Checkout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import DashboardVentas from './pages/DashboardVentas.jsx';
-import EmpleadosHome from './pages/EmpleadosHome.jsx';
+import HomeAdministrador from './pages/HomeAdministrador.jsx';
 import EscanearQR from './pages/EscanearQR.jsx';
 import HistorialPedidos from './pages/HistorialPedidos.jsx';
 import HistorialReservas from './pages/HistorialReservas.jsx';
@@ -27,107 +29,117 @@ import QuienesSomos from './pages/QuienesSomos.jsx';
 import ReservasAdministrar from './pages/ReservacionesAdministrar.jsx';
 import Reservas from './pages/Reservas.jsx';
 import SobreNosotros from './pages/SobreNosotros.jsx';
+import HomeEmpleados from './pages/HomeEmpleados.jsx';
 
 function App() {
   return (
-    <AuthProvider>
-      <ProductoProvider>
-        <CategoriaProvider>
-          <CartProvider>
-            <Routes>
-              {/* Rutas públicas */}
-              <Route element={<Home />} path="/" />
-              <Route element={<Login />} path="/login" />
-              <Route element={<Register />} path="/register" />
-              <Route element={<ResetPasswordContainer />} path="/reset-password/:token" />
-              <Route element={<Reservas />} path="/reservas" />
-              <Route element={<Carrito />} path="/carrito" />
-              <Route element={<Checkout />} path="/checkout" />
-              <Route element={<ModificarPedido />} path="/carrito/modificar/:id"/>
-              <Route element={<QuienesSomos />} path="/quienes-somos" />
-              <Route element={<SobreNosotros />} path="/sobre-nosotros" />
-              <Route element={<EscanearQR />} path="/escanear-qr" />
-              
+    <HelmetProvider>
+      <AuthProvider>
+        <ProductoProvider>
+          <CategoriaProvider>
+            <CartProvider>
+              <Routes>
+                {/* Rutas públicas */}
+                <Route element={<Home />} path="/" />
+                <Route element={<Login />} path="/login" />
+                <Route element={<Register />} path="/register" />
+                <Route element={<ResetPasswordContainer />} path="/reset-password/:token" />
+                <Route element={<Reservas />} path="/reservas" />
+                <Route element={<Carrito />} path="/carrito" />
+                <Route element={<Checkout />} path="/checkout" />
+                <Route element={<ModificarPedido />} path="/carrito/modificar/:id" />
+                <Route element={<QuienesSomos />} path="/quienes-somos" />
+                <Route element={<SobreNosotros />} path="/sobre-nosotros" />
+                <Route element={<EscanearQR />} path="/escanear-qr" />
 
-              {/* Rutas protegidas */}
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <EmpleadosHome />
-                  </ProtectedRoute>
-                }
-                path="/homeempleados"
-              />
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <ProductosAdministrar />
-                  </ProtectedRoute>
-                }
-                path="/administrar/productos"
-              />
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <PedidosAdministrar />
-                  </ProtectedRoute>
-                }
-                path="/administrar/pedidos"
-              />
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <ReservasAdministrar />
-                  </ProtectedRoute>
-                }
-                path="/administrar/reservaciones"
-              />
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-                path="/administrar/panel"
-              />
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <DashboardVentas />
-                  </ProtectedRoute>
-                }
-                path="/administrar/panel/ventas"
-              />
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <ActualizarDatos />
-                  </ProtectedRoute>
-                }
-                path="/actualizar-datos"
-              />
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <HistorialPedidos />
-                  </ProtectedRoute>
-                }
-                path="/historial-pedidos"
-              />
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <HistorialReservas />
-                  </ProtectedRoute>
-                }
-                path="/historial-reservas"
-              />
-              <Route element={<PaginaNoEncontrada />} path="*" />
-            </Routes>
-          </CartProvider>
-        </CategoriaProvider>
-      </ProductoProvider>
-    </AuthProvider>
+                {/* Rutas protegidas */}
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <HomeAdministrador />
+                    </ProtectedRoute>
+                  }
+                  path="/HomeAdministrador"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <HomeEmpleados />
+                    </ProtectedRoute>
+                  }
+                  path="/HomeEmpleados"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <ProductosAdministrar />
+                    </ProtectedRoute>
+                  }
+                  path="/administrar/productos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <PedidosAdministrar />
+                    </ProtectedRoute>
+                  }
+                  path="/administrar/pedidos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <ReservasAdministrar />
+                    </ProtectedRoute>
+                  }
+                  path="/administrar/reservaciones"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                  path="/administrar/panel"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <DashboardVentas />
+                    </ProtectedRoute>
+                  }
+                  path="/administrar/panel/ventas"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <ActualizarDatos />
+                    </ProtectedRoute>
+                  }
+                  path="/actualizar-datos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <HistorialPedidos />
+                    </ProtectedRoute>
+                  }
+                  path="/historial-pedidos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <HistorialReservas />
+                    </ProtectedRoute>
+                  }
+                  path="/historial-reservas"
+                />
+                <Route element={<PaginaNoEncontrada />} path="*" />
+              </Routes>
+            </CartProvider>
+          </CategoriaProvider>
+        </ProductoProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
 
