@@ -51,10 +51,6 @@ CREATE TABLE roles (
   PRIMARY KEY (id_rol)
 );
 
-<<<<<<< HEAD
-=======
-
->>>>>>> feature/paginasAdministrador
 INSERT INTO roles (nombre_rol) VALUES
 ("Usuario"),
 ("Empleado"),

@@ -188,9 +188,6 @@ const Home = () => {
                     className="carrusel-productos__imagen carrusel-productos__imagen--full"
                     src={imagenesCarrusel[indiceCarrusel].src}
                   />
-                  <div className="carrusel-productos__nombre">
-                    {imagenesCarrusel[indiceCarrusel].alt}
-                  </div>
                 </div>
                 <button
                   aria-label="Siguiente"
