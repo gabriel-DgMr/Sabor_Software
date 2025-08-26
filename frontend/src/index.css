@@ -5,8 +5,11 @@
   margin: 0;
 }
 .hide-number-spin {
-  -moz-appearance: textfield;
+  appearance: textfield;       /* estándar */
+  -moz-appearance: textfield;  /* Firefox */
+  -webkit-appearance: textfield; /* Chrome, Safari, Edge */
 }
+
 /* =====================
    VARIABLES Y FUENTES
    ===================== */
@@ -1085,7 +1088,7 @@ hr {
 
 .categorias__titulo {
   font-size: 2.4rem;
-  color: white;
+  color: var(--neutral-900);
 }
 
 .categorias__contenedor-cards {
@@ -1125,10 +1128,50 @@ hr {
 }
 
 .categorias__reserva a {
-  color: var(--neutral-50);
+  color: var(--neutral-900);
   font-size: 1.8rem;
-  text-decoration: underline;
+  text-decoration: none;
 }
+
+.btn-reserva {
+  border-radius: 50%;
+  width: 6rem;
+  height: 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem; /* tamaño del ícono */
+  color: white;
+  background-color: var(--secondary-700);
+  text-decoration: none;
+  position: fixed;
+  bottom: 3rem;
+  left: 3rem; /* lo ponemos en la izquierda para que no choque con el carrito */
+  z-index: 1000;
+  transition: all 0.3s ease;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.reserva-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+  color: var(--neutral-900);
+  font-size: 3.5rem;
+}
+
+.btn-reserva:hover .reserva-icono {
+  transform: scale(1.1);
+}
+
+.btn-reserva:active .reserva-icono {
+  transform: scale(0.95);
+}
+
+
+
 
 /* =====================
    BARRA DE NAVEGACIÓN
@@ -1610,18 +1653,6 @@ hr {
   padding: 1rem;
 }
 
-/* =====================
-   RESERVAS
-   ===================== */
-.pagina__contenido-reservas {
-  margin-top: 2%;
-  display: flex;
-  flex-direction: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  height: 100%;
-}
 
 .imagen-reservas {
   border-radius:2rem;

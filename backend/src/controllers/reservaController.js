@@ -229,6 +229,13 @@ export const hacerReserva = async (req, res) => {
     if (error.message && error.message.includes("No hay disponibilidad")) {
       return res.status(400).json({ message: error.message });
     }
+    if (
+      error.message &&
+      error.message.includes("Ya tienes una reservación para ese horario")
+    ) {
+      return res.status(400).json({ message: error.message });
+    }
+
     // Siempre responder con JSON en caso de error
     res.status(500).json({
       message: "Error interno del servidor al crear la reserva.",

@@ -48,16 +48,16 @@ const ForgotPassword = ({ onShowMessage }) => {
     setErrors({});
 
     const form = e.target;
-    const email_cliente = form.email.value;
+    const correo_usuario = form.correo_usuario.value;
 
     // Validación del correo electrónico usando funciones centralizadas
     const newErrors = {};
-    if (!email_cliente) {
-      newErrors.email = t('forgot_email_required');
+    if (!correo_usuario) {
+      newErrors.correo = t('forgot_email_required');
     } else {
-      const emailError = validarEmail(email_cliente);
-      if (emailError) {
-        newErrors.email = t('forgot_email_invalid');
+      const correoError = validarEmail(correo_usuario);
+      if (correoError) {
+        newErrors.correo = t('forgot_email_invalid');
       }
     }
 
@@ -75,7 +75,7 @@ const ForgotPassword = ({ onShowMessage }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email_cliente: email_cliente.trim() }),
+        body: JSON.stringify({ correo_usuario: correo_usuario.trim() }),
       });
 
       const data = await response.json();
@@ -107,7 +107,7 @@ const ForgotPassword = ({ onShowMessage }) => {
             className={`formulario__input ${errors.email ? 'input--error' : ''}`}
             disabled={loading}
             id="email-forgot"
-            name="email"
+            name="correo_usuario"
             placeholder={t('login_placeholder_email')}
             type="email"
           />

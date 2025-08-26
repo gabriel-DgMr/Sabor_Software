@@ -14,6 +14,7 @@ import { useProductos } from '../context/ProductoContext';
 import { useCart } from '../context/useCart.js';
 import { useDebounce } from '../hooks/useDebounce.js';
 import { GoX } from 'react-icons/go';
+import { BiSolidDish } from 'react-icons/bi';
 
 // Componente de error visualmente consistente para Home
 const HomeError = ({ message }) => {
@@ -160,6 +161,12 @@ const Home = () => {
         </div>
       </Link>
 
+      <a href="/reservas" className="btn-reserva">
+        <span className="reserva-icono">
+          <BiSolidDish />
+        </span>
+      </a>
+
       {isMobile && (
         <Link className="burbuja-qr" to="/escanear-qr">
           <div className="carrito-icono">
@@ -221,9 +228,7 @@ const Home = () => {
                   <img alt="Bebidas" className="categorias__imagen" src="/images/bedidas.png" />
                 </div>
               </div>
-              <h2 className="categorias__reserva">
-                <a href="/reservas">{t('reservar_mesa')}</a>
-              </h2>
+              <h2 className="categorias__reserva"></h2>
             </div>
           </div>
         </section>
@@ -239,7 +244,8 @@ const Home = () => {
                 value={categoriaSeleccionada}
                 onChange={handleCategoriaChange}
               >
-                <option value="">{t('seleccionar_categoria')}</option>
+                <option value="">{'Seleccionar categoría'}</option>
+
                 {categorias &&
                   categorias.map(cat => (
                     <option key={cat.id_categoria} value={cat.nombre_categoria}>
