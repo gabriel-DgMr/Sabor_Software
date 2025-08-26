@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FaQrcode, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { FaCartShopping } from "react-icons/fa6";
+import { FaQrcode, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaCartShopping } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
 import '../index.css';
 
@@ -14,6 +14,7 @@ import { useProductos } from '../context/ProductoContext';
 import { useCart } from '../context/useCart.js';
 import { useDebounce } from '../hooks/useDebounce.js';
 import { GoX } from 'react-icons/go';
+import { BiSolidDish } from 'react-icons/bi';
 
 // Componente de error visualmente consistente para Home
 const HomeError = ({ message }) => {
@@ -48,11 +49,12 @@ const Home = () => {
   // Carrusel de imágenes de productos
   const [indiceCarrusel, setIndiceCarrusel] = useState(0);
   const carruselIntervalo = useRef(null);
-  const imagenesCarrusel = useMemo(() =>
-    state.productos.map(p => ({
-      src: `http://localhost:3000/uploads/productos/${p.imagen_producto}`,
-      alt: p.nombre_producto
-    })),
+  const imagenesCarrusel = useMemo(
+    () =>
+      state.productos.map(p => ({
+        src: `http://localhost:3000/uploads/productos/${p.imagen_producto}`,
+        alt: p.nombre_producto,
+      })),
     [state.productos]
   );
 
@@ -81,26 +83,30 @@ const Home = () => {
     return () => clearInterval(carruselIntervalo.current);
   }, [imagenesCarrusel.length]);
 
-  const irASiguiente = () => setIndiceCarrusel((prev) => (prev + 1) % imagenesCarrusel.length);
-  const irAAnterior = () => setIndiceCarrusel((prev) => (prev - 1 + imagenesCarrusel.length) % imagenesCarrusel.length);
+  const irASiguiente = () => setIndiceCarrusel(prev => (prev + 1) % imagenesCarrusel.length);
+  const irAAnterior = () =>
+    setIndiceCarrusel(prev => (prev - 1 + imagenesCarrusel.length) % imagenesCarrusel.length);
 
   // Función optimizada para aplicar filtros
-  const aplicarFiltros = useCallback((nuevosFiltros) => {
-    // Si solo hay filtros de orden y búsqueda, usar filtros locales (más rápido)
-    if (!nuevosFiltros.categoria && (nuevosFiltros.busqueda || nuevosFiltros.orden)) {
-      aplicarFiltrosLocales(nuevosFiltros);
-    } else {
-      // Si hay filtro de categoría, hacer llamada al backend
-      getProductosFiltrados(nuevosFiltros);
-    }
-  }, [aplicarFiltrosLocales, getProductosFiltrados]);
+  const aplicarFiltros = useCallback(
+    nuevosFiltros => {
+      // Si solo hay filtros de orden y búsqueda, usar filtros locales (más rápido)
+      if (!nuevosFiltros.categoria && (nuevosFiltros.busqueda || nuevosFiltros.orden)) {
+        aplicarFiltrosLocales(nuevosFiltros);
+      } else {
+        // Si hay filtro de categoría, hacer llamada al backend
+        getProductosFiltrados(nuevosFiltros);
+      }
+    },
+    [aplicarFiltrosLocales, getProductosFiltrados]
+  );
 
   // Efecto optimizado para aplicar filtros
   useEffect(() => {
     const filtros = {
       categoria: categoriaSeleccionada,
       busqueda: busquedaDebounced,
-      orden
+      orden,
     };
 
     // Solo aplicar filtros si hay productos cargados
@@ -119,40 +125,52 @@ const Home = () => {
   }, []);
 
   // Handlers optimizados para los filtros
-  const handleCategoriaChange = useCallback((e) => {
+  const handleCategoriaChange = useCallback(e => {
     setCategoriaSeleccionada(e.target.value);
   }, []);
 
-  const handleOrdenChange = useCallback((e) => {
+  const handleOrdenChange = useCallback(e => {
     setOrden(e.target.value);
   }, []);
 
-  const handleBusquedaChange = useCallback((e) => {
+  const handleBusquedaChange = useCallback(e => {
     setBusqueda(e.target.value);
   }, []);
 
   if (state.loading && state.productos.length === 0) return <LoadingScreen />;
-  if (state.error) return <HomeError message={t('error_cargar_productos', { error: state.error })} />;
+  if (state.error)
+    return <HomeError message={t('error_cargar_productos', { error: state.error })} />;
 
   return (
     <div>
       <Header />
       <Link
-        className={`carrito-link ${isMobile ? 'carrito-flotante' : (isScrolled ? 'carrito-flotante' : 'carrito-fixed')}`}
+        className={`carrito-link ${isMobile ? 'carrito-flotante' : isScrolled ? 'carrito-flotante' : 'carrito-fixed'}`}
         to="/carrito"
       >
         <div className="carrito-icono">
-          <FaCartShopping className='carrito' size={30}/>
+          <FaCartShopping className="carrito" size={30} />
           {cartCount > 0 && (
-            <span aria-label={`Productos en el carrito: ${cartCount}`} className="carrito-burbuja-cantidad">{cartCount}</span>
+            <span
+              aria-label={`Productos en el carrito: ${cartCount}`}
+              className="carrito-burbuja-cantidad"
+            >
+              {cartCount}
+            </span>
           )}
         </div>
       </Link>
 
+      <a href="/reservas" className="btn-reserva">
+        <span className="reserva-icono">
+          <BiSolidDish />
+        </span>
+      </a>
+
       {isMobile && (
         <Link className="burbuja-qr" to="/escanear-qr">
           <div className="carrito-icono">
-            <FaQrcode className='qr' size={30}/>
+            <FaQrcode className="qr" size={30} />
           </div>
         </Link>
       )}
@@ -206,24 +224,14 @@ const Home = () => {
                 </div>
                 <div className="categorias__card">
                   <h4 className="categorias__nombre">{t('entradas')}</h4>
-                  <img
-                    alt="Entradas"
-                    className="categorias__imagen"
-                    src="/images/entradas.png"
-                  />
+                  <img alt="Entradas" className="categorias__imagen" src="/images/entradas.png" />
                 </div>
                 <div className="categorias__card">
                   <h4 className="categorias__nombre">{t('bebidas')}</h4>
-                  <img
-                    alt="Bebidas"
-                    className="categorias__imagen"
-                    src="/images/bedidas.png"
-                  />
+                  <img alt="Bebidas" className="categorias__imagen" src="/images/bedidas.png" />
                 </div>
               </div>
-              <h2 className="categorias__reserva">
-                <a href="/reservas">{t('reservar_mesa')}</a>
-              </h2>
+              <h2 className="categorias__reserva"></h2>
             </div>
           </div>
         </section>
@@ -240,9 +248,12 @@ const Home = () => {
                 onChange={handleCategoriaChange}
               >
                 <option value="">{'Seleccionar categoría'}</option>
-                {categorias && categorias.map(cat => (
-                  <option key={cat.id_categoria} value={cat.nombre_categoria}>{cat.nombre_categoria}</option>
-                ))}
+                {categorias &&
+                  categorias.map(cat => (
+                    <option key={cat.id_categoria} value={cat.nombre_categoria}>
+                      {cat.nombre_categoria}
+                    </option>
+                  ))}
               </select>
             </div>
             <div className="barra-navegacion__opcion barra-navegacion__opcion--filtro">
@@ -284,12 +295,12 @@ const Home = () => {
                 No hemos encontrado ese producto.
               </div>
             ) : (
-              productosMostrados.map((producto) => (
+              productosMostrados.map(producto => (
                 <ProductoCard key={producto.id_producto} producto={producto} />
               ))
             )}
           </div>
-        </section> 
+        </section>
       </main>
       <Footer />
     </div>
@@ -297,4 +308,3 @@ const Home = () => {
 };
 
 export default Home;
-

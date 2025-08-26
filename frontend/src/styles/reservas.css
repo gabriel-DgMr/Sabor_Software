@@ -6,7 +6,7 @@
 }
 
 .reservas-flex-layout {
-  display: flex;
+  display: flex; 
   flex-direction: row;
   justify-content: center;
   align-items: stretch;
@@ -80,24 +80,29 @@
 }
 
 .prog-step__circle {
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: #f2f1f0;
-  color: #aaa;
+  background: #e0e0e0;
+  color: #555;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 1.3rem;
-  border: 2.5px solid #e6e4e2;
-  transition: all 0.2s;
+  font-weight: bold;
 }
+
 .prog-step--active .prog-step__circle {
   background: var(--primary-500);
   color: #fff;
-  border: 2.5px solid var(--primary-500);
 }
+
+.prog-step--done .prog-step__circle {
+  background: var(--primary-500);
+  color: #fff;
+}
+
+
+
 .prog-step__label {
   margin-top: 0.5rem;
   font-size: 1.1rem;
@@ -137,6 +142,7 @@
   transform-origin: left;
   animation: fill-bar 0.6s ease forwards;
 }
+
 
 @keyframes fill-bar {
   from {
@@ -500,7 +506,7 @@
   border-radius: 1.1rem;
   padding: 0.8rem 1.2rem;
   font-size: 1.1rem;
-  border: none;
+  border: 1px var(--primary-500);
   outline: none;
   font-weight: 500;
   color: #222;
@@ -561,7 +567,7 @@
 }
 
 textarea.formulario__input {
-  resize: vertical;
+  resize: none;
 }
 
 /* Estilos para los subtítulos */
@@ -644,7 +650,18 @@ textarea.formulario__input {
   outline: none;
   font-weight: 600;
   color: #222;
-  -moz-appearance: textfield;
+  input[type=number] {
+  appearance: textfield;        
+  -moz-appearance: textfield;   
+  -webkit-appearance: textfield; 
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 }
 
 /* Estilos para el selector de fechas */
@@ -760,68 +777,111 @@ textarea.formulario__input {
 }
 
 /* Formulario y etiquetas */
-.formulario__input {
-  background: #f2f1f0;
-  border-radius: 1.1rem;
-  padding: 0.8rem 1.2rem;
-  font-size: 1.1rem;
+.boton_regresar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  margin: 0 auto;
+  padding: 1rem;
+  color: var(--neutral-50);
   border: none;
-  outline: none;
-  font-weight: 500;
-  color: #222;
+  border-radius: 0.7rem;
+  font-size: 1.15rem;
+  font-weight: bold;
+  cursor: pointer;
   box-shadow: 0 1px 6px #0001;
+  position: relative;
+  background: var(--neutral-50);
+  color: var(--primary-500);
+  transition: background 0.18s, color 0.18s;
 }
 
-/* Botones de control */
-.boton_regresar {
-  background: #f2f1f0;
-  color: var(--primary-500);
-  border-radius: 1.1rem;
-  padding: 0.9rem 2.2rem;
-  font-weight: 700;
-  font-size: 1.15rem;
-  box-shadow: 0 1px 6px #0001;
-  border: none;
-  cursor: pointer;
-  transition: background 0.18s, color 0.18s;
+.boton_regresar .icon {
+  position: absolute;
+  left: 0.3em;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 2.2em;
+  height: 2.2em;
+
+  background: var(--neutral-400);
+  border-radius: 0.7em;
+  transition: all 0.3s;
+}
+
+.boton_regresar .icon svg {
+  width: 1.5em;
+  color: var(--neutral-900);
+  transition: transform 0.3s;
+  transform: rotate(180deg);
+}
+
+.boton_regresar:hover .icon {
+  width: calc(100% - 0.6em);
+}
+
+.boton_regresar:hover .icon svg {
+  transform: translateX(-0.1em) rotate(180deg);
+}
+
+.boton_regresar:active .icon {
+  transform: scale(0.95);
 }
 
 .boton_siguiente {
   background: var(--primary-500);
   color: #fff;
-  border-radius: 1.1rem;
-  padding: 0.9rem 2.2rem;
-  font-weight: 700;
+  font-family: inherit;
   font-size: 1.15rem;
-  box-shadow: 0 2px 12px #ff6b0033;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  width: 200px;
+  margin: 0 auto;
+  padding: 0.9rem 2.2rem;
   border: none;
+  border-radius: 1.1rem;
+  box-shadow: 0 2px 12px #ff6b0033;
   cursor: pointer;
   transition: background 0.18s, box-shadow 0.18s;
 }
 
-/* Estilos para botones de navegación */
-.boton_regresar {
-  background: #f2f1f0;
-  color: var(--primary-500);
-  border-radius: 1.1rem;
-  padding: 0.9rem 2.2rem;
-  font-weight: 700;
-  font-size: 1.15rem;
-  box-shadow: 0 1px 6px #0001;
-  border: none;
-  cursor: pointer;
-  transition: background 0.18s, color 0.18s;
-}
-
-.boton_siguiente {
+.boton_siguiente .icon {
   background: var(--primary-500);
-  color: #fff;
-  border-radius: 1.1rem;
-  padding: 0.9rem 2.2rem;
-  font-weight: 700;
-  font-size: 1.15rem;
-  box-shadow: 0 2px 12px #ff6b0033;
-  border: none;
-  cursor: pointer;
-  transition: background 0.18s, box-shadow 0.18s;
+  margin-left: 1em;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.2em;
+  width: 2.2em;
+  border-radius: 0.7em;
+  right: 0.3em;
+  transition: all 0.3s;
+}
+
+.boton_siguiente:hover .icon {
+  width: calc(100% - 0.6em);
+}
+
+.boton_siguiente .icon svg {
+  width: 1.5em;
+  transition: transform 0.3s;
+  color: var(--neutral-900);
+}
+
+.boton_siguiente:hover .icon svg {
+  transform: translateX(0.1em);
+}
+
+.boton_siguiente:active .icon {
+  transform: scale(0.95);
 }
