@@ -1,5 +1,16 @@
 import { reservaModel } from "../models/reservaModel.js"; // Importar el nuevo modelo de reserva
 import * as authModel from "../models/authModel.js"; // Importar authModel para manejar clientes
+import nodemailer from "nodemailer";
+import { config } from "../config/config.js";
+
+// Configurar el transporter de nodemailer
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: config.email.user,
+    pass: config.email.password,
+  },
+});
 
 /**
  * Maneja la solicitud para crear una nueva reserva.
@@ -145,6 +156,71 @@ export const hacerReserva = async (req, res) => {
 
     console.log("Reserva guardada con éxito con ID:", reservaId);
 
+    // Obtener los detalles de la reserva incluyendo la mesa asignada
+    const reservaDetails = await reservaModel.getReservaById(reservaId);
+
+    // Enviar correo de confirmación
+    const mailOptions = {
+      from: config.email.user,
+      to: datosReserva.email,
+      subject: "Confirmación de Reserva - Sabor",
+      html: `
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+      
+      <!-- Encabezado -->
+      <h2 style="color: #e65100; text-align: center; margin-bottom: 10px;">¡Tu reserva ha sido confirmada!</h2>
+      <p style="text-align: center; font-size: 16px;">Hola <strong>${datosReserva.nombre}</strong>,</p>
+      <p style="text-align: center; font-size: 15px;">Tu mesa en <strong>Sabor</strong> ya está lista para recibirte.</p>
+      
+      <!-- Detalles de la reserva -->
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 12px; margin: 25px 0; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+        <h3 style="color: #444; margin-top: 0; margin-bottom: 15px;">Detalles de la Reserva</h3>
+        <ul style="list-style: none; padding: 0; margin: 0; font-size: 15px; line-height: 1.6;">
+          <li><strong>Fecha:</strong> ${datosReserva.fecha}</li>
+          <li><strong>Hora:</strong> ${datosReserva.hora}</li>
+          <li><strong>Número de personas:</strong> ${datosReserva.personas}</li>
+          <li><strong>Mesa asignada:</strong> ${reservaDetails.id_mesa}</li>
+          ${datosReserva.peticiones ? `<li><strong>Peticiones especiales:</strong> ${datosReserva.peticiones}</li>` : ""}
+        </ul>
+      </div>
+
+      <!-- Número de reserva -->
+      <p style="font-size: 15px; text-align: center; margin: 20px 0;">
+        <strong style="color: #e65100;">Número de reserva:</strong> #${reservaId}
+      </p>
+
+      <!-- Botón -->
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="https://tusabor.com/reservas/${reservaId}" 
+          style="background-color: #ff6f00; color: #fff; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px; display: inline-block;">
+          Ver mi reserva
+        </a>
+      </div>
+
+      <!-- Importante -->
+      <div style="background-color: #fff8f1; padding: 18px; border-radius: 8px; margin: 25px 0; border-left: 5px solid #ff9800;">
+        <p style="margin: 0 0 10px 0; font-weight: bold; color: #444;">Importante:</p>
+        <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.5; color: #555;">
+          <li>Llega 10 minutos antes de tu hora reservada</li>
+          <li>Si necesitas cancelar o modificar tu reserva, hazlo con al menos 2 horas de anticipación</li>
+          <li>La reserva se mantendrá por 15 minutos después de la hora programada</li>
+        </ul>
+      </div>
+
+      <!-- Despedida -->
+      <p style="text-align: center; font-size: 15px;">Te esperamos con gusto en <strong>Sabor</strong>.</p>
+
+      <!-- Footer -->
+      <p style="color: #999; font-size: 13px; text-align: center; margin-top: 40px;">
+        Saludos,<br>
+        El equipo de Sabor
+      </p>
+    </div>
+  `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
     res
       .status(201)
       .json({ message: "Reserva creada con éxito!", reservaId: reservaId });
@@ -231,5 +307,58 @@ export const getHistorialReservas = async (req, res) => {
         detalle: error.message,
       });
     }
+  }
+};
+
+// Obtener todas las reservaciones (para administración)
+export const getAllReservaciones = async (req, res) => {
+  try {
+    const reservaciones = await reservaModel.getAllReservaciones();
+    res.json(reservaciones);
+  } catch (error) {
+    console.error("Error al obtener todas las reservaciones:", error);
+    res.status(500).json({ message: "Error al obtener reservaciones" });
+  }
+};
+
+// Obtener reservaciones por fecha (para administración)
+export const getReservacionesByFecha = async (req, res) => {
+  try {
+    const { fecha } = req.params;
+    const reservaciones = await reservaModel.getReservacionesByFecha(fecha);
+    res.json(reservaciones);
+  } catch (error) {
+    console.error("Error al obtener reservaciones por fecha:", error);
+    res
+      .status(500)
+      .json({ message: "Error al obtener reservaciones por fecha" });
+  }
+};
+
+// Actualizar estado de reservación
+export const updateEstadoReservacion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { estado } = req.body;
+
+    await reservaModel.updateReservacionEstado(parseInt(id), estado);
+    res.json({ message: "Estado de reservación actualizado correctamente" });
+  } catch (error) {
+    console.error("Error al actualizar estado de reservación:", error);
+    res
+      .status(500)
+      .json({ message: "Error al actualizar estado de reservación" });
+  }
+};
+
+// Eliminar reservación
+export const deleteReservacion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await reservaModel.deleteReservacion(parseInt(id));
+    res.json({ message: "Reservación eliminada correctamente" });
+  } catch (error) {
+    console.error("Error al eliminar reservación:", error);
+    res.status(500).json({ message: "Error al eliminar reservación" });
   }
 };

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import MenuLateral from '../components/MenuLateral';
+import MenuLateralEmpleados from '../components/MenuLateralEmpleado';
 import '../styles/empleados.css';
 
 const EmpleadosHome = () => {
@@ -12,7 +12,7 @@ const EmpleadosHome = () => {
   }, []);
 
   return (
-    <div className='layout'>
+    <div className="layout">
       <MenuLateral />
       <main className="contenido-principal">
         <header>
@@ -20,19 +20,32 @@ const EmpleadosHome = () => {
         </header>
 
         <section className="contenido-principal__opciones">
-          <h2 className="contenido-principal__subtitulo">
-            ¿Qué deseas hacer el día de hoy?
-          </h2>
+          <h2 className="contenido-principal__subtitulo">¿Qué deseas hacer el día de hoy?</h2>
           <nav aria-label="Acciones principales">
             <ul className="acciones-principales">
               <li className="acciones-principales__item">
-                <button className="acciones-principales__boton" onClick={() => navigate('/administrar/reservaciones')}>Administrar Reservaciones</button>
+                <button
+                  className="acciones-principales__boton"
+                  onClick={() => navigate('/administrar/reservaciones')}
+                >
+                  Administrar Reservaciones
+                </button>
               </li>
               <li className="acciones-principales__item">
-                <button className="acciones-principales__boton" onClick={() => navigate('/administrar/productos')}>Administrar Productos</button>
+                <button
+                  className="acciones-principales__boton"
+                  onClick={() => navigate('/administrar/productos')}
+                >
+                  Administrar Productos
+                </button>
               </li>
               <li className="acciones-principales__item">
-                <button className="acciones-principales__boton" onClick={() => navigate('/administrar/pedidos')}>Administrar Pedidos</button>
+                <button
+                  className="acciones-principales__boton"
+                  onClick={() => navigate('/administrar/pedidos')}
+                >
+                  Administrar Pedidos
+                </button>
               </li>
             </ul>
           </nav>

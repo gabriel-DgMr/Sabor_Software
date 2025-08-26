@@ -205,5 +205,14 @@
   "quienes_equipo_titulo": "Equipo de Desarrollo",
   "quienes_dev_juan": "Apasionado por el desarrollo web, videojuegos y deportes, especializado en React y Node.js. Encargado de la arquitectura y la experiencia de cliente.",
   "quienes_dev_gabriel": "Desarrollador integral con experiencia en backend y frontend, apasionado por los videojuegos. Responsable de la integración y la seguridad.",
-  "quienes_dev_miguel": "Apasionado por las hamburguesas y vender platanitos. Encargado de la calidad, pruebas y documentación del proyecto. Garantiza la robustez y claridad del sistema."
+  "quienes_dev_miguel": "Apasionado por las hamburguesas y vender platanitos. Encargado de la calidad, pruebas y documentación del proyecto. Garantiza la robustez y claridad del sistema.",
+  "quienes_dev_juliana": "Apasionada por la nataciòn, los animales y la programación. Encargada de desarrollo web y el modulo de domicilios.",
+  "seleccionar_categoria": "Seleccionar categoría",
+  "ordenar_por": "Ordenar por...",
+  "precio_menor_mayor": "Precio: menor a mayor",
+  "precio_mayor_menor": "Precio: mayor a menor",
+  "calificacion": "Calificación",
+  "mas_vendidos": "Más vendidos",
+  "aplicando_filtros": "Aplicando filtros...",
+  "no_encontrado": "No hemos encontrado ese producto."
 }

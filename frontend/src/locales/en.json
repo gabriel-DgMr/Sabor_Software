@@ -205,5 +205,14 @@
   "quienes_equipo_titulo": "Development Team",
   "quienes_dev_juan": "Passionate about web development, video games, and sports, specialized in React and Node.js. In charge of architecture and user experience.",
   "quienes_dev_gabriel": "Full-stack developer with experience in backend and frontend, passionate about video games. Responsible for integration and security.",
-  "quienes_dev_miguel": "Passionate about burgers and selling plantains. In charge of quality, testing, and project documentation. Ensures system robustness and clarity."
+  "quienes_dev_miguel": "Passionate about burgers and selling plantains. In charge of quality, testing, and project documentation. Ensures system robustness and clarity.",
+  "quienes_dev_juliana": "Passionate about swimming, animals, and programming. In charge of web development and the delivery module.",
+  "seleccionar_categoria": "Select category",
+  "ordenar_por": "Sort by...",
+  "precio_menor_mayor": "Price: low to high",
+  "precio_mayor_menor": "Price: high to low",
+  "calificacion": "Rating",
+  "mas_vendidos": "Best sellers",
+  "aplicando_filtros": "Applying filters...",
+  "no_encontrado": "We haven't found that product."
 }

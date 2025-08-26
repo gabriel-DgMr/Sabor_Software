@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import MenuLateral from '../components/MenuLateral';
+import MenuLateral from '../components/MenuLateralAdministrador';
 import '../styles/empleados.css';
 
 const Dashboard = () => {
@@ -28,7 +28,7 @@ const Dashboard = () => {
                   className="acciones-principales__boton dashboard__acciones"
                   onClick={() => navigate('/administrar/panel/clientes')}
                 >
-                  clientes
+                  Clientes{' '}
                 </button>
               </li>
               <li className="acciones-principales__item">

@@ -153,6 +153,38 @@ export const reservaModel = {
       throw new Error("Error al verificar disponibilidad: " + error.message);
     }
   },
+
+  /**
+   * Obtiene los detalles de una reserva específica por su ID.
+   * @param {number} id_reservacion - El ID de la reserva.
+   * @returns {Promise<Object>} Los detalles de la reserva.
+   */
+  getReservaById: async (id_reservacion) => {
+    try {
+      const [rows] = await pool.query(
+        `SELECT 
+          r.*,
+          m.id_mesa,
+          u.nombre_usuario,
+          u.correo_usuario,
+          u.telefono_usuario
+        FROM reservaciones r
+        JOIN mesas m ON r.id_mesa = m.id_mesa
+        JOIN usuarios u ON r.id_usuario = u.id_usuario
+        WHERE r.id_reservacion = ?`,
+        [id_reservacion],
+      );
+
+      if (rows.length === 0) {
+        throw new Error("Reserva no encontrada");
+      }
+
+      return rows[0];
+    } catch (error) {
+      console.error("Error en reservaModel.getReservaById:", error);
+      throw error;
+    }
+  },
 };
 
 // Importar horarioModel aquí para evitar circular dependency if needed, or ensure proper import order

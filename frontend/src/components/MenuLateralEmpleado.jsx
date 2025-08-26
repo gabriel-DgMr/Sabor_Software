@@ -12,16 +12,8 @@ const MenuLateral = () => {
 
   const opcionesGenerales = [
     { nombre: 'Reservaciones', ruta: '/administrar/reservaciones' },
-    { nombre: 'Productos', ruta: '/administrar/productos' },
     { nombre: 'Pedidos', ruta: '/administrar/pedidos' },
-    { nombre: 'Panel de control', ruta: '/administrar/panel' },
-  ];
-
-  const opcionesPanel = [
-    { nombre: 'Ventas', ruta: '/administrar/panel/ventas' },
-    { nombre: 'clientes', ruta: '/administrar/panel/clientes' },
-    { nombre: 'Trabajadores', ruta: '/administrar/panel/trabajadores' },
-    { nombre: 'Inventario', ruta: '/administrar/panel/inventario' },
+    { nombre: 'Domicilios', ruta: '/administrar/domicilios' },
   ];
 
   const enPanel = location.pathname.startsWith('/administrar/panel');
@@ -50,14 +42,14 @@ const MenuLateral = () => {
 
         <button
           aria-label="Cerrar sesión"
-          className="menu-lateral__cliente"
+          className="menu-lateral__usuario"
           onClick={() => {
             logout();
             closeMenu();
           }}
         >
           <FaUserCircle size={32} />
-          <span className="menu-lateral__cliente-nombre">{user?.nombre_cliente || 'Invitado'}</span>
+          <span className="menu-lateral__usuario-nombre">{user?.nombre_cliente || 'Invitado'}</span>
         </button>
 
         <hr className="menu-lateral__separador" />
@@ -86,32 +78,6 @@ const MenuLateral = () => {
             ))}
           </ul>
         </section>
-
-        {/* Opciones del panel (solo dentro de /panel/administrar) */}
-        {enPanel && (
-          <section className="menu-lateral__seccion">
-            <ul className="menu-lateral__lista">
-              {opcionesPanel.map(({ nombre, ruta }) => (
-                <li key={ruta} className="menu-lateral__item">
-                  <button
-                    aria-current={location.pathname === ruta ? 'page' : undefined}
-                    className={`menu-lateral__link menu-lateral__link--panel ${
-                      location.pathname === ruta
-                        ? 'menu-lateral__link--activo--panel menu-lateral__link--activo'
-                        : ''
-                    }`}
-                    onClick={() => {
-                      navigate(ruta);
-                      closeMenu();
-                    }}
-                  >
-                    {nombre}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
       </nav>
     </>
   );
