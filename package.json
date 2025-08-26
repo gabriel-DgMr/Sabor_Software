@@ -29,6 +29,7 @@
     "@blackbox-vision/react-qr-reader": "^5.0.0",
     "jimp": "^0.22.10",
     "nodemailer": "^7.0.3",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "react-helmet-async": "^2.0.5"
   }
 }
