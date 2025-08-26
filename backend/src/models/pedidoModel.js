@@ -1,3 +1,16 @@
+// Actualizar estado del pedido por resultado de pago (usado por webhook)
+export const updatePedidoEstadoPorPago = async (id_pedido, nuevoEstado) => {
+  try {
+    const [result] = await pool.query(
+      "UPDATE pedidos SET id_estado = ? WHERE id_pedido = ?",
+      [nuevoEstado, id_pedido],
+    );
+    return result.affectedRows > 0;
+  } catch (error) {
+    console.error("Error al actualizar estado de pedido por pago:", error);
+    throw error;
+  }
+};
 import { dbConfig } from "../config/dbconfig.js";
 import mysql from "mysql2/promise";
 
@@ -183,7 +196,7 @@ export const getCarritoByUser = async (userId) => {
 export const createCarrito = async (userId) => {
   try {
     const [result] = await pool.query(
-      "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, id_empleado, metodo_pago) VALUES (?, 1, 0, NULL, NULL)",
+      "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, metodo_pago) VALUES (?, 1, 0, NULL)",
       [userId],
     );
     return result.insertId;
@@ -203,9 +216,9 @@ export const addOrUpdateProductoCarrito = async (
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    // Verificar stock
+    // Verificar stock y obtener precio actual (lock row for update)
     const [stockResult] = await connection.query(
-      "SELECT stock, precio_producto FROM productos WHERE id_producto = ?",
+      "SELECT stock, precio_producto FROM productos WHERE id_producto = ? FOR UPDATE",
       [id_producto],
     );
     if (stockResult.length === 0) {
@@ -214,9 +227,9 @@ export const addOrUpdateProductoCarrito = async (
     if (stockResult[0].stock < cantidad) {
       throw new Error("Stock insuficiente");
     }
-
     const precio_unitario = stockResult[0].precio_producto;
 
+    // Buscar o crear carrito persistente
     const [carrito] = await connection.query(
       "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 1 LIMIT 1",
       [userId],
@@ -232,6 +245,7 @@ export const addOrUpdateProductoCarrito = async (
       id_pedido = carrito[0].id_pedido;
     }
 
+    // Agregar o actualizar producto en el carrito
     const [detalle] = await connection.query(
       "SELECT * FROM detalle_pedidos WHERE id_pedido = ? AND id_producto = ?",
       [id_pedido, id_producto],
@@ -257,6 +271,18 @@ export const addOrUpdateProductoCarrito = async (
         [nuevaCantidad, nuevaCantidad, id_pedido, id_producto],
       );
     }
+
+    // Recalcular y actualizar el total del carrito
+    const [totalRow] = await connection.query(
+      "SELECT SUM(subtotal) as total FROM detalle_pedidos WHERE id_pedido = ?",
+      [id_pedido],
+    );
+    const total = totalRow[0].total || 0;
+    await connection.query(
+      "UPDATE pedidos SET total_pedido = ? WHERE id_pedido = ?",
+      [total, id_pedido],
+    );
+
     await connection.commit();
     return id_pedido;
   } catch (error) {
@@ -278,9 +304,9 @@ export const updateCantidadProductoCarrito = async (
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    // Verificar stock
+    // Verificar stock y obtener precio actual (lock row for update)
     const [stockResult] = await connection.query(
-      "SELECT stock FROM productos WHERE id_producto = ?",
+      "SELECT stock, precio_producto FROM productos WHERE id_producto = ? FOR UPDATE",
       [id_producto],
     );
     if (stockResult.length === 0) {
@@ -289,6 +315,7 @@ export const updateCantidadProductoCarrito = async (
     if (stockResult[0].stock < cantidad) {
       throw new Error("Stock insuficiente");
     }
+    const precio_unitario = stockResult[0].precio_producto;
 
     const [carrito] = await connection.query(
       "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 1 LIMIT 1",
@@ -296,10 +323,30 @@ export const updateCantidadProductoCarrito = async (
     );
     if (carrito.length === 0) throw new Error("No hay carrito");
     const id_pedido = carrito[0].id_pedido;
+
     await connection.query(
-      "UPDATE detalle_pedidos SET cantidad = ?, subtotal = ? * precio_unitario WHERE id_pedido = ? AND id_producto = ?",
-      [cantidad, cantidad, id_pedido, id_producto],
+      "UPDATE detalle_pedidos SET cantidad = ?, precio_unitario = ?, subtotal = ? * ? WHERE id_pedido = ? AND id_producto = ?",
+      [
+        cantidad,
+        precio_unitario,
+        cantidad,
+        precio_unitario,
+        id_pedido,
+        id_producto,
+      ],
     );
+
+    // Recalcular y actualizar el total del carrito
+    const [totalRow] = await connection.query(
+      "SELECT SUM(subtotal) as total FROM detalle_pedidos WHERE id_pedido = ?",
+      [id_pedido],
+    );
+    const total = totalRow[0].total || 0;
+    await connection.query(
+      "UPDATE pedidos SET total_pedido = ? WHERE id_pedido = ?",
+      [total, id_pedido],
+    );
+
     await connection.commit();
     return id_pedido;
   } catch (error) {
@@ -326,6 +373,18 @@ export const removeProductoCarrito = async (userId, id_producto) => {
       "DELETE FROM detalle_pedidos WHERE id_pedido = ? AND id_producto = ?",
       [id_pedido, id_producto],
     );
+
+    // Recalcular y actualizar el total del carrito
+    const [totalRow] = await connection.query(
+      "SELECT SUM(subtotal) as total FROM detalle_pedidos WHERE id_pedido = ?",
+      [id_pedido],
+    );
+    const total = totalRow[0].total || 0;
+    await connection.query(
+      "UPDATE pedidos SET total_pedido = ? WHERE id_pedido = ?",
+      [total, id_pedido],
+    );
+
     await connection.commit();
     return id_pedido;
   } catch (error) {
@@ -351,6 +410,11 @@ export const vaciarCarrito = async (userId) => {
     await connection.query("DELETE FROM detalle_pedidos WHERE id_pedido = ?", [
       id_pedido,
     ]);
+    // Actualizar total a 0
+    await connection.query(
+      "UPDATE pedidos SET total_pedido = 0 WHERE id_pedido = ?",
+      [id_pedido],
+    );
     await connection.commit();
     return id_pedido;
   } catch (error) {
@@ -362,7 +426,7 @@ export const vaciarCarrito = async (userId) => {
   }
 };
 
-export const confirmarPedido = async (userId, id_empleado, metodo_pago) => {
+export const confirmarPedido = async (userId, metodo_pago) => {
   let connection;
   try {
     connection = await pool.getConnection();
@@ -373,25 +437,48 @@ export const confirmarPedido = async (userId, id_empleado, metodo_pago) => {
     );
     if (carrito.length === 0) throw new Error("No hay carrito");
     const id_pedido = carrito[0].id_pedido;
+
+    // Revalidar stock y precio de todos los productos antes de confirmar
+    const [items] = await connection.query(
+      "SELECT id_producto, cantidad FROM detalle_pedidos WHERE id_pedido = ?",
+      [id_pedido],
+    );
+    for (const item of items) {
+      const [stockResult] = await connection.query(
+        "SELECT stock, precio_producto FROM productos WHERE id_producto = ? FOR UPDATE",
+        [item.id_producto],
+      );
+      if (stockResult.length === 0) {
+        throw new Error(`Producto con ID ${item.id_producto} no encontrado`);
+      }
+      if (stockResult[0].stock < item.cantidad) {
+        throw new Error(
+          `Stock insuficiente para el producto con ID ${item.id_producto}`,
+        );
+      }
+      // Actualizar precio_unitario y subtotal por si cambió el precio
+      await connection.query(
+        "UPDATE detalle_pedidos SET precio_unitario = ?, subtotal = ? * ? WHERE id_pedido = ? AND id_producto = ?",
+        [
+          stockResult[0].precio_producto,
+          item.cantidad,
+          stockResult[0].precio_producto,
+          id_pedido,
+          item.id_producto,
+        ],
+      );
+    }
+
+    // Recalcular total
     const [totalRow] = await connection.query(
       "SELECT SUM(subtotal) as total FROM detalle_pedidos WHERE id_pedido = ?",
       [id_pedido],
     );
     const total = totalRow[0].total || 0;
-    // Guardar NULL si id_empleado es null, undefined, 0, string vacío o no es un número válido
-    let empleadoValue = null;
-    if (
-      id_empleado !== undefined &&
-      id_empleado !== null &&
-      id_empleado !== "" &&
-      !isNaN(Number(id_empleado)) &&
-      Number(id_empleado) > 0
-    ) {
-      empleadoValue = Number(id_empleado);
-    }
+
     await connection.query(
-      "UPDATE pedidos SET id_estado = 2, id_empleado = ?, total_pedido = ?, metodo_pago = ? WHERE id_pedido = ?",
-      [empleadoValue, total, metodo_pago, id_pedido],
+      "UPDATE pedidos SET id_estado = 2, total_pedido = ?, metodo_pago = ? WHERE id_pedido = ?",
+      [total, metodo_pago, id_pedido],
     );
     await connection.commit();
     return id_pedido;
@@ -401,6 +488,19 @@ export const confirmarPedido = async (userId, id_empleado, metodo_pago) => {
     throw error;
   } finally {
     if (connection) connection.release();
+  }
+};
+// Limpieza de carritos abandonados (puedes programar esto con un cron job externo)
+export const limpiarCarritosAbandonados = async (horas = 24) => {
+  try {
+    const [result] = await pool.query(
+      `DELETE FROM pedidos WHERE id_estado = 1 AND TIMESTAMPDIFF(HOUR, fecha_pedido, NOW()) > ?`,
+      [horas],
+    );
+    return result.affectedRows;
+  } catch (error) {
+    console.error("Error al limpiar carritos abandonados:", error);
+    throw error;
   }
 };
 

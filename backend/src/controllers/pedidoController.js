@@ -58,54 +58,43 @@ export const createPedido = async (req, res) => {
 
     // Validaciones
     if (!items || !Array.isArray(items) || items.length === 0) {
-      return res
-        .status(400)
-        .json({
-          mensaje:
-            "La lista de items es requerida y debe ser un array no vacío",
-        });
+      return res.status(400).json({
+        mensaje: "La lista de items es requerida y debe ser un array no vacío",
+      });
     }
 
     // Validar cada item en el array
     for (const item of items) {
       if (!item.id_producto || typeof item.id_producto !== "number") {
-        return res
-          .status(400)
-          .json({
-            mensaje: "Cada item debe tener un id_producto numérico válido",
-          });
+        return res.status(400).json({
+          mensaje: "Cada item debe tener un id_producto numérico válido",
+        });
       }
       if (
         !item.cantidad ||
         typeof item.cantidad !== "number" ||
         item.cantidad <= 0
       ) {
-        return res
-          .status(400)
-          .json({
-            mensaje: "Cada item debe tener una cantidad numérica positiva",
-          });
+        return res.status(400).json({
+          mensaje: "Cada item debe tener una cantidad numérica positiva",
+        });
       }
       if (
         !item.precio_unitario ||
         typeof item.precio_unitario !== "number" ||
         item.precio_unitario < 0
       ) {
-        return res
-          .status(400)
-          .json({
-            mensaje:
-              "Cada item debe tener un precio_unitario numérico no negativo",
-          });
+        return res.status(400).json({
+          mensaje:
+            "Cada item debe tener un precio_unitario numérico no negativo",
+        });
       }
     }
 
     if (!total || typeof total !== "number" || total <= 0) {
-      return res
-        .status(400)
-        .json({
-          mensaje: "El total es requerido y debe ser un número positivo",
-        });
+      return res.status(400).json({
+        mensaje: "El total es requerido y debe ser un número positivo",
+      });
     }
 
     // Validar recomendaciones (opcional, puede ser un string vacío)
@@ -211,12 +200,10 @@ export const addProductoCarrito = async (req, res) => {
     const userId = req.user.id;
     const { id_producto, cantidad } = req.body;
     if (!id_producto || !cantidad || cantidad <= 0) {
-      return res
-        .status(400)
-        .json({
-          mensaje:
-            "id_producto y cantidad son requeridos y cantidad debe ser mayor a 0",
-        });
+      return res.status(400).json({
+        mensaje:
+          "id_producto y cantidad son requeridos y cantidad debe ser mayor a 0",
+      });
     }
     const id_pedido = await addOrUpdateProductoCarrito(
       userId,
@@ -229,12 +216,10 @@ export const addProductoCarrito = async (req, res) => {
     });
   } catch (error) {
     console.error("Error en addProductoCarrito:", error);
-    res
-      .status(500)
-      .json({
-        mensaje: error.message || "Error al agregar producto al carrito",
-        error: error.message,
-      });
+    res.status(500).json({
+      mensaje: error.message || "Error al agregar producto al carrito",
+      error: error.message,
+    });
   }
 };
 
@@ -244,12 +229,10 @@ export const updateCantidadCarrito = async (req, res) => {
     const userId = req.user.id;
     const { id_producto, cantidad } = req.body;
     if (!id_producto || !cantidad || cantidad <= 0) {
-      return res
-        .status(400)
-        .json({
-          mensaje:
-            "id_producto y cantidad son requeridos y cantidad debe ser mayor a 0",
-        });
+      return res.status(400).json({
+        mensaje:
+          "id_producto y cantidad son requeridos y cantidad debe ser mayor a 0",
+      });
     }
     const id_pedido = await updateCantidadProductoCarrito(
       userId,
@@ -259,12 +242,10 @@ export const updateCantidadCarrito = async (req, res) => {
     res.json({ mensaje: "Cantidad actualizada", id_pedido });
   } catch (error) {
     console.error("Error en updateCantidadCarrito:", error);
-    res
-      .status(500)
-      .json({
-        mensaje: error.message || "Error al actualizar cantidad",
-        error: error.message,
-      });
+    res.status(500).json({
+      mensaje: error.message || "Error al actualizar cantidad",
+      error: error.message,
+    });
   }
 };
 
@@ -303,22 +284,23 @@ export const vaciar = async (req, res) => {
 // Confirmar pedido (finalizar carrito)
 export const confirmar = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const { id_empleado, metodo_pago } = req.body;
+    const userId = req.user?.id;
+    const { metodo_pago } = req.body;
     if (!metodo_pago) {
       return res.status(400).json({ mensaje: "metodo_pago es requerido" });
     }
-    // id_empleado puede ser undefined/null
-    const idEmpleadoValue =
-      typeof id_empleado !== "undefined" ? id_empleado : null;
-    const id_pedido = await confirmarPedido(
-      userId,
-      idEmpleadoValue,
-      metodo_pago,
-    );
+    if (!userId) {
+      return res.status(401).json({ mensaje: "Usuario no autenticado" });
+    }
+    const id_pedido = await confirmarPedido(userId, metodo_pago);
     res.json({ mensaje: "Pedido confirmado", id_pedido });
   } catch (error) {
-    console.error("Error en confirmar:", error);
+    console.error("[Pedido][Confirmar] Error:", {
+      error: error,
+      stack: error.stack,
+      user: req.user,
+      body: req.body,
+    });
     res
       .status(500)
       .json({ mensaje: "Error al confirmar pedido", error: error.message });
