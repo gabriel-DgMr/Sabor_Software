@@ -5,7 +5,7 @@ import crypto from "crypto";
 
 const pool = mysql.createPool(dbConfig);
 
-// Register - Ahora registra con activo = false y email_verificado = false
+// Register - Registra con activo = false y email_verificado = false (requiere verificación)
 export const registerUser = async (usuarioData) => {
   const {
     nombre_usuario,
@@ -26,7 +26,7 @@ export const registerUser = async (usuarioData) => {
 
   // Verificar si el teléfono ya existe
   const [existingPhone] = await pool.query(
-    "SELECT * FROM usuarios WHERE id_usuario = ?",
+    "SELECT * FROM usuarios WHERE telefono_usuario = ?",
     [telefono_usuario],
   );
   if (existingPhone.length > 0) {
@@ -36,7 +36,7 @@ export const registerUser = async (usuarioData) => {
   // Encriptar contraseña
   const hashedPassword = await bcrypt.hash(contraseña_usuario, 10);
 
-  // Insertar nuevo usuario con activo = false y email_verificado = false
+  // Insertar nuevo usuario con activo = false y email_verificado = false (requiere verificación)
   const [result] = await pool.query(
     `INSERT INTO usuarios (
             nombre_usuario, 
@@ -52,8 +52,8 @@ export const registerUser = async (usuarioData) => {
       correo_usuario,
       telefono_usuario,
       hashedPassword,
-      false,
-      false,
+      false, // Usuario inactivo hasta verificar email
+      false, // Email no verificado hasta confirmar
       1,
     ],
   );
@@ -134,18 +134,13 @@ export const getUserByEmailIncludingUnverified = async (correo_usuario) => {
 
 // Login - Solo permite acceso a usuarios activos y verificados
 export const loginUser = async (correo_usuario, contraseña_usuario) => {
-  // TEMPORAL: Permitir login aunque no esté verificado ni activo
   const [rows] = await pool.query(
-    "SELECT * FROM usuarios WHERE correo_usuario = ?",
+    "SELECT * FROM usuarios WHERE correo_usuario = ? AND activo = true AND email_verificado = true",
     [correo_usuario],
   );
 
-  if (rows[0].activo === 0) {
-    throw new Error("Usuario no activo, por favor verifica tu correo");
-  }
-
   if (!rows.length) {
-    throw new Error("usuario no existe");
+    throw new Error("usuario no existe o no está verificado");
   }
 
   const user = rows[0];

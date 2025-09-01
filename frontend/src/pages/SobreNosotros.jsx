@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Helmet } from 'react-helmet-async';
 
 import Header from '../components/Header.jsx';
 import Footer from '../components/Footer.jsx';

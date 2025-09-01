@@ -185,6 +185,126 @@ export const reservaModel = {
       throw error;
     }
   },
+
+  /**
+   * Obtiene todas las reservaciones con información completa.
+   * @returns {Promise<Array>} Lista de todas las reservaciones.
+   */
+  getAllReservaciones: async () => {
+    try {
+      const [rows] = await pool.query(
+        `SELECT 
+          r.id_reservacion,
+          r.fecha_reservacion,
+          r.hora_reservacion,
+          r.numero_personas,
+          r.notas,
+          r.fecha_creacion,
+          r.fecha_modificacion,
+          u.nombre_usuario as nombre,
+          u.correo_usuario as email,
+          u.telefono_usuario as telefono,
+          m.id_mesa,
+          e.nombre_estado as estado
+        FROM reservaciones r
+        JOIN usuarios u ON r.id_usuario = u.id_usuario
+        JOIN mesas m ON r.id_mesa = m.id_mesa
+        JOIN estados e ON r.id_estado = e.id_estado
+        ORDER BY r.fecha_reservacion DESC, r.hora_reservacion DESC`,
+      );
+      return rows;
+    } catch (error) {
+      console.error("Error en reservaModel.getAllReservaciones:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtiene reservaciones por fecha específica.
+   * @param {string} fecha - La fecha en formato YYYY-MM-DD.
+   * @returns {Promise<Array>} Lista de reservaciones para esa fecha.
+   */
+  getReservacionesByFecha: async (fecha) => {
+    try {
+      const [rows] = await pool.query(
+        `SELECT 
+          r.id_reservacion,
+          r.fecha_reservacion,
+          r.hora_reservacion,
+          r.numero_personas,
+          r.notas,
+          r.fecha_creacion,
+          r.fecha_modificacion,
+          u.nombre_usuario as nombre,
+          u.correo_usuario as email,
+          u.telefono_usuario as telefono,
+          m.id_mesa,
+          e.nombre_estado as estado
+        FROM reservaciones r
+        JOIN usuarios u ON r.id_usuario = u.id_usuario
+        JOIN mesas m ON r.id_mesa = m.id_mesa
+        JOIN estados e ON r.id_estado = e.id_estado
+        WHERE r.fecha_reservacion = ?
+        ORDER BY r.hora_reservacion ASC`,
+        [fecha],
+      );
+      return rows;
+    } catch (error) {
+      console.error("Error en reservaModel.getReservacionesByFecha:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Actualiza el estado de una reservación.
+   * @param {number} id_reservacion - El ID de la reservación.
+   * @param {string} estado - El nuevo estado.
+   * @returns {Promise<boolean>} True si se actualizó correctamente.
+   */
+  updateReservacionEstado: async (id_reservacion, estado) => {
+    try {
+      // Primero obtener el id_estado basado en el nombre del estado
+      const [estadoRows] = await pool.query(
+        "SELECT id_estado FROM estados WHERE nombre_estado = ?",
+        [estado],
+      );
+
+      if (estadoRows.length === 0) {
+        throw new Error("Estado no válido");
+      }
+
+      const id_estado = estadoRows[0].id_estado;
+
+      const [result] = await pool.query(
+        "UPDATE reservaciones SET id_estado = ?, fecha_modificacion = CURRENT_TIMESTAMP WHERE id_reservacion = ?",
+        [id_estado, id_reservacion],
+      );
+
+      return result.affectedRows > 0;
+    } catch (error) {
+      console.error("Error en reservaModel.updateReservacionEstado:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Elimina una reservación.
+   * @param {number} id_reservacion - El ID de la reservación a eliminar.
+   * @returns {Promise<boolean>} True si se eliminó correctamente.
+   */
+  deleteReservacion: async (id_reservacion) => {
+    try {
+      const [result] = await pool.query(
+        "DELETE FROM reservaciones WHERE id_reservacion = ?",
+        [id_reservacion],
+      );
+
+      return result.affectedRows > 0;
+    } catch (error) {
+      console.error("Error en reservaModel.deleteReservacion:", error);
+      throw error;
+    }
+  },
 };
 
 // Importar horarioModel aquí para evitar circular dependency if needed, or ensure proper import order

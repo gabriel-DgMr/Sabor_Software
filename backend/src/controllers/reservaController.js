@@ -136,13 +136,13 @@ export const hacerReserva = async (req, res) => {
 
     const id_usuario = cliente.id_usuario;
 
-    // Verificar si el cliente está activo y verificado
-    if (!cliente.activo || !cliente.email_verificado) {
-      return res.status(403).json({
-        message:
-          "No puedes crear una reservación hasta que verifiques tu cuenta. Por favor revisa tu correo electrónico.",
-      });
-    }
+    // Comentado: Verificación de email para reservas
+    // if (!cliente.activo || !cliente.email_verificado) {
+    //   return res.status(403).json({
+    //     message:
+    //       "No puedes crear una reservación hasta que verifiques tu cuenta. Por favor revisa tu correo electrónico.",
+    //   });
+    // }
 
     // Usar el nuevo modelo para crear la reserva en la base de datos MySQL
     // Pasar id_usuario en lugar de nombre, telefono, email

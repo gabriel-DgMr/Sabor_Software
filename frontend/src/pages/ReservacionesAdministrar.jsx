@@ -25,6 +25,7 @@ const ReservacionesAdministrar = () => {
   });
 
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [aplicandoFiltros, setAplicandoFiltros] = useState(false);
 
   // Cargar reservas desde la base de datos
   useEffect(() => {
@@ -33,7 +34,11 @@ const ReservacionesAdministrar = () => {
 
   // Aplicar filtros cuando cambien
   useEffect(() => {
+    console.log('🔄 Aplicando filtros...');
+    console.log('📊 Reservas totales:', reservas.length);
+    setAplicandoFiltros(true);
     aplicarFiltros();
+    setAplicandoFiltros(false);
   }, [reservas, filtros, filtroHora]);
 
   const cargarReservas = async () => {
@@ -42,7 +47,12 @@ const ReservacionesAdministrar = () => {
       setError(null);
 
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/reservas/obtenerTodas', {
+      console.log('🔍 Token obtenido:', token ? 'Sí' : 'No');
+
+      const url = '/api/reservas';
+      console.log('🔍 Haciendo petición a:', url);
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -50,15 +60,23 @@ const ReservacionesAdministrar = () => {
         },
       });
 
+      console.log('📊 Status de respuesta:', response.status);
+      console.log('📊 Headers de respuesta:', response.headers.get('content-type'));
+
       if (!response.ok) {
-        throw new Error('Error al cargar las reservas');
+        const errorText = await response.text();
+        console.error('❌ Error en respuesta:', errorText);
+        throw new Error(`Error al cargar las reservas: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
-      setReservas(data.reservas || []);
+      console.log('✅ Datos recibidos:', data);
+      console.log('📊 Número de reservaciones:', data ? data.length : 0);
+
+      setReservas(data || []);
     } catch (error) {
-      console.error('Error al cargar reservas:', error);
-      setError('Error al cargar las reservas. Por favor, inténtalo de nuevo.');
+      console.error('❌ Error al cargar reservas:', error);
+      setError(`Error al cargar las reservas: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -66,13 +84,14 @@ const ReservacionesAdministrar = () => {
 
   // Función para aplicar todos los filtros
   const aplicarFiltros = () => {
+    console.log('🔍 Aplicando filtros a', reservas.length, 'reservaciones');
     let resultado = [...reservas];
 
     // Filtro por hora (bloque de tiempo)
     if (filtroHora !== 'todos') {
       const hora = parseInt(filtroHora);
       resultado = resultado.filter(r => {
-        const horaReserva = parseInt(r.hora.split(':')[0]);
+        const horaReserva = parseInt(r.hora_reservacion.split(':')[0]);
         return horaReserva === hora;
       });
     }
@@ -80,7 +99,7 @@ const ReservacionesAdministrar = () => {
     // Filtro por fecha
     if (filtros.fecha) {
       resultado = resultado.filter(r => {
-        const fechaReserva = new Date(r.fecha).toISOString().split('T')[0];
+        const fechaReserva = new Date(r.fecha_reservacion).toISOString().split('T')[0];
         return fechaReserva === filtros.fecha;
       });
     }
@@ -91,51 +110,65 @@ const ReservacionesAdministrar = () => {
     }
 
     // Filtro por nombre (búsqueda parcial)
-    if (filtros.nombre) {
+    if (filtros.nombre && filtros.nombre.trim() !== '') {
       resultado = resultado.filter(r =>
-        r.nombre.toLowerCase().includes(filtros.nombre.toLowerCase())
+        r.nombre.toLowerCase().includes(filtros.nombre.toLowerCase().trim())
       );
     }
 
     // Filtro por teléfono
-    if (filtros.telefono) {
-      resultado = resultado.filter(r => r.telefono.includes(filtros.telefono));
+    if (filtros.telefono && filtros.telefono.trim() !== '') {
+      resultado = resultado.filter(r => r.telefono.includes(filtros.telefono.trim()));
     }
 
     // Filtro por email
-    if (filtros.email) {
+    if (filtros.email && filtros.email.trim() !== '') {
       resultado = resultado.filter(r =>
-        r.email.toLowerCase().includes(filtros.email.toLowerCase())
+        r.email.toLowerCase().includes(filtros.email.toLowerCase().trim())
       );
     }
 
     // Filtro por cantidad de personas (rango)
-    if (filtros.personasMin) {
-      resultado = resultado.filter(r => r.personas >= parseInt(filtros.personasMin));
+    if (filtros.personasMin && filtros.personasMin !== '') {
+      const minPersonas = parseInt(filtros.personasMin);
+      if (!isNaN(minPersonas)) {
+        resultado = resultado.filter(r => r.numero_personas >= minPersonas);
+      }
     }
-    if (filtros.personasMax) {
-      resultado = resultado.filter(r => r.personas <= parseInt(filtros.personasMax));
+    if (filtros.personasMax && filtros.personasMax !== '') {
+      const maxPersonas = parseInt(filtros.personasMax);
+      if (!isNaN(maxPersonas)) {
+        resultado = resultado.filter(r => r.numero_personas <= maxPersonas);
+      }
     }
 
     // Filtro por rango de horas
-    if (filtros.horaInicio) {
-      resultado = resultado.filter(r => {
-        const horaReserva = parseInt(r.hora.split(':')[0]);
-        return horaReserva >= parseInt(filtros.horaInicio);
-      });
+    if (filtros.horaInicio && filtros.horaInicio !== '') {
+      const horaInicio = parseInt(filtros.horaInicio);
+      if (!isNaN(horaInicio)) {
+        resultado = resultado.filter(r => {
+          const horaReserva = parseInt(r.hora_reservacion.split(':')[0]);
+          return horaReserva >= horaInicio;
+        });
+      }
     }
-    if (filtros.horaFin) {
-      resultado = resultado.filter(r => {
-        const horaReserva = parseInt(r.hora.split(':')[0]);
-        return horaReserva <= parseInt(filtros.horaFin);
-      });
+    if (filtros.horaFin && filtros.horaFin !== '') {
+      const horaFin = parseInt(filtros.horaFin);
+      if (!isNaN(horaFin)) {
+        resultado = resultado.filter(r => {
+          const horaReserva = parseInt(r.hora_reservacion.split(':')[0]);
+          return horaReserva <= horaFin;
+        });
+      }
     }
 
+    console.log('✅ Filtros aplicados. Resultado:', resultado.length, 'reservaciones');
     setReservasFiltradas(resultado);
   };
 
   // Limpiar todos los filtros
   const limpiarFiltros = () => {
+    console.log('🧹 Limpiando filtros...');
     setFiltros({
       fecha: '',
       estado: 'todos',
@@ -148,13 +181,14 @@ const ReservacionesAdministrar = () => {
       horaFin: '',
     });
     setFiltroHora('todos');
+    // Los filtros se aplicarán automáticamente por el useEffect
   };
 
   // Función para actualizar el estado de una reserva (confirmar, cancelar, etc.)
   const actualizarEstadoReserva = async (idReserva, nuevoEstado) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/reservas/actualizarEstado/${idReserva}`, {
+      const response = await fetch(`/api/reservas/${idReserva}/estado`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -183,7 +217,7 @@ const ReservacionesAdministrar = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/reservas/eliminar/${idReserva}`, {
+      const response = await fetch(`/api/reservas/${idReserva}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -223,7 +257,7 @@ const ReservacionesAdministrar = () => {
 
   const reservasPorBloque = (inicio, fin) => {
     return reservasFiltradas.filter(r => {
-      const hora = parseInt(r.hora.split(':')[0]);
+      const hora = parseInt(r.hora_reservacion.split(':')[0]);
       return hora >= inicio && hora < fin;
     });
   };
@@ -231,11 +265,11 @@ const ReservacionesAdministrar = () => {
   // Función para obtener el color del estado
   const obtenerColorEstado = estado => {
     switch (estado) {
-      case 'confirmada':
+      case 'CONFIRMADA':
         return '#4CAF50';
-      case 'pendiente':
+      case 'PENDIENTE':
         return '#FF9800';
-      case 'cancelada':
+      case 'CANCELADA':
         return '#F44336';
       default:
         return '#757575';
@@ -245,10 +279,10 @@ const ReservacionesAdministrar = () => {
   // Obtener estadísticas de las reservas filtradas
   const obtenerEstadisticas = () => {
     const total = reservasFiltradas.length;
-    const confirmadas = reservasFiltradas.filter(r => r.estado === 'confirmada').length;
-    const pendientes = reservasFiltradas.filter(r => r.estado === 'pendiente').length;
-    const canceladas = reservasFiltradas.filter(r => r.estado === 'cancelada').length;
-    const totalPersonas = reservasFiltradas.reduce((sum, r) => sum + r.personas, 0);
+    const confirmadas = reservasFiltradas.filter(r => r.estado === 'CONFIRMADA').length;
+    const pendientes = reservasFiltradas.filter(r => r.estado === 'PENDIENTE').length;
+    const canceladas = reservasFiltradas.filter(r => r.estado === 'CANCELADA').length;
+    const totalPersonas = reservasFiltradas.reduce((sum, r) => sum + r.numero_personas, 0);
 
     return { total, confirmadas, pendientes, canceladas, totalPersonas };
   };
@@ -289,11 +323,16 @@ const ReservacionesAdministrar = () => {
               <button
                 className="reservaciones__boton-filtros"
                 onClick={() => setMostrarFiltros(!mostrarFiltros)}
+                disabled={aplicandoFiltros}
               >
                 {mostrarFiltros ? 'Ocultar Filtros' : 'Mostrar Filtros'}
               </button>
-              <button className="reservaciones__boton-limpiar" onClick={limpiarFiltros}>
-                Limpiar Filtros
+              <button
+                className="reservaciones__boton-limpiar"
+                onClick={limpiarFiltros}
+                disabled={aplicandoFiltros}
+              >
+                {aplicandoFiltros ? 'Limpiando...' : 'Limpiar Filtros'}
               </button>
             </div>
           </div>
@@ -320,9 +359,9 @@ const ReservacionesAdministrar = () => {
                   className="reservaciones__filtro-select"
                 >
                   <option value="todos">Todos los estados</option>
-                  <option value="pendiente">Pendiente</option>
-                  <option value="confirmada">Confirmada</option>
-                  <option value="cancelada">Cancelada</option>
+                  <option value="PENDIENTE">Pendiente</option>
+                  <option value="CONFIRMADA">Confirmada</option>
+                  <option value="CANCELADA">Cancelada</option>
                 </select>
               </div>
 
@@ -436,14 +475,21 @@ const ReservacionesAdministrar = () => {
               <option value="20">8:00 PM</option>
               <option value="21">9:00 PM</option>
             </select>
-            <button className="reservaciones__boton-filtrar" onClick={cargarReservas}>
-              ACTUALIZAR
+            <button
+              className="reservaciones__boton-filtrar"
+              onClick={cargarReservas}
+              disabled={isLoading}
+            >
+              {isLoading ? 'CARGANDO...' : 'RECARGAR'}
             </button>
           </div>
         </div>
 
         {/* Estadísticas */}
         <div className="reservaciones__estadisticas">
+          {aplicandoFiltros && (
+            <div className="reservaciones__filtros-aplicando">Aplicando filtros...</div>
+          )}
           <div className="reservaciones__estadistica-item">
             <h4 className="reservaciones__estadistica-titulo reservaciones__estadistica-titulo--total">
               Total Reservas
@@ -489,24 +535,28 @@ const ReservacionesAdministrar = () => {
         {reservasFiltradas.length === 0 ? (
           <div className="reservaciones__vacio">
             {reservas.length === 0
-              ? 'No hay reservas registradas en este momento.'
-              : 'No se encontraron reservas con los filtros aplicados. Intenta ajustar los criterios de búsqueda.'}
+              ? 'No hay reservaciones registradas en este momento.'
+              : 'No se encontraron reservaciones con los filtros aplicados. Intenta ajustar los criterios de búsqueda.'}
           </div>
         ) : (
           <section className="reservaciones__bloques">
             {bloques.map((bloque, i) => {
               const reservasDelBloque = reservasPorBloque(bloque.inicio, bloque.fin);
 
-              if (reservasDelBloque.length === 0) return null;
+              if (reservasDelBloque.length === 0) {
+                return (
+                  <div key={i} className="reservaciones__bloque">
+                    <h2 className="reservaciones__bloque-titulo">{bloque.titulo}</h2>
+                    <div className="reservaciones__vacio">
+                      No hay reservaciones para este horario.
+                    </div>
+                  </div>
+                );
+              }
 
               return (
                 <div key={i} className="reservaciones__bloque">
-                  <h2 className="reservaciones__bloque-titulo">
-                    {bloque.titulo}
-                    <span className="reservaciones__bloque-contador">
-                      {reservasDelBloque.length} reserva{reservasDelBloque.length !== 1 ? 's' : ''}
-                    </span>
-                  </h2>
+                  <h2 className="reservaciones__bloque-titulo">{bloque.titulo}</h2>
                   <div className="reservaciones__lista">
                     {reservasDelBloque.map(reserva => (
                       <div
@@ -522,13 +572,13 @@ const ReservacionesAdministrar = () => {
                               <strong>Nombre:</strong> {reserva.nombre}
                             </p>
                             <p className="reservacion__mesa">
-                              <strong>Personas:</strong> {reserva.personas}
+                              <strong>Personas:</strong> {reserva.numero_personas}
                             </p>
                             <p className="reservacion__fecha">
-                              <strong>Fecha:</strong> {formatearFecha(reserva.fecha)}
+                              <strong>Fecha:</strong> {formatearFecha(reserva.fecha_reservacion)}
                             </p>
                             <p className="reservacion__hora">
-                              <strong>Hora:</strong> {reserva.hora}
+                              <strong>Hora:</strong> {reserva.hora_reservacion}
                             </p>
                             <p className="reservacion__telefono">
                               <strong>Teléfono:</strong> {reserva.telefono}
@@ -536,9 +586,9 @@ const ReservacionesAdministrar = () => {
                             <p className="reservacion__email">
                               <strong>Email:</strong> {reserva.email}
                             </p>
-                            {reserva.peticiones && (
+                            {reserva.notas && (
                               <p className="reservacion__peticiones">
-                                <strong>Peticiones:</strong> {reserva.peticiones}
+                                <strong>Notas:</strong> {reserva.notas}
                               </p>
                             )}
                             <p
@@ -551,16 +601,20 @@ const ReservacionesAdministrar = () => {
                             </p>
                           </div>
                           <div className="reservacion__acciones">
-                            {reserva.estado === 'pendiente' && (
+                            {reserva.estado === 'PENDIENTE' && (
                               <>
                                 <button
-                                  onClick={() => actualizarEstadoReserva(reserva.id, 'confirmada')}
+                                  onClick={() =>
+                                    actualizarEstadoReserva(reserva.id_reservacion, 'CONFIRMADA')
+                                  }
                                   className="reservacion__boton reservacion__boton--confirmar"
                                 >
                                   Confirmar
                                 </button>
                                 <button
-                                  onClick={() => actualizarEstadoReserva(reserva.id, 'cancelada')}
+                                  onClick={() =>
+                                    actualizarEstadoReserva(reserva.id_reservacion, 'CANCELADA')
+                                  }
                                   className="reservacion__boton reservacion__boton--cancelar"
                                 >
                                   Cancelar
@@ -568,7 +622,7 @@ const ReservacionesAdministrar = () => {
                               </>
                             )}
                             <button
-                              onClick={() => eliminarReserva(reserva.id)}
+                              onClick={() => eliminarReserva(reserva.id_reservacion)}
                               className="reservacion__boton reservacion__boton--eliminar"
                             >
                               Eliminar
