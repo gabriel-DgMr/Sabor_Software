@@ -300,7 +300,7 @@ const Reservas = () => {
         setAlert({
           open: true,
           type: 'error',
-          message: 'Hubo un problema al conectar con el servidor de reservas.',
+          message: 'Hubo un problema al conectar con el servidor.',
         });
       }
     }
@@ -330,18 +330,20 @@ const Reservas = () => {
         </div>
 
         <div className="steps">
-          {[1, 2, 3, 4].map(num => (
-            <div key={num} className={`step ${step >= num ? 'active' : ''}`}>
-              <span className="step_number">{num}</span>
-              <span className="step_text">
-                {num === 1
-                  ? 'Encontrar'
-                  : num === 2
-                    ? 'Información'
-                    : num === 3
-                      ? 'Adicional'
-                      : 'Confirmación'}
-              </span>
+          {[1, 2, 3, 4].map(n => (
+            <div
+              key={n}
+              className={`prog-step ${
+                step > n ? 'prog-step--done' : step === n ? 'prog-step--active' : ''
+              }`}
+            >
+              <div className="prog-step__circle">{step > n ? '✔' : n}</div>
+              <div className="prog-step__label">
+                {n === 1 && 'Selección'}
+                {n === 2 && 'Información'}
+                {n === 3 && 'Adicional'}
+                {n === 4 && 'Confirmación'}
+              </div>
             </div>
           ))}
         </div>
@@ -428,7 +430,6 @@ const Reservas = () => {
     <>
       <div className="inputCantidadPersonas">
         <input
-          required
           className={`cantidad-personas__input ${formErrors.personas ? 'reservas__input-error' : ''}`}
           min="1"
           name="personas"
@@ -436,6 +437,16 @@ const Reservas = () => {
           type="number"
           value={formData.personas}
           onChange={handleInputChange}
+          onBlur={() => {
+            if (!formData.personas || formData.personas < 1) {
+              setFormErrors(prev => ({
+                ...prev,
+                personas: 'La cantidad de personas debe ser mayor a 0',
+              }));
+            } else {
+              setFormErrors(prev => ({ ...prev, personas: '' }));
+            }
+          }}
         />
         {formErrors.personas && (
           <small className="reservas__input-error">{formErrors.personas}</small>
@@ -562,7 +573,7 @@ const Reservas = () => {
         </section>
         {/* Columna Derecha: Formulario */}
         <section className="reservas-card">
-          <h1 className="reservas__titulo">Reservación</h1>
+          <h1 className="reservas__titulo">{t('reservas-main__titulo')}</h1>
           {/* prog de pasos */}
           <div className="reservas-prog">
             {[1, 2, 3, 4].map(num => (
@@ -585,14 +596,14 @@ const Reservas = () => {
             ))}
           </div>
           <div className="reservas__contenido">
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               {/* Paso 1: Cantidad, Fecha, Hora */}
               {step === 1 && (
                 <div className="reservas-step reservas-step--1">
                   {/* Cantidad de personas */}
                   <div className="inputCantidadPersonas">
                     <label htmlFor="personas" className="input-cantidad-personas__label">
-                      Cantidad
+                      {t('reservas_cantidad_personas-label')}
                     </label>
                     <div className="cantidad-personas__wrapper">
                       <button
@@ -664,7 +675,7 @@ const Reservas = () => {
                     <label className="time_selector__label">{t('reservas_hora')}</label>
                     <div
                       className="time_columns"
-                      style={{ display: 'flex', gap: '0.7rem', flexWrap: 'wrap' }}
+                      style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}
                     >
                       {horariosDisponibles.map((horario, index) => (
                         <button
@@ -695,7 +706,7 @@ const Reservas = () => {
                   <h2 className="reservas__subtitulo">{t('reservas_info_contacto_titulo')}</h2>
                   <div
                     className="campo"
-                    style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}
+                    style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}
                   >
                     <label
                       htmlFor="nombre"
@@ -710,17 +721,6 @@ const Reservas = () => {
                       type="text"
                       value={formData.nombre}
                       onChange={handleInputChange}
-                      style={{
-                        background: '#f2f1f0',
-                        borderRadius: '1.1rem',
-                        padding: '0.8rem 1.2rem',
-                        fontSize: '1.1rem',
-                        border: 'none',
-                        outline: 'none',
-                        fontWeight: 500,
-                        color: '#222',
-                        boxShadow: '0 1px 6px #0001',
-                      }}
                     />
                     {formErrors.nombre && (
                       <small className="reservas__input-error">{formErrors.nombre}</small>
@@ -743,32 +743,13 @@ const Reservas = () => {
                       type="tel"
                       value={formData.telefono}
                       onChange={handleInputChange}
-                      style={{
-                        background: '#f2f1f0',
-                        borderRadius: '1.1rem',
-                        padding: '0.8rem 1.2rem',
-                        fontSize: '1.1rem',
-                        border: 'none',
-                        outline: 'none',
-                        fontWeight: 500,
-                        color: '#222',
-                        boxShadow: '0 1px 6px #0001',
-                      }}
                     />
                     {formErrors.telefono && (
                       <small className="reservas__input-error">{formErrors.telefono}</small>
                     )}
                   </div>
-                  <div
-                    className="campo"
-                    style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}
-                  >
-                    <label
-                      htmlFor="email"
-                      style={{ fontWeight: 600, fontSize: '1.1rem', color: '#444' }}
-                    >
-                      {t('correo_electronico')}:
-                    </label>
+                  <div className="campo">
+                    <label htmlFor="email">{t('correo_electronico')}:</label>
                     <input
                       className={`formulario__input${formErrors.email ? ' reservas__input-error' : ''}`}
                       id="email"
@@ -776,17 +757,6 @@ const Reservas = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      style={{
-                        background: '#f2f1f0',
-                        borderRadius: '1.1rem',
-                        padding: '0.8rem 1.2rem',
-                        fontSize: '1.1rem',
-                        border: 'none',
-                        outline: 'none',
-                        fontWeight: 500,
-                        color: '#222',
-                        boxShadow: '0 1px 6px #0001',
-                      }}
                     />
                     {formErrors.email && (
                       <small className="reservas__input-error">{formErrors.email}</small>
@@ -859,9 +829,38 @@ const Reservas = () => {
                 {step > 1 && (
                   <button className="boton_regresar" type="button" onClick={handlePreviousStep}>
                     {t('reservas_regresar')}
+                    <div class="icon">
+                      <svg
+                        height="24"
+                        width="24"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M0 0h24v24H0z" fill="none"></path>
+                        <path
+                          d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
+                          fill="currentColor"
+                        ></path>
+                      </svg>
+                    </div>
                   </button>
                 )}
                 <button className="boton_siguiente" type="submit">
+                  <div class="icon">
+                    <svg
+                      height="24"
+                      width="24"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M0 0h24v24H0z" fill="none"></path>
+                      <path
+                        d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
+                        fill="currentColor"
+                      ></path>
+                    </svg>
+                  </div>
+
                   {step === 4
                     ? t('reservas_confirmar_boton')
                     : step === 3

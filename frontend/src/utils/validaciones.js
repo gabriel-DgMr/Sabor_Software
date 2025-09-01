@@ -133,7 +133,7 @@ export const validarHora = hora => {
 export const validarNumeroPersonas = numero => {
   const num = parseInt(numero);
   if (isNaN(num) || num < 1 || num > 8) {
-    return 'El número de personas debe estar entre 1 y 8';
+    return 'El número de personas debe estar entre 1 y 4';
   }
   return null;
 };

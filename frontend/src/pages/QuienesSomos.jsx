@@ -20,7 +20,7 @@ const DESARROLLADORES = [
   },
   {
     nombre: 'Miguel Angel Sanchez',
-    rol: 'FukkStack Developer',
+    rol: 'Full    Stack Developer',
     foto: '/images/dev-miguel.jpg',
     descripcionKey: 'quienes_dev_miguel',
   },

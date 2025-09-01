@@ -5,8 +5,11 @@
   margin: 0;
 }
 .hide-number-spin {
-  -moz-appearance: textfield;
+  appearance: textfield;       /* estándar */
+  -moz-appearance: textfield;  /* Firefox */
+  -webkit-appearance: textfield; /* Chrome, Safari, Edge */
 }
+
 /* =====================
    VARIABLES Y FUENTES
    ===================== */
@@ -575,6 +578,310 @@ hr {
   z-index: 5;
 }
 
+/* ==============
+  Sobre Nostros
+  ============== */
+
+   .sobre-nosotros {
+    display: block;
+    color: var(--neutral-900, #1f1f1f);
+    overflow-x: hidden;
+  }
+  
+  .sobre-nosotros__hero {
+    position: relative;
+    min-height: clamp(38rem, 58vh, 54rem);
+    padding: 4rem 2rem 6rem;
+    display: flex;
+    align-items: flex-end;
+    background:
+      linear-gradient(140deg, rgba(0,0,0,.55), rgba(0,0,0,.25)),
+      url('/images/sobre-nostros-background.jpg') center/cover no-repeat;
+      background-position: 50% 30%;
+    border-radius: 0 0 2.4rem 2.4rem;
+    isolation: isolate;
+  }
+  
+  .sobre-nosotros__hero-capa {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(255,255,255,.08), transparent 60%),
+      linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.65));
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .sobre-nosotros__hero-contenido {
+    position: relative;
+    z-index: 2;
+    max-width: 72rem;
+  }
+  
+  .sobre-nosotros__titulo-principal {
+    margin: 0 0 1rem;
+    font: 700 clamp(2.8rem, 5vw, 4.6rem) 'Montserrat', system-ui, sans-serif;
+    letter-spacing: .5px;
+    color: #fff;
+  }
+  
+  .sobre-nosotros__titulo-resalte {
+    background: linear-gradient(90deg, var(--primary-200,#ff9a4d), var(--primary-500,#ff6f00));
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+  
+  .sobre-nosotros__subtitulo-hero {
+    margin: 0;
+    font-size: clamp(1.4rem, 2.1vw, 2rem);
+    color: rgba(255,255,255,.88);
+    line-height: 1.4;
+  }
+  
+  .sobre-nosotros__hero-decor {
+    position: absolute;
+    width: 18rem;
+    height: 18rem;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: .35;
+    z-index: 0;
+    pointer-events: none;
+    animation: pulsoLuz 8s ease-in-out infinite;
+  }
+  .sobre-nosotros__hero-decor--uno {
+    left: -4rem; top: -4rem;
+    background: var(--primary-300,#ff8c33);
+  }
+  .sobre-nosotros__hero-decor--dos {
+    right: -3rem; bottom: -6rem;
+    background: var(--primary-500,#ff6f00);
+    animation-delay: 3.5s;
+  }
+  
+  .sobre-nosotros__contenedor {
+    max-width: 1200px;
+    margin: -4rem auto 6rem;
+    padding: 0 2rem;
+    position: relative;
+  }
+  
+  .sobre-nosotros__grid {
+    display: grid;
+    gap: 2.4rem;
+    grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr));
+    margin-bottom: 4.8rem;
+  }
+  
+  .sobre-nosotros__tarjeta {
+    position: relative;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.06);
+    border-radius: 1.6rem;
+    padding: 2.2rem 2.2rem 2.4rem;
+    box-shadow: 0 6px 18px rgba(0,0,0,.06);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    transition: box-shadow .25s ease, transform .25s ease, border-color .25s ease;
+    overflow: hidden;
+  }
+  
+  .sobre-nosotros__tarjeta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,125,26,.18), transparent 60%);
+    opacity: 0;
+    transition: opacity .35s ease;
+    pointer-events: none;
+  }
+  
+  .sobre-nosotros__tarjeta:hover,
+  .sobre-nosotros__tarjeta:focus-within {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 34px -6px rgba(0,0,0,.18);
+    border-color: var(--primary-200,#ff9a4d);
+  }
+  
+  .sobre-nosotros__tarjeta:hover::before,
+  .sobre-nosotros__tarjeta:focus-within::before {
+    opacity: 1;
+  }
+  
+  .sobre-nosotros__tarjeta-cabecera {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+  }
+  
+  .sobre-nosotros__icono {
+    font-size: 2.4rem;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.15));
+  }
+  
+  .sobre-nosotros__tarjeta-titulo {
+    margin: 0;
+    font: 600 1.8rem/1.2 'Montserrat', system-ui, sans-serif;
+    color: var(--primary-700,#b64f00);
+  }
+  
+  .sobre-nosotros__texto {
+    margin: 0;
+    font-size: 1.45rem;
+    line-height: 1.6;
+    color: #3a322d;
+  }
+  
+  .sobre-nosotros__lista-contacto {
+    list-style: none;
+    padding: 0;
+    margin: .8rem 0 0;
+    display: grid;
+    gap: .6rem;
+  }
+  
+  .sobre-nosotros__item-contacto {
+    display: flex;
+    gap: .6rem;
+    align-items: baseline;
+    font-size: 1.4rem;
+  }
+  
+  .sobre-nosotros__etiqueta {
+    font-weight: 600;
+    color: var(--primary-600,#db5f00);
+  }
+  
+  .sobre-nosotros__enlace {
+    color: #0d4c92;
+    text-decoration: none;
+    border-bottom: 1px dashed transparent;
+    transition: color .2s ease, border-color .2s ease;
+  }
+  .sobre-nosotros__enlace:hover,
+  .sobre-nosotros__enlace:focus-visible {
+    color: var(--primary-600,#db5f00);
+    border-color: currentColor;
+  }
+  
+  /* Franja Misión Visión Valores */
+  .sobre-nosotros__franja {
+    background: linear-gradient(110deg, var(--primary-100,#ffa966), var(--primary-300,#ff8c33) 55%, var(--primary-500,#ff6f00));
+    border-radius: 2rem;
+    padding: 3rem clamp(1.6rem, 4vw, 3.6rem);
+    display: grid;
+    gap: 2.4rem;
+    box-shadow: 0 10px 40px -12px rgba(0,0,0,.25);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .sobre-nosotros__franja::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 70% 30%, rgba(255,255,255,.22), transparent 60%),
+      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0));
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+  
+  .sobre-nosotros__franja-bloque {
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(4px);
+    padding: 1.6rem 1.8rem 1.8rem;
+    border-radius: 1.4rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,.12);
+    display: flex;
+    flex-direction: column;
+    gap: .8rem;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  
+  .sobre-nosotros__franja-bloque:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px -6px rgba(0,0,0,.18);
+  }
+  
+  .sobre-nosotros__franja-titulo {
+    margin: 0;
+    font: 600 1.6rem 'Montserrat', system-ui, sans-serif;
+    color: var(--primary-700,#b64f00);
+    letter-spacing: .4px;
+  }
+  
+  .sobre-nosotros__franja-texto {
+    margin: 0;
+    font-size: 1.4rem;
+    line-height: 1.55;
+    color: #473d36;
+  }
+  
+  .sobre-nosotros__valores {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: grid;
+    gap: .4rem;
+    font-size: 1.35rem;
+    color: #493b32;
+  }
+  .sobre-nosotros__valor::marker {
+    color: var(--primary-600,#db5f00);
+    font-weight: 600;
+  }
+  
+  /* Animaciones reveal */
+  .animacion-revelar {
+    opacity: 0;
+    transform: translateY(20px) scale(.98);
+    filter: blur(3px);
+    transition:
+      opacity .8s cubic-bezier(.22,.61,.36,1),
+      transform .8s cubic-bezier(.22,.61,.36,1),
+      filter .6s ease;
+    will-change: opacity, transform;
+  }
+  .animacion-revelar--visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  
+  @keyframes pulsoLuz {
+    0%,100% { transform: scale(1); opacity: .35; }
+    50% { transform: scale(1.25); opacity: .55; }
+  }
+  
+  /* Responsive */
+  @media (min-width: 780px) {
+    .sobre-nosotros__franja {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .sobre-nosotros__hero {
+      padding: 3.2rem 1.6rem 5rem;
+      border-radius: 0 0 1.6rem 1.6rem;
+    }
+    .sobre-nosotros__contenedor {
+      margin-top: -3rem;
+      padding: 0 1.6rem;
+    }
+    .sobre-nosotros__franja {
+      padding: 2.4rem 1.6rem;
+    }
+    .sobre-nosotros__tarjeta {
+      padding: 1.8rem 1.8rem 2rem;
+    }
+  }
+
+
 /* Tarjeta base */
 .tarjeta-info {
   position: relative;
@@ -649,10 +956,7 @@ hr {
 
 .tarjeta-info:hover {
   background: linear-gradient(0deg,var(--primary-300),var(--primary-500));
-  box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.4),
-  inset 0px -4px 0px 0px rgba(0, 0, 0, 0.2),
-  0px 0px 0px 4px rgba(255, 255, 255, 0.2),
-  0px 0px 180px 0px var(--primary-500);
+  box-shadow: 0 0 200px var(--primary-500);;
   transform: translateY(-2px);
 }
 
@@ -784,7 +1088,7 @@ hr {
 
 .categorias__titulo {
   font-size: 2.4rem;
-  color: white;
+  color: var(--neutral-900);
 }
 
 .categorias__contenedor-cards {
@@ -824,10 +1128,50 @@ hr {
 }
 
 .categorias__reserva a {
-  color: var(--neutral-50);
+  color: var(--neutral-900);
   font-size: 1.8rem;
-  text-decoration: underline;
+  text-decoration: none;
 }
+
+.btn-reserva {
+  border-radius: 50%;
+  width: 6rem;
+  height: 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem; /* tamaño del ícono */
+  color: white;
+  background-color: var(--secondary-700);
+  text-decoration: none;
+  position: fixed;
+  bottom: 3rem;
+  left: 3rem; /* lo ponemos en la izquierda para que no choque con el carrito */
+  z-index: 1000;
+  transition: all 0.3s ease;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.reserva-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+  color: var(--neutral-900);
+  font-size: 3.5rem;
+}
+
+.btn-reserva:hover .reserva-icono {
+  transform: scale(1.1);
+}
+
+.btn-reserva:active .reserva-icono {
+  transform: scale(0.95);
+}
+
+
+
 
 /* =====================
    BARRA DE NAVEGACIÓN
@@ -1309,18 +1653,6 @@ hr {
   padding: 1rem;
 }
 
-/* =====================
-   RESERVAS
-   ===================== */
-.pagina__contenido-reservas {
-  margin-top: 2%;
-  display: flex;
-  flex-direction: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  height: 100%;
-}
 
 .imagen-reservas {
   border-radius:2rem;

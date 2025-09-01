@@ -16,7 +16,7 @@ export const registerUser = async (usuarioData) => {
 
   // Verificar si el email ya existe
   const [existingUser] = await pool.query(
-    "SELECT * FROM usuarios WHERE id_usuario = ?",
+    "SELECT * FROM usuarios WHERE correo_usuario = ?",
     [correo_usuario],
   );
 
@@ -139,6 +139,10 @@ export const loginUser = async (correo_usuario, contraseña_usuario) => {
     "SELECT * FROM usuarios WHERE correo_usuario = ?",
     [correo_usuario],
   );
+
+  if (rows[0].activo === 0) {
+    throw new Error("Usuario no activo, por favor verifica tu correo");
+  }
 
   if (!rows.length) {
     throw new Error("usuario no existe");

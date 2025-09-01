@@ -47,6 +47,22 @@ const EmpleadosHome = () => {
                   Administrar Pedidos
                 </button>
               </li>
+              <li className="acciones-principales__item">
+                <button
+                  className="acciones-principales__boton"
+                  onClick={() => navigate('/administrar/domicilios')}
+                >
+                  Administrar Domicilios
+                </button>
+              </li>
+              <li className="acciones-principales__item">
+                <button
+                  className="acciones-principales__boton"
+                  onClick={() => navigate('/administrar/panel')}
+                >
+                  Ver reportes
+                </button>
+              </li>
             </ul>
           </nav>
         </section>

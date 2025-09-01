@@ -78,7 +78,7 @@ export const reservaModel = {
       return result.insertId;
     } catch (error) {
       console.error("Error en reservaModel.createReserva:", error);
-      throw new Error("Error al crear la reserva: " + error.message);
+      throw new Error(error.message);
     }
   },
 
