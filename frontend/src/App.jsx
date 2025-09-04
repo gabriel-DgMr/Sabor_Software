@@ -3,14 +3,16 @@ import { Route, Routes } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 
 import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext.jsx'; // asegúrate de que exista
 import { CartProvider } from './context/CartContext.jsx';
 import { CategoriaProvider } from './context/CategoriaContext.jsx';
 import { ProductoProvider } from './context/ProductoContext.jsx';
+
 import ActualizarDatos from './pages/ActualizarDatos.jsx';
 import Login from './pages/auth/Login.jsx';
 import Register from './pages/auth/Register.jsx';
 import ResetPasswordContainer from './pages/auth/ResetPasswordContainer.jsx';
-import Carrito from './pages/carrito.jsx';
+import Carrito from './pages/Carrito.jsx';
 import Checkout from './pages/Checkout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import DashboardVentas from './pages/DashboardVentas.jsx';
@@ -21,186 +23,163 @@ import HistorialReservas from './pages/HistorialReservas.jsx';
 import Home from './pages/Home.jsx';
 import ModificarPedido from './pages/ModificarPedido.jsx';
 import PaginaNoEncontrada from './pages/PaginaNoEncontrada.jsx';
-import PedidosAdministrar from './pages/pedidosadministrar.jsx';
-import ProductosAdministrar from './pages/ProductosAdministrar.jsx';
+import PedidosAdministrar from './pages/PedidosAdministrador.jsx';
+import ProductosAdministrar from './pages/ProductosAdministrador.jsx';
 import QuienesSomos from './pages/QuienesSomos.jsx';
-import ReservasAdministrar from './pages/ReservacionesAdministrar.jsx';
+import ReservasAdministrar from './pages/ReservacionesAdministrador.jsx';
 import Reservas from './pages/Reservas.jsx';
 import SobreNosotros from './pages/SobreNosotros.jsx';
 import HomeEmpleados from './pages/HomeEmpleados.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
+import ProductosEmpleados from './pages/ProductosEmpleados.jsx';
 
-// Componente de diagnóstico temporal
-const DiagnosticComponent = () => {
-  return (
-    <div
-      style={{
-        padding: '20px',
-        backgroundColor: '#f0f0f0',
-        fontFamily: 'Arial, sans-serif',
-        textAlign: 'center',
-      }}
+// Componentes de diagnóstico
+const DiagnosticComponent = () => (
+  <div style={{ padding: '20px', backgroundColor: '#f0f0f0', textAlign: 'center' }}>
+    <h1>🚀 Sabor - Diagnóstico</h1>
+    <p>Si puedes ver este mensaje, React está funcionando correctamente.</p>
+    <p>Fecha: {new Date().toLocaleString()}</p>
+    <button
+      onClick={() => (window.location.href = '/')}
+      style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none' }}
     >
-      <h1>🚀 Sabor - Diagnóstico</h1>
-      <p>Si puedes ver este mensaje, React está funcionando correctamente.</p>
-      <p>Fecha: {new Date().toLocaleString()}</p>
-      <div style={{ marginTop: '20px' }}>
-        <button
-          onClick={() => (window.location.href = '/')}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
-        >
-          Ir a la página principal
-        </button>
-      </div>
-    </div>
-  );
-};
+      Ir a la página principal
+    </button>
+  </div>
+);
 
-// Componente de prueba simple
-const TestComponent = () => {
-  return (
-    <div
-      style={{
-        padding: '20px',
-        backgroundColor: '#e8f5e8',
-        fontFamily: 'Arial, sans-serif',
-        textAlign: 'center',
-      }}
-    >
-      <h1>✅ React funcionando correctamente</h1>
-      <p>Este es un componente de prueba simple sin contextos.</p>
-      <p>Si puedes ver esto, el problema está en algún contexto específico.</p>
-    </div>
-  );
-};
+const TestComponent = () => (
+  <div style={{ padding: '20px', backgroundColor: '#e8f5e8', textAlign: 'center' }}>
+    <h1>✅ React funcionando correctamente</h1>
+    <p>Si ves esto, el problema está en algún contexto.</p>
+  </div>
+);
 
 function App() {
   return (
     <HelmetProvider>
-      <Routes>
-        {/* Ruta de prueba simple */}
-        <Route element={<TestComponent />} path="/test" />
+      <AuthProvider>
+        <ProductoProvider>
+          <CategoriaProvider>
+            <CartProvider>
+              <Routes>
+                {/* Rutas de prueba */}
+                <Route element={<TestComponent />} path="/test" />
+                <Route element={<DiagnosticComponent />} path="/diagnostico" />
 
-        {/* Ruta de diagnóstico temporal */}
-        <Route element={<DiagnosticComponent />} path="/diagnostico" />
+                {/* Rutas públicas */}
+                <Route element={<Home />} path="/" />
+                <Route element={<Login />} path="/login" />
+                <Route element={<Register />} path="/register" />
+                <Route element={<ResetPasswordContainer />} path="/reset-password/:token" />
+                <Route element={<Reservas />} path="/reservas" />
+                <Route element={<Carrito />} path="/carrito" />
+                <Route element={<Checkout />} path="/checkout" />
+                <Route element={<ModificarPedido />} path="/carrito/modificar/:id" />
+                <Route element={<QuienesSomos />} path="/quienes-somos" />
+                <Route element={<SobreNosotros />} path="/sobre-nosotros" />
+                <Route element={<EscanearQR />} path="/escanear-qr" />
+                <Route element={<LoadingScreen />} path="/loading-screen" />
 
-        {/* Rutas con contextos */}
-        <Route
-          element={
-            <ProductoProvider>
-              <CategoriaProvider>
-                <CartProvider>
-                  <Routes>
-                    {/* Rutas públicas */}
-                    <Route element={<Home />} path="/" />
-                    <Route element={<Login />} path="/login" />
-                    <Route element={<Register />} path="/register" />
-                    <Route element={<ResetPasswordContainer />} path="/reset-password/:token" />
-                    <Route element={<Reservas />} path="/reservas" />
-                    <Route element={<Carrito />} path="/carrito" />
-                    <Route element={<Checkout />} path="/checkout" />
-                    <Route element={<ModificarPedido />} path="/carrito/modificar/:id" />
-                    <Route element={<QuienesSomos />} path="/quienes-somos" />
-                    <Route element={<SobreNosotros />} path="/sobre-nosotros" />
-                    <Route element={<EscanearQR />} path="/escanear-qr" />
-                    <Route element={<LoadingScreen />} path="/loading-screen" />
-                    {/* Rutas protegidas */}
-                    <Route
-                      element={
-                        <ProtectedRoute>
-                          <HomeAdministrador />
-                        </ProtectedRoute>
-                      }
-                      path="/HomeAdministrador"
-                    />
-                    <Route
-                      element={
-                        <ProtectedRoute>
-                          <HomeEmpleados />
-                        </ProtectedRoute>
-                      }
-                      path="/HomeEmpleados"
-                    />
-                    <Route
-                      element={
-                        <ProtectedRoute>
-                          <ProductosAdministrar />
-                        </ProtectedRoute>
-                      }
-                      path="/administrar/productos"
-                    />
-                    <Route
-                      element={
-                        <ProtectedRoute>
-                          <PedidosAdministrar />
-                        </ProtectedRoute>
-                      }
-                      path="/administrar/pedidos"
-                    />
-                    <Route
-                      element={
-                        <ProtectedRoute>
-                          <ReservasAdministrar />
-                        </ProtectedRoute>
-                      }
-                      path="/administrar/reservaciones"
-                    />
-                    <Route
-                      element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                      path="/administrar/panel"
-                    />
-                    <Route
-                      element={
-                        <ProtectedRoute>
-                          <DashboardVentas />
-                        </ProtectedRoute>
-                      }
-                      path="/administrar/panel/ventas"
-                    />
-                    <Route
-                      element={
-                        <ProtectedRoute>
-                          <ActualizarDatos />
-                        </ProtectedRoute>
-                      }
-                      path="/actualizar-datos"
-                    />
-                    <Route
-                      element={
-                        <ProtectedRoute>
-                          <HistorialPedidos />
-                        </ProtectedRoute>
-                      }
-                      path="/historial-pedidos"
-                    />
-                    <Route
-                      element={
-                        <ProtectedRoute>
-                          <HistorialReservas />
-                        </ProtectedRoute>
-                      }
-                      path="/historial-reservas"
-                    />
-                    <Route element={<PaginaNoEncontrada />} path="*" />
-                  </Routes>
-                </CartProvider>
-              </CategoriaProvider>
-            </ProductoProvider>
-          }
-          path="/*"
-        />
-      </Routes>
+                {/* Rutas protegidas */}
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <HomeAdministrador />
+                    </ProtectedRoute>
+                  }
+                  path="/HomeAdministrador"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <HomeEmpleados />
+                    </ProtectedRoute>
+                  }
+                  path="/HomeEmpleados"
+                />
+
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <ProductosAdministrar />
+                    </ProtectedRoute>
+                  }
+                  path="/administrador/productos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <ProductosEmpleados />
+                    </ProtectedRoute>
+                  }
+                  path="/empleado/productos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <PedidosAdministrar />
+                    </ProtectedRoute>
+                  }
+                  path="/administrador/pedidos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <ReservasAdministrar />
+                    </ProtectedRoute>
+                  }
+                  path="/administrador/reservaciones"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                  path="/administrador/panel"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <DashboardVentas />
+                    </ProtectedRoute>
+                  }
+                  path="/administrador/panel/ventas"
+                />
+
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <ActualizarDatos />
+                    </ProtectedRoute>
+                  }
+                  path="/actualizar-datos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <HistorialPedidos />
+                    </ProtectedRoute>
+                  }
+                  path="/historial-pedidos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <HistorialReservas />
+                    </ProtectedRoute>
+                  }
+                  path="/historial-reservas"
+                />
+
+                {/* Ruta 404 */}
+                <Route element={<PaginaNoEncontrada />} path="*" />
+              </Routes>
+            </CartProvider>
+          </CategoriaProvider>
+        </ProductoProvider>
+      </AuthProvider>
     </HelmetProvider>
   );
 }

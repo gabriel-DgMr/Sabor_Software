@@ -11,21 +11,22 @@ const MenuLateral = () => {
   const navigate = useNavigate();
 
   const opcionesGenerales = [
-    { nombre: 'Reservaciones', ruta: '/administrar/reservaciones' },
-    { nombre: 'Productos', ruta: '/administrar/productos' },
-    { nombre: 'Pedidos', ruta: '/administrar/pedidos' },
-    { nombre: 'Domicilios', ruta: '/administrar/domicilios' },
-    { nombre: 'Panel de control', ruta: '/administrar/panel' },
+    { nombre: 'Inicio', ruta: '/HomeAdministrador' },
+    { nombre: 'Reservaciones', ruta: '/administrador/reservaciones' },
+    { nombre: 'Productos', ruta: '/administrador/productos' },
+    { nombre: 'Pedidos', ruta: '/administrador/pedidos' },
+    { nombre: 'Domicilios', ruta: '/administrador/domicilios' },
+    { nombre: 'Panel de control', ruta: '/administrador/panel' },
   ];
 
   const opcionesPanel = [
-    { nombre: 'Ventas', ruta: '/administrar/panel/ventas' },
-    { nombre: 'Clientes', ruta: '/administrar/panel/clientes' },
-    { nombre: 'Trabajadores', ruta: '/administrar/panel/trabajadores' },
-    { nombre: 'Inventario', ruta: '/administrar/panel/inventario' },
+    { nombre: 'Ventas', ruta: '/administrador/panel/ventas' },
+    { nombre: 'Clientes', ruta: '/administrador/panel/clientes' },
+    { nombre: 'Trabajadores', ruta: '/administrador/panel/trabajadores' },
+    { nombre: 'Inventario', ruta: '/administrador/panel/inventario' },
   ];
 
-  const enPanel = location.pathname.startsWith('/administrar/panel');
+  const enPanel = location.pathname.startsWith('/administrador/panel');
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -65,7 +66,6 @@ const MenuLateral = () => {
 
         {/* Opciones generales */}
         <section className="menu-lateral__seccion">
-          <h2 className="menu-lateral__titulo">Inicio</h2>
           <ul className="menu-lateral__lista">
             {opcionesGenerales.map(({ nombre, ruta }) => (
               <li key={ruta} className="menu-lateral__item">
