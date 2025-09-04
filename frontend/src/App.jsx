@@ -23,14 +23,15 @@ import HistorialReservas from './pages/HistorialReservas.jsx';
 import Home from './pages/Home.jsx';
 import ModificarPedido from './pages/ModificarPedido.jsx';
 import PaginaNoEncontrada from './pages/PaginaNoEncontrada.jsx';
-import PedidosAdministrar from './pages/pedidosadministrar.jsx';
-import ProductosAdministrar from './pages/ProductosAdministrar.jsx';
+import PedidosAdministrar from './pages/PedidosAdministrador.jsx';
+import ProductosAdministrar from './pages/ProductosAdministrador.jsx';
 import QuienesSomos from './pages/QuienesSomos.jsx';
-import ReservasAdministrar from './pages/ReservacionesAdministrar.jsx';
+import ReservasAdministrar from './pages/ReservacionesAdministrador.jsx';
 import Reservas from './pages/Reservas.jsx';
 import SobreNosotros from './pages/SobreNosotros.jsx';
 import HomeEmpleados from './pages/HomeEmpleados.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
+import ProductosEmpleados from './pages/ProductosEmpleados.jsx';
 
 function App() {
   return (
@@ -76,7 +77,15 @@ function App() {
                       <ProductosAdministrar />
                     </ProtectedRoute>
                   }
-                  path="/administrar/productos"
+                  path="/administrador/productos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <ProductosEmpleados />
+                    </ProtectedRoute>
+                  }
+                  path="/empleado/productos"
                 />
                 <Route
                   element={
@@ -84,7 +93,7 @@ function App() {
                       <PedidosAdministrar />
                     </ProtectedRoute>
                   }
-                  path="/administrar/pedidos"
+                  path="/administrador/pedidos"
                 />
                 <Route
                   element={
@@ -92,7 +101,7 @@ function App() {
                       <ReservasAdministrar />
                     </ProtectedRoute>
                   }
-                  path="/administrar/reservaciones"
+                  path="/administrador/reservaciones"
                 />
                 <Route
                   element={
@@ -100,7 +109,7 @@ function App() {
                       <Dashboard />
                     </ProtectedRoute>
                   }
-                  path="/administrar/panel"
+                  path="/administrador/panel"
                 />
                 <Route
                   element={
@@ -108,7 +117,7 @@ function App() {
                       <DashboardVentas />
                     </ProtectedRoute>
                   }
-                  path="/administrar/panel/ventas"
+                  path="/administrador/panel/ventas"
                 />
                 <Route
                   element={

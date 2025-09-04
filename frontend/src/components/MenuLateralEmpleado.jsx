@@ -11,12 +11,12 @@ const MenuLateral = () => {
   const navigate = useNavigate();
 
   const opcionesGenerales = [
-    { nombre: 'Reservaciones', ruta: '/administrar/reservaciones' },
-    { nombre: 'Pedidos', ruta: '/administrar/pedidos' },
-    { nombre: 'Domicilios', ruta: '/administrar/domicilios' },
+    { nombre: 'Inicio', ruta: '/HomeEmpleados' },
+    { nombre: 'Productos', ruta: '/empleado/productos' },
+    { nombre: 'Reservaciones', ruta: '/empleados/reservaciones' },
+    { nombre: 'Pedidos', ruta: '/empleado/pedidos' },
+    { nombre: 'Domicilios', ruta: '/empleado/domicilios' },
   ];
-
-  const enPanel = location.pathname.startsWith('/administrar/panel');
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -49,14 +49,13 @@ const MenuLateral = () => {
           }}
         >
           <FaUserCircle size={32} />
-          <span className="menu-lateral__usuario-nombre">{user?.nombre_cliente || 'Invitado'}</span>
+          <span className="menu-lateral__usuario-nombre">{user?.nombre_usuario}</span>
         </button>
 
         <hr className="menu-lateral__separador" />
 
         {/* Opciones generales */}
         <section className="menu-lateral__seccion">
-          <h2 className="menu-lateral__titulo">Inicio</h2>
           <ul className="menu-lateral__lista">
             {opcionesGenerales.map(({ nombre, ruta }) => (
               <li key={ruta} className="menu-lateral__item">

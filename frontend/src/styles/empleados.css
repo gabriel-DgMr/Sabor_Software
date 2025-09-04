@@ -23,7 +23,7 @@
 
 .menu-lateral {
     width: 15%;
-    min-width: 18rem;
+    min-width: 30rem;
     background-color: var(--secondary-700);
     box-shadow: 15px 0px 10px 0px rgba(0, 0, 0, 0.1);
     padding: 2rem;
@@ -89,14 +89,6 @@
   .menu-lateral__cliente-nombre {
     margin-left: 0.5rem;
   }
-  .menu-lateral__seccion {
-    width: 100%;
-  }
-  .menu-lateral__titulo {
-    color: var(--neutral-50);
-    font-weight: 900;
-    margin-bottom: 1rem;
-  }
   .menu-lateral__lista {
     list-style: none;
     padding: 0;
@@ -139,6 +131,12 @@
   .menu-lateral__link--activo--panel {
     transform: scale(1.1);
     font-weight: 700;
+  }
+
+  .menu-lateral__item:nth-child(1) .menu-lateral__link{
+    font-size: 2.4rem;
+    transform: scale(1.2);
+    font-weight: bolder;
   }
 
 /* Contenido principal pagina empleados */
@@ -1329,8 +1327,19 @@
     font-size: 1.8rem;
 }
 
+.contenedor__productos-vista {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin: 2rem;
+}
+
 .productos__vista {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-bottom: 2rem;
 }
 
@@ -1338,6 +1347,13 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+    width: 100%;
+}
+
+.productos__grid--empleado {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
     width: 100%;
 }
 

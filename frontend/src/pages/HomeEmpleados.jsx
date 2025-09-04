@@ -13,7 +13,7 @@ const EmpleadosHome = () => {
 
   return (
     <div className="layout">
-      <MenuLateral />
+      <MenuLateralEmpleados />
       <main className="contenido-principal">
         <header>
           <h1 className="titulos__empleados">¡Bienvenido!</h1>
