@@ -5,7 +5,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
 import RoleBasedRedirect from './components/RoleBasedRedirect';
-import { AuthProvider } from './context/AuthContext.jsx'; // asegúrate de que exista
+import { AuthProvider } from './context/AuthContext.jsx';
 import { CartProvider } from './context/CartContext.jsx';
 import { CategoriaProvider } from './context/CategoriaContext.jsx';
 import { ProductoProvider } from './context/ProductoContext.jsx';
@@ -87,6 +87,8 @@ function App() {
                 <Route element={<LoadingScreen />} path="/loading-screen" />
 
                 {/* Rutas protegidas por rol */}
+                <Route element={<DashboardVentas />} path="/administrar/panel/ventas" />
+
                 <Route
                   element={
                     <ProtectedRoute>

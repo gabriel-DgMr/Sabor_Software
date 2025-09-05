@@ -28,6 +28,7 @@
   "promociones": "Promotions",
   "tipo_plato": "Dish type",
   "filtrar": "Filter",
+  "seleccionar__categoria": "Select category",
   "buscar": "Search",
   "agregar": "Add",
   "error_cargar_productos": "Error loading products: {{error}}",
