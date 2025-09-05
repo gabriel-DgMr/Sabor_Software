@@ -53,6 +53,7 @@ function App() {
                 <Route element={<SobreNosotros />} path="/sobre-nosotros" />
                 <Route element={<EscanearQR />} path="/escanear-qr" />
                 <Route element={<LoadingScreen />} path="/loading-screen" />
+                <Route element={<DashboardVentas />} path="/administrar/panel/ventas" />
                 {/* Rutas protegidas */}
                 <Route
                   element={

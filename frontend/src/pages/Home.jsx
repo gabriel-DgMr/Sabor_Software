@@ -4,6 +4,7 @@ import { FaQrcode, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { FaCartShopping } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
 import '../index.css';
+import { FaUtensils, FaSortAmountDownAlt, FaSearch } from 'react-icons/fa';
 
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
@@ -233,19 +234,21 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Sección de navegación */}
         <section className="seccion seccion--navegacion">
           <div className="barra-navegacion">
+            {/* Categorías */}
             <div className="barra-navegacion__opcion">
-              <h3 className="barra-navegacion__titulo">{t('tipo_plato')}</h3>
+              <label className="barra-navegacion__label">
+                <FaUtensils className="barra-navegacion__icon" />
+                {t('tipo_plato')}
+              </label>
               <select
                 className="barra-navegacion__input"
                 disabled={loadingCategorias || !!errorCategorias}
                 value={categoriaSeleccionada}
                 onChange={handleCategoriaChange}
               >
-                <option value="">{'Seleccionar categoría'}</option>
-
+                <option value="seleccionar__cat">{t('seleccionar__categoria')}</option>
                 {categorias &&
                   categorias.map(cat => (
                     <option key={cat.id_categoria} value={cat.nombre_categoria}>
@@ -254,8 +257,13 @@ const Home = () => {
                   ))}
               </select>
             </div>
-            <div className="barra-navegacion__opcion barra-navegacion__opcion--filtro">
-              <h3 className="barra-navegacion__titulo">{t('filtrar')}</h3>
+
+            {/* Filtros */}
+            <div className="barra-navegacion__opcion">
+              <label className="barra-navegacion__label">
+                <FaSortAmountDownAlt className="barra-navegacion__icon" />
+                {t('filtrar')}
+              </label>
               <select
                 className="barra-navegacion__input"
                 value={orden}
@@ -268,9 +276,12 @@ const Home = () => {
                 <option value="ventas">{t('mas_vendidos')}</option>
               </select>
             </div>
+
+            {/* Buscador */}
             <div className="barra-navegacion__buscador">
+              <FaSearch className="barra-navegacion__icon" />
               <input
-                className="barra-navegacion__input"
+                className="barra-navegacion__input barra-navegacion__input--buscador"
                 placeholder={t('buscar')}
                 type="text"
                 value={busqueda}

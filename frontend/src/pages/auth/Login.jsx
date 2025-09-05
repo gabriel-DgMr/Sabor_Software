@@ -5,12 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
 import { validarLogin } from '../../utils/validaciones';
-import { GoX } from 'react-icons/go';
+import { GoX, GoCheck } from 'react-icons/go';
 
 const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVerification }) => {
   const { login, loading } = useAuth();
   const [errors, setErrors] = useState({});
   const [globalError, setGlobalError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -20,6 +21,7 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
   const manejarErroresDeCampo = newErrors => {
     setErrors(newErrors);
     setGlobalError('');
+    setSuccessMessage('');
     setTimeout(() => animateElements('.formulario__mensaje-error', 'fade-in'), 0);
     setTimeout(() => {
       document.querySelectorAll('.formulario__mensaje-error').forEach(el => {
@@ -33,6 +35,8 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
   const handleLogin = async e => {
     e.preventDefault();
     setErrors({});
+    setGlobalError('');
+    setSuccessMessage('');
 
     const form = e.target;
     const formData = {
@@ -40,9 +44,7 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
       contraseña_usuario: form.password.value,
     };
 
-    // Usar validaciones centralizadas
     const validationErrors = validarLogin(formData);
-
     if (Object.keys(validationErrors).length > 0) {
       manejarErroresDeCampo(validationErrors);
       return;
@@ -51,10 +53,9 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
     const result = await login(formData.correo_usuario.trim(), formData.contraseña_usuario);
 
     if (result && result.success) {
-      onShowMessage('success', t('login_exito'));
+      setSuccessMessage(t('login_exito'));
       if (onLoginSuccess) onLoginSuccess();
     } else {
-      // Mostrar solo el mensaje real del backend
       setGlobalError(result.message || t('login_error'));
       setTimeout(() => animateElements('#global-error-login', 'fade-in'), 0);
       setTimeout(() => {
@@ -107,10 +108,19 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
             <small className="formulario__mensaje-error">{errors.contraseña_usuario}</small>
           )}
         </div>
-        {globalError && <LoginAlert message={globalError} id="global-error-login" />}
+
+        {/* 📌 Bloque de alertas arriba del botón */}
+        <div className="formulario__alertas">
+          {successMessage && (
+            <LoginAlert message={successMessage} id="global-success-login" type="success" />
+          )}
+          {globalError && <LoginAlert message={globalError} id="global-error-login" type="error" />}
+        </div>
+
         <button className="formulario__boton-principal" disabled={loading} type="submit">
           {loading ? t('login_iniciando') : t('iniciar_sesion')}
         </button>
+
         <button
           className="formulario__olvidar-contraseña"
           type="button"
@@ -119,6 +129,7 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
           {t('login_olvidaste_contrasena')}
         </button>
       </form>
+
       {typeof window !== 'undefined' && localStorage.getItem('pendingVerificationEmail') && (
         <button
           className="formulario__boton-secundario"
@@ -140,15 +151,28 @@ Login.propTypes = {
   onShowVerification: PropTypes.func.isRequired,
 };
 
-// Componente de alerta visualmente consistente para login
-const LoginAlert = ({ message, id }) => {
+const LoginAlert = ({ message, id, type }) => {
   if (!message) return null;
+
+  const Icon = type === 'success' ? GoCheck : GoX;
+
   return (
-    <div id={id} className="alerta-sin-tarjeta alerta-sin-tarjeta--grande">
-      <GoX className="GoX" />
+    <div
+      id={id}
+      className={`alerta-sin-tarjeta alerta-sin-tarjeta--grande ${
+        type === 'success' ? 'success' : 'error'
+      }`}
+    >
+      <Icon className="alerta__icono" />
       <span>{message}</span>
     </div>
   );
+};
+
+LoginAlert.propTypes = {
+  message: PropTypes.string.isRequired,
+  id: PropTypes.string,
+  type: PropTypes.oneOf(['success', 'error']),
 };
 
 export default Login;

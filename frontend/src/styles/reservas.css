@@ -781,18 +781,17 @@ input[type=number]::-webkit-outer-spin-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 200px;
+  width: 180px;
   margin: 0 auto;
   padding: 1rem;
-  color: var(--neutral-50);
   border: none;
-  border-radius: 0.7rem;
+  border-radius: 1.1rem;
   font-size: 1.15rem;
   font-weight: bold;
   cursor: pointer;
   box-shadow: 0 1px 6px #0001;
   position: relative;
-  background: var(--neutral-50);
+  background: var(--neutral-200);
   color: var(--primary-500);
   transition: background 0.18s, color 0.18s;
 }
@@ -844,7 +843,7 @@ input[type=number]::-webkit-outer-spin-button {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  width: 200px;
+  width: 180px;
   margin: 0 auto;
   padding: 0.9rem 2.2rem;
   border: none;
