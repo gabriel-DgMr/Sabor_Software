@@ -113,9 +113,9 @@ export const checkOwnership = (resourceIdField = "id") => {
       });
     }
 
-    // Permitir acceso si es admin o si es el propietario del recurso
+    // Permitir acceso si es Administrador o si es el propietario del recurso
     if (
-      req.user.rol === "admin" ||
+      req.user.rol === "Administrador" ||
       req.user.id.toString() === resourceId.toString()
     ) {
       return next();
@@ -138,18 +138,21 @@ export const checkPermission = (permission) => {
       });
     }
 
-    // Definir permisos por rol
+    // Definir permisos por rol (usando nombres de la BD)
     const rolePermissions = {
-      admin: [
+      Administrador: [
         "read",
         "write",
         "delete",
         "manage_users",
         "manage_products",
         "manage_orders",
+        "manage_reservations",
+        "view_dashboard",
+        "manage_inventory",
       ],
-      manager: ["read", "write", "manage_products", "manage_orders"],
-      user: ["read", "write_own"],
+      Empleado: ["read", "write", "manage_orders", "manage_reservations"],
+      Usuario: ["read", "write_own"],
     };
 
     const userPermissions = rolePermissions[req.user.rol] || [];

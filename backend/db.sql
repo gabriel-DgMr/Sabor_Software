@@ -382,3 +382,13 @@ CREATE INDEX idx_categoria_traducciones_categoria ON categoria_traducciones(cate
 -- Permitir NULL en metodo_pago e id_empleado
 ALTER TABLE pedidos 
   MODIFY metodo_pago ENUM('efectivo','tarjeta','transferencia') DEFAULT NULL;
+  
+ -- Campos agregados DOMICILIO 
+  ALTER TABLE pedidos 
+ADD COLUMN tipo_servicio ENUM('mesa','domicilio') NOT NULL DEFAULT 'mesa' AFTER notas;
+
+ALTER TABLE pedidos 
+ADD COLUMN direccion_entrega VARCHAR(255) AFTER tipo_servicio;
+
+ALTER TABLE pedidos 
+ADD COLUMN detalle_direccion VARCHAR(100) AFTER direccion_entrega;

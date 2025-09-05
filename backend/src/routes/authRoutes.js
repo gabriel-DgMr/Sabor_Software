@@ -13,6 +13,7 @@ import {
   validateLogin,
   validateUpdateusuario,
 } from "../middleware/validateRequest.js";
+import { upload } from "../middleware/upload.js";
 
 const router = express.Router();
 
@@ -32,11 +33,11 @@ router.post("/reset-password/:token", authController.resetPassword);
 router.post("/logout", authenticateToken, authController.logoutUser);
 router.get("/perfil", authenticateToken, authController.getUserProfile);
 
-// Rutas para gestión de usuarios (solo admin)
+// Rutas para gestión de usuarios (solo Administrador)
 router.get(
   "/usuarios",
   authenticateToken,
-  checkRole(["admin"]),
+  checkRole(["Administrador"]),
   usuarioController.getAllusuarios,
 );
 
@@ -51,6 +52,7 @@ router.put(
   "/actualizarusuario/:id",
   authenticateToken,
   checkPermission("manage_users"),
+  upload.single("imagen_usuario"),
   validateUpdateusuario,
   usuarioController.updateusuario,
 );
@@ -58,7 +60,7 @@ router.put(
 router.delete(
   "/eliminarusuario/:id",
   authenticateToken,
-  checkRole(["admin"]),
+  checkRole(["Administrador"]),
   usuarioController.deleteusuario,
 );
 

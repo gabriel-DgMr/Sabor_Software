@@ -1,5 +1,7 @@
 import * as authModel from "../models/authModel.js";
 import validator from "validator";
+import fs from "fs";
+import path from "path";
 // Obtener todos los usuarios
 export const getAllusuarios = async (req, res) => {
   try {
@@ -39,11 +41,28 @@ export const updateusuario = async (req, res) => {
     const { id } = req.params;
     const { nombre_usuario, correo_usuario, telefono_usuario } = req.body;
 
-    const success = await authModel.updateUser(id, {
+    // Preparar datos para actualizar
+    const updateData = {
       nombre_usuario,
       correo_usuario,
       telefono_usuario,
-    });
+    };
+
+    // Si hay una imagen, agregarla a los datos de actualización
+    if (req.file) {
+      updateData.imagen_usuario = req.file.filename;
+
+      // Eliminar imagen anterior si existe
+      const usuario = await authModel.getusuarioById(id);
+      if (usuario && usuario.imagen_usuario) {
+        const oldImagePath = path.join("uploads", usuario.imagen_usuario);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+    }
+
+    const success = await authModel.updateUser(id, updateData);
 
     if (!success) {
       return res.status(404).json({

@@ -26,19 +26,19 @@ router.post("/hacerReserva", hacerReserva);
 router.get(
   "/",
   authenticateToken,
-  checkPermission("read"),
+  checkPermission("manage_reservations"),
   getAllReservaciones,
 );
 router.get(
   "/fecha/:fecha",
   authenticateToken,
-  checkPermission("read"),
+  checkPermission("manage_reservations"),
   getReservacionesByFecha,
 );
 router.put(
   "/:id/estado",
   authenticateToken,
-  checkPermission("write"),
+  checkPermission("manage_reservations"),
   updateEstadoReservacion,
 );
 router.delete(

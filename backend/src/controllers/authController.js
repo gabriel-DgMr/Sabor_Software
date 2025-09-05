@@ -253,7 +253,7 @@ export const loginUser = async (req, res) => {
       {
         id: user.id_usuario,
         email: user.correo_usuario,
-        rol: user.rol || "user",
+        rol: user.nombre_rol || "Usuario",
         nombre: user.nombre_usuario,
       },
       config.jwt.secret,

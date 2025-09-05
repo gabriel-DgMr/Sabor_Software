@@ -2142,6 +2142,108 @@ hr {
   text-align: center;
 }
 
+/* Estilos para la sección de imagen de perfil */
+.actualizar-datos__perfil {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: var(--neutral-50);
+  border-radius: 1rem;
+  border: 2px dashed var(--neutral-300);
+}
+
+.actualizar-datos__imagen-contenedor {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.actualizar-datos__imagen-perfil {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--primary-500);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.actualizar-datos__imagen-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--neutral-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--neutral-300);
+}
+
+.actualizar-datos__icono-usuario {
+  font-size: 3rem;
+  color: var(--neutral-500);
+}
+
+.actualizar-datos__boton-imagen {
+  background: var(--primary-500);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 0.6rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.actualizar-datos__boton-imagen:hover {
+  background: var(--primary-600);
+  transform: translateY(-1px);
+}
+
+.actualizar-datos__icono-camara {
+  font-size: 1.6rem;
+}
+
+.actualizar-datos__boton-eliminar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--error-500);
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.actualizar-datos__boton-eliminar:hover {
+  background: var(--error-600);
+  transform: scale(1.1);
+}
+
+.actualizar-datos__icono-eliminar {
+  font-size: 1.4rem;
+}
+
+.actualizar-datos__ayuda-imagen {
+  font-size: 1.2rem;
+  color: var(--neutral-600);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
 /* ===== Estilos DialogoExito.jsx ===== */
 .success-dialog-overlay {
   position: fixed;

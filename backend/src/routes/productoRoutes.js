@@ -26,6 +26,8 @@ router.get(
 // Rutas protegidas con manejo de imágenes y validaciones
 router.post(
   "/",
+  authenticateToken,
+  checkPermission("manage_products"),
   upload.single("imagen_producto"),
   validateFileType(["image/jpeg", "image/jpg", "image/png", "image/webp"]),
   validateFileSize(5), // 5MB

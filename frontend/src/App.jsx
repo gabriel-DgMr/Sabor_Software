@@ -3,6 +3,8 @@ import { Route, Routes } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 
 import ProtectedRoute from './components/ProtectedRoute';
+import RoleProtectedRoute from './components/RoleProtectedRoute';
+import RoleBasedRedirect from './components/RoleBasedRedirect';
 import { AuthProvider } from './context/AuthContext.jsx'; // asegúrate de que exista
 import { CartProvider } from './context/CartContext.jsx';
 import { CategoriaProvider } from './context/CategoriaContext.jsx';
@@ -72,6 +74,9 @@ function App() {
                 <Route element={<Login />} path="/login" />
                 <Route element={<Register />} path="/register" />
                 <Route element={<ResetPasswordContainer />} path="/reset-password/:token" />
+
+                {/* Ruta de redirección automática basada en roles */}
+                <Route element={<RoleBasedRedirect />} path="/redirect" />
                 <Route element={<Reservas />} path="/reservas" />
                 <Route element={<Carrito />} path="/carrito" />
                 <Route element={<Checkout />} path="/checkout" />
@@ -81,11 +86,13 @@ function App() {
                 <Route element={<EscanearQR />} path="/escanear-qr" />
                 <Route element={<LoadingScreen />} path="/loading-screen" />
 
-                {/* Rutas protegidas */}
+                {/* Rutas protegidas por rol */}
                 <Route
                   element={
                     <ProtectedRoute>
-                      <HomeAdministrador />
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <HomeAdministrador />
+                      </RoleProtectedRoute>
                     </ProtectedRoute>
                   }
                   path="/HomeAdministrador"
@@ -93,7 +100,9 @@ function App() {
                 <Route
                   element={
                     <ProtectedRoute>
-                      <HomeEmpleados />
+                      <RoleProtectedRoute allowedRoles={['Empleado']}>
+                        <HomeEmpleados />
+                      </RoleProtectedRoute>
                     </ProtectedRoute>
                   }
                   path="/HomeEmpleados"
@@ -102,7 +111,9 @@ function App() {
                 <Route
                   element={
                     <ProtectedRoute>
-                      <ProductosAdministrar />
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <ProductosAdministrar />
+                      </RoleProtectedRoute>
                     </ProtectedRoute>
                   }
                   path="/administrador/productos"
@@ -110,7 +121,9 @@ function App() {
                 <Route
                   element={
                     <ProtectedRoute>
-                      <ProductosEmpleados />
+                      <RoleProtectedRoute allowedRoles={['Empleado']}>
+                        <ProductosEmpleados />
+                      </RoleProtectedRoute>
                     </ProtectedRoute>
                   }
                   path="/empleado/productos"
@@ -118,7 +131,9 @@ function App() {
                 <Route
                   element={
                     <ProtectedRoute>
-                      <PedidosAdministrar />
+                      <RoleProtectedRoute allowedRoles={['Administrador', 'Empleado']}>
+                        <PedidosAdministrar />
+                      </RoleProtectedRoute>
                     </ProtectedRoute>
                   }
                   path="/administrador/pedidos"
@@ -126,7 +141,9 @@ function App() {
                 <Route
                   element={
                     <ProtectedRoute>
-                      <ReservasAdministrar />
+                      <RoleProtectedRoute allowedRoles={['Administrador', 'Empleado']}>
+                        <ReservasAdministrar />
+                      </RoleProtectedRoute>
                     </ProtectedRoute>
                   }
                   path="/administrador/reservaciones"
@@ -134,7 +151,9 @@ function App() {
                 <Route
                   element={
                     <ProtectedRoute>
-                      <Dashboard />
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <Dashboard />
+                      </RoleProtectedRoute>
                     </ProtectedRoute>
                   }
                   path="/administrador/panel"
@@ -142,7 +161,9 @@ function App() {
                 <Route
                   element={
                     <ProtectedRoute>
-                      <DashboardVentas />
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <DashboardVentas />
+                      </RoleProtectedRoute>
                     </ProtectedRoute>
                   }
                   path="/administrador/panel/ventas"

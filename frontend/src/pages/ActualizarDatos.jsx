@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
@@ -12,16 +12,20 @@ import {
   validarEspacios,
 } from '../utils/validaciones.js';
 import { GoCheck, GoX } from 'react-icons/go';
+import { FaCamera, FaUser } from 'react-icons/fa';
 
 const ActualizarDatos = () => {
   const { user } = useAuth();
   const [nombre, setNombre] = useState('');
   const [correo, setCorreo] = useState('');
   const [telefono, setTelefono] = useState('');
+  const [imagenPerfil, setImagenPerfil] = useState(null);
+  const [imagenPreview, setImagenPreview] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [errors, setErrors] = useState({});
   const [globalError, setGlobalError] = useState('');
   const [cargando, setCargando] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     document.title = 'Actualizar datos | Sabor';
@@ -29,6 +33,10 @@ const ActualizarDatos = () => {
       setNombre(user.nombre_usuario || '');
       setCorreo(user.correo_usuario || '');
       setTelefono(user.telefono_usuario || '');
+      // Si el usuario ya tiene una imagen de perfil, mostrarla
+      if (user.imagen_usuario) {
+        setImagenPreview(`http://localhost:3000/uploads/${user.imagen_usuario}`);
+      }
     }
   }, [user]);
 
@@ -51,6 +59,44 @@ const ActualizarDatos = () => {
         });
       setTimeout(() => setErrors({}), ANIM_DURATION);
     }, VISIBLE_DURATION);
+  };
+
+  // Función para manejar la selección de imagen
+  const handleImageChange = e => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validar tipo de archivo
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setGlobalError('Solo se permiten archivos de imagen (JPG, PNG, WEBP)');
+        return;
+      }
+
+      // Validar tamaño (máximo 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        setGlobalError('La imagen no puede ser mayor a 5MB');
+        return;
+      }
+
+      setImagenPerfil(file);
+
+      // Crear preview
+      const reader = new FileReader();
+      reader.onload = e => {
+        setImagenPreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Función para eliminar la imagen seleccionada
+  const removeImage = () => {
+    setImagenPerfil(null);
+    setImagenPreview('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = async e => {
@@ -119,19 +165,26 @@ const ActualizarDatos = () => {
     setCargando(true);
     try {
       const token = localStorage.getItem('token');
+
+      // Crear FormData para enviar datos con imagen
+      const formData = new FormData();
+      formData.append('nombre_usuario', nombre.trim());
+      formData.append('correo_usuario', correo.trim());
+      formData.append('telefono_usuario', telefono.trim());
+
+      // Si hay una nueva imagen, agregarla al FormData
+      if (imagenPerfil) {
+        formData.append('imagen_usuario', imagenPerfil);
+      }
+
       const response = await fetch(
         `http://localhost:3000/api/auth/actualizarusuario/${user.id_usuario}`,
         {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            nombre_usuario: nombre.trim(),
-            correp_usuario: correo.trim(),
-            telefono_usuario: telefono.trim(),
-          }),
+          body: formData,
         }
       );
       const data = await response.json();
@@ -194,6 +247,51 @@ const ActualizarDatos = () => {
       <main className="actualizar-datos">
         <section className="actualizar-datos__contenedor">
           <h1 className="actualizar-datos__titulo">Actualizar datos</h1>
+
+          {/* Sección de imagen de perfil */}
+          <div className="actualizar-datos__perfil">
+            <div className="actualizar-datos__imagen-contenedor">
+              {imagenPreview ? (
+                <img
+                  src={imagenPreview}
+                  alt="Imagen de perfil"
+                  className="actualizar-datos__imagen-perfil"
+                />
+              ) : (
+                <div className="actualizar-datos__imagen-placeholder">
+                  <FaUser className="actualizar-datos__icono-usuario" />
+                </div>
+              )}
+              <button
+                type="button"
+                className="actualizar-datos__boton-imagen"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <FaCamera className="actualizar-datos__icono-camara" />
+                {imagenPreview ? 'Cambiar foto' : 'Agregar foto'}
+              </button>
+              {imagenPreview && (
+                <button
+                  type="button"
+                  className="actualizar-datos__boton-eliminar"
+                  onClick={removeImage}
+                >
+                  <GoX className="actualizar-datos__icono-eliminar" />
+                </button>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              onChange={handleImageChange}
+              style={{ display: 'none' }}
+            />
+            <p className="actualizar-datos__ayuda-imagen">
+              Formatos permitidos: JPG, PNG, WEBP. Tamaño máximo: 5MB
+            </p>
+          </div>
+
           <form autoComplete="off" className="actualizar-datos__formulario" onSubmit={handleSubmit}>
             <div className="actualizar-datos__campo">
               <label className="actualizar-datos__label" htmlFor="nombre">

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next';
 import { FaQrcode, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { FaCartShopping } from 'react-icons/fa6';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../index.css';
 
 import Footer from '../components/Footer.jsx';
@@ -13,6 +13,7 @@ import { useCategorias } from '../context/CategoriaContext';
 import { useProductos } from '../context/ProductoContext';
 import { useCart } from '../context/useCart.js';
 import { useDebounce } from '../hooks/useDebounce.js';
+import { useAuth } from '../context/AuthContext';
 import { GoX } from 'react-icons/go';
 import { BiSolidDish } from 'react-icons/bi';
 
@@ -32,6 +33,26 @@ const Home = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, loading } = useAuth();
+
+  // Redirección automática basada en roles
+  useEffect(() => {
+    if (!loading && isAuthenticated && user && user.nombre_rol) {
+      switch (user.nombre_rol) {
+        case 'Administrador':
+          navigate('/HomeAdministrador');
+          break;
+        case 'Empleado':
+          navigate('/HomeEmpleados');
+          break;
+        case 'Usuario':
+        default:
+          // Los usuarios regulares pueden quedarse en Home
+          break;
+      }
+    }
+  }, [user, isAuthenticated, loading, navigate]);
 
   // Obtener productos y categorías ANTES de cualquier uso de state
   const { state, aplicarFiltrosLocales, getProductosFiltrados } = useProductos();

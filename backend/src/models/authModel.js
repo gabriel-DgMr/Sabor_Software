@@ -117,7 +117,10 @@ export const verifyCode = async (id_usuario, codigo) => {
 // Obtener usuario por email (solo usuarios activos y verificados)
 export const getUserByEmail = async (correo_usuario) => {
   const [rows] = await pool.query(
-    "SELECT * FROM usuarios WHERE correo_usuario = ? AND activo = true AND email_verificado = true",
+    `SELECT u.*, r.nombre_rol 
+     FROM usuarios u 
+     JOIN roles r ON u.id_rol = r.id_rol 
+     WHERE u.correo_usuario = ? AND u.activo = true AND u.email_verificado = true`,
     [correo_usuario],
   );
   return rows.length > 0 ? rows[0] : null;
@@ -135,7 +138,10 @@ export const getUserByEmailIncludingUnverified = async (correo_usuario) => {
 // Login - Solo permite acceso a usuarios activos y verificados
 export const loginUser = async (correo_usuario, contraseña_usuario) => {
   const [rows] = await pool.query(
-    "SELECT * FROM usuarios WHERE correo_usuario = ? AND activo = true AND email_verificado = true",
+    `SELECT u.*, r.nombre_rol 
+     FROM usuarios u 
+     JOIN roles r ON u.id_rol = r.id_rol 
+     WHERE u.correo_usuario = ? AND u.activo = true AND u.email_verificado = true`,
     [correo_usuario],
   );
 
@@ -160,17 +166,40 @@ export const loginUser = async (correo_usuario, contraseña_usuario) => {
 
 // Actualizar usuario
 export const updateUser = async (id_usuario, userData) => {
-  const { nombre_usuario, correo_usuario, telefono_usuario } = userData;
+  const { nombre_usuario, correo_usuario, telefono_usuario, imagen_usuario } =
+    userData;
 
-  const [result] = await pool.query(
-    `UPDATE usuarios 
-         SET nombre_usuario = ?, 
-             correo_usuario = ?, 
-             telefono_usuario = ?,
-             fecha_modificacion = CURRENT_TIMESTAMP
-         WHERE id_usuario = ? AND activo = true`,
-    [nombre_usuario, correo_usuario, telefono_usuario, id_usuario],
-  );
+  // Construir la consulta dinámicamente basada en los campos proporcionados
+  let query = "UPDATE usuarios SET ";
+  let values = [];
+  let setClauses = [];
+
+  if (nombre_usuario !== undefined) {
+    setClauses.push("nombre_usuario = ?");
+    values.push(nombre_usuario);
+  }
+
+  if (correo_usuario !== undefined) {
+    setClauses.push("correo_usuario = ?");
+    values.push(correo_usuario);
+  }
+
+  if (telefono_usuario !== undefined) {
+    setClauses.push("telefono_usuario = ?");
+    values.push(telefono_usuario);
+  }
+
+  if (imagen_usuario !== undefined) {
+    setClauses.push("imagen_usuario = ?");
+    values.push(imagen_usuario);
+  }
+
+  setClauses.push("fecha_modificacion = CURRENT_TIMESTAMP");
+  values.push(id_usuario);
+
+  query += setClauses.join(", ") + " WHERE id_usuario = ? AND activo = true";
+
+  const [result] = await pool.query(query, values);
 
   return result.affectedRows > 0;
 };

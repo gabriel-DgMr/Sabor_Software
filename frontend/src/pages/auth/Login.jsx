@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
@@ -8,10 +9,11 @@ import { validarLogin } from '../../utils/validaciones';
 import { GoX } from 'react-icons/go';
 
 const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVerification }) => {
-  const { login, loading } = useAuth();
+  const { login, loading, user } = useAuth();
   const [errors, setErrors] = useState({});
   const [globalError, setGlobalError] = useState('');
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     return () => setErrors({});
@@ -52,6 +54,12 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
 
     if (result && result.success) {
       onShowMessage('success', t('login_exito'));
+
+      // Redireccionar según el rol del usuario
+      setTimeout(() => {
+        navigate('/redirect');
+      }, 1000); // Pequeño delay para mostrar el mensaje de éxito
+
       if (onLoginSuccess) onLoginSuccess();
     } else {
       // Mostrar solo el mensaje real del backend
