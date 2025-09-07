@@ -201,40 +201,46 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const confirmarPedido = async metodo_pago => {
-    try {
-      setLoading(true);
-      setError(null);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Debes iniciar sesión para confirmar el pedido');
-      }
-
-      const response = await fetch(`${API_URL}/pedidos/carrito/confirmar`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ metodo_pago }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.mensaje || 'Error al confirmar el pedido');
-      }
-
-      // Limpiar carrito después de confirmar
-      setCartItems([]);
-      return await response.json();
-    } catch (error) {
-      console.error('Error al confirmar pedido:', error);
-      setError(error.message);
-      throw error;
-    } finally {
-      setLoading(false);
+// CartContext.jsx
+const confirmarPedido = async ({ metodo_pago, tipo_servicio, direccion_entrega, detalle_direccion } = {}) => {
+  try {
+    setLoading(true);
+    setError(null);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Debes iniciar sesión para confirmar el pedido');
     }
-  };
+
+    const response = await fetch(`${API_URL}/pedidos/carrito/confirmar`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        metodo_pago,           // 'efectivo' | 'tarjeta' | 'transferencia'
+        tipo_servicio,         // 'mesa' | 'domicilio'
+        direccion_entrega,     // requerido si tipo_servicio === 'domicilio'
+        detalle_direccion,     // opcional (apto/piso/habitación)
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.mensaje || 'Error al confirmar el pedido');
+    }
+
+    // Limpiar carrito después de confirmar
+    setCartItems([]);
+    return await response.json();
+  } catch (error) {
+    console.error('Error al confirmar pedido:', error);
+    setError(error.message);
+    throw error;
+  } finally {
+    setLoading(false);
+  }
+};
 
   const cartCount = cartItems.reduce((sum, item) => sum + (item.cantidad || 1), 0);
   const cartTotal = cartItems.reduce(
