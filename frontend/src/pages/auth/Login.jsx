@@ -55,139 +55,136 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
     const result = await login(formData.correo_usuario.trim(), formData.contraseña_usuario);
 
     if (result && result.success) {
-      if (result && result.success) {
-        // Mostrar mensaje de éxito en alertas globales
-        onShowMessage('success', t('login_exito'));
+      // Mostrar mensaje de éxito en alertas globales
+      onShowMessage('success', t('login_exito'));
 
-        // Mostrar mensaje de éxito en el propio formulario
-        setSuccessMessage(t('login_exito'));
+      // Mostrar mensaje de éxito en el propio formulario
+      setSuccessMessage(t('login_exito'));
 
-        // Redireccionar según el rol del usuario después de un pequeño delay
-        setTimeout(() => {
-          navigate('/redirect');
-        }, 1000);
+      // Redireccionar según el rol del usuario después de un pequeño delay
+      setTimeout(() => {
+        navigate('/redirect');
+      }, 1000);
 
-        if (onLoginSuccess) onLoginSuccess();
-      } else {
-        setGlobalError(result.message || t('login_error'));
-        setTimeout(() => animateElements('#global-error-login', 'fade-in'), 0);
-        setTimeout(() => {
-          const el = document.getElementById('global-error-login');
-          if (el) {
-            el.classList.remove('fade-in');
-            el.classList.add('fade-out');
-          }
-          setTimeout(() => setGlobalError(''), ANIM_DURATION);
-        }, VISIBLE_DURATION);
-      }
+      if (onLoginSuccess) onLoginSuccess();
+    } else {
+      setGlobalError(result.message || t('login_error'));
+      setTimeout(() => animateElements('#global-error-login', 'fade-in'), 0);
+      setTimeout(() => {
+        const el = document.getElementById('global-error-login');
+        if (el) {
+          el.classList.remove('fade-in');
+          el.classList.add('fade-out');
+        }
+        setTimeout(() => setGlobalError(''), ANIM_DURATION);
+      }, VISIBLE_DURATION);
     }
-
-    return (
-      <div className="formulario__contenedor formulario__contenedor--login">
-        <h2 className="modal__titulo">{t('iniciar_sesion')}</h2>
-        <form noValidate className="formulario" onSubmit={handleLogin}>
-          <div className="formulario__campo">
-            <label className="formulario__label" htmlFor="email-login">
-              {t('correo_electronico')}
-            </label>
-            <input
-              autoComplete="email"
-              className={`formulario__input ${errors.correo_usuario ? 'input--error' : ''}`}
-              disabled={loading}
-              id="email-login"
-              name="email"
-              placeholder={t('login_placeholder_email')}
-              type="email"
-            />
-            {errors.correo_usuario && (
-              <small className="formulario__mensaje-error">{errors.correo_usuario}</small>
-            )}
-          </div>
-
-          <div className="formulario__campo">
-            <label className="formulario__label" htmlFor="password-login">
-              {t('contrasena')}
-            </label>
-            <input
-              autoComplete="current-password"
-              className={`formulario__input ${errors.contraseña_usuario ? 'input--error' : ''}`}
-              disabled={loading}
-              id="password-login"
-              name="password"
-              placeholder={t('login_placeholder_password')}
-              type="password"
-            />
-            {errors.contraseña_usuario && (
-              <small className="formulario__mensaje-error">{errors.contraseña_usuario}</small>
-            )}
-          </div>
-
-          {/* 📌 Bloque de alertas arriba del botón */}
-          <div className="formulario__alertas">
-            {successMessage && (
-              <LoginAlert message={successMessage} id="global-success-login" type="success" />
-            )}
-            {globalError && (
-              <LoginAlert message={globalError} id="global-error-login" type="error" />
-            )}
-          </div>
-
-          <button className="formulario__boton-principal" disabled={loading} type="submit">
-            {loading ? t('login_iniciando') : t('iniciar_sesion')}
-          </button>
-
-          <button
-            className="formulario__olvidar-contraseña"
-            type="button"
-            onClick={() => onShowForgotPassword()}
-          >
-            {t('login_olvidaste_contrasena')}
-          </button>
-        </form>
-
-        {typeof window !== 'undefined' && localStorage.getItem('pendingVerificationEmail') && (
-          <button
-            className="formulario__boton-secundario"
-            style={{ marginTop: '1rem' }}
-            type="button"
-            onClick={onShowVerification}
-          >
-            {t('volver_a_verificar_email') || 'Verificar mi email'}
-          </button>
-        )}
-      </div>
-    );
   };
 
-  Login.propTypes = {
-    onShowMessage: PropTypes.func.isRequired,
-    onLoginSuccess: PropTypes.func.isRequired,
-    onShowForgotPassword: PropTypes.func.isRequired,
-    onShowVerification: PropTypes.func.isRequired,
-  };
+  return (
+    <div className="formulario__contenedor formulario__contenedor--login">
+      <h2 className="modal__titulo">{t('iniciar_sesion')}</h2>
+      <form noValidate className="formulario" onSubmit={handleLogin}>
+        <div className="formulario__campo">
+          <label className="formulario__label" htmlFor="email-login">
+            {t('correo_electronico')}
+          </label>
+          <input
+            autoComplete="email"
+            className={`formulario__input ${errors.correo_usuario ? 'input--error' : ''}`}
+            disabled={loading}
+            id="email-login"
+            name="email"
+            placeholder={t('login_placeholder_email')}
+            type="email"
+          />
+          {errors.correo_usuario && (
+            <small className="formulario__mensaje-error">{errors.correo_usuario}</small>
+          )}
+        </div>
 
-  const LoginAlert = ({ message, id, type }) => {
-    if (!message) return null;
+        <div className="formulario__campo">
+          <label className="formulario__label" htmlFor="password-login">
+            {t('contrasena')}
+          </label>
+          <input
+            autoComplete="current-password"
+            className={`formulario__input ${errors.contraseña_usuario ? 'input--error' : ''}`}
+            disabled={loading}
+            id="password-login"
+            name="password"
+            placeholder={t('login_placeholder_password')}
+            type="password"
+          />
+          {errors.contraseña_usuario && (
+            <small className="formulario__mensaje-error">{errors.contraseña_usuario}</small>
+          )}
+        </div>
 
-    const Icon = type === 'success' ? GoCheck : GoX;
+        {/* 📌 Bloque de alertas arriba del botón */}
+        <div className="formulario__alertas">
+          {successMessage && (
+            <LoginAlert message={successMessage} id="global-success-login" type="success" />
+          )}
+          {globalError && <LoginAlert message={globalError} id="global-error-login" type="error" />}
+        </div>
 
-    return (
-      <div
-        id={id}
-        className={`alerta-sin-tarjeta alerta-sin-tarjeta--grande ${
-          type === 'success' ? 'success' : 'error'
-        }`}
-      >
-        <Icon className="alerta__icono" />
-        <span>{message}</span>
-      </div>
-    );
-  };
+        <button className="formulario__boton-principal" disabled={loading} type="submit">
+          {loading ? t('login_iniciando') : t('iniciar_sesion')}
+        </button>
 
-  LoginAlert.propTypes = {
-    message: PropTypes.string.isRequired,
-    id: PropTypes.string,
-    type: PropTypes.oneOf(['success', 'error']),
-  };
+        <button
+          className="formulario__olvidar-contraseña"
+          type="button"
+          onClick={() => onShowForgotPassword()}
+        >
+          {t('login_olvidaste_contrasena')}
+        </button>
+      </form>
+
+      {typeof window !== 'undefined' && localStorage.getItem('pendingVerificationEmail') && (
+        <button
+          className="formulario__boton-secundario"
+          style={{ marginTop: '1rem' }}
+          type="button"
+          onClick={onShowVerification}
+        >
+          {t('volver_a_verificar_email') || 'Verificar mi email'}
+        </button>
+      )}
+    </div>
+  );
 };
+
+Login.propTypes = {
+  onShowMessage: PropTypes.func.isRequired,
+  onLoginSuccess: PropTypes.func.isRequired,
+  onShowForgotPassword: PropTypes.func.isRequired,
+  onShowVerification: PropTypes.func.isRequired,
+};
+
+const LoginAlert = ({ message, id, type }) => {
+  if (!message) return null;
+
+  const Icon = type === 'success' ? GoCheck : GoX;
+
+  return (
+    <div
+      id={id}
+      className={`alerta-sin-tarjeta alerta-sin-tarjeta--grande ${
+        type === 'success' ? 'success' : 'error'
+      }`}
+    >
+      <Icon className="alerta__icono" />
+      <span>{message}</span>
+    </div>
+  );
+};
+
+LoginAlert.propTypes = {
+  message: PropTypes.string.isRequired,
+  id: PropTypes.string,
+  type: PropTypes.oneOf(['success', 'error']),
+};
+
 export default Login;

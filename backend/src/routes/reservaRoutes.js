@@ -1,6 +1,8 @@
 import express from "express";
 import {
   hacerReserva,
+  crearReservaAdmin,
+  actualizarReservaAdmin,
   getHorariosDisponibles,
   checkDisponibilidad,
   getHistorialReservas,
@@ -21,6 +23,22 @@ router.get("/historial", authenticateToken, getHistorialReservas);
 
 // Rutas protegidas con validaciones
 router.post("/hacerReserva", hacerReserva);
+
+// Ruta para crear reservas desde administración
+router.post(
+  "/",
+  authenticateToken,
+  checkPermission("manage_reservations"),
+  crearReservaAdmin,
+);
+
+// Ruta para actualizar reservas desde administración
+router.put(
+  "/:id",
+  authenticateToken,
+  checkPermission("manage_reservations"),
+  actualizarReservaAdmin,
+);
 
 // Rutas para administración de reservaciones
 router.get(

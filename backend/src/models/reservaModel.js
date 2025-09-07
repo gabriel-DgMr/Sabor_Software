@@ -71,7 +71,7 @@ export const reservaModel = {
           hora_reservacion,
           notas,
           id_mesa,
-          1,
+          2, // PENDIENTE
         ],
       );
 
@@ -131,17 +131,29 @@ export const reservaModel = {
   // Verificar disponibilidad específica
   checkDisponibilidad: async (fecha, hora) => {
     try {
-      // Usar la función del modelo de horario para obtener la capacidad máxima
-      const capacidadMaxima = await horarioModel.obtenerCapacidadMaxima(
-        fecha,
-        hora,
-      );
+      // Capacidad máxima por defecto (puede ser configurada)
+      const CAPACIDAD_MAXIMA_DEFAULT = 20;
 
-      if (capacidadMaxima === 0) {
-        return false; // No hay capacidad para este horario
+      let capacidadMaxima = CAPACIDAD_MAXIMA_DEFAULT;
+
+      try {
+        // Intentar obtener la capacidad máxima desde la configuración
+        const capacidadConfigurada = await horarioModel.obtenerCapacidadMaxima(
+          fecha,
+          hora,
+        );
+        if (capacidadConfigurada > 0) {
+          capacidadMaxima = capacidadConfigurada;
+        }
+      } catch (error) {
+        console.warn(
+          "No se pudo obtener capacidad máxima desde configuración, usando valor por defecto:",
+          error.message,
+        );
+        // Continuar con la capacidad por defecto
       }
 
-      // Contar reservas existentes usando 'reservaciones'
+      // Contar reservas existentes
       const [rows] = await pool.query(
         "SELECT COUNT(*) as count FROM reservaciones WHERE fecha_reservacion = ? AND hora_reservacion = ?",
         [fecha, hora],
@@ -283,6 +295,82 @@ export const reservaModel = {
       return result.affectedRows > 0;
     } catch (error) {
       console.error("Error en reservaModel.updateReservacionEstado:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Actualiza una reservación completa.
+   * @param {number} id_reservacion - El ID de la reservación.
+   * @param {Object} reservaData - Los nuevos datos de la reservación.
+   * @returns {Promise<boolean>} True si se actualizó correctamente.
+   */
+  updateReservacion: async (id_reservacion, reservaData) => {
+    try {
+      const {
+        id_usuario,
+        numero_personas,
+        fecha_reservacion,
+        hora_reservacion,
+        notas,
+        estado,
+      } = reservaData;
+
+      // Obtener el id_estado basado en el nombre del estado
+      let id_estado = null;
+      if (estado) {
+        const [estadoRows] = await pool.query(
+          "SELECT id_estado FROM estados WHERE nombre_estado = ?",
+          [estado],
+        );
+        if (estadoRows.length > 0) {
+          id_estado = estadoRows[0].id_estado;
+        }
+      }
+
+      // Construir la consulta dinámicamente
+      const updates = [];
+      const values = [];
+
+      if (id_usuario !== undefined) {
+        updates.push("id_usuario = ?");
+        values.push(id_usuario);
+      }
+      if (numero_personas !== undefined) {
+        updates.push("numero_personas = ?");
+        values.push(numero_personas);
+      }
+      if (fecha_reservacion !== undefined) {
+        updates.push("fecha_reservacion = ?");
+        values.push(fecha_reservacion);
+      }
+      if (hora_reservacion !== undefined) {
+        updates.push("hora_reservacion = ?");
+        values.push(hora_reservacion);
+      }
+      if (notas !== undefined) {
+        updates.push("notas = ?");
+        values.push(notas);
+      }
+      if (id_estado !== null) {
+        updates.push("id_estado = ?");
+        values.push(id_estado);
+      }
+
+      // Siempre actualizar la fecha de modificación
+      updates.push("fecha_modificacion = CURRENT_TIMESTAMP");
+
+      // Agregar el ID al final para la cláusula WHERE
+      values.push(id_reservacion);
+
+      const [result] = await pool.query(
+        `UPDATE reservaciones SET ${updates.join(", ")} WHERE id_reservacion = ?`,
+        values,
+      );
+
+      return result.affectedRows > 0;
+    } catch (error) {
+      console.error("Error en reservaModel.updateReservacion:", error);
       throw error;
     }
   },

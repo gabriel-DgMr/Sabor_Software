@@ -738,9 +738,18 @@
     box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.2);
 }
 
+.reservacion__boton--editar {
+  background-color: var(--primary-500);
+  color: white;
+}
+
+.reservacion__boton--editar:hover {
+  background-color: var(--primary-600);
+}
+
 .reservacion__boton--confirmar {
-    background-color: #4CAF50;
-    color: white;
+  background-color: #4CAF50;
+  color: white;
 }
 
 .reservacion__boton--confirmar:hover {
@@ -1552,6 +1561,202 @@
   padding: 2rem;
   background: var(--neutral-50);
   min-height: 100vh;
+}
+
+/* Grid layout para reservaciones con formulario a la derecha */
+.reservaciones__grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.reservaciones__editor {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--primary-500);
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+}
+
+/* Estilos adicionales para el formulario de reservaciones */
+.reservaciones__editor .editor__titulo {
+  color: var(--primary-700);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+  border-bottom: 2px solid var(--primary-500);
+  padding-bottom: 1rem;
+}
+
+.reservaciones__editor .editor__descripcion {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.reservaciones__editor .descripcion__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.reservaciones__editor .campo_p {
+  font-weight: 600;
+  color: var(--neutral-800);
+  font-size: 1.4rem;
+}
+
+.reservaciones__editor .campo__input {
+  padding: 1rem;
+  border: 2px solid var(--neutral-300);
+  border-radius: 0.8rem;
+  font-size: 1.4rem;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.reservaciones__editor .campo__input:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.1);
+}
+
+.reservaciones__editor .campo__input--categoria {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.6rem;
+  cursor: pointer;
+}
+
+.reservaciones__editor .editor__botones {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--neutral-200);
+}
+
+.reservaciones__editor .descripcion__boton {
+  min-width: 12rem;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 0.8rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+.reservaciones__editor .descripcion__boton:not(.descripcion__boton--cancelar) {
+  background-color: var(--primary-500);
+  color: white;
+}
+
+.reservaciones__editor .descripcion__boton:not(.descripcion__boton--cancelar):hover {
+  background-color: var(--primary-600);
+  transform: translateY(-2px);
+  box-shadow: 0 0.4rem 1rem rgba(255, 111, 0, 0.3);
+}
+
+.reservaciones__editor .descripcion__boton--cancelar {
+  background-color: var(--neutral-400);
+  color: var(--neutral-800);
+}
+
+.reservaciones__editor .descripcion__boton--cancelar:hover {
+  background-color: var(--neutral-500);
+}
+
+.reservaciones__editor .descripcion__boton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.reservaciones__editor .descripcion__boton--loading {
+  position: relative;
+  color: transparent !important;
+}
+
+.reservaciones__editor .descripcion__boton--loading .loading-indicator {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+}
+
+.reservaciones__editor .formulario__mensaje-error {
+  color: var(--error-500);
+  font-size: 1.2rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reservaciones__editor .input--error {
+  border-color: var(--error-500) !important;
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1) !important;
+}
+
+/* Responsive para el grid de reservaciones */
+@media (max-width: 1200px) {
+  .reservaciones__grid {
+    grid-template-columns: 1fr 350px;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .reservaciones__grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .reservaciones__editor {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .reservaciones__editor {
+    padding: 1.5rem;
+  }
+  
+  .reservaciones__editor .editor__titulo {
+    font-size: 1.8rem;
+  }
+  
+  .reservaciones__editor .campo__input {
+    font-size: 1.6rem;
+  }
+  
+  .reservaciones__editor .editor__botones {
+    flex-direction: column;
+  }
+  
+  .reservaciones__editor .descripcion__boton {
+    width: 100%;
+  }
 }
 
 .reservaciones__filtros {

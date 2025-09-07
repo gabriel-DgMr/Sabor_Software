@@ -29,7 +29,7 @@ const ReservacionesError = ({ message, onRetry }) => {
   );
 };
 
-const ReservacionesAdministrador = () => {
+const ReservacionesEmpleados = () => {
   const [filtroHora, setFiltroHora] = useState('todos');
   const [reservas, setReservas] = useState([]);
   const [reservasFiltradas, setReservasFiltradas] = useState([]);
@@ -1113,4 +1113,4 @@ const ReservacionesAdministrador = () => {
   );
 };
 
-export default ReservacionesAdministrador;
+export default ReservacionesEmpleados;

@@ -369,3 +369,280 @@ export const deleteReservacion = async (req, res) => {
     res.status(500).json({ message: "Error al eliminar reservación" });
   }
 };
+
+// Crear reserva desde administración
+export const crearReservaAdmin = async (req, res) => {
+  try {
+    console.log("Datos recibidos para crear reserva desde admin:", req.body);
+
+    const datosReserva = req.body;
+    const errors = {};
+
+    // Validaciones básicas
+    if (
+      !datosReserva.nombre ||
+      typeof datosReserva.nombre !== "string" ||
+      datosReserva.nombre.trim() === ""
+    ) {
+      errors.nombre = "El nombre es obligatorio.";
+    }
+
+    if (
+      !datosReserva.telefono ||
+      typeof datosReserva.telefono !== "string" ||
+      datosReserva.telefono.trim() === ""
+    ) {
+      errors.telefono = "El teléfono es obligatorio.";
+    } else if (!/^[0-9]{10}$/.test(datosReserva.telefono.replace(/\D/g, ""))) {
+      errors.telefono = "El teléfono debe tener 10 dígitos.";
+    }
+
+    if (
+      !datosReserva.email ||
+      typeof datosReserva.email !== "string" ||
+      datosReserva.email.trim() === ""
+    ) {
+      errors.email = "El correo electrónico es obligatorio.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datosReserva.email.trim())) {
+      errors.email = "El formato del correo electrónico no es válido.";
+    }
+
+    if (
+      !datosReserva.fecha_reservacion ||
+      typeof datosReserva.fecha_reservacion !== "string" ||
+      datosReserva.fecha_reservacion.trim() === ""
+    ) {
+      errors.fecha_reservacion = "La fecha es obligatoria.";
+    }
+
+    if (
+      !datosReserva.hora_reservacion ||
+      typeof datosReserva.hora_reservacion !== "string" ||
+      datosReserva.hora_reservacion.trim() === ""
+    ) {
+      errors.hora_reservacion = "La hora es obligatoria.";
+    }
+
+    if (
+      !datosReserva.numero_personas ||
+      typeof datosReserva.numero_personas !== "number" ||
+      datosReserva.numero_personas <= 0
+    ) {
+      errors.numero_personas =
+        "El número de personas debe ser un número positivo.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      console.log("Errores de validación:", errors);
+      return res
+        .status(400)
+        .json({ message: "Error en los datos de la reserva.", errors });
+    }
+
+    // Buscar o crear cliente
+    let cliente = await authModel.getUserByEmailIncludingUnverified(
+      datosReserva.email,
+    );
+
+    if (!cliente) {
+      console.log("Cliente no encontrado, creando nuevo...");
+      try {
+        const nuevoClienteId = await authModel.registerUser({
+          nombre_cliente: datosReserva.nombre,
+          email_cliente: datosReserva.email,
+          telefono_cliente: datosReserva.telefono,
+          contraseña_cliente: "temporal_password_for_reservation",
+        });
+        cliente = await authModel.getUserByEmailIncludingUnverified(
+          datosReserva.email,
+        );
+        if (!cliente) {
+          throw new Error("Error al obtener el cliente recién creado.");
+        }
+        console.log("Cliente creado con ID:", cliente.id_usuario);
+      } catch (error) {
+        if (
+          error.message.includes("correo ya está registrado") ||
+          error.message.includes("teléfono ya está registrado")
+        ) {
+          cliente = await authModel.getUserByEmailIncludingUnverified(
+            datosReserva.email,
+          );
+          if (!cliente) {
+            throw new Error(
+              "Error al obtener el cliente existente tras intento de registro.",
+            );
+          }
+          console.log("Cliente ya existía, usando ID:", cliente.id_usuario);
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    // Crear la reserva
+    console.log("Datos para crear reserva:", {
+      id_usuario: cliente.id_usuario,
+      numero_personas: datosReserva.numero_personas,
+      fecha_reservacion: datosReserva.fecha_reservacion,
+      hora_reservacion: datosReserva.hora_reservacion,
+      notas: datosReserva.notas || "",
+    });
+
+    const reservaId = await reservaModel.createReserva({
+      id_usuario: cliente.id_usuario,
+      numero_personas: datosReserva.numero_personas,
+      fecha_reservacion: datosReserva.fecha_reservacion,
+      hora_reservacion: datosReserva.hora_reservacion,
+      notas: datosReserva.notas || "",
+    });
+
+    console.log("Reserva creada desde admin con ID:", reservaId);
+
+    res.status(201).json({
+      message: "Reserva creada exitosamente desde administración",
+      reservaId: reservaId,
+    });
+  } catch (error) {
+    console.error("Error al crear reserva desde admin:", error);
+    res.status(500).json({
+      message: "Error interno del servidor al crear la reserva.",
+      detalle: error.message,
+    });
+  }
+};
+
+// Actualizar reserva desde administración
+export const actualizarReservaAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const datosReserva = req.body;
+    console.log("Actualizando reserva ID:", id, "con datos:", datosReserva);
+
+    const errors = {};
+
+    // Validaciones básicas
+    if (
+      !datosReserva.nombre ||
+      typeof datosReserva.nombre !== "string" ||
+      datosReserva.nombre.trim() === ""
+    ) {
+      errors.nombre = "El nombre es obligatorio.";
+    }
+
+    if (
+      !datosReserva.telefono ||
+      typeof datosReserva.telefono !== "string" ||
+      datosReserva.telefono.trim() === ""
+    ) {
+      errors.telefono = "El teléfono es obligatorio.";
+    } else if (!/^[0-9]{10}$/.test(datosReserva.telefono.replace(/\D/g, ""))) {
+      errors.telefono = "El teléfono debe tener 10 dígitos.";
+    }
+
+    if (
+      !datosReserva.email ||
+      typeof datosReserva.email !== "string" ||
+      datosReserva.email.trim() === ""
+    ) {
+      errors.email = "El correo electrónico es obligatorio.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datosReserva.email.trim())) {
+      errors.email = "El formato del correo electrónico no es válido.";
+    }
+
+    if (
+      !datosReserva.fecha_reservacion ||
+      typeof datosReserva.fecha_reservacion !== "string" ||
+      datosReserva.fecha_reservacion.trim() === ""
+    ) {
+      errors.fecha_reservacion = "La fecha es obligatoria.";
+    }
+
+    if (
+      !datosReserva.hora_reservacion ||
+      typeof datosReserva.hora_reservacion !== "string" ||
+      datosReserva.hora_reservacion.trim() === ""
+    ) {
+      errors.hora_reservacion = "La hora es obligatoria.";
+    }
+
+    if (
+      !datosReserva.numero_personas ||
+      typeof datosReserva.numero_personas !== "number" ||
+      datosReserva.numero_personas <= 0
+    ) {
+      errors.numero_personas =
+        "El número de personas debe ser un número positivo.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      console.log("Errores de validación:", errors);
+      return res
+        .status(400)
+        .json({ message: "Error en los datos de la reserva.", errors });
+    }
+
+    // Buscar o crear cliente
+    let cliente = await authModel.getUserByEmailIncludingUnverified(
+      datosReserva.email,
+    );
+
+    if (!cliente) {
+      console.log("Cliente no encontrado, creando nuevo...");
+      try {
+        const nuevoClienteId = await authModel.registerUser({
+          nombre_cliente: datosReserva.nombre,
+          email_cliente: datosReserva.email,
+          telefono_cliente: datosReserva.telefono,
+          contraseña_cliente: "temporal_password_for_reservation",
+        });
+        cliente = await authModel.getUserByEmailIncludingUnverified(
+          datosReserva.email,
+        );
+        if (!cliente) {
+          throw new Error("Error al obtener el cliente recién creado.");
+        }
+        console.log("Cliente creado con ID:", cliente.id_usuario);
+      } catch (error) {
+        if (
+          error.message.includes("correo ya está registrado") ||
+          error.message.includes("teléfono ya está registrado")
+        ) {
+          cliente = await authModel.getUserByEmailIncludingUnverified(
+            datosReserva.email,
+          );
+          if (!cliente) {
+            throw new Error(
+              "Error al obtener el cliente existente tras intento de registro.",
+            );
+          }
+          console.log("Cliente ya existía, usando ID:", cliente.id_usuario);
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    // Actualizar la reserva
+    await reservaModel.updateReservacion(parseInt(id), {
+      id_usuario: cliente.id_usuario,
+      numero_personas: datosReserva.numero_personas,
+      fecha_reservacion: datosReserva.fecha_reservacion,
+      hora_reservacion: datosReserva.hora_reservacion,
+      notas: datosReserva.notas || "",
+      estado: datosReserva.estado || "PENDIENTE",
+    });
+
+    console.log("Reserva actualizada desde admin con ID:", id);
+
+    res.json({
+      message: "Reserva actualizada exitosamente desde administración",
+    });
+  } catch (error) {
+    console.error("Error al actualizar reserva desde admin:", error);
+    res.status(500).json({
+      message: "Error interno del servidor al actualizar la reserva.",
+      detalle: error.message,
+    });
+  }
+};
