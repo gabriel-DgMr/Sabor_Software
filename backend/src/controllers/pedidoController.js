@@ -285,14 +285,30 @@ export const vaciar = async (req, res) => {
 export const confirmar = async (req, res) => {
   try {
     const userId = req.user?.id;
-    const { metodo_pago } = req.body;
+    const { metodo_pago, tipo_servicio, direccion_entrega, detalle_direccion } = req.body;
+
+    // Validaciones
     if (!metodo_pago) {
       return res.status(400).json({ mensaje: "metodo_pago es requerido" });
     }
     if (!userId) {
       return res.status(401).json({ mensaje: "Usuario no autenticado" });
     }
-    const id_pedido = await confirmarPedido(userId, metodo_pago);
+    if (!tipo_servicio || !["mesa", "domicilio"].includes(tipo_servicio)) {
+      return res.status(400).json({ mensaje: "tipo_servicio inválido" });
+    }
+    if (tipo_servicio === "domicilio" && !direccion_entrega) {
+      return res.status(400).json({ mensaje: "direccion_entrega es requerida para domicilio" });
+    }
+
+    const id_pedido = await confirmarPedido(
+      userId,
+      metodo_pago,
+      tipo_servicio,
+      direccion_entrega,
+      detalle_direccion
+    );
+
     res.json({ mensaje: "Pedido confirmado", id_pedido });
   } catch (error) {
     console.error("[Pedido][Confirmar] Error:", {
@@ -306,6 +322,7 @@ export const confirmar = async (req, res) => {
       .json({ mensaje: "Error al confirmar pedido", error: error.message });
   }
 };
+
 
 // Obtener un pedido por ID
 export const getPedidoById = async (req, res) => {

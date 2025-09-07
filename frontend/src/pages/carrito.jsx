@@ -5,7 +5,8 @@ import '../index.css';
 import '../styles/carrito.css';
 import { GoX, GoCheck, GoAlert } from 'react-icons/go';
 import { GoTrash } from 'react-icons/go';
-import { BsCash } from 'react-icons/bs';
+import { BsCash, BsHouse } from 'react-icons/bs';
+
 import { GoCreditCard } from 'react-icons/go';
 import { IoCart } from 'react-icons/io5';
 
@@ -14,6 +15,8 @@ import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useCart } from '../context/useCart.js';
+
+
 
 const API_URL = 'http://localhost:3000/api';
 
@@ -124,35 +127,107 @@ export default function Carrito() {
     });
   };
 
-  const handlePagoEfectivo = async () => {
-    setModal({
-      open: true,
-      message: '¿Deseas pagar tu pedido en efectivo?',
-      icon: <BsCash className="BsCash" style={{ color: '#ff9800', fontSize: '2.5rem' }} />,
-      confirmText: 'Sí, pagar en efectivo',
-      cancelText: 'Cancelar',
-      onConfirm: async () => {
-        try {
-          await confirmarPedido(1, 'efectivo');
-          localStorage.removeItem('recomendacionesPedido');
-          setModal({
-            open: true,
-            message: '¡Pago en efectivo registrado exitosamente!',
-            icon: <GoCheck className="GoCheck" style={{ color: '#00a600', fontSize: '2.5rem' }} />,
-            onConfirm: () => setModal(m => ({ ...m, open: false })),
-          });
-        } catch (error) {
-          setModal({
-            open: true,
-            message: `Error al registrar el pago en efectivo`,
-            icon: <GoX className="GoX" style={{ color: '#e53935', fontSize: '2.5rem' }} />,
-            onConfirm: () => setModal(m => ({ ...m, open: false })),
-          });
-        }
-      },
-      onCancel: () => setModal(m => ({ ...m, open: false })),
-    });
-  };
+
+//  función principal para pago en efectivo
+const handlePagoEfectivo = async () => {
+  setModal({
+    open: true,
+    message: '¿Deseas tu pedido para Mesa o Domicilio?',
+    icon: <BsCash className="BsCash" style={{ color: '#ff9800', fontSize: '2.5rem' }} />,
+    confirmText: 'Mesa',
+    cancelText: 'Domicilio',
+
+    // Caso Mesa
+    onConfirm: async () => {
+      try {
+        await confirmarPedido({
+  metodo_pago: 'efectivo',
+  tipo_servicio: 'mesa'
+});
+
+        localStorage.removeItem('recomendacionesPedido');
+        setModal({
+          open: true,
+          message: '¡Pedido confirmado para Mesa y pago en efectivo!',
+          icon: <GoCheck className="GoCheck" style={{ color: '#00a600', fontSize: '2.5rem' }} />,
+          onConfirm: () => setModal(m => ({ ...m, open: false })),
+        });
+      } catch (error) {
+        setModal({
+          open: true,
+          message: `Error al confirmar el pedido en Mesa`,
+          icon: <GoX className="GoX" style={{ color: '#e53935', fontSize: '2.5rem' }} />,
+          onConfirm: () => setModal(m => ({ ...m, open: false })),
+        });
+      }
+    },
+
+    //Caso Domicilio
+    onCancel: () => {
+      setModal({
+        open: true,
+        message: (
+          <div>
+            <h3 style={{ marginBottom: "10px" }}>Datos para el domicilio</h3>
+            <input
+              type="text"
+              placeholder="Dirección"
+              id="direccion"
+              className="input-modal"
+              style={{ width: "100%", marginBottom: "8px", padding: "6px" }}
+            />
+            <input
+              type="text"
+              placeholder="Apartamento / Piso / Habitación"
+              id="apartamento"
+              className="input-modal"
+              style={{ width: "100%", marginBottom: "8px", padding: "6px" }}
+            />
+          </div>
+        ),
+        icon: <BsHouse className="BsHouse" style={{ color: '#ff5722', fontSize: '2.5rem' }} />,
+        confirmText: 'Confirmar domicilio',
+        cancelText: 'Cancelar',
+        onConfirm: async () => {
+          try {
+            const direccion = document.getElementById('direccion').value;
+            const apartamento = document.getElementById('apartamento').value;
+
+            if (!direccion) {
+              alert("⚠️ Por favor ingresa la dirección");
+              return;
+              }
+
+           await confirmarPedido({
+  metodo_pago: 'efectivo',
+  tipo_servicio: 'domicilio',
+  direccion: direccion_entrega,
+  detalle_direccion: apartamento
+});
+
+            localStorage.removeItem('recomendacionesPedido');
+
+            setModal({
+              open: true,
+              message: '¡Pedido confirmado para Domicilio y pago en efectivo!',
+              icon: <GoCheck className="GoCheck" style={{ color: '#00a600', fontSize: '2.5rem' }} />,
+              onConfirm: () => setModal(m => ({ ...m, open: false })),
+            });
+          } catch (error) {
+            setModal({
+              open: true,
+              message: `Error al confirmar el pedido en Domicilio`,
+              icon: <GoX className="GoX" style={{ color: '#e53935', fontSize: '2.5rem' }} />,
+              onConfirm: () => setModal(m => ({ ...m, open: false })),
+            });
+          }
+        },
+        onCancel: () => setModal(m => ({ ...m, open: false })),
+      });
+    },
+  });
+};
+
 
   const handleUpdateQuantity = async (id_producto, nuevaCantidad) => {
     try {

@@ -426,11 +426,18 @@ export const vaciarCarrito = async (userId) => {
   }
 };
 
-export const confirmarPedido = async (userId, metodo_pago) => {
+export const confirmarPedido = async (
+  userId,
+  metodo_pago,
+  tipo_servicio,
+  direccion_entrega = null,
+  detalle_direccion = null
+) => {
   let connection;
   try {
     connection = await pool.getConnection();
     await connection.beginTransaction();
+
     const [carrito] = await connection.query(
       "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 1 LIMIT 1",
       [userId],
@@ -456,35 +463,20 @@ export const confirmarPedido = async (userId, metodo_pago) => {
           `Stock insuficiente para el producto con ID ${item.id_producto}`,
         );
       }
-      // Actualizar precio_unitario y subtotal por si cambió el precio
-      await connection.query(
-        "UPDATE detalle_pedidos SET precio_unitario = ?, subtotal = ? * ? WHERE id_pedido = ? AND id_producto = ?",
-        [
-          stockResult[0].precio_producto,
-          item.cantidad,
-          stockResult[0].precio_producto,
-          id_pedido,
-          item.id_producto,
-        ],
-      );
     }
 
-    // Recalcular total
-    const [totalRow] = await connection.query(
-      "SELECT SUM(subtotal) as total FROM detalle_pedidos WHERE id_pedido = ?",
-      [id_pedido],
-    );
-    const total = totalRow[0].total || 0;
-
+    // 🔹 Actualizar pedido con los datos extra
     await connection.query(
-      "UPDATE pedidos SET id_estado = 2, total_pedido = ?, metodo_pago = ? WHERE id_pedido = ?",
-      [total, metodo_pago, id_pedido],
+      `UPDATE pedidos 
+       SET metodo_pago = ?, tipo_servicio = ?, direccion_entrega = ?, detalle_direccion = ?, id_estado = 2 
+       WHERE id_pedido = ?`,
+      [metodo_pago, tipo_servicio, direccion_entrega, detalle_direccion, id_pedido]
     );
+
     await connection.commit();
     return id_pedido;
   } catch (error) {
     if (connection) await connection.rollback();
-    console.error("Error al confirmar el pedido:", error);
     throw error;
   } finally {
     if (connection) connection.release();
