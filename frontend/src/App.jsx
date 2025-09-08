@@ -14,7 +14,7 @@ import ActualizarDatos from './pages/ActualizarDatos.jsx';
 import Login from './pages/auth/Login.jsx';
 import Register from './pages/auth/Register.jsx';
 import ResetPasswordContainer from './pages/auth/ResetPasswordContainer.jsx';
-import Carrito from './pages/Carrito.jsx';
+import Carrito from './pages/carrito.jsx';
 import Checkout from './pages/Checkout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import DashboardVentas from './pages/DashboardVentas.jsx';
