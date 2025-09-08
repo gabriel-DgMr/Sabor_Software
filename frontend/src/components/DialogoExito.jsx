@@ -62,9 +62,9 @@ const DialogoModal = ({
         >
           {icon}
         </span>
-        <p className="success-dialog__message" style={{ textAlign: 'center' }}>
+        <div className="success-dialog__message" style={{ textAlign: 'center' }}>
           {message}
-        </p>
+        </div>
         {(confirmText || cancelText) && (
           <div className="success-dialog__actions">
             {confirmText && (
@@ -87,8 +87,9 @@ const DialogoModal = ({
 DialogoModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func,
-  message: PropTypes.string.isRequired,
-  icon: PropTypes.string,
+  message: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
+  icon: PropTypes.node,
+
   confirmText: PropTypes.string,
   cancelText: PropTypes.string,
   onConfirm: PropTypes.func,
