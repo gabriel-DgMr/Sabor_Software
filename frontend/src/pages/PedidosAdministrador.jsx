@@ -19,7 +19,6 @@ const estadoTexto = estado => {
 };
 
 const Pedidos = () => {
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [filtroActivo, setFiltroActivo] = useState('todos');
   const [pedidos, setPedidos] = useState([]);
   const [cargando, setCargando] = useState(true);
