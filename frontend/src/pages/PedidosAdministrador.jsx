@@ -18,7 +18,7 @@ const estadoTexto = estado => {
   return mapearEstado(estado);
 };
 
-const Pedidos = () => {
+const PedidosAdministrador = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [filtroActivo, setFiltroActivo] = useState('todos');
   const [pedidos, setPedidos] = useState([]);

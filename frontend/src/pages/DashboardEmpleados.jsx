@@ -28,7 +28,7 @@ ChartJS.register(
   ArcElement
 );
 
-const DashboardVentas = () => {
+const DashboardEmpleados = () => {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,10 +38,10 @@ const DashboardVentas = () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await dashboardService.getSalesMetrics();
+        const data = await dashboardService.getEmployeeMetrics();
         setMetrics(data);
       } catch (err) {
-        console.error('Error al cargar métricas de ventas:', err);
+        console.error('Error al cargar métricas de empleados:', err);
         setError(err.response?.data?.error || err.message || 'Error desconocido');
       } finally {
         setLoading(false);
@@ -57,8 +57,8 @@ const DashboardVentas = () => {
     return (
       <div className="layout">
         <MenuLateral />
-        <main className="dashboard__ventas" style={{ padding: 24 }}>
-          <h1 style={{ fontSize: 28, marginBottom: 24 }}>Ventas</h1>
+        <main className="dashboard__empleados" style={{ padding: 24 }}>
+          <h1 style={{ fontSize: 28, marginBottom: 24 }}>Empleados</h1>
           <div
             style={{
               background: '#ffebee',
@@ -68,13 +68,13 @@ const DashboardVentas = () => {
               border: '1px solid #ffcdd2',
             }}
           >
-            <h3>Error al cargar el dashboard de ventas</h3>
+            <h3>Error al cargar el dashboard de empleados</h3>
             <p>{error}</p>
             <p style={{ fontSize: 14, marginTop: 16 }}>
               {error.includes('403') || error.includes('No autorizado') ? (
                 <>
-                  <strong>Problema de autorización:</strong> Tu sesión puede haber expirado o no
-                  tienes permisos de administrador.
+                  <strong>Problema de autorización:</strong> Solo los administradores pueden acceder
+                  a este dashboard.
                   <br />
                   <a href="/login" style={{ color: '#c62828', textDecoration: 'underline' }}>
                     Haz clic aquí para iniciar sesión nuevamente
@@ -91,12 +91,12 @@ const DashboardVentas = () => {
   }
 
   // Mostrar mensaje cuando no hay datos
-  if (metrics && metrics.ventas_totales === 0) {
+  if (metrics && metrics.total_empleados === 0) {
     return (
       <div className="layout">
         <MenuLateral />
-        <main className="dashboard__ventas" style={{ padding: 24 }}>
-          <h1 style={{ fontSize: 28, marginBottom: 24 }}>Ventas</h1>
+        <main className="dashboard__empleados" style={{ padding: 24 }}>
+          <h1 style={{ fontSize: 28, marginBottom: 24 }}>Empleados</h1>
           <div
             style={{
               background: '#e3f2fd',
@@ -107,10 +107,10 @@ const DashboardVentas = () => {
               textAlign: 'center',
             }}
           >
-            <h3 style={{ marginBottom: 16 }}>💰 Dashboard de Ventas Vacío</h3>
+            <h3 style={{ marginBottom: 16 }}>👥 Dashboard de Empleados Vacío</h3>
             <p style={{ fontSize: 16, marginBottom: 16 }}>
-              No hay datos de ventas aún. El dashboard mostrará métricas cuando se realicen pedidos
-              completados.
+              No hay empleados registrados aún. El dashboard mostrará métricas cuando se registren
+              empleados y administradores.
             </p>
             <div
               style={{
@@ -123,9 +123,9 @@ const DashboardVentas = () => {
             >
               <h4 style={{ marginBottom: 12 }}>💡 Próximos pasos:</h4>
               <ul style={{ textAlign: 'left', margin: 0, paddingLeft: 20 }}>
-                <li>Realiza algunos pedidos</li>
-                <li>Completa los pedidos (estado "Completado")</li>
-                <li>Las métricas de ventas aparecerán automáticamente</li>
+                <li>Registra algunos empleados</li>
+                <li>Asigna roles de empleado o administrador</li>
+                <li>Las métricas de empleados aparecerán automáticamente</li>
               </ul>
             </div>
           </div>
@@ -137,42 +137,65 @@ const DashboardVentas = () => {
   if (!metrics) return <div>Error cargando métricas</div>;
 
   const {
-    ventas_totales,
-    ventas_hoy,
-    ventas_semana,
-    ventas_mes,
-    ventasPorDia,
-    ventasPorMetodo,
-    productosVendidos,
+    total_empleados,
+    empleados_activos,
+    administradores,
+    empleados_regulares,
+    empleadosPorRol,
+    actividadEmpleados,
+    listaEmpleados,
   } = metrics;
 
-  // Función para formatear moneda
-  const formatCurrency = amount => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-    }).format(amount);
+  // Función para formatear fecha
+  const formatDate = dateString => {
+    if (!dateString) return 'Nunca';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-CO', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
-  // Gráfico de línea - Ventas por día
+  // Función para obtener color según estado de actividad
+  const getActivityColor = estado => {
+    switch (estado) {
+      case 'Activo':
+        return '#4CAF50';
+      case 'Reciente':
+        return '#FF9800';
+      case 'Inactivo':
+        return '#FF5722';
+      case 'Muy inactivo':
+        return '#9E9E9E';
+      default:
+        return '#9E9E9E';
+    }
+  };
+
+  // Gráfico de línea - Actividad de empleados
   const lineData = {
     labels:
-      ventasPorDia && ventasPorDia.length > 0
-        ? ventasPorDia.map(d => {
-            const fecha = new Date(d.fecha);
+      actividadEmpleados && actividadEmpleados.length > 0
+        ? actividadEmpleados.map(a => {
+            const fecha = new Date(a.fecha);
             return `${fecha.getDate()}/${fecha.getMonth() + 1}`;
           })
         : ['Sin datos'],
     datasets: [
       {
-        label: 'Ventas diarias',
-        data: ventasPorDia && ventasPorDia.length > 0 ? ventasPorDia.map(d => d.total || 0) : [0],
+        label: 'Empleados activos',
+        data:
+          actividadEmpleados && actividadEmpleados.length > 0
+            ? actividadEmpleados.map(a => a.empleados_activos || 0)
+            : [0],
         fill: true,
-        backgroundColor: 'rgba(76, 175, 80, 0.1)',
-        borderColor: '#4CAF50',
+        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+        borderColor: '#2196F3',
         tension: 0.4,
-        pointBackgroundColor: '#4CAF50',
+        pointBackgroundColor: '#2196F3',
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
         pointRadius: 4,
@@ -180,45 +203,19 @@ const DashboardVentas = () => {
     ],
   };
 
-  // Gráfico de dona - Ventas por método de pago
+  // Gráfico de dona - Empleados por rol
   const doughnutData = {
     labels:
-      ventasPorMetodo && ventasPorMetodo.length > 0
-        ? ventasPorMetodo.map(v => v.metodo_pago || 'Sin método')
+      empleadosPorRol && empleadosPorRol.length > 0
+        ? empleadosPorRol.map(e => e.nombre_rol)
         : ['Sin datos'],
     datasets: [
       {
         data:
-          ventasPorMetodo && ventasPorMetodo.length > 0
-            ? ventasPorMetodo.map(v => v.total || 0)
+          empleadosPorRol && empleadosPorRol.length > 0
+            ? empleadosPorRol.map(e => e.cantidad)
             : [0],
-        backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#E91E63', '#9C27B0'],
-      },
-    ],
-  };
-
-  // Gráfico de barras - Productos más vendidos
-  const barData = {
-    labels:
-      productosVendidos && productosVendidos.length > 0
-        ? productosVendidos
-            .slice(0, 5)
-            .map(p =>
-              p.nombre_producto.length > 20
-                ? p.nombre_producto.substring(0, 20) + '...'
-                : p.nombre_producto
-            )
-        : ['Sin datos'],
-    datasets: [
-      {
-        label: 'Cantidad vendida',
-        data:
-          productosVendidos && productosVendidos.length > 0
-            ? productosVendidos.slice(0, 5).map(p => p.cantidad_vendida || 0)
-            : [0],
-        backgroundColor: 'rgba(33, 150, 243, 0.8)',
-        borderColor: '#2196F3',
-        borderWidth: 1,
+        backgroundColor: ['#FF9800', '#4CAF50', '#2196F3', '#E91E63'],
       },
     ],
   };
@@ -226,37 +223,37 @@ const DashboardVentas = () => {
   return (
     <div className="layout">
       <MenuLateral />
-      <main className="dashboard__ventas" style={{ padding: 24 }}>
-        <h1 style={{ fontSize: 28, marginBottom: 24 }}>Ventas</h1>
+      <main className="dashboard__empleados" style={{ padding: 24 }}>
+        <h1 style={{ fontSize: 28, marginBottom: 24 }}>Empleados</h1>
 
         {/* Tarjetas métricas */}
         <div style={{ display: 'flex', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
           {[
             {
-              label: 'Ventas Totales',
-              value: formatCurrency(ventas_totales || 0),
-              description: 'Historial completo',
+              label: 'Total Empleados',
+              value: `${total_empleados || 0} Personas`,
+              description: 'Empleados y administradores',
             },
             {
-              label: 'Ventas Hoy',
-              value: formatCurrency(ventas_hoy || 0),
-              description: 'Día actual',
-            },
-            {
-              label: 'Ventas Semana',
-              value: formatCurrency(ventas_semana || 0),
-              description: 'Últimos 7 días',
-            },
-            {
-              label: 'Ventas Mes',
-              value: formatCurrency(ventas_mes || 0),
+              label: 'Empleados Activos',
+              value: `${empleados_activos || 0} Personas`,
               description: 'Últimos 30 días',
+            },
+            {
+              label: 'Administradores',
+              value: `${administradores || 0} Personas`,
+              description: 'Rol administrador',
+            },
+            {
+              label: 'Empleados Regulares',
+              value: `${empleados_regulares || 0} Personas`,
+              description: 'Rol empleado',
             },
           ].map(card => (
             <div
               key={card.label}
               style={{
-                background: '#4CAF50',
+                background: '#2196F3',
                 color: '#fff',
                 borderRadius: 12,
                 padding: 24,
@@ -287,7 +284,7 @@ const DashboardVentas = () => {
               boxShadow: '0 2px 8px #0001',
             }}
           >
-            <div style={{ fontWeight: 600, marginBottom: 8 }}>Ventas por Día</div>
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>Actividad de Empleados</div>
             <Line
               data={lineData}
               options={{
@@ -297,9 +294,7 @@ const DashboardVentas = () => {
                   y: {
                     beginAtZero: true,
                     ticks: {
-                      callback: function (value) {
-                        return formatCurrency(value);
-                      },
+                      stepSize: 1,
                     },
                   },
                 },
@@ -317,27 +312,19 @@ const DashboardVentas = () => {
               boxShadow: '0 2px 8px #0001',
             }}
           >
-            <div style={{ fontWeight: 600, marginBottom: 8 }}>Ventas por Método de Pago</div>
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>Empleados por Rol</div>
             <Doughnut
               data={doughnutData}
               options={{
                 plugins: {
                   legend: { position: 'right' },
-                  tooltip: {
-                    callbacks: {
-                      label: function (context) {
-                        const value = context.parsed;
-                        return `${context.label}: ${formatCurrency(value)}`;
-                      },
-                    },
-                  },
                 },
               }}
             />
           </div>
         </div>
 
-        {/* Productos más vendidos */}
+        {/* Lista de empleados */}
         <div
           style={{
             background: '#fff',
@@ -346,46 +333,67 @@ const DashboardVentas = () => {
             boxShadow: '0 2px 8px #0001',
           }}
         >
-          <div style={{ fontWeight: 600, marginBottom: 16 }}>Productos Más Vendidos</div>
-          <Bar
-            data={barData}
-            options={{
-              responsive: true,
-              plugins: { legend: { display: false } },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                },
-              },
-            }}
-            height={100}
-          />
+          <div style={{ fontWeight: 600, marginBottom: 16 }}>Lista de Empleados</div>
 
-          {/* Tabla de productos */}
-          {productosVendidos && productosVendidos.length > 0 && (
-            <div style={{ marginTop: 24 }}>
+          {listaEmpleados && listaEmpleados.length > 0 ? (
+            <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
-                    <th style={{ padding: 12, textAlign: 'left' }}>Producto</th>
-                    <th style={{ padding: 12, textAlign: 'right' }}>Cantidad</th>
-                    <th style={{ padding: 12, textAlign: 'right' }}>Ingresos</th>
+                    <th style={{ padding: 12, textAlign: 'left' }}>Nombre</th>
+                    <th style={{ padding: 12, textAlign: 'left' }}>Email</th>
+                    <th style={{ padding: 12, textAlign: 'left' }}>Rol</th>
+                    <th style={{ padding: 12, textAlign: 'left' }}>Última Actividad</th>
+                    <th style={{ padding: 12, textAlign: 'left' }}>Estado</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {productosVendidos.slice(0, 10).map((producto, index) => (
+                  {listaEmpleados.map((empleado, index) => (
                     <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                      <td style={{ padding: 12 }}>{producto.nombre_producto}</td>
-                      <td style={{ padding: 12, textAlign: 'right' }}>
-                        {producto.cantidad_vendida}
+                      <td style={{ padding: 12 }}>{empleado.nombre_usuario}</td>
+                      <td style={{ padding: 12 }}>{empleado.correo_usuario}</td>
+                      <td style={{ padding: 12 }}>
+                        <span
+                          style={{
+                            background:
+                              empleado.nombre_rol === 'Administrador' ? '#FF9800' : '#4CAF50',
+                            color: '#fff',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                          }}
+                        >
+                          {empleado.nombre_rol}
+                        </span>
                       </td>
-                      <td style={{ padding: 12, textAlign: 'right' }}>
-                        {formatCurrency(producto.ingresos)}
+                      <td style={{ padding: 12 }}>{formatDate(empleado.last_active)}</td>
+                      <td style={{ padding: 12 }}>
+                        <span
+                          style={{
+                            background: getActivityColor(empleado.estado_actividad),
+                            color: '#fff',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                          }}
+                        >
+                          {empleado.estado_actividad}
+                        </span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+          ) : (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: 40,
+                color: '#666',
+              }}
+            >
+              No hay empleados registrados
             </div>
           )}
         </div>
@@ -394,4 +402,4 @@ const DashboardVentas = () => {
   );
 };
 
-export default DashboardVentas;
+export default DashboardEmpleados;

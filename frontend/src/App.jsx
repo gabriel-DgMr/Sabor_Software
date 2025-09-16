@@ -19,6 +19,7 @@ import Carrito from './pages/carrito.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import DashboardVentas from './pages/DashboardVentas.jsx';
 import DashboardClientes from './pages/DashboardClientes.jsx';
+import DashboardEmpleados from './pages/DashboardEmpleados.jsx';
 import HomeAdministrador from './pages/HomeAdministrador.jsx';
 import EscanearQR from './pages/EscanearQR.jsx';
 import HistorialPedidos from './pages/HistorialPedidos.jsx';
@@ -103,6 +104,26 @@ function App() {
                     </ProtectedRoute>
                   }
                   path="/administrar/panel/clientes"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Administrador', 'Empleado']}>
+                        <DashboardVentas />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/administrar/panel/ventas"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <DashboardEmpleados />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/administrar/panel/empleados"
                 />
                 <Route
                   element={
