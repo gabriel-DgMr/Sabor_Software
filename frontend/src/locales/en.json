@@ -130,6 +130,7 @@
   "quienes_valor_2": "Commitment to quality",
   "quienes_valor_3": "Respect and teamwork",
   "sobre_titulo": "About Us",
+  "sobre_subtitulo": "Discover our passion for Colombian gastronomy",
   "sobre_historia_titulo": "Our History",
   "sobre_historia": "Founded in 2023, Sabor was born from the dream of sharing a passion for good food and exceptional service. Since then, we have put our hands to work to make this project a reality.",
   "sobre_equipo_titulo": "Our Team",
@@ -217,5 +218,6 @@
   "calificacion": "Rating",
   "mas_vendidos": "Best sellers",
   "aplicando_filtros": "Applying filters...",
-  "no_encontrado": "We haven't found that product."
+  "no_encontrado": "We haven't found that product.",
+  "categorias_todas": "All categories"
 }

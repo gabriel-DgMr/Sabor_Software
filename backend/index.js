@@ -26,7 +26,8 @@ import { dirname } from "path";
 import helmet from "helmet";
 import mensajeContactoRoutes from "./src/routes/contactoRoutes.js";
 import mercadopagoRoutes from "./src/routes/mercadopagoRoutes.js";
-import webhookRoutes from "./src/routes/webhookRoutes.js";
+
+import dashboardRoutes from "./src/routes/dashboardRoutes.js";
 
 // NUEVO: Importa las rutas de domicilios
 import domicilioRoutes from "./src/routes/domicilioRoutes.js";
@@ -96,7 +97,8 @@ app.use("/api/pedidos", pedidoRoutes);
 app.use("/api/horarios", horarioRoutes);
 app.use("/api", mensajeContactoRoutes);
 app.use("/api/mercadopago", mercadopagoRoutes);
-app.use("/api/webhook", webhookRoutes);
+
+app.use("/api/dashboard", dashboardRoutes);
 
 // NUEVO: Ruta para historial de domicilios
 app.use("/api/domicilios", domicilioRoutes);

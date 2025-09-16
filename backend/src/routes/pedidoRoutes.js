@@ -4,6 +4,7 @@ import {
   deletePedido,
   createPedido,
   updatePedido,
+  updateEstadoPedido,
 } from "../controllers/pedidoController.js";
 import { authenticateToken, checkPermission } from "../middleware/auth.js";
 import { validatePedido } from "../middleware/validateRequest.js";
@@ -74,6 +75,14 @@ router.delete(
   authenticateToken,
   checkPermission("delete"),
   deletePedido,
+);
+
+// Ruta para actualizar estado de pedido (solo administradores)
+router.patch(
+  "/:id/estado",
+  authenticateToken,
+  checkPermission("manage_orders"),
+  updateEstadoPedido,
 );
 
 export default router;

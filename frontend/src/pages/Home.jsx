@@ -269,7 +269,7 @@ const Home = () => {
                 value={categoriaSeleccionada}
                 onChange={handleCategoriaChange}
               >
-                <option value="seleccionar__cat">{t('seleccionar__categoria')}</option>
+                <option value="">{t('categorias_todas')}</option>
                 {categorias &&
                   categorias.map(cat => (
                     <option key={cat.id_categoria} value={cat.nombre_categoria}>

@@ -18,6 +18,7 @@ import Carrito from './pages/carrito.jsx';
 // import Checkout from './pages/Checkout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import DashboardVentas from './pages/DashboardVentas.jsx';
+import DashboardClientes from './pages/DashboardClientes.jsx';
 import HomeAdministrador from './pages/HomeAdministrador.jsx';
 import EscanearQR from './pages/EscanearQR.jsx';
 import HistorialPedidos from './pages/HistorialPedidos.jsx';
@@ -61,9 +62,9 @@ function App() {
                 <Route element={<EscanearQR />} path="/escanear-qr" />
                 <Route element={<LoadingScreen />} path="/loading-screen" />
 
-                {/* Rutas protegidas por rol */}
-                <Route element={<DashboardVentas />} path="/administrar/panel/ventas" />
+                {/* ------------------- Rutas protegidas ------------------- */}
 
+                {/* Administrador */}
                 <Route
                   element={
                     <ProtectedRoute>
@@ -73,57 +74,6 @@ function App() {
                     </ProtectedRoute>
                   }
                   path="/HomeAdministrador"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Empleado']}>
-                        <HomeEmpleados />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/HomeEmpleados"
-                />
-
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <ProductosAdministrar />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrador/productos"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Empleado']}>
-                        <ProductosEmpleados />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/empleado/productos"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador', 'Empleado']}>
-                        <PedidosAdministrar />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrador/pedidos"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador', 'Empleado']}>
-                        <ReservasAdministrar />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrador/reservaciones"
                 />
                 <Route
                   element={
@@ -145,7 +95,70 @@ function App() {
                   }
                   path="/administrador/panel/ventas"
                 />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <DashboardClientes />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/administrar/panel/clientes"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <ProductosAdministrar />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/administrador/productos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Administrador', 'Empleado']}>
+                        <PedidosAdministrar />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/administrador/pedidos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Administrador', 'Empleado']}>
+                        <ReservasAdministrar />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/administrador/reservaciones"
+                />
 
+                {/* Empleados */}
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Empleado']}>
+                        <HomeEmpleados />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/HomeEmpleados"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Empleado']}>
+                        <ProductosEmpleados />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/empleado/productos"
+                />
+
+                {/* Usuario autenticado */}
                 <Route
                   element={
                     <ProtectedRoute>

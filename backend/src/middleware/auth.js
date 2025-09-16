@@ -1,4 +1,7 @@
 import jwt from "jsonwebtoken";
+import mysql from "mysql2/promise";
+import { dbConfig } from "../config/dbconfig.js";
+const pool = mysql.createPool(dbConfig);
 
 // Middleware para autenticar token
 export const authenticateToken = (req, res, next) => {
@@ -58,6 +61,15 @@ export const authenticateToken = (req, res, next) => {
       nombre: decoded.nombre || null,
       permisos: rolePermissions[decoded.rol] || [],
     };
+
+    // Actualizar last_active en la base de datos (no bloquear la request)
+    pool
+      .query("UPDATE usuarios SET last_active = NOW() WHERE id_usuario = ?", [
+        decoded.id,
+      ])
+      .catch((err) => {
+        console.error("Error actualizando last_active:", err.message);
+      });
 
     next();
   } catch (error) {

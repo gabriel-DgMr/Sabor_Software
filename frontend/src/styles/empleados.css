@@ -242,10 +242,44 @@
     font-size: 5rem;
 }
 
+.pedidos__controles {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
 .pedidos__filtros {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
+}
+
+.pedidos__boton-refrescar {
+    background-color: var(--primary-500);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.6rem;
+    border-radius: 0.5rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pedidos__boton-refrescar:hover {
+    background-color: var(--primary-600);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pedidos__boton-refrescar:active {
+    transform: translateY(0);
 }
 
 .pedidos__filtro {
@@ -345,15 +379,87 @@
     color: #fff;
 }
 
-.pedido__estado--entregado {
-    background-color: var(--neutral-300);
-    color: var(--neutral-800);
+.pedido__estado--completado {
+    background-color: var(--success-500);
+    color: #fff;
+}
+
+.pedido__estado--cancelado {
+    background-color: var(--error-500);
+    color: #fff;
 }
 
 .pedido__mesa {
     font-size: 1.6rem;
     font-weight: bold;
     color: var(--neutral-900);
+}
+
+/* Estilos adicionales para pedidos */
+.pedido__total {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--primary-600);
+    margin-bottom: 0.4rem;
+}
+
+.pedido__notas {
+    font-size: 1.2rem;
+    color: var(--neutral-600);
+    font-style: italic;
+    margin-bottom: 0.4rem;
+}
+
+.pedido__direccion {
+    font-size: 1.2rem;
+    color: var(--neutral-700);
+    margin-bottom: 0.4rem;
+    background-color: var(--neutral-100);
+    padding: 0.5rem;
+    border-radius: 0.4rem;
+}
+
+.pedido__boton:disabled {
+    background-color: var(--neutral-300);
+    color: var(--neutral-500);
+    cursor: not-allowed;
+}
+
+.pedido__boton--cargando {
+    background-color: var(--primary-400);
+    color: white;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.pedidos__mensaje--error {
+    color: var(--error-500);
+    background-color: var(--error-50);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--error-200);
+}
+
+.pedidos__mensaje--error h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.8rem;
+    color: var(--error-600);
+}
+
+.pedidos__mensaje--error p {
+    margin: 0.5rem 0;
+    font-size: 1.4rem;
 }
 
 /* Estilos de administrar reservaciones */
