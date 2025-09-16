@@ -14,9 +14,7 @@ import './AuthPage.css';
 // Componente de alerta visualmente consistente para auth
 const AuthAlert = ({ type, message }) => {
   if (!message) return null;
-  const icon = type === 'success'
-    ? <GoCheck className="GoCheck" />
-    : <GoX className="GoX" />;
+  const icon = type === 'success' ? <GoCheck className="GoCheck" /> : <GoX className="GoX" />;
   return (
     <div className="alerta-sin-tarjeta">
       {icon}
@@ -76,7 +74,7 @@ const AuthPage = ({ isOpen, onClose }) => {
 
   const handleShowMessage = (type, text) => {
     setGlobalMessage({ type, text });
-    const selector = type === 'success' ? '.formulario__mensaje-exito' : '.formulario__mensaje-error';
+    const selector = type === 'success' ? '.formulario_mensaje-exito' : '.formulario_mensaje-error';
 
     setTimeout(() => animateElement(selector, 'fade-in'), 0);
 
@@ -93,9 +91,12 @@ const AuthPage = ({ isOpen, onClose }) => {
   };
 
   const handleLoginSuccess = () => {
-    setTimeout(() => {
-      onClose();
-    }, VISIBLE_DURATION + ANIM_DURATION + 50);
+    setTimeout(
+      () => {
+        onClose();
+      },
+      VISIBLE_DURATION + ANIM_DURATION + 50
+    );
   };
 
   const handleVerificationSuccess = () => {
@@ -143,11 +144,7 @@ const AuthPage = ({ isOpen, onClose }) => {
           />
         );
       case 'forgot-password':
-        return (
-          <ForgotPassword
-            onShowMessage={handleShowMessage}
-          />
-        );
+        return <ForgotPassword onShowMessage={handleShowMessage} />;
       default:
         return null;
     }
@@ -162,9 +159,7 @@ const AuthPage = ({ isOpen, onClose }) => {
 
         {renderContent()}
 
-        {globalMessage.text && (
-          <AuthAlert type={globalMessage.type} message={globalMessage.text} />
-        )}
+        {globalMessage.text && <AuthAlert type={globalMessage.type} message={globalMessage.text} />}
 
         {view !== 'forgot-password' && (
           <div className="auth-page__toggle-view">

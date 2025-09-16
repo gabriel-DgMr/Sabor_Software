@@ -35,28 +35,6 @@ import HomeEmpleados from './pages/HomeEmpleados.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 import ProductosEmpleados from './pages/ProductosEmpleados.jsx';
 
-// Componentes de diagnóstico
-const DiagnosticComponent = () => (
-  <div style={{ padding: '20px', backgroundColor: '#f0f0f0', textAlign: 'center' }}>
-    <h1>🚀 Sabor - Diagnóstico</h1>
-    <p>Si puedes ver este mensaje, React está funcionando correctamente.</p>
-    <p>Fecha: {new Date().toLocaleString()}</p>
-    <button
-      onClick={() => (window.location.href = '/')}
-      style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none' }}
-    >
-      Ir a la página principal
-    </button>
-  </div>
-);
-
-const TestComponent = () => (
-  <div style={{ padding: '20px', backgroundColor: '#e8f5e8', textAlign: 'center' }}>
-    <h1>✅ React funcionando correctamente</h1>
-    <p>Si ves esto, el problema está en algún contexto.</p>
-  </div>
-);
-
 function App() {
   return (
     <HelmetProvider>
@@ -65,10 +43,6 @@ function App() {
           <CategoriaProvider>
             <CartProvider>
               <Routes>
-                {/* Rutas de prueba */}
-                <Route element={<TestComponent />} path="/test" />
-                <Route element={<DiagnosticComponent />} path="/diagnostico" />
-
                 {/* Rutas públicas */}
                 <Route element={<Home />} path="/" />
                 <Route element={<Login />} path="/login" />

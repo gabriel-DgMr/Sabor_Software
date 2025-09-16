@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
 /* Ocultar flechas nativas de los input[type=number] para cantidad personas */
 .hide-number-spin::-webkit-outer-spin-button,
 .hide-number-spin::-webkit-inner-spin-button {
@@ -13,7 +15,6 @@
 /* =====================
    VARIABLES Y FUENTES
    ===================== */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 
 :root {
   /* Primary */
@@ -980,7 +981,6 @@ hr {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 320px;
   background: var(--neutral-100);
   box-shadow: 0 2px 12px rgba(0,0,0,0.07);
   overflow: hidden;
@@ -989,7 +989,7 @@ hr {
 
 @media (min-width: 768px) {
   .carrusel-productos {
-    height: 75rem;
+    height: 60rem;
   }
 }
 .carrusel-productos__diapositiva {
@@ -1183,16 +1183,25 @@ hr {
 }
 
 .barra-navegacion {
-  background: #fff;
-  padding: 1rem 2rem;
-  border-radius: 1.5rem;
   display: flex;
+  flex-wrap: wrap; /* Permite que los hijos bajen a otra fila */
   justify-content: space-between;
   align-items: center;
   gap: 3rem;
+  background: #fff;
+  padding: 1rem 2rem;
+  border-radius: 1.5rem;
   width: 55%;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  height: 7rem;
+  height: auto; /* Permite crecer en altura si hay más filas */
+  min-height: 7rem;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .barra-navegacion {
+    width: 95%;
+  }
 }
 
 .barra-navegacion__opcion,
@@ -1334,6 +1343,7 @@ hr {
   }
 }
 
+
 /* =====================
    PRODUCTOS
    ===================== */
@@ -1348,7 +1358,6 @@ hr {
 .productos {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 4rem;
   justify-content: center;
   align-items: start;
 }
