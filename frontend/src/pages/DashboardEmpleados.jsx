@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import dashboardService from '../services/dashboardService';
 import MenuLateral from '../components/MenuLateralAdministrador';
+import PDFDownloadButton from '../components/PDFDownloadButton';
+import { usePDFGenerator } from '../hooks/usePDFGenerator';
 import '../styles/empleados.css';
+import '../styles/dashboard.css';
+import '../styles/charts.css';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -32,6 +36,7 @@ const DashboardEmpleados = () => {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { contentRef, generatePDF } = usePDFGenerator();
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -51,14 +56,18 @@ const DashboardEmpleados = () => {
     fetchMetrics();
   }, []);
 
+  const handleGeneratePDF = () => {
+    generatePDF('dashboard-trabajadores.pdf', 'Dashboard de Trabajadores');
+  };
+
   if (loading) return <div>Cargando...</div>;
 
   if (error) {
     return (
       <div className="layout">
         <MenuLateral />
-        <main className="dashboard__empleados" style={{ padding: 24 }}>
-          <h1 style={{ fontSize: 28, marginBottom: 24 }}>Empleados</h1>
+        <main className="dashboard-container">
+          <h1 className="dashboard-title">Trabajadores</h1>
           <div
             style={{
               background: '#ffebee',
@@ -68,7 +77,7 @@ const DashboardEmpleados = () => {
               border: '1px solid #ffcdd2',
             }}
           >
-            <h3>Error al cargar el dashboard de empleados</h3>
+            <h3>Error al cargar el dashboard de trabajadores</h3>
             <p>{error}</p>
             <p style={{ fontSize: 14, marginTop: 16 }}>
               {error.includes('403') || error.includes('No autorizado') ? (
@@ -95,8 +104,8 @@ const DashboardEmpleados = () => {
     return (
       <div className="layout">
         <MenuLateral />
-        <main className="dashboard__empleados" style={{ padding: 24 }}>
-          <h1 style={{ fontSize: 28, marginBottom: 24 }}>Empleados</h1>
+        <main className="dashboard-container">
+          <h1 className="dashboard-title">Trabajadores</h1>
           <div
             style={{
               background: '#e3f2fd',
@@ -107,10 +116,10 @@ const DashboardEmpleados = () => {
               textAlign: 'center',
             }}
           >
-            <h3 style={{ marginBottom: 16 }}>👥 Dashboard de Empleados Vacío</h3>
+            <h3 style={{ marginBottom: 16 }}>👥 Dashboard de Trabajadores Vacío</h3>
             <p style={{ fontSize: 16, marginBottom: 16 }}>
-              No hay empleados registrados aún. El dashboard mostrará métricas cuando se registren
-              empleados y administradores.
+              No hay trabajadores registrados aún. El dashboard mostrará métricas cuando se
+              registren empleados y administradores.
             </p>
             <div
               style={{
@@ -125,7 +134,7 @@ const DashboardEmpleados = () => {
               <ul style={{ textAlign: 'left', margin: 0, paddingLeft: 20 }}>
                 <li>Registra algunos empleados</li>
                 <li>Asigna roles de empleado o administrador</li>
-                <li>Las métricas de empleados aparecerán automáticamente</li>
+                <li>Las métricas de trabajadores aparecerán automáticamente</li>
               </ul>
             </div>
           </div>
@@ -198,7 +207,8 @@ const DashboardEmpleados = () => {
         pointBackgroundColor: '#2196F3',
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
-        pointRadius: 4,
+        pointRadius: 6,
+        pointHoverRadius: 8,
       },
     ],
   };
@@ -216,6 +226,8 @@ const DashboardEmpleados = () => {
             ? empleadosPorRol.map(e => e.cantidad)
             : [0],
         backgroundColor: ['#FF9800', '#4CAF50', '#2196F3', '#E91E63'],
+        borderWidth: 2,
+        borderColor: '#fff',
       },
     ],
   };
@@ -223,179 +235,178 @@ const DashboardEmpleados = () => {
   return (
     <div className="layout">
       <MenuLateral />
-      <main className="dashboard__empleados" style={{ padding: 24 }}>
-        <h1 style={{ fontSize: 28, marginBottom: 24 }}>Empleados</h1>
+      <main className="dashboard-container">
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">Trabajadores</h1>
+          <PDFDownloadButton
+            onGeneratePDF={handleGeneratePDF}
+            disabled={loading || error || !metrics}
+          />
+        </div>
 
-        {/* Tarjetas métricas */}
-        <div style={{ display: 'flex', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
-          {[
-            {
-              label: 'Total Empleados',
-              value: `${total_empleados || 0} Personas`,
-              description: 'Empleados y administradores',
-            },
-            {
-              label: 'Empleados Activos',
-              value: `${empleados_activos || 0} Personas`,
-              description: 'Últimos 30 días',
-            },
-            {
-              label: 'Administradores',
-              value: `${administradores || 0} Personas`,
-              description: 'Rol administrador',
-            },
-            {
-              label: 'Empleados Regulares',
-              value: `${empleados_regulares || 0} Personas`,
-              description: 'Rol empleado',
-            },
-          ].map(card => (
-            <div
-              key={card.label}
-              style={{
-                background: '#2196F3',
-                color: '#fff',
-                borderRadius: 12,
-                padding: 24,
-                minWidth: 180,
-                boxShadow: '0 2px 8px #0001',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-              }}
-            >
-              <div>
-                <div style={{ fontSize: 18, marginBottom: 4 }}>{card.label}</div>
-                <div style={{ fontSize: 12, opacity: 0.8 }}>{card.description}</div>
+        {/* Contenido para PDF */}
+        <div ref={contentRef} className="dashboard-content">
+          {/* Tarjetas métricas */}
+          <div className="metrics-grid">
+            {[
+              {
+                label: 'Total Trabajadores',
+                value: `${total_empleados || 0} Personas`,
+                description: 'Empleados y administradores',
+              },
+              {
+                label: 'Trabajadores Activos',
+                value: `${empleados_activos || 0} Personas`,
+                description: 'Últimos 30 días',
+              },
+              {
+                label: 'Administradores',
+                value: `${administradores || 0} Personas`,
+                description: 'Rol administrador',
+              },
+              {
+                label: 'Empleados Regulares',
+                value: `${empleados_regulares || 0} Personas`,
+                description: 'Rol empleado',
+              },
+            ].map(card => (
+              <div key={card.label} className="metric-card metric-card--employees">
+                <div className="metric-card-header">
+                  <div className="metric-card-title">{card.label}</div>
+                  <div className="metric-card-description">{card.description}</div>
+                </div>
+                <div className="metric-card-value">{card.value}</div>
               </div>
-              <div style={{ fontSize: 24, fontWeight: 600, marginTop: 8 }}>{card.value}</div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* Gráficas */}
-        <div style={{ display: 'flex', gap: 24, marginBottom: 32 }}>
-          <div
-            style={{
-              flex: 2,
-              background: '#fff',
-              borderRadius: 12,
-              padding: 24,
-              boxShadow: '0 2px 8px #0001',
-            }}
-          >
-            <div style={{ fontWeight: 600, marginBottom: 8 }}>Actividad de Empleados</div>
-            <Line
-              data={lineData}
-              options={{
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: {
-                      stepSize: 1,
+          {/* Gráficas */}
+          <div className="charts-container">
+            <div className="chart-container chart-container--large line-chart">
+              <div className="chart-title">Actividad de Trabajadores</div>
+              <div className="chart-wrapper chart-wrapper--large">
+                <Line
+                  data={lineData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false },
+                      tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#2196F3',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: false,
+                      },
                     },
-                  },
-                },
-              }}
-              height={200}
-            />
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        grid: {
+                          color: 'rgba(0, 0, 0, 0.1)',
+                        },
+                        ticks: {
+                          color: '#666',
+                          stepSize: 1,
+                        },
+                      },
+                      x: {
+                        grid: {
+                          color: 'rgba(0, 0, 0, 0.1)',
+                        },
+                        ticks: {
+                          color: '#666',
+                        },
+                      },
+                    },
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="chart-container chart-container--small doughnut-chart">
+              <div className="chart-title">Trabajadores por Rol</div>
+              <div className="chart-wrapper chart-wrapper--small">
+                <Doughnut
+                  data={doughnutData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'right',
+                        labels: {
+                          usePointStyle: true,
+                          padding: 20,
+                          font: {
+                            size: 12,
+                          },
+                        },
+                      },
+                      tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#FF9800',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                      },
+                    },
+                  }}
+                />
+              </div>
+            </div>
           </div>
 
-          <div
-            style={{
-              flex: 1,
-              background: '#fff',
-              borderRadius: 12,
-              padding: 24,
-              boxShadow: '0 2px 8px #0001',
-            }}
-          >
-            <div style={{ fontWeight: 600, marginBottom: 8 }}>Empleados por Rol</div>
-            <Doughnut
-              data={doughnutData}
-              options={{
-                plugins: {
-                  legend: { position: 'right' },
-                },
-              }}
-            />
-          </div>
-        </div>
+          {/* Lista de trabajadores */}
+          <div className="table-container">
+            <div className="table-title">Lista de Trabajadores</div>
 
-        {/* Lista de empleados */}
-        <div
-          style={{
-            background: '#fff',
-            borderRadius: 12,
-            padding: 24,
-            boxShadow: '0 2px 8px #0001',
-          }}
-        >
-          <div style={{ fontWeight: 600, marginBottom: 16 }}>Lista de Empleados</div>
-
-          {listaEmpleados && listaEmpleados.length > 0 ? (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
-                    <th style={{ padding: 12, textAlign: 'left' }}>Nombre</th>
-                    <th style={{ padding: 12, textAlign: 'left' }}>Email</th>
-                    <th style={{ padding: 12, textAlign: 'left' }}>Rol</th>
-                    <th style={{ padding: 12, textAlign: 'left' }}>Última Actividad</th>
-                    <th style={{ padding: 12, textAlign: 'left' }}>Estado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {listaEmpleados.map((empleado, index) => (
-                    <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                      <td style={{ padding: 12 }}>{empleado.nombre_usuario}</td>
-                      <td style={{ padding: 12 }}>{empleado.correo_usuario}</td>
-                      <td style={{ padding: 12 }}>
-                        <span
-                          style={{
-                            background:
-                              empleado.nombre_rol === 'Administrador' ? '#FF9800' : '#4CAF50',
-                            color: '#fff',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                          }}
-                        >
-                          {empleado.nombre_rol}
-                        </span>
-                      </td>
-                      <td style={{ padding: 12 }}>{formatDate(empleado.last_active)}</td>
-                      <td style={{ padding: 12 }}>
-                        <span
-                          style={{
-                            background: getActivityColor(empleado.estado_actividad),
-                            color: '#fff',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                          }}
-                        >
-                          {empleado.estado_actividad}
-                        </span>
-                      </td>
+            {listaEmpleados && listaEmpleados.length > 0 ? (
+              <div style={{ overflowX: 'auto' }}>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Email</th>
+                      <th>Rol</th>
+                      <th>Última Actividad</th>
+                      <th>Estado</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div
-              style={{
-                textAlign: 'center',
-                padding: 40,
-                color: '#666',
-              }}
-            >
-              No hay empleados registrados
-            </div>
-          )}
+                  </thead>
+                  <tbody>
+                    {listaEmpleados.map((empleado, index) => (
+                      <tr key={index}>
+                        <td>{empleado.nombre_usuario}</td>
+                        <td>{empleado.correo_usuario}</td>
+                        <td>
+                          <span
+                            className={`role-badge role-badge--${empleado.nombre_rol === 'Administrador' ? 'admin' : 'employee'}`}
+                          >
+                            {empleado.nombre_rol}
+                          </span>
+                        </td>
+                        <td>{formatDate(empleado.last_active)}</td>
+                        <td>
+                          <span
+                            className={`status-badge status-badge--${empleado.estado_actividad.toLowerCase().replace(' ', '-')}`}
+                            style={{ backgroundColor: getActivityColor(empleado.estado_actividad) }}
+                          >
+                            {empleado.estado_actividad}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="status-message">No hay trabajadores registrados</div>
+            )}
+          </div>
         </div>
       </main>
     </div>

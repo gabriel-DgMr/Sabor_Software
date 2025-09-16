@@ -1,0 +1,236 @@
+/* Estilos comunes para todos los dashboards */
+.dashboard-container {
+  padding: 24px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.dashboard-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Tarjetas de métricas */
+.metrics-grid {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.metric-card {
+  border-radius: 12px;
+  padding: 24px;
+  min-width: 180px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.metric-card-header {
+  margin-bottom: 8px;
+}
+
+.metric-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #fff;
+}
+
+.metric-card-description {
+  font-size: 12px;
+  opacity: 0.8;
+  color: #fff;
+}
+
+.metric-card-value {
+  font-size: 24px;
+  font-weight: 600;
+  margin-top: 8px;
+  color: #fff;
+}
+
+/* Colores específicos para cada dashboard */
+.metric-card--clients {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+}
+
+.metric-card--sales {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+}
+
+.metric-card--employees {
+  background: linear-gradient(135deg, #2196F3, #1976D2);
+}
+
+/* Contenedor de gráficas */
+.charts-container {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.chart-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  min-width: 300px;
+}
+
+.chart-container--large {
+  flex: 2;
+}
+
+.chart-container--small {
+  flex: 1;
+}
+
+.chart-title {
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 16px;
+}
+
+/* Tablas */
+.table-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 24px;
+}
+
+.table-title {
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 16px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.data-table th {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid #e0e0e0;
+  font-weight: 600;
+  color: #333;
+  background-color: #f8f9fa;
+}
+
+.data-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.data-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Estados de actividad */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.status-badge--active {
+  background-color: #4CAF50;
+}
+
+.status-badge--recent {
+  background-color: #FF9800;
+}
+
+.status-badge--inactive {
+  background-color: #FF5722;
+}
+
+.status-badge--very-inactive {
+  background-color: #9E9E9E;
+}
+
+/* Roles */
+.role-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.role-badge--admin {
+  background-color: #FF9800;
+}
+
+.role-badge--employee {
+  background-color: #4CAF50;
+}
+
+/* Mensajes de estado */
+.status-message {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px;
+  }
+  
+  .metrics-grid {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .charts-container {
+    flex-direction: column;
+  }
+  
+  .chart-container {
+    min-width: 100%;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+}

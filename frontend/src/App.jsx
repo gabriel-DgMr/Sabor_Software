@@ -93,7 +93,7 @@ function App() {
                       </RoleProtectedRoute>
                     </ProtectedRoute>
                   }
-                  path="/administrador/panel/ventas"
+                  path="/administrar/panel/ventas"
                 />
                 <Route
                   element={
@@ -108,22 +108,12 @@ function App() {
                 <Route
                   element={
                     <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador', 'Empleado']}>
-                        <DashboardVentas />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrar/panel/ventas"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
                       <RoleProtectedRoute allowedRoles={['Administrador']}>
                         <DashboardEmpleados />
                       </RoleProtectedRoute>
                     </ProtectedRoute>
                   }
-                  path="/administrar/panel/empleados"
+                  path="/administrar/panel/trabajadores"
                 />
                 <Route
                   element={

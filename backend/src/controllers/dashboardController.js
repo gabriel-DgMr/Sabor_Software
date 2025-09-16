@@ -214,7 +214,7 @@ export const dashboardController = {
 
       // Empleados activos (que han hecho login en los últimos 30 días)
       const [empleadosActivosResult] = await pool.query(
-        "SELECT COUNT(*) as empleados_activos FROM usuarios WHERE id_rol IN (2, 3) AND last_active >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)",
+        "SELECT COUNT(*) as empleados_activos FROM usuarios WHERE id_rol IN (2, 3) AND (last_active >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) OR last_active IS NULL)",
       );
       const empleados_activos =
         empleadosActivosResult[0]?.empleados_activos || 0;
@@ -252,6 +252,7 @@ export const dashboardController = {
           COUNT(*) as empleados_activos
         FROM usuarios
         WHERE id_rol IN (2, 3) 
+          AND last_active IS NOT NULL
           AND last_active >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
         GROUP BY DATE(last_active)
         ORDER BY fecha

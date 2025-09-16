@@ -20,13 +20,13 @@ const MenuLateral = () => {
   ];
 
   const opcionesPanel = [
-    { nombre: 'Ventas', ruta: '/administrador/panel/ventas' },
-    { nombre: 'Clientes', ruta: '/administrador/panel/clientes' },
-    { nombre: 'Trabajadores', ruta: '/administrador/panel/trabajadores' },
-    { nombre: 'Inventario', ruta: '/administrador/panel/inventario' },
+    { nombre: 'Ventas', ruta: '/administrar/panel/ventas' },
+    { nombre: 'Clientes', ruta: '/administrar/panel/clientes' },
+    { nombre: 'Trabajadores', ruta: '/administrar/panel/trabajadores' },
+    { nombre: 'Inventario', ruta: '/administrar/panel/inventario' },
   ];
 
-  const enPanel = location.pathname.startsWith('/administrador/panel');
+  const enPanel = location.pathname.startsWith('/administrar/panel');
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);

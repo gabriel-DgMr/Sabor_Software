@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import dashboardService from '../services/dashboardService';
 import MenuLateral from '../components/MenuLateralAdministrador';
+import PDFDownloadButton from '../components/PDFDownloadButton';
+import { usePDFGenerator } from '../hooks/usePDFGenerator';
 import '../styles/empleados.css';
+import '../styles/dashboard.css';
+import '../styles/charts.css';
 import { Line, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -30,6 +34,7 @@ const DashboardClientes = () => {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { contentRef, generatePDF } = usePDFGenerator();
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -49,14 +54,18 @@ const DashboardClientes = () => {
     fetchMetrics();
   }, []);
 
+  const handleGeneratePDF = () => {
+    generatePDF('dashboard-clientes.pdf', 'Dashboard de Clientes');
+  };
+
   if (loading) return <div>Cargando...</div>;
 
   if (error) {
     return (
       <div className="layout">
         <MenuLateral />
-        <main className="dashboard__clientes" style={{ padding: 24 }}>
-          <h1 style={{ fontSize: 28, marginBottom: 24 }}>Clientes</h1>
+        <main className="dashboard-container">
+          <h1 className="dashboard-title">Clientes</h1>
           <div
             style={{
               background: '#ffebee',
@@ -93,8 +102,8 @@ const DashboardClientes = () => {
     return (
       <div className="layout">
         <MenuLateral />
-        <main className="dashboard__clientes" style={{ padding: 24 }}>
-          <h1 style={{ fontSize: 28, marginBottom: 24 }}>Clientes</h1>
+        <main className="dashboard-container">
+          <h1 className="dashboard-title">Clientes</h1>
           <div
             style={{
               background: '#e3f2fd',
@@ -134,10 +143,17 @@ const DashboardClientes = () => {
 
   if (!metrics) return <div>Error cargando métricas</div>;
 
-  const { views, visitas, usuarios_nuevos, usuarios_activos, usuariosPorDia, pedidosPorHora } =
-    metrics;
+  const {
+    total_usuarios,
+    usuarios_nuevos,
+    usuarios_activos,
+    views,
+    visitas,
+    pedidosPorHora,
+    usuariosPorDia,
+  } = metrics;
 
-  // 📈 Gráfico de línea con formato de fecha corto
+  // Gráfico de línea - Usuarios por día
   const lineData = {
     labels:
       usuariosPorDia && usuariosPorDia.length > 0
@@ -154,59 +170,52 @@ const DashboardClientes = () => {
             ? usuariosPorDia.map(d => d.cantidad || 0)
             : [0],
         fill: true,
-        backgroundColor: 'rgba(255, 159, 64, 0.1)',
-        borderColor: '#FF9800',
+        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+        borderColor: '#4CAF50',
         tension: 0.4,
-        pointBackgroundColor: '#FF9800',
+        pointBackgroundColor: '#4CAF50',
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
-        pointRadius: 4,
+        pointRadius: 6,
+        pointHoverRadius: 8,
       },
     ],
   };
 
-  // 🍩 Gráfico de dona con pedidos por hora
+  // Gráfico de dona - Pedidos por hora
   const horas =
     pedidosPorHora && pedidosPorHora.length > 0
-      ? pedidosPorHora.map(p => {
-          // Si viene como número, convertir a "HH:00"
-          if (typeof p.hora === 'number') {
-            return `${p.hora.toString().padStart(2, '0')}:00`;
-          }
-          return p.hora || 'Sin hora'; // si ya es string o está vacío
-        })
+      ? pedidosPorHora.map(p => `${p.hora}:00`)
       : ['Sin datos'];
 
-  const pedidosPorHoras =
-    pedidosPorHora && pedidosPorHora.length > 0 ? pedidosPorHora.map(p => p.cantidad || 0) : [0];
+  const totalPedidos =
+    pedidosPorHora && pedidosPorHora.length > 0
+      ? pedidosPorHora.reduce((sum, p) => sum + p.cantidad, 0)
+      : 0;
 
-  const totalPedidos = pedidosPorHoras.reduce((a, b) => a + b, 0);
-  const porcentajes = pedidosPorHoras.map(c =>
-    totalPedidos > 0 ? ((c / totalPedidos) * 100).toFixed(1) : 0
-  );
+  const porcentajes =
+    pedidosPorHora && pedidosPorHora.length > 0
+      ? pedidosPorHora.map(p => Math.round((p.cantidad / totalPedidos) * 100))
+      : [0];
 
   const doughnutData = {
     labels: horas,
     datasets: [
       {
-        data: pedidosPorHoras,
+        data:
+          pedidosPorHora && pedidosPorHora.length > 0 ? pedidosPorHora.map(p => p.cantidad) : [0],
         backgroundColor: [
-          '#FF9800',
           '#4CAF50',
           '#2196F3',
+          '#FF9800',
           '#E91E63',
           '#9C27B0',
-          '#3F51B5',
           '#00BCD4',
           '#8BC34A',
           '#FFC107',
-          '#795548',
-          '#607D8B',
-          '#FF5722',
-          '#673AB7',
-          '#009688',
-          '#CDDC39',
         ],
+        borderWidth: 2,
+        borderColor: '#fff',
       },
     ],
   };
@@ -214,121 +223,151 @@ const DashboardClientes = () => {
   return (
     <div className="layout">
       <MenuLateral />
-      <main className="dashboard__clientes" style={{ padding: 24 }}>
-        <h1 style={{ fontSize: 28, marginBottom: 24 }}>Clientes</h1>
-
-        {/* Tarjetas métricas */}
-        <div style={{ display: 'flex', gap: 24, marginBottom: 32 }}>
-          {[
-            {
-              label: 'Usuarios Únicos',
-              value: `${views || 0} Personas`,
-              description: 'Últimos 7 días',
-            },
-            {
-              label: 'Total Visitas',
-              value: `${visitas || 0} Sesiones`,
-              description: 'Últimos 7 días',
-            },
-            {
-              label: 'Usuarios Nuevos',
-              value: `${usuarios_nuevos || 0} Personas`,
-              description: 'Hoy',
-            },
-            {
-              label: 'Usuarios Activos',
-              value: `${usuarios_activos || 0} Personas`,
-              description: 'Últimos 30 días',
-            },
-          ].map(card => (
-            <div
-              key={card.label}
-              style={{
-                background: '#FF9800',
-                color: '#fff',
-                borderRadius: 12,
-                padding: 24,
-                minWidth: 180,
-                boxShadow: '0 2px 8px #0001',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-              }}
-            >
-              <div>
-                <div style={{ fontSize: 18, marginBottom: 4 }}>{card.label}</div>
-                <div style={{ fontSize: 12, opacity: 0.8 }}>{card.description}</div>
-              </div>
-              <div style={{ fontSize: 32, fontWeight: 600, marginTop: 8 }}>{card.value}</div>
-            </div>
-          ))}
+      <main className="dashboard-container">
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">Clientes</h1>
+          <PDFDownloadButton
+            onGeneratePDF={handleGeneratePDF}
+            disabled={loading || error || !metrics}
+          />
         </div>
 
-        {/* Gráficas */}
-        <div style={{ display: 'flex', gap: 24 }}>
-          <div
-            style={{
-              flex: 2,
-              background: '#fff',
-              borderRadius: 12,
-              padding: 24,
-              boxShadow: '0 2px 8px #0001',
-            }}
-          >
-            <div style={{ fontWeight: 600, marginBottom: 8 }}>Usuarios Registrados por Día</div>
-            <Line
-              data={lineData}
-              options={{
-                responsive: true,
-                plugins: { legend: { display: false } },
-              }}
-              height={180}
-            />
+        {/* Contenido para PDF */}
+        <div ref={contentRef} className="dashboard-content">
+          {/* Tarjetas métricas */}
+          <div className="metrics-grid">
+            {[
+              {
+                label: 'Usuarios Únicos',
+                value: `${views || 0} Personas`,
+                description: 'Últimos 7 días',
+              },
+              {
+                label: 'Total Visitas',
+                value: `${visitas || 0} Sesiones`,
+                description: 'Últimos 7 días',
+              },
+              {
+                label: 'Usuarios Nuevos',
+                value: `${usuarios_nuevos || 0} Personas`,
+                description: 'Hoy',
+              },
+              {
+                label: 'Usuarios Activos',
+                value: `${usuarios_activos || 0} Personas`,
+                description: 'Últimos 30 días',
+              },
+            ].map(card => (
+              <div key={card.label} className="metric-card metric-card--clients">
+                <div className="metric-card-header">
+                  <div className="metric-card-title">{card.label}</div>
+                  <div className="metric-card-description">{card.description}</div>
+                </div>
+                <div className="metric-card-value">{card.value}</div>
+              </div>
+            ))}
           </div>
 
-          <div
-            style={{
-              flex: 1,
-              background: '#fff',
-              borderRadius: 12,
-              padding: 24,
-              boxShadow: '0 2px 8px #0001',
-            }}
-          >
-            <div style={{ fontWeight: 600, marginBottom: 8 }}>Pedidos por Hora</div>
-            <Doughnut
-              data={doughnutData}
-              options={{ plugins: { legend: { position: 'right' } } }}
-            />
-            {totalPedidos > 0 ? (
-              <ul style={{ marginTop: 16, fontSize: 14 }}>
-                {horas.map((h, i) => (
-                  <li key={h} style={{ marginBottom: 4 }}>
-                    <span
-                      style={{
-                        color: doughnutData.datasets[0].backgroundColor[i],
-                        fontWeight: 600,
-                      }}
-                    >
-                      ●
-                    </span>{' '}
-                    {h}: {porcentajes[i]}%
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div
-                style={{
-                  marginTop: 16,
-                  fontSize: 14,
-                  color: '#666',
-                  textAlign: 'center',
-                  padding: 20,
-                }}
-              >
-                No hay datos de pedidos disponibles
+          {/* Gráficas */}
+          <div className="charts-container">
+            <div className="chart-container chart-container--large line-chart">
+              <div className="chart-title">Usuarios Registrados por Día</div>
+              <div className="chart-wrapper chart-wrapper--large">
+                <Line
+                  data={lineData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false },
+                      tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#4CAF50',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: false,
+                      },
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        grid: {
+                          color: 'rgba(0, 0, 0, 0.1)',
+                        },
+                        ticks: {
+                          color: '#666',
+                        },
+                      },
+                      x: {
+                        grid: {
+                          color: 'rgba(0, 0, 0, 0.1)',
+                        },
+                        ticks: {
+                          color: '#666',
+                        },
+                      },
+                    },
+                  }}
+                />
               </div>
-            )}
+            </div>
+
+            <div className="chart-container chart-container--small doughnut-chart">
+              <div className="chart-title">Pedidos por Hora</div>
+              <div className="chart-wrapper chart-wrapper--small">
+                <Doughnut
+                  data={doughnutData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'right',
+                        labels: {
+                          usePointStyle: true,
+                          padding: 20,
+                          font: {
+                            size: 12,
+                          },
+                        },
+                      },
+                      tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#FF9800',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                      },
+                    },
+                  }}
+                />
+              </div>
+              {totalPedidos > 0 ? (
+                <div className="chart-legend">
+                  {horas.map((h, i) => (
+                    <div key={h} className="legend-item">
+                      <div
+                        className="legend-color"
+                        style={{
+                          backgroundColor: doughnutData.datasets[0].backgroundColor[i],
+                        }}
+                      ></div>
+                      <span>
+                        {h}: {porcentajes[i]}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="chart-no-data">
+                  <div className="chart-no-data-icon">📊</div>
+                  <div>No hay datos de pedidos disponibles</div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </main>
