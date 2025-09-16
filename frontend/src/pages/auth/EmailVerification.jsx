@@ -26,6 +26,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
 
     try {
       const response = await fetch('/api/auth/verify-email', {
@@ -46,10 +47,9 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
         setTimeout(() => {
           if (onVerificationSuccess) {
             onVerificationSuccess();
-          } else {
-            navigate('/');
           }
-        }, 2000);
+          onBackToLogin();
+        }, 5000);
       } else {
         setError(data.message);
         setTimeout(() => animateElements('.formulario__mensaje-error', 'fade-in'), 0);
@@ -116,7 +116,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
       </div>
 
       <form noValidate className="formulario" onSubmit={handleVerification}>
-        <div className="formulario__campo">
+        <div className="formulario__campo--codigo">
           <label className="formulario__label" htmlFor="codigo-verification">
             {t('codigo_verificacion')}
           </label>

@@ -74,6 +74,10 @@
   text-align: left;
 }
 
+.formulario__campo--codigo {
+  margin: 2rem 0;
+}
+
 .formulario__label {
   display: block;
   font-weight: 600;
