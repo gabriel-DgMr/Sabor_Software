@@ -67,4 +67,6 @@ const HistorialDomicilios = () => {
   );
 };
 
+
 export default HistorialDomicilios;
+
