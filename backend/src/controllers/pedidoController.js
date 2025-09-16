@@ -3,15 +3,17 @@ import {
   deletePedido as deletePedidoFromModel,
   createPedido as createPedidoFromModel,
   updatePedido as updatePedidoFromModel,
+  getAllPedidosForAdmin,
+  updatePedidoEstado,
 } from "../models/pedidoModel.js";
 
 // Obtener todos los pedidos
 export const getPedidos = async (req, res) => {
   try {
     let pedidos;
-    // Si es admin (no req.onlyOwn), obtener todos los pedidos
+    // Si es admin (no req.onlyOwn), obtener todos los pedidos con información completa
     if (!req.onlyOwn) {
-      pedidos = await getPedidosFromModel();
+      pedidos = await getAllPedidosForAdmin();
     } else {
       // Si es usuario normal, solo sus pedidos
       const userId = req.user.id;
@@ -349,5 +351,50 @@ export const getPedidoById = async (req, res) => {
     res
       .status(500)
       .json({ mensaje: "Error al obtener el pedido", error: error.message });
+  }
+};
+
+// Actualizar estado de un pedido (solo para administradores)
+export const updateEstadoPedido = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nuevoEstado } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ mensaje: "ID de pedido no proporcionado" });
+    }
+
+    if (!nuevoEstado || typeof nuevoEstado !== "number") {
+      return res.status(400).json({
+        mensaje: "nuevoEstado es requerido y debe ser un número",
+      });
+    }
+
+    // Validar que el estado sea válido (2=PENDIENTE, 3=COMPLETADO, 4=CANCELADO, 5=EN PREPARACION)
+    const estadosValidos = [2, 3, 4, 5];
+    if (!estadosValidos.includes(nuevoEstado)) {
+      return res.status(400).json({
+        mensaje:
+          "Estado inválido. Estados válidos: 2=PENDIENTE, 3=COMPLETADO, 4=CANCELADO, 5=EN PREPARACION",
+      });
+    }
+
+    const actualizado = await updatePedidoEstado(id, nuevoEstado);
+
+    if (!actualizado) {
+      return res.status(404).json({ mensaje: "Pedido no encontrado" });
+    }
+
+    res.json({
+      mensaje: "Estado del pedido actualizado exitosamente",
+      pedidoId: id,
+      nuevoEstado,
+    });
+  } catch (error) {
+    console.error("Error en updateEstadoPedido:", error);
+    res.status(500).json({
+      mensaje: "Error al actualizar el estado del pedido",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };

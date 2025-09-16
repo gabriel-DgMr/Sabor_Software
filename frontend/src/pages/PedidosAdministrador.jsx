@@ -1,65 +1,127 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 import MenuLateral from '../components/MenuLateralAdministrador';
+
+import {
+  obtenerPedidos,
+  actualizarEstadoPedido,
+  mapearEstado,
+  obtenerSiguienteEstado,
+  mapearEstadoAId,
+} from '../services/pedidosService';
 import '../styles/empleados.css';
 
-const ESTADOS = ['pendiente', 'en-preparacion', 'listo', 'entregado'];
+const ESTADOS = ['pendiente', 'en-preparacion', 'completado'];
 
 const estadoTexto = estado => {
-  switch (estado) {
-    case 'pendiente':
-      return 'Pendiente';
-    case 'en-preparacion':
-      return 'En preparación';
-    case 'listo':
-      return 'Listo';
-    case 'entregado':
-      return 'Entregado';
-    default:
-      return 'Desconocido';
-  }
+  return mapearEstado(estado);
 };
 
 const Pedidos = () => {
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [filtroActivo, setFiltroActivo] = useState('todos');
-  const [pedidos, setPedidos] = useState([
-    {
-      id: 'PED001',
-      cliente: 'Miguel Morales',
-      productos: 'Ceviche Mixto, Arroz con Mariscos',
-      hora: '12:35 PM',
-      mesa: 16,
-      estado: 'pendiente',
-    },
-    {
-      id: 'PED002',
-      cliente: 'Andrea Martinez',
-      productos: 'Pulpo a la Parrilla, Jugo de Maracuya',
-      hora: '12:50 PM',
-      mesa: 21,
-      estado: 'en-preparacion',
-    },
-    {
-      id: 'PED003',
-      cliente: 'Katiuska Villalobos',
-      productos: 'Arroz con Mariscos, Filete miñon con salsa de brandy',
-      hora: '1:00 PM',
-      mesa: 8,
-      estado: 'listo',
-    },
-  ]);
+  const [pedidos, setPedidos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
 
-  const cambiarEstado = index => {
-    setPedidos(prevPedidos =>
-      prevPedidos.map((pedido, i) => {
-        if (i === index) {
-          const estadoActual = pedido.estado;
-          const siguienteIndex = (ESTADOS.indexOf(estadoActual) + 1) % ESTADOS.length;
-          return { ...pedido, estado: ESTADOS[siguienteIndex] };
-        }
-        return pedido;
-      })
-    );
+  // Cargar pedidos al montar el componente
+  useEffect(() => {
+    const cargarPedidos = async () => {
+      // Solo cargar pedidos si el usuario está autenticado
+      if (!isAuthenticated || authLoading) {
+        setCargando(false);
+        return;
+      }
+
+      try {
+        setCargando(true);
+        setError(null);
+        const datosPedidos = await obtenerPedidos();
+        setPedidos(datosPedidos);
+      } catch (err) {
+        console.error('Error al cargar pedidos:', err);
+        setError('Error al cargar los pedidos. Por favor, intenta de nuevo.');
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarPedidos();
+  }, [isAuthenticated, authLoading]);
+
+  const cambiarEstado = async (pedidoId, estadoActual) => {
+    try {
+      // Mostrar estado de carga temporal
+      setPedidos(prevPedidos =>
+        prevPedidos.map(pedido => {
+          if (pedido.id === pedidoId) {
+            return { ...pedido, cambiandoEstado: true };
+          }
+          return pedido;
+        })
+      );
+
+      const siguienteEstado = obtenerSiguienteEstado(estadoActual);
+      const nuevoEstadoId = mapearEstadoAId(siguienteEstado);
+
+      console.log(
+        `Cambiando pedido ${pedidoId} de "${estadoActual}" a "${siguienteEstado}" (ID: ${nuevoEstadoId})`
+      );
+
+      const resultado = await actualizarEstadoPedido(pedidoId, nuevoEstadoId);
+      console.log('Resultado de la actualización:', resultado);
+
+      // Actualizar el estado local con el nuevo estado
+      setPedidos(prevPedidos =>
+        prevPedidos.map(pedido => {
+          if (pedido.id === pedidoId) {
+            return {
+              ...pedido,
+              estado: siguienteEstado,
+              id_estado: nuevoEstadoId,
+              cambiandoEstado: false,
+            };
+          }
+          return pedido;
+        })
+      );
+
+      // Limpiar cualquier error previo
+      setError(null);
+
+      console.log(
+        `✅ Estado del pedido ${pedidoId} actualizado exitosamente a "${siguienteEstado}"`
+      );
+    } catch (err) {
+      console.error('Error al cambiar estado:', err);
+
+      // Revertir el estado de carga
+      setPedidos(prevPedidos =>
+        prevPedidos.map(pedido => {
+          if (pedido.id === pedidoId) {
+            return { ...pedido, cambiandoEstado: false };
+          }
+          return pedido;
+        })
+      );
+
+      setError(`Error al actualizar el estado del pedido ${pedidoId}: ${err.message}`);
+    }
+  };
+
+  // Función para refrescar los pedidos
+  const refrescarPedidos = async () => {
+    if (!isAuthenticated) return;
+
+    try {
+      setError(null);
+      const datosPedidos = await obtenerPedidos();
+      setPedidos(datosPedidos);
+    } catch (err) {
+      console.error('Error al refrescar pedidos:', err);
+      setError('Error al refrescar los pedidos. Por favor, intenta de nuevo.');
+    }
   };
 
   const pedidosFiltrados =
@@ -71,42 +133,81 @@ const Pedidos = () => {
       <main className="pedidos">
         <header className="pedidos__encabezado">
           <h1 className="titulos__empleados">PEDIDOS</h1>
-          <div className="pedidos__filtros">
-            {['todos', ...ESTADOS].map(estado => (
-              <button
-                key={estado}
-                className={`pedidos__filtro ${
-                  filtroActivo === estado ? 'pedidos__filtro--activo' : ''
-                }`}
-                onClick={() => setFiltroActivo(estado)}
-              >
-                {estado === 'todos' ? 'Todos' : estadoTexto(estado)}
-              </button>
-            ))}
+          <div className="pedidos__controles">
+            <div className="pedidos__filtros">
+              {['todos', ...ESTADOS].map(estado => (
+                <button
+                  key={estado}
+                  className={`pedidos__filtro ${
+                    filtroActivo === estado ? 'pedidos__filtro--activo' : ''
+                  }`}
+                  onClick={() => setFiltroActivo(estado)}
+                >
+                  {estado === 'todos' ? 'Todos' : estadoTexto(estado)}
+                </button>
+              ))}
+            </div>
+            <button
+              className="pedidos__boton-refrescar"
+              onClick={refrescarPedidos}
+              title="Refrescar pedidos"
+            >
+              🔄 Refrescar
+            </button>
           </div>
         </header>
 
         <section className="pedidos__lista">
-          {pedidosFiltrados.length === 0 ? (
+          {authLoading ? (
+            <p className="pedidos__mensaje">Verificando autenticación...</p>
+          ) : !isAuthenticated ? (
+            <div className="pedidos__mensaje pedidos__mensaje--error">
+              <h3>🔒 Acceso Restringido</h3>
+              <p>Necesitas iniciar sesión como administrador para ver los pedidos.</p>
+              <p>Por favor, inicia sesión con una cuenta de administrador.</p>
+            </div>
+          ) : cargando ? (
+            <p className="pedidos__mensaje">Cargando pedidos...</p>
+          ) : error ? (
+            <p className="pedidos__mensaje pedidos__mensaje--error">{error}</p>
+          ) : pedidosFiltrados.length === 0 ? (
             <p className="pedidos__mensaje">No hay pedidos para mostrar.</p>
           ) : (
-            pedidosFiltrados.map((pedido, index) => (
-              <article key={index} className="pedido">
+            pedidosFiltrados.map(pedido => (
+              <article key={pedido.id} className="pedido">
                 <div className="pedido__contenido">
                   <h2 className="pedido__titulo">
-                    {pedido.id} - {pedido.cliente}
+                    PED{pedido.id} - {pedido.cliente}
                   </h2>
                   <p className="pedido__productos">{pedido.productos}</p>
                   <p className="pedido__hora">Hora: {pedido.hora}</p>
-                  <button className="pedido__boton" onClick={() => cambiarEstado(index)}>
-                    Cambiar estado
+                  <p className="pedido__total">Total: ${pedido.total?.toLocaleString()}</p>
+                  {pedido.notas && <p className="pedido__notas">Notas: {pedido.notas}</p>}
+                  {pedido.tipo_servicio === 'domicilio' && (
+                    <p className="pedido__direccion">
+                      📍 Domicilio: {pedido.direccion_entrega}
+                      {pedido.detalle_direccion && ` - ${pedido.detalle_direccion}`}
+                    </p>
+                  )}
+                  <button
+                    className={`pedido__boton ${pedido.cambiandoEstado ? 'pedido__boton--cargando' : ''}`}
+                    onClick={() => cambiarEstado(pedido.id, pedido.estado)}
+                    disabled={pedido.estado === 'completado' || pedido.cambiandoEstado}
+                  >
+                    {pedido.cambiandoEstado
+                      ? '🔄 Actualizando...'
+                      : pedido.estado === 'completado'
+                        ? '✅ Completado'
+                        : `➡️ Cambiar a ${mapearEstado(obtenerSiguienteEstado(pedido.estado))}`}
                   </button>
                 </div>
                 <div className="pedido__info">
                   <span className={`pedido__estado pedido__estado--${pedido.estado}`}>
                     {estadoTexto(pedido.estado)}
                   </span>
-                  <p className="pedido__mesa">MESA: {pedido.mesa}</p>
+                  <p className="pedido__mesa">
+                    {pedido.tipo_servicio === 'mesa' ? `MESA: ${pedido.mesa}` : 'DOMICILIO'}
+                  </p>
                 </div>
               </article>
             ))
@@ -117,4 +218,4 @@ const Pedidos = () => {
   );
 };
 
-export default Pedidos;
+export default PedidosAdministrador;

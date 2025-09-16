@@ -522,3 +522,76 @@ export const getPedidoById = async (userId, pedidoId) => {
     throw error;
   }
 };
+
+// Obtener todos los pedidos para administradores con información completa
+export const getAllPedidosForAdmin = async () => {
+  try {
+    const query = `
+      SELECT
+        p.id_pedido,
+        p.fecha_pedido,
+        p.total_pedido,
+        p.notas,
+        p.tipo_servicio,
+        p.direccion_entrega,
+        p.detalle_direccion,
+        e.nombre_estado,
+        e.id_estado,
+        u.nombre_usuario,
+        u.telefono_usuario,
+        m.id_mesa,
+        GROUP_CONCAT(CONCAT(dp.cantidad, ' x ', pr.nombre_producto) SEPARATOR ', ') AS productos_str
+      FROM pedidos p
+      JOIN estados e ON p.id_estado = e.id_estado
+      JOIN usuarios u ON p.id_usuario = u.id_usuario
+      LEFT JOIN mesas m ON p.id_mesa = m.id_mesa
+      LEFT JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
+      LEFT JOIN productos pr ON dp.id_producto = pr.id_producto
+      WHERE p.id_estado != 1
+      GROUP BY p.id_pedido
+      ORDER BY p.fecha_pedido DESC
+    `;
+
+    const [rows] = await pool.query(query);
+
+    const pedidos = rows.map((row) => ({
+      id: row.id_pedido,
+      cliente: row.nombre_usuario,
+      telefono: row.telefono_usuario,
+      productos: row.productos_str || "Sin productos",
+      hora: new Date(row.fecha_pedido).toLocaleTimeString("es-CO", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      }),
+      mesa: row.id_mesa || "N/A",
+      estado: row.nombre_estado.toLowerCase().replace(" ", "-"),
+      id_estado: row.id_estado,
+      total: row.total_pedido,
+      notas: row.notas,
+      tipo_servicio: row.tipo_servicio,
+      direccion_entrega: row.direccion_entrega,
+      detalle_direccion: row.detalle_direccion,
+      fecha_pedido: row.fecha_pedido,
+    }));
+
+    return pedidos;
+  } catch (error) {
+    console.error("Error al obtener todos los pedidos para admin:", error);
+    throw error;
+  }
+};
+
+// Actualizar estado de un pedido
+export const updatePedidoEstado = async (pedidoId, nuevoEstadoId) => {
+  try {
+    const [result] = await pool.query(
+      "UPDATE pedidos SET id_estado = ? WHERE id_pedido = ?",
+      [nuevoEstadoId, pedidoId],
+    );
+    return result.affectedRows > 0;
+  } catch (error) {
+    console.error("Error al actualizar estado de pedido:", error);
+    throw error;
+  }
+};
