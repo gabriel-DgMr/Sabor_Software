@@ -28,6 +28,9 @@ import mensajeContactoRoutes from "./src/routes/contactoRoutes.js";
 import mercadopagoRoutes from "./src/routes/mercadopagoRoutes.js";
 import webhookRoutes from "./src/routes/webhookRoutes.js";
 
+// NUEVO: Importa las rutas de domicilios
+import domicilioRoutes from "./src/routes/domicilioRoutes.js";
+
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -95,6 +98,9 @@ app.use("/api", mensajeContactoRoutes);
 app.use("/api/mercadopago", mercadopagoRoutes);
 app.use("/api/webhook", webhookRoutes);
 
+// NUEVO: Ruta para historial de domicilios
+app.use("/api/domicilios", domicilioRoutes);
+
 // Servir archivos estáticos con validaciones de seguridad
 // Ruta principal para uploads
 app.use(
@@ -158,3 +164,9 @@ app.listen(PORT, () => {
 });
 
 export default app;
+
+
+
+
+
+

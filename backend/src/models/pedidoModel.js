@@ -464,7 +464,7 @@ export const confirmarPedido = async (
       }
     }
 
-    // 🔹 Actualizar pedido con los datos extra
+    //  Actualizar pedido con los datos extra
     await connection.query(
       `UPDATE pedidos 
        SET metodo_pago = ?, tipo_servicio = ?, direccion_entrega = ?, detalle_direccion = ?, id_estado = 2 
