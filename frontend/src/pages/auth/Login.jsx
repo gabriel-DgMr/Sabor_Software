@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../../utils/animationUtils';
 import { validarLogin } from '../../utils/validaciones';
 import { GoX, GoCheck } from 'react-icons/go';
+import './AuthPage.css';
 
 const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVerification }) => {
   const { login, loading, user } = useAuth();
@@ -56,7 +57,6 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
 
     if (result && result.success) {
       // Mostrar mensaje de éxito en alertas globales
-      onShowMessage('success', t('login_exito'));
 
       // Mostrar mensaje de éxito en el propio formulario
       setSuccessMessage(t('login_exito'));
@@ -91,7 +91,7 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
           </label>
           <input
             autoComplete="email"
-            className={`formulario__input ${errors.correo_usuario ? 'input--error' : ''}`}
+            className={`formulario__input_login ${errors.correo_usuario ? 'input--error' : ''}`}
             disabled={loading}
             id="email-login"
             name="email"
@@ -109,7 +109,7 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
           </label>
           <input
             autoComplete="current-password"
-            className={`formulario__input ${errors.contraseña_usuario ? 'input--error' : ''}`}
+            className={`formulario__input_login ${errors.contraseña_usuario ? 'input--error' : ''}`}
             disabled={loading}
             id="password-login"
             name="password"

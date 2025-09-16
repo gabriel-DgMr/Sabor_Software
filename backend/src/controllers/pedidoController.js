@@ -8,10 +8,15 @@ import {
 // Obtener todos los pedidos
 export const getPedidos = async (req, res) => {
   try {
-    // Obtener el ID del cliente autenticado del objeto req
-    const userId = req.user.id; // Asumiendo que el middleware de autenticación añade el ID del cliente en req.user.userId
-
-    const pedidos = await getPedidosFromModel(userId); // Pasar el ID del cliente al modelo
+    let pedidos;
+    // Si es admin (no req.onlyOwn), obtener todos los pedidos
+    if (!req.onlyOwn) {
+      pedidos = await getPedidosFromModel();
+    } else {
+      // Si es usuario normal, solo sus pedidos
+      const userId = req.user.id;
+      pedidos = await getPedidosFromModel(userId);
+    }
     res.json(pedidos);
   } catch (error) {
     console.error("Error en getPedidos:", error);
@@ -285,7 +290,8 @@ export const vaciar = async (req, res) => {
 export const confirmar = async (req, res) => {
   try {
     const userId = req.user?.id;
-    const { metodo_pago, tipo_servicio, direccion_entrega, detalle_direccion } = req.body;
+    const { metodo_pago, tipo_servicio, direccion_entrega, detalle_direccion } =
+      req.body;
 
     // Validaciones
     if (!metodo_pago) {
@@ -298,7 +304,9 @@ export const confirmar = async (req, res) => {
       return res.status(400).json({ mensaje: "tipo_servicio inválido" });
     }
     if (tipo_servicio === "domicilio" && !direccion_entrega) {
-      return res.status(400).json({ mensaje: "direccion_entrega es requerida para domicilio" });
+      return res
+        .status(400)
+        .json({ mensaje: "direccion_entrega es requerida para domicilio" });
     }
 
     const id_pedido = await confirmarPedido(
@@ -306,7 +314,7 @@ export const confirmar = async (req, res) => {
       metodo_pago,
       tipo_servicio,
       direccion_entrega,
-      detalle_direccion
+      detalle_direccion,
     );
 
     res.json({ mensaje: "Pedido confirmado", id_pedido });
@@ -322,7 +330,6 @@ export const confirmar = async (req, res) => {
       .json({ mensaje: "Error al confirmar pedido", error: error.message });
   }
 };
-
 
 // Obtener un pedido por ID
 export const getPedidoById = async (req, res) => {

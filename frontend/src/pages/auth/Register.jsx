@@ -156,7 +156,7 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
           </label>
           <input
             autoComplete="name"
-            className={`formulario__input ${errors.nombre_usuario ? 'input--error' : ''}`}
+            className={`formulario__input_login ${errors.nombre_usuario ? 'input--error' : ''}`}
             disabled={loading}
             id="nombre-register"
             name="nombre"
@@ -174,7 +174,7 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
           </label>
           <input
             autoComplete="email"
-            className={`formulario__input ${errors.correo_usuario ? 'input--error' : ''}`}
+            className={`formulario__input_login ${errors.correo_usuario ? 'input--error' : ''}`}
             disabled={loading}
             id="email-register"
             name="email"
@@ -192,7 +192,7 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
           </label>
           <input
             autoComplete="tel"
-            className={`formulario__input ${errors.telefono_usuario ? 'input--error' : ''}`}
+            className={`formulario__input_login ${errors.telefono_usuario ? 'input--error' : ''}`}
             disabled={loading}
             id="telefono-register"
             name="telefono"
@@ -210,7 +210,7 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
           </label>
           <input
             autoComplete="new-password"
-            className={`formulario__input ${errors.contraseña_usuario ? 'input--error' : ''}`}
+            className={`formulario__input_login ${errors.contraseña_usuario ? 'input--error' : ''}`}
             disabled={loading}
             id="password-register"
             name="password"
@@ -228,7 +228,7 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
           </label>
           <input
             autoComplete="new-password"
-            className={`formulario__input ${errors.confirmPassword ? 'input--error' : ''}`}
+            className={`formulario__input_login ${errors.confirmPassword ? 'input--error' : ''}`}
             disabled={loading}
             id="confirmPassword-register"
             name="confirmPassword"

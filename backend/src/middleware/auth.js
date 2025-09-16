@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 
+// Middleware para autenticar token
 export const authenticateToken = (req, res, next) => {
   try {
     const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
@@ -10,16 +11,15 @@ export const authenticateToken = (req, res, next) => {
       });
     }
 
-    // Verificar que el token tenga el formato correcto
     if (typeof token !== "string" || token.length < 10) {
       return res.status(401).json({
         message: "No autorizado - Formato de token inválido",
         code: "TOKEN_INVALID_FORMAT",
       });
     }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret_key");
 
-    // Validar que el token contenga la información necesaria
     if (!decoded.id || !decoded.email || !decoded.rol) {
       return res.status(401).json({
         message: "No autorizado - Token malformado",
@@ -27,7 +27,6 @@ export const authenticateToken = (req, res, next) => {
       });
     }
 
-    // Verificar que el token no haya expirado (verificación adicional)
     const currentTime = Math.floor(Date.now() / 1000);
     if (decoded.exp && decoded.exp < currentTime) {
       return res.status(401).json({
@@ -36,12 +35,28 @@ export const authenticateToken = (req, res, next) => {
       });
     }
 
-    // Agregar la información del cliente al request
+    // Definir permisos por rol
+    const rolePermissions = {
+      Administrador: [
+        "read",
+        "write",
+        "delete",
+        "manage_users",
+        "manage_products",
+        "manage_orders",
+        "manage_reservations",
+        "view_dashboard",
+        "manage_inventory",
+      ],
+      Empleado: ["read", "write", "manage_orders", "manage_reservations"],
+      Usuario: ["read", "write_own", "manage_users_own", "read_own"],
+    };
     req.user = {
       id: decoded.id,
       email: decoded.email,
       rol: decoded.rol,
       nombre: decoded.nombre || null,
+      permisos: rolePermissions[decoded.rol] || [],
     };
 
     next();
@@ -67,7 +82,7 @@ export const authenticateToken = (req, res, next) => {
   }
 };
 
-// Middleware para verificar roles
+// Middleware para verificar roles completos
 export const checkRole = (roles) => {
   return (req, res, next) => {
     if (!req.user) {
@@ -113,7 +128,6 @@ export const checkOwnership = (resourceIdField = "id") => {
       });
     }
 
-    // Permitir acceso si es Administrador o si es el propietario del recurso
     if (
       req.user.rol === "Administrador" ||
       req.user.id.toString() === resourceId.toString()
@@ -122,14 +136,14 @@ export const checkOwnership = (resourceIdField = "id") => {
     }
 
     return res.status(403).json({
-      message: "No autorizado - No tienes permisos para acceder a este recurso",
+      message: "No autorizado - No tienes permisos para este recurso",
       code: "RESOURCE_ACCESS_DENIED",
     });
   };
 };
 
 // Middleware para verificar permisos específicos
-export const checkPermission = (permission) => {
+export const checkPermission = (permission, resourceIdField = "id") => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
@@ -138,7 +152,7 @@ export const checkPermission = (permission) => {
       });
     }
 
-    // Definir permisos por rol (usando nombres de la BD)
+    // Definir permisos por rol
     const rolePermissions = {
       Administrador: [
         "read",
@@ -152,21 +166,37 @@ export const checkPermission = (permission) => {
         "manage_inventory",
       ],
       Empleado: ["read", "write", "manage_orders", "manage_reservations"],
-      Usuario: ["read", "write_own"],
+      Usuario: ["read", "write_own", "manage_users_own"],
     };
 
     const userPermissions = rolePermissions[req.user.rol] || [];
 
-    if (!userPermissions.includes(permission)) {
-      return res.status(403).json({
-        message: "No autorizado - Permiso insuficiente",
-        code: "INSUFFICIENT_PERMISSIONS",
-        requiredPermission: permission,
-        userPermissions: userPermissions,
-      });
+    // Caso especial: manage_users_own
+    if (permission === "manage_users_own") {
+      const resourceId =
+        req.params[resourceIdField] || req.body[resourceIdField];
+
+      if (
+        userPermissions.includes("manage_users_own") &&
+        resourceId &&
+        req.user.id &&
+        req.user.id.toString() === resourceId.toString()
+      ) {
+        return next();
+      }
+    } else {
+      // Para permisos normales
+      if (userPermissions.includes(permission)) {
+        return next();
+      }
     }
 
-    next();
+    return res.status(403).json({
+      message: "No autorizado - Permiso insuficiente",
+      code: "INSUFFICIENT_PERMISSIONS",
+      requiredPermission: permission,
+      userPermissions: userPermissions,
+    });
   };
 };
 
@@ -178,9 +208,6 @@ export const checkUserActive = (req, res, next) => {
       code: "USER_NOT_AUTHENTICATED",
     });
   }
-
-  // Aquí podrías verificar en la base de datos si el cliente está activo
-  // Por ahora, asumimos que si tiene token válido está activo
   next();
 };
 
@@ -225,11 +252,27 @@ export const authenticateTokenOptional = (req, res, next) => {
       req.user = null;
       return next();
     }
+    const rolePermissions = {
+      Administrador: [
+        "read",
+        "write",
+        "delete",
+        "manage_users",
+        "manage_products",
+        "manage_orders",
+        "manage_reservations",
+        "view_dashboard",
+        "manage_inventory",
+      ],
+      Empleado: ["read", "write", "manage_orders", "manage_reservations"],
+      Usuario: ["read", "write_own", "manage_users_own", "read_own"],
+    };
     req.user = {
       id: decoded.id,
       email: decoded.email,
       rol: decoded.rol,
       nombre: decoded.nombre || null,
+      permisos: rolePermissions[decoded.rol] || [],
     };
     next();
   } catch (error) {

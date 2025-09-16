@@ -51,7 +51,14 @@ router.get(
 router.put(
   "/actualizarusuario/:id",
   authenticateToken,
-  checkPermission("manage_users"),
+  (req, res, next) => {
+    if (req.user.rol === "Administrador") {
+      // Admin puede actualizar a cualquiera
+      return checkPermission("manage_users")(req, res, next);
+    }
+    // Usuario solo puede actualizarse a sí mismo
+    return checkPermission("manage_users_own")(req, res, next);
+  },
   upload.single("imagen_usuario"),
   validateUpdateusuario,
   usuarioController.updateusuario,

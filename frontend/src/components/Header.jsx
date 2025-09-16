@@ -229,7 +229,16 @@ const Header = () => {
                 <p className="encabezado__nombre-cliente">
                   {user?.nombre_usuario || user?.correo_usuario}
                 </p>
-                <FaUserCircle className="encabezado__icono-cliente" size={32} />
+                {user?.imagen_usuario ? (
+                  <img
+                    src={`http://localhost:3000/uploads/${user.imagen_usuario}`}
+                    alt="Foto de perfil"
+                    className="encabezado__icono-cliente encabezado__icono-cliente--foto"
+                    style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <FaUserCircle className="encabezado__icono-cliente" size={32} />
+                )}
                 {showMenu && (
                   <div className="menu-perfil">
                     <Link className="menu-perfil__opcion" to="/historial-pedidos">
@@ -253,7 +262,16 @@ const Header = () => {
             ) : (
               <div className="encabezado__cliente" onClick={() => setShowLogin(true)}>
                 <p className="encabezado__nombre-cliente">{t('iniciar_sesion')}</p>
-                <FaUserCircle className="encabezado__icono-cliente" size={32} />
+                {user?.imagen_usuario ? (
+                  <img
+                    src={`http://localhost:3000/uploads/${user.imagen_usuario}`}
+                    alt="Foto de perfil"
+                    className="encabezado__icono-cliente encabezado__icono-cliente--foto"
+                    style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <FaUserCircle className="encabezado__icono-cliente" size={32} />
+                )}
               </div>
             )}
           </div>

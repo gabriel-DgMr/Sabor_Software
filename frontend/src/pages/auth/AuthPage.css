@@ -82,38 +82,17 @@
   font-size: 1.1rem;
 }
 
-.formulario__input {
-  padding: 1.4rem 1.6rem;
-  border: 2px solid var(--neutral-300);
-  border-radius: 1.2rem;
-  font-size: 1.7rem;
+.formulario__input_login {
+  height: 35px;
   width: 100%;
-  background: #fafafa;
-  transition: all 0.25s ease;
-  outline: none;
+  padding: 1.4rem;
+  border-radius: 0.8rem;
+  font-size: 1.6rem;
+  background-color: var(--neutral-100);
+  border: solid var(--primary-600);
 }
 
-.formulario__input:hover {
-  border-color: var(--primary-400);
-  background: #fff;
-}
 
-.formulario__input:focus,
-.formulario__input:focus-visible {
-  border-color: var(--primary-600);
-  background: #fff;
-  box-shadow: 0 0 0 4px rgba(255, 140, 0, 0.25);
-  transform: scale(1.03);
-}
-
-.formulario__input::placeholder {
-  color: #aaa;
-  transition: color 0.25s ease;
-}
-
-.formulario__input:focus::placeholder {
-  color: var(--primary-400);
-}
 
 .input--error {
   border-color: var(--error-400);

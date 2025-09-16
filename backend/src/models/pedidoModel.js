@@ -18,8 +18,7 @@ const pool = mysql.createPool(dbConfig);
 
 export const getPedidos = async (userId) => {
   try {
-    const [rows] = await pool.query(
-      `
+    let query = `
       SELECT
         p.id_pedido AS _id,
         p.total_pedido AS total,
@@ -31,13 +30,14 @@ export const getPedidos = async (userId) => {
       JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
       JOIN productos pr ON dp.id_producto = pr.id_producto
       JOIN estados e ON p.id_estado = e.id_estado
-      WHERE p.id_usuario = ? AND p.id_estado != 1
-      GROUP BY p.id_pedido
-      ORDER BY p.fecha_pedido DESC
-    `,
-      [userId],
-    );
-
+      WHERE p.id_estado != 1`;
+    const params = [];
+    if (userId) {
+      query += " AND p.id_usuario = ?";
+      params.push(userId);
+    }
+    query += ` GROUP BY p.id_pedido ORDER BY p.fecha_pedido DESC`;
+    const [rows] = await pool.query(query, params);
     const pedidos = rows.map((row) => ({
       _id: row._id,
       total: row.total,
@@ -46,7 +46,6 @@ export const getPedidos = async (userId) => {
       recomendaciones: row.notas,
       items: row.items_str ? row.items_str.split(", ") : [],
     }));
-
     return pedidos;
   } catch (error) {
     console.error("Error al obtener pedidos de MySQL:", error);
@@ -431,7 +430,7 @@ export const confirmarPedido = async (
   metodo_pago,
   tipo_servicio,
   direccion_entrega = null,
-  detalle_direccion = null
+  detalle_direccion = null,
 ) => {
   let connection;
   try {
@@ -470,7 +469,13 @@ export const confirmarPedido = async (
       `UPDATE pedidos 
        SET metodo_pago = ?, tipo_servicio = ?, direccion_entrega = ?, detalle_direccion = ?, id_estado = 2 
        WHERE id_pedido = ?`,
-      [metodo_pago, tipo_servicio, direccion_entrega, detalle_direccion, id_pedido]
+      [
+        metodo_pago,
+        tipo_servicio,
+        direccion_entrega,
+        detalle_direccion,
+        id_pedido,
+      ],
     );
 
     await connection.commit();

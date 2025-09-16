@@ -15,7 +15,7 @@ import Login from './pages/auth/Login.jsx';
 import Register from './pages/auth/Register.jsx';
 import ResetPasswordContainer from './pages/auth/ResetPasswordContainer.jsx';
 import Carrito from './pages/carrito.jsx';
-import Checkout from './pages/Checkout.jsx';
+// import Checkout from './pages/Checkout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import DashboardVentas from './pages/DashboardVentas.jsx';
 import HomeAdministrador from './pages/HomeAdministrador.jsx';
@@ -79,7 +79,7 @@ function App() {
                 <Route element={<RoleBasedRedirect />} path="/redirect" />
                 <Route element={<Reservas />} path="/reservas" />
                 <Route element={<Carrito />} path="/carrito" />
-                <Route element={<Checkout />} path="/checkout" />
+                {/* <Route element={<Checkout />} path="/checkout" /> */}
                 <Route element={<ModificarPedido />} path="/carrito/modificar/:id" />
                 <Route element={<QuienesSomos />} path="/quienes-somos" />
                 <Route element={<SobreNosotros />} path="/sobre-nosotros" />

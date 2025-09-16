@@ -32,10 +32,29 @@ router.post("/carrito/confirmar", authenticateToken, confirmar);
 // Rutas protegidas con validaciones
 router.post("/", authenticateToken, validatePedido, createPedido);
 
+// Permitir a admin ver todos los pedidos y a usuarios ver los suyos propios
 router.get(
   "/",
   authenticateToken,
-  checkPermission("manage_orders"),
+  (req, res, next) => {
+    // Si el usuario tiene 'manage_orders', permitir
+    // Si tiene 'read_own', permitir pero solo sus pedidos
+    const userPermissions = req.user?.permisos || req.user?.permissions || [];
+    if (userPermissions.includes("manage_orders")) {
+      return next();
+    }
+    if (userPermissions.includes("read_own")) {
+      // Forzar filtro por usuario en el controlador
+      req.onlyOwn = true;
+      return next();
+    }
+    return res.status(403).json({
+      message: "No autorizado - Permiso insuficiente",
+      code: "INSUFFICIENT_PERMISSIONS",
+      requiredPermission: "manage_orders|read_own",
+      userPermissions,
+    });
+  },
   getPedidos,
 );
 

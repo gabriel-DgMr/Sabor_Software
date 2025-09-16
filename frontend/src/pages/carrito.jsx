@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import '../index.css';
@@ -27,6 +28,7 @@ const CarritoAlert = ({ message }) => {
 };
 
 export default function Carrito() {
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -56,7 +58,41 @@ export default function Carrito() {
     if (recomendacionesGuardadas) {
       setRecomendaciones(recomendacionesGuardadas);
     }
-  }, []);
+
+    // Lógica para mostrar estado de pago después de volver de MercadoPago
+    const params = new URLSearchParams(location.search);
+    const status = params.get('status');
+    if (status) {
+      let message = '';
+      let icon = null;
+      switch (status) {
+        case 'success':
+          message = '¡Pago realizado con éxito! Tu pedido ha sido recibido.';
+          icon = <GoCheck className="GoCheck" style={{ fontSize: '2.5rem' }} />;
+          break;
+        case 'failure':
+          message = 'El pago fue rechazado o cancelado. Intenta nuevamente.';
+          icon = <GoX className="GoX" style={{ fontSize: '2.5rem' }} />;
+          break;
+        case 'pending':
+          message = 'El pago está pendiente de confirmación. Te avisaremos cuando se procese.';
+          icon = <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />;
+          break;
+        default:
+          message = 'No se pudo determinar el estado del pago.';
+          icon = <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />;
+      }
+      setModal({
+        open: true,
+        message,
+        icon,
+        onConfirm: () => {
+          setModal(m => ({ ...m, open: false }));
+          window.history.replaceState({}, document.title, location.pathname); // Limpia la URL
+        },
+      });
+    }
+  }, [location]);
 
   const procesarPago = async () => {
     if (cartItems.length === 0) {
