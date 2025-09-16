@@ -67,6 +67,7 @@ CREATE TABLE usuarios (
   imagen_usuario varchar(255),
   fecha_registro timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   fecha_modificacion timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  last_active timestamp NULL DEFAULT NULL,
   activo boolean NOT NULL DEFAULT TRUE,
   email_verificado boolean NOT NULL DEFAULT FALSE,
   PRIMARY KEY (id_usuario),
