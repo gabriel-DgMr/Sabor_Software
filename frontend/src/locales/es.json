@@ -130,6 +130,7 @@
   "quienes_valor_2": "Compromiso con la calidad",
   "quienes_valor_3": "Respeto y trabajo en equipo",
   "sobre_titulo": "Sobre Nosotros",
+  "sobre_subtitulo": "Descubre nuestra pasión por la gastronomía colombiana",
   "sobre_historia_titulo": "Nuestra Historia",
   "sobre_historia": "Fundado en 2023, Sabor nació del sueño de compartir la pasión por la buena comida y el servicio excepcional. Desde entonces, hemos puesto manos en obra a realizar este proyecto.",
   "sobre_equipo_titulo": "Nuestro Equipo",
@@ -217,5 +218,6 @@
   "calificacion": "Calificación",
   "mas_vendidos": "Más vendidos",
   "aplicando_filtros": "Aplicando filtros...",
-  "no_encontrado": "No hemos encontrado ese producto."
+  "no_encontrado": "No hemos encontrado ese producto.",
+  "categorias_todas": "Todas las categorías"
 }

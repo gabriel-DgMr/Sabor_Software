@@ -152,7 +152,7 @@ const ProductoCard = React.memo(({ producto }) => {
                   <img
                     alt={producto.nombre_producto}
                     className="dialogo-agregar-producto__imagen"
-                    src={`http://localhost:3000/${producto.imagen_producto}`}
+                    src={`http://localhost:3000${producto.imagen_producto}`}
                   />
                   <div className="dialogo-agregar-producto__info">
                     <h3 className="dialogo-agregar-producto__nombre">{producto.nombre_producto}</h3>
