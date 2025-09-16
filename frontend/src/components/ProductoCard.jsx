@@ -50,7 +50,7 @@ const ProductoCard = React.memo(({ producto }) => {
         imagen: producto.imagen_producto,
         imagen_producto: producto.imagen_producto,
         cantidad: Number(cantidad),
-        peticion: peticion.trim()
+        peticion: peticion.trim(),
       });
       setMensajeExito(t('producto_agregado', { nombre: producto.nombre_producto }));
       setExitoOpen(true);
@@ -78,7 +78,7 @@ const ProductoCard = React.memo(({ producto }) => {
         <img
           alt={producto.nombre_producto}
           className="productos__imagen"
-          src={`http://localhost:3000/uploads/productos/${producto.imagen_producto}`}
+          src={`http://localhost:3000${producto.imagen_producto}`}
         />
         <div className="productos__info">
           <h4 className="productos__nombre">{producto.nombre_producto}</h4>
@@ -89,20 +89,31 @@ const ProductoCard = React.memo(({ producto }) => {
               const calificacion = Number(producto.calificacion) || 0;
               for (let i = 1; i <= 5; i++) {
                 if (calificacion >= i) {
-                  estrellas.push(<FaStar key={i} className="productos__estrella productos__estrella--llena" />);
+                  estrellas.push(
+                    <FaStar key={i} className="productos__estrella productos__estrella--llena" />
+                  );
                 } else if (calificacion >= i - 0.5) {
-                  estrellas.push(<FaStarHalfAlt key={i} className="productos__estrella productos__estrella--media" />);
+                  estrellas.push(
+                    <FaStarHalfAlt
+                      key={i}
+                      className="productos__estrella productos__estrella--media"
+                    />
+                  );
                 } else {
-                  estrellas.push(<FaRegStar key={i} className="productos__estrella productos__estrella--vacia" />);
+                  estrellas.push(
+                    <FaRegStar key={i} className="productos__estrella productos__estrella--vacia" />
+                  );
                 }
               }
               return estrellas;
             })()}
-            <span className="productos__calificacion-num">{!isNaN(Number(producto.calificacion)) ? Number(producto.calificacion).toFixed(1) : '0.0'}</span>
+            <span className="productos__calificacion-num">
+              {!isNaN(Number(producto.calificacion))
+                ? Number(producto.calificacion).toFixed(1)
+                : '0.0'}
+            </span>
           </div>
-          <p
-            className={`productos__descripcion${productoExpandido ? ' expandida' : ''}`}
-          >
+          <p className={`productos__descripcion${productoExpandido ? ' expandida' : ''}`}>
             {producto.descripcion_producto}
           </p>
           <div className="productos__footer">
@@ -113,7 +124,7 @@ const ProductoCard = React.memo(({ producto }) => {
           </div>
         </div>
       </div>
-      
+
       {/* Diálogo de éxito */}
       <MensajeExito
         duration={2000}
@@ -132,65 +143,68 @@ const ProductoCard = React.memo(({ producto }) => {
         icon={<GoX className="GoX" style={{ fontSize: '2.5rem' }} />}
       />
 
-      {dialogoAgregar && ReactDOM.createPortal(
-        <div className="dialogo-agregar-producto__overlay">
-          <div className="dialogo-agregar-producto">
-            <div className="dialogo-agregar-producto__contenido">
-              <div className="dialogo-agregar-producto__izquierda">
-                <img
-                  alt={producto.nombre_producto}
-                  className="dialogo-agregar-producto__imagen"
-                  src={`http://localhost:3000/uploads/productos/${producto.imagen_producto}`}
-                />
-                <div className="dialogo-agregar-producto__info">
-                  <h3 className="dialogo-agregar-producto__nombre">{producto.nombre_producto}</h3>
-                  <p className="dialogo-agregar-producto__precio">{FormatPriceCOP(producto.precio_producto)}</p>
+      {dialogoAgregar &&
+        ReactDOM.createPortal(
+          <div className="dialogo-agregar-producto__overlay">
+            <div className="dialogo-agregar-producto">
+              <div className="dialogo-agregar-producto__contenido">
+                <div className="dialogo-agregar-producto__izquierda">
+                  <img
+                    alt={producto.nombre_producto}
+                    className="dialogo-agregar-producto__imagen"
+                    src={`http://localhost:3000/${producto.imagen_producto}`}
+                  />
+                  <div className="dialogo-agregar-producto__info">
+                    <h3 className="dialogo-agregar-producto__nombre">{producto.nombre_producto}</h3>
+                    <p className="dialogo-agregar-producto__precio">
+                      {FormatPriceCOP(producto.precio_producto)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="dialogo-agregar-producto__derecha">
-                <label className="dialogo-agregar-producto__label">
-                  Unidades:
-                  <input
-                    className="dialogo-agregar-producto__input"
-                    min="1"
-                    type="number"
-                    value={cantidad}
-                    onChange={e => setCantidad(e.target.value.replace(/[^0-9]/g, ''))}
-                    disabled={loading}
-                  />
-                </label>
-                <label className="dialogo-agregar-producto__label">
-                  Petición especial:
-                  <textarea
-                    className="dialogo-agregar-producto__textarea"
-                    placeholder="¿Alguna petición especial para este producto?"
-                    value={peticion}
-                    onChange={e => setPeticion(e.target.value)}
-                    disabled={loading}
-                  />
-                </label>
-                <div className="dialogo-agregar-producto__acciones">
-                  <button 
-                    className="dialogo-agregar-producto__boton dialogo-agregar-producto__boton--confirmar" 
-                    onClick={handleConfirmarAgregar}
-                    disabled={loading}
-                  >
-                    {loading ? 'Agregando...' : 'Agregar'}
-                  </button>
-                  <button 
-                    className="dialogo-agregar-producto__boton dialogo-agregar-producto__boton--cancelar" 
-                    onClick={handleCancelarAgregar}
-                    disabled={loading}
-                  >
-                    Cancelar
-                  </button>
+                <div className="dialogo-agregar-producto__derecha">
+                  <label className="dialogo-agregar-producto__label">
+                    Unidades:
+                    <input
+                      className="dialogo-agregar-producto__input"
+                      min="1"
+                      type="number"
+                      value={cantidad}
+                      onChange={e => setCantidad(e.target.value.replace(/[^0-9]/g, ''))}
+                      disabled={loading}
+                    />
+                  </label>
+                  <label className="dialogo-agregar-producto__label">
+                    Petición especial:
+                    <textarea
+                      className="dialogo-agregar-producto__textarea"
+                      placeholder="¿Alguna petición especial para este producto?"
+                      value={peticion}
+                      onChange={e => setPeticion(e.target.value)}
+                      disabled={loading}
+                    />
+                  </label>
+                  <div className="dialogo-agregar-producto__acciones">
+                    <button
+                      className="dialogo-agregar-producto__boton dialogo-agregar-producto__boton--confirmar"
+                      onClick={handleConfirmarAgregar}
+                      disabled={loading}
+                    >
+                      {loading ? 'Agregando...' : 'Agregar'}
+                    </button>
+                    <button
+                      className="dialogo-agregar-producto__boton dialogo-agregar-producto__boton--cancelar"
+                      onClick={handleCancelarAgregar}
+                      disabled={loading}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>,
-        document.body
-      )}
+          </div>,
+          document.body
+        )}
     </>
   );
 });
@@ -207,4 +221,4 @@ ProductoCard.propTypes = {
   }).isRequired,
 };
 
-export default ProductoCard; 
+export default ProductoCard;

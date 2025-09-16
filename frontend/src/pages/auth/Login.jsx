@@ -157,10 +157,10 @@ const Login = ({ onShowMessage, onLoginSuccess, onShowForgotPassword, onShowVeri
 };
 
 Login.propTypes = {
-  onShowMessage: PropTypes.func.isRequired,
-  onLoginSuccess: PropTypes.func.isRequired,
-  onShowForgotPassword: PropTypes.func.isRequired,
-  onShowVerification: PropTypes.func.isRequired,
+  onShowMessage: PropTypes.func,
+  onLoginSuccess: PropTypes.func,
+  onShowForgotPassword: PropTypes.func,
+  onShowVerification: PropTypes.func,
 };
 
 const LoginAlert = ({ message, id, type }) => {

@@ -253,8 +253,8 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
 };
 
 Register.propTypes = {
-  onShowMessage: PropTypes.func.isRequired,
-  onRegisterSuccess: PropTypes.func.isRequired,
+  onShowMessage: PropTypes.func,
+  onRegisterSuccess: PropTypes.func,
 };
 
 export default Register;

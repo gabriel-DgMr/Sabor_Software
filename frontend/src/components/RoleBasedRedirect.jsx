@@ -47,7 +47,7 @@ const RoleBasedRedirect = ({ children }) => {
 };
 
 RoleBasedRedirect.propTypes = {
-  children: PropTypes.node.isRequired,
+  children: PropTypes.node,
 };
 
 export default RoleBasedRedirect;

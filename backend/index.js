@@ -99,7 +99,7 @@ app.use("/api/webhook", webhookRoutes);
 // Ruta principal para uploads
 app.use(
   "/uploads",
-  express.static(path.join(__dirname, "uploads"), {
+  express.static(path.join(__dirname, "public/uploads"), {
     setHeaders: (res, filePath) => {
       // Headers de CORS para imágenes
       res.setHeader("Access-Control-Allow-Origin", "*");
