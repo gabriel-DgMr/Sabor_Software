@@ -27,8 +27,7 @@ import helmet from "helmet";
 import mensajeContactoRoutes from "./src/routes/contactoRoutes.js";
 import mercadopagoRoutes from "./src/routes/mercadopagoRoutes.js";
 import webhookRoutes from "./src/routes/webhookRoutes.js";
-
-// NUEVO: Importa las rutas de domicilios
+import dashboardRoutes from "./src/routes/dashboardRoutes.js";
 import domicilioRoutes from "./src/routes/domicilioRoutes.js";
 
 const app = express();
@@ -36,7 +35,9 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Configuración de seguridad con Helmet (modificada para permitir imágenes)
+// ============================
+// Seguridad con Helmet
+// ============================
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -53,42 +54,39 @@ app.use(
   }),
 );
 
-// Configuración de CORS más permisiva para desarrollo
+// ============================
+// Configuración CORS
+// ============================
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:3000"],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     maxAge: 86400, // 24 horas
   }),
 );
 
-// Rate limiting general
+// ============================
+// Middlewares globales
+// ============================
 app.use(createRateLimiter());
-
-// Middlewares básicos
-app.use(express.json({ limit: "10mb" })); // Limitar tamaño de JSON
+app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser(config.cookie.secret));
-
-// Sanitización de datos de entrada
 app.use(sanitizeInput);
-
-// Prevención de inyección SQL básica
 app.use(preventSQLInjection);
 
-// Middleware para prevenir ataques de enumeración de clientes (aplicado a todas las rutas de auth)
+// Delay random para prevenir timing attacks en auth
 app.use("/api/auth", (req, res, next) => {
-  // Agregar delay aleatorio para prevenir timing attacks
   const delay = Math.random() * 100 + 50; // 50-150ms
   setTimeout(next, delay);
 });
 
-// Rutas con rate limiting específico
+// ============================
+// Rutas API
+// ============================
 app.use("/api/auth", authRateLimiter, authRoutes);
-
-// Rutas de productos con validaciones adicionales
 app.use("/api/productos", productoRoutes);
 app.use("/api/categorias", categoriaRoutes);
 app.use("/api/reservas", reservaRoutes);
@@ -97,22 +95,20 @@ app.use("/api/horarios", horarioRoutes);
 app.use("/api", mensajeContactoRoutes);
 app.use("/api/mercadopago", mercadopagoRoutes);
 app.use("/api/webhook", webhookRoutes);
-
-// NUEVO: Ruta para historial de domicilios
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/domicilios", domicilioRoutes);
 
-// Servir archivos estáticos con validaciones de seguridad
-// Ruta principal para uploads
+// ============================
+// Archivos estáticos seguros
+// ============================
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "public/uploads"), {
     setHeaders: (res, filePath) => {
-      // Headers de CORS para imágenes
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Methods", "GET");
       res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-      // Prevenir ejecución de archivos
       if (
         filePath.endsWith(".js") ||
         filePath.endsWith(".php") ||
@@ -121,10 +117,8 @@ app.use(
         res.setHeader("Content-Type", "text/plain");
       }
 
-      // Headers de seguridad para archivos estáticos
       res.setHeader("X-Content-Type-Options", "nosniff");
 
-      // Permitir acceso a imágenes
       if (filePath.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
         res.setHeader("Cache-Control", "public, max-age=31536000"); // 1 año
         res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
@@ -150,11 +144,15 @@ app.use(
   }),
 );
 
+// ============================
 // Middlewares de error
+// ============================
 app.use(notFoundHandler);
 app.use(errorHandler);
 
+// ============================
 // Iniciar servidor
+// ============================
 const PORT = config.server.port;
 app.listen(PORT, () => {
   console.log(
