@@ -34,7 +34,7 @@ const EmpleadosHome = () => {
               <li className="acciones-principales__item">
                 <button
                   className="acciones-principales__boton"
-                  onClick={() => navigate('/administrar/productos')}
+                  onClick={() => navigate('/administrador/productos')}
                 >
                   Administrar Productos
                 </button>
@@ -42,7 +42,7 @@ const EmpleadosHome = () => {
               <li className="acciones-principales__item">
                 <button
                   className="acciones-principales__boton"
-                  onClick={() => navigate('/administrar/pedidos')}
+                  onClick={() => navigate('/administrador/pedidos')}
                 >
                   Administrar Pedidos
                 </button>
@@ -50,7 +50,7 @@ const EmpleadosHome = () => {
               <li className="acciones-principales__item">
                 <button
                   className="acciones-principales__boton"
-                  onClick={() => navigate('/administrar/domicilios')}
+                  onClick={() => navigate('/administrador/domicilios')}
                 >
                   Administrar Domicilios
                 </button>
@@ -58,7 +58,7 @@ const EmpleadosHome = () => {
               <li className="acciones-principales__item">
                 <button
                   className="acciones-principales__boton"
-                  onClick={() => navigate('/administrar/panel')}
+                  onClick={() => navigate('/administrador/panel')}
                 >
                   Ver reportes
                 </button>

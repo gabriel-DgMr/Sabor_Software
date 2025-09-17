@@ -1,4 +1,5 @@
 export function FormatPriceCOP(precio) {
-  if (typeof precio !== "number") return "";
-  return precio.toLocaleString('es-CO');
+  const num = typeof precio === 'number' ? precio : Number(precio);
+  if (isNaN(num)) return '';
+  return num.toLocaleString('es-CO');
 }

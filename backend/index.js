@@ -59,7 +59,7 @@ app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:3000"],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     maxAge: 86400, // 24 horas
   }),
@@ -102,6 +102,7 @@ app.use("/api/dashboard", dashboardRoutes);
 
 // NUEVO: Ruta para historial de domicilios
 app.use("/api/domicilios", domicilioRoutes);
+
 
 // Servir archivos estáticos con validaciones de seguridad
 // Ruta principal para uploads
