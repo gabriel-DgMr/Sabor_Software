@@ -88,12 +88,56 @@ const DashboardClientes = () => {
     );
   }
 
+  // Mostrar mensaje cuando no hay datos
+  if (metrics && metrics.total_usuarios === 0) {
+    return (
+      <div className="layout">
+        <MenuLateral />
+        <main className="dashboard__clientes" style={{ padding: 24 }}>
+          <h1 style={{ fontSize: 28, marginBottom: 24 }}>Clientes</h1>
+          <div
+            style={{
+              background: '#e3f2fd',
+              color: '#1565c0',
+              padding: 32,
+              borderRadius: 12,
+              border: '1px solid #bbdefb',
+              textAlign: 'center',
+            }}
+          >
+            <h3 style={{ marginBottom: 16 }}>📊 Dashboard Vacío</h3>
+            <p style={{ fontSize: 16, marginBottom: 16 }}>
+              No hay datos de usuarios aún. El dashboard mostrará métricas cuando los usuarios
+              comiencen a registrarse y hacer pedidos.
+            </p>
+            <div
+              style={{
+                background: '#fff',
+                padding: 16,
+                borderRadius: 8,
+                marginTop: 16,
+                border: '1px solid #e0e0e0',
+              }}
+            >
+              <h4 style={{ marginBottom: 12 }}>💡 Próximos pasos:</h4>
+              <ul style={{ textAlign: 'left', margin: 0, paddingLeft: 20 }}>
+                <li>Registra algunos usuarios de prueba</li>
+                <li>Haz algunos pedidos</li>
+                <li>Las métricas aparecerán automáticamente</li>
+              </ul>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   if (!metrics) return <div>Error cargando métricas</div>;
 
   const { views, visitas, usuarios_nuevos, usuarios_activos, usuariosPorDia, pedidosPorHora } =
     metrics;
 
-  // 📈 Gráfico de línea
+  // 📈 Gráfico de línea con fechas cortas
   const lineData = {
     labels:
       usuariosPorDia && usuariosPorDia.length > 0
@@ -121,12 +165,15 @@ const DashboardClientes = () => {
     ],
   };
 
-  // 🍩 Gráfico de dona
+  // 🍩 Gráfico de dona con pedidos por hora
   const horas =
     pedidosPorHora && pedidosPorHora.length > 0
-      ? pedidosPorHora.map(p =>
-          typeof p.hora === 'number' ? `${p.hora.toString().padStart(2, '0')}:00` : p.hora
-        )
+      ? pedidosPorHora.map(p => {
+          if (typeof p.hora === 'number') {
+            return `${p.hora.toString().padStart(2, '0')}:00`;
+          }
+          return p.hora || 'Sin hora';
+        })
       : ['Sin datos'];
 
   const pedidosPorHoras =
@@ -248,7 +295,10 @@ const DashboardClientes = () => {
             }}
           >
             <div style={{ fontWeight: 600, marginBottom: 8 }}>Pedidos por Hora</div>
-            <Doughnut data={doughnutData} options={{ plugins: { legend: { position: 'right' } } }} />
+            <Doughnut
+              data={doughnutData}
+              options={{ plugins: { legend: { position: 'right' } } }}
+            />
             {totalPedidos > 0 ? (
               <ul style={{ marginTop: 16, fontSize: 14 }}>
                 {horas.map((h, i) => (

@@ -26,7 +26,6 @@ import { dirname } from "path";
 import helmet from "helmet";
 import mensajeContactoRoutes from "./src/routes/contactoRoutes.js";
 import mercadopagoRoutes from "./src/routes/mercadopagoRoutes.js";
-
 import dashboardRoutes from "./src/routes/dashboardRoutes.js";
 
 // NUEVO: Importa las rutas de domicilios
@@ -97,12 +96,10 @@ app.use("/api/pedidos", pedidoRoutes);
 app.use("/api/horarios", horarioRoutes);
 app.use("/api", mensajeContactoRoutes);
 app.use("/api/mercadopago", mercadopagoRoutes);
-
 app.use("/api/dashboard", dashboardRoutes);
 
 // NUEVO: Ruta para historial de domicilios
 app.use("/api/domicilios", domicilioRoutes);
-
 
 // Servir archivos estáticos con validaciones de seguridad
 // Ruta principal para uploads
@@ -167,9 +164,3 @@ app.listen(PORT, () => {
 });
 
 export default app;
-
-
-
-
-
-
