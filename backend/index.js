@@ -46,10 +46,11 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "'data:'", "'https:'", "'http://localhost:3000'"],
-        fontSrc: ["'self'", "'data:'"],
+        imgSrc: ["'self'", "data:", "https:", "https://cdn.jsdelivr.net"],
+        fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
+        connectSrc: ["'self'", "https://sabor-production.up.railway.app"],
       },
     },
     crossOriginEmbedderPolicy: false,
@@ -68,6 +69,7 @@ const corsOptions = {
       "http://localhost:5173", // Desarrollo frontend
       "http://localhost:3000", // Desarrollo backend
       "http://localhost:4173", // Preview frontend
+      "https://sabor-production.up.railway.app", // Producción Railway
     ];
 
     // En producción, agregar URLs de Railway y CORS_ORIGIN
