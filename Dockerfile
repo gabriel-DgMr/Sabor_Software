@@ -7,8 +7,8 @@ WORKDIR /app/frontend
 # Copiar package.json y package-lock.json del frontend
 COPY frontend/package*.json ./
 
-# Instalar dependencias
-RUN npm ci --only=production
+# Instalar dependencias con legacy peer deps para React 19
+RUN npm ci --legacy-peer-deps
 
 # Copiar código fuente del frontend
 COPY frontend/ ./
