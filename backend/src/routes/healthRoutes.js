@@ -1,5 +1,6 @@
 import express from "express";
 import { config } from "../config/config.js";
+import { default as db } from "../config/dbconfig.js";
 
 const router = express.Router();
 
@@ -74,9 +75,8 @@ router.get("/health/full", async (req, res) => {
       healthCheck.warnings.push(`High memory usage: ${memoryUsageMB}MB`);
     }
 
-    // Verificar base de datos (importar dinámicamente para evitar errores circulares)
+    // Verificar base de datos
     try {
-      const { default: db } = await import("../config/dbconfig.js");
       await db.execute("SELECT 1");
       healthCheck.checks.database = "OK";
     } catch (dbError) {
@@ -106,7 +106,6 @@ router.get("/health/full", async (req, res) => {
 router.get("/ready", async (req, res) => {
   try {
     // Verificar dependencias críticas
-    const { default: db } = await import("../config/dbconfig.js");
     await db.execute("SELECT 1");
 
     res.status(200).json({
