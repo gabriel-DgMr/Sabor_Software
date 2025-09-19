@@ -41,7 +41,6 @@ const Header = () => {
           </Link>
           <div className="encabezado__informacion">
             <nav className="encabezado__links">
-              {' '}
               {/* Estas opciones solo deben mostrarse en escritorio */}
               {!isMobileMenu && (
                 <>
@@ -139,6 +138,14 @@ const Header = () => {
                         onClick={closeMobileMenu}
                       >
                         {t('ver_historial_reservas')}
+                      </Link>
+                      {/* NUEVO: Botón historial de domicilios (móvil) */}
+                      <Link
+                        className="menu-perfil__opcion"
+                        to="/historial-domicilios"
+                        onClick={closeMobileMenu}
+                      >
+                        {t('ver_historial_domicilios', 'Ver historial de domicilios')}
                       </Link>
                       <Link
                         className="menu-perfil__opcion"
@@ -256,6 +263,10 @@ const Header = () => {
                     </Link>
                     <Link className="menu-perfil__opcion" to="/mis-calificaciones">
                       Mis Calificaciones
+                    </Link>
+                    {/* NUEVO: Botón historial de domicilios (escritorio) */}
+                    <Link className="menu-perfil__opcion" to="/historial-domicilios">
+                      {t('ver_historial_domicilios', 'Ver historial de domicilios')}
                     </Link>
                     <Link className="menu-perfil__opcion" to="/actualizar-datos">
                       {t('actualizar_datos')}

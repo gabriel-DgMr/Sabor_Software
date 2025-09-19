@@ -292,3 +292,5 @@ export const authenticateTokenOptional = (req, res, next) => {
     next();
   }
 };
+
+export { authenticateToken as authMiddleware };

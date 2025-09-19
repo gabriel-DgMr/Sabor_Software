@@ -155,7 +155,7 @@ const DashboardClientes = () => {
     usuariosPorDia,
   } = metrics;
 
-  // Gráfico de línea - Usuarios por día
+  // 📈 Gráfico de línea con fechas cortas - Usuarios por día
   const lineData = {
     labels:
       usuariosPorDia && usuariosPorDia.length > 0
@@ -187,7 +187,12 @@ const DashboardClientes = () => {
   // Gráfico de dona - Pedidos por hora
   const horas =
     pedidosPorHora && pedidosPorHora.length > 0
-      ? pedidosPorHora.map(p => `${p.hora}:00`)
+      ? pedidosPorHora.map(p => {
+          if (typeof p.hora === 'number') {
+            return `${p.hora.toString().padStart(2, '0')}:00`;
+          }
+          return p.hora || 'Sin hora';
+        })
       : ['Sin datos'];
 
   const totalPedidos =

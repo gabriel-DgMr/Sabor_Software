@@ -29,8 +29,10 @@ import mercadopagoRoutes from "./src/routes/mercadopagoRoutes.js";
 import payuRoutes from "./src/routes/payuRoutes.js";
 import webhookRoutes from "./src/routes/webhookRoutes.js";
 import calificacionRoutes from "./src/routes/calificacionRoutes.js";
-
 import dashboardRoutes from "./src/routes/dashboardRoutes.js";
+
+// NUEVO: Importa las rutas de domicilios
+import domicilioRoutes from "./src/routes/domicilioRoutes.js";
 
 const app = express();
 
@@ -100,8 +102,10 @@ app.use("/api/mercadopago", mercadopagoRoutes);
 app.use("/api/payu", payuRoutes);
 app.use("/api/webhook", webhookRoutes);
 app.use("/api/calificaciones", calificacionRoutes);
-
 app.use("/api/dashboard", dashboardRoutes);
+
+// NUEVO: Ruta para historial de domicilios
+app.use("/api/domicilios", domicilioRoutes);
 
 // Servir archivos estáticos con validaciones de seguridad
 // Ruta principal para uploads
