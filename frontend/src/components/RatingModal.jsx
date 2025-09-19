@@ -130,7 +130,7 @@ const RatingModal = ({
         >
           {producto.imagen_producto && (
             <img
-              src={`${producto.imagen_producto}`}
+              src={`https://sabor-production.up.railway.app${producto.imagen_producto}`}
               alt={producto.nombre_producto}
               style={{
                 width: '60px',

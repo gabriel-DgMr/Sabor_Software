@@ -692,7 +692,7 @@ export default function Carrito() {
                           {item.imagen_producto && (
                             <img
                               className="carrito_item_imagen"
-                              src={`${item.imagen_producto}`}
+                              src={`https://sabor-production.up.railway.app${item.imagen_producto}`}
                               alt={item.nombre_producto}
                               style={{
                                 width: '48px',

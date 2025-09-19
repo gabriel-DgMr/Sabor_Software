@@ -116,7 +116,7 @@ const ProductosAdministrar = () => {
                       <img
                         alt={producto.nombre_producto}
                         className="productos__imagen"
-                        src={`${producto.imagen_producto}`}
+                        src={`https://sabor-production.up.railway.app${producto.imagen_producto}`}
                       />
                       <div className="productos__info">
                         <h4 className="productos__nombre">{producto.nombre_producto}</h4>

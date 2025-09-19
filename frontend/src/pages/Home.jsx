@@ -74,7 +74,7 @@ const Home = () => {
   const imagenesCarrusel = useMemo(
     () =>
       state.productos.map(p => ({
-        src: `${p.imagen_producto}`,
+        src: `https://sabor-production.up.railway.app/${p.imagen_producto}`,
         alt: p.nombre_producto,
       })),
     [state.productos]
