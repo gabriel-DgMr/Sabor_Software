@@ -1,8 +1,8 @@
 -- Crear base de datos
 DROP DATABASE IF EXISTS sabor_db_1;
 CREATE DATABASE sabor_db_1 
-  CHARACTER SET utf8_general_ci
-  COLLATE utf8_general_ci ;
+  CHARACTER SET utf8mb4_unicode_ci
+  COLLATE utf8mb4_unicode_ci ;
 USE sabor_db_1;
 
 -- ========================
@@ -27,7 +27,7 @@ CREATE TABLE categoria_traducciones (
   descripcion VARCHAR(255),
   FOREIGN KEY (categoria_id) REFERENCES categorias(id_categoria) ON DELETE CASCADE,
   UNIQUE KEY (categoria_id, idioma)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8_general_ci COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE estados (
   id_estado int NOT NULL AUTO_INCREMENT, 
@@ -42,7 +42,7 @@ CREATE TABLE mesas (
   estado_mesa ENUM('disponible','ocupada','reservada','mantenimiento') NOT NULL DEFAULT 'disponible',
   fecha_creacion timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id_mesa)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8_general_ci COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE roles (
   id_rol int NOT NULL AUTO_INCREMENT,
@@ -83,7 +83,7 @@ CREATE TABLE mensajes_contacto (
   fecha_envio TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id_mensaje),
   CONSTRAINT fk_mensajes_cliente FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8_general_ci COLLATE=utf8_general_ci ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COLLATE=utf8mb4_unicode_ci ;
 
 -- Tabla para códigos de verificación de email
 CREATE TABLE codigos_verificacion (
@@ -215,7 +215,7 @@ CREATE TABLE calificaciones_productos (
     FOREIGN KEY (id_producto) REFERENCES productos(id_producto) ON DELETE CASCADE,
     FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido) ON DELETE CASCADE,
     UNIQUE KEY unique_user_product_order (id_usuario, id_producto, id_pedido)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8_general_ci COLLATE=utf8_general_ci ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COLLATE=utf8mb4_unicode_ci ;
 
 -- ========================
 -- INSERCIÓN DE DATOS BASE
