@@ -12,7 +12,7 @@ import {
 
 import '../styles/empleados.css';
 
-const PedidosEmpleados = () => {
+const DomiciliosEmpleados = () => {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [pedidos, setPedidos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -26,8 +26,8 @@ const PedidosEmpleados = () => {
 
       try {
         const datosPedidos = await obtenerPedidos();
-        // 🔹 Filtrar solo pedidos para mesa
-        setPedidos(datosPedidos.filter(p => p.tipo_servicio === 'mesa'));
+        // 🔹 Filtrar solo pedidos a domicilio
+        setPedidos(datosPedidos.filter(p => p.tipo_servicio === 'domicilio'));
       } catch (err) {
         console.error('Error al cargar pedidos:', err);
       } finally {
@@ -60,13 +60,13 @@ const PedidosEmpleados = () => {
     <div className="layout">
       <MenuLateral />
       <main className="pedidos">
-        <h1 className="titulos__empleados">Pedidos en Mesa</h1>
+        <h1 className="titulos__empleados">Pedidos a Domicilio</h1>
 
         <section className="pedidos__lista">
           {cargando ? (
             <p>Cargando pedidos...</p>
           ) : pedidos.length === 0 ? (
-            <p>No hay pedidos de mesa para mostrar.</p>
+            <p>No hay pedidos a domicilio para mostrar.</p>
           ) : (
             pedidos.map(pedido => (
               <article key={pedido.id} className="pedido">
@@ -75,7 +75,10 @@ const PedidosEmpleados = () => {
                     PED{pedido.id} - {pedido.cliente}
                   </h2>
                   <p className="pedido__productos">{pedido.productos}</p>
-                  <p className="pedido__mesa">Mesa: {pedido.mesa}</p>
+                  <p className="pedido__direccion">
+                    Dirección: {pedido.direccion_entrega}{' '}
+                    {pedido.detalle_direccion && ` - ${pedido.detalle_direccion}`}
+                  </p>
                   {pedido.notas && <p className="pedido__notas">Notas: {pedido.notas}</p>}
                   <p className="pedido__total">Total: ${pedido.total?.toLocaleString()}</p>
                 </div>
@@ -100,4 +103,4 @@ const PedidosEmpleados = () => {
   );
 };
 
-export default PedidosEmpleados;
+export default DomiciliosEmpleados;
