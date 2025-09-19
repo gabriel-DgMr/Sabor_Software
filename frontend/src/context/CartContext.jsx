@@ -3,7 +3,7 @@ import React, { createContext, useState, useEffect, useCallback } from 'react';
 
 const CartContext = createContext(null);
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
