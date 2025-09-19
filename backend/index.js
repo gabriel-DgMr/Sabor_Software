@@ -174,22 +174,7 @@ app.use(
   }),
 );
 
-app.use(
-  "/uploads/productos",
-  express.static(path.join(__dirname, "public/uploads/productos"), {
-    setHeaders: (res, filePath) => {
-      if (
-        filePath.endsWith(".js") ||
-        filePath.endsWith(".php") ||
-        filePath.endsWith(".exe")
-      ) {
-        res.setHeader("Content-Type", "text/plain");
-      }
-      res.setHeader("X-Content-Type-Options", "nosniff");
-      res.setHeader("X-Frame-Options", "DENY");
-    },
-  }),
-);
+// La ruta /uploads ya maneja todos los archivos en public/uploads, incluyendo productos
 
 // Servir archivos estáticos del frontend React
 app.use(
