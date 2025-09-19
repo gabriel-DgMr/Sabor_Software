@@ -3,6 +3,7 @@ import helmet from "helmet";
 import xss from "xss-clean";
 import hpp from "hpp";
 import validator from "validator";
+import { securityLogger } from "./logger.js";
 
 // Rate limiting para prevenir ataques de fuerza bruta
 export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
@@ -35,7 +36,6 @@ export const authRateLimiter = rateLimit({
   handler: (req, res, next, options) => {
     // Log de seguridad para intentos de fuerza bruta
     if (process.env.NODE_ENV === "production") {
-      const { securityLogger } = require("./logger.js");
       securityLogger.log("BRUTE_FORCE_ATTEMPT", req, {
         endpoint: req.originalUrl,
         attempts: req.rateLimit.current,
@@ -295,7 +295,6 @@ export const validateSecurityHeaders = (req, res, next) => {
     );
 
     if (isSuspicious && !req.url.includes("/api/health")) {
-      const { securityLogger } = require("./logger.js");
       securityLogger.log("SUSPICIOUS_USER_AGENT", req, {
         userAgent: userAgent,
       });
@@ -346,7 +345,6 @@ export const pathTraversalProtection = (req, res, next) => {
         (value) => typeof value === "string" && checkPath(value),
       ))
   ) {
-    const { securityLogger } = require("./logger.js");
     securityLogger.log("PATH_TRAVERSAL_ATTEMPT", req);
 
     return res.status(400).json({
