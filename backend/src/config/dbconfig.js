@@ -27,3 +27,18 @@ export const createConnection = async () => {
 
 // Pool de conexiones reutilizable (mantiene la funcionalidad existente)
 export const pool = mysql.createPool(dbConfig);
+
+// Exportar como default para compatibilidad con healthcheck
+const defaultDb = {
+  execute: async (query, params) => {
+    const connection = await pool.getConnection();
+    try {
+      const [rows] = await connection.execute(query, params);
+      return [rows];
+    } finally {
+      connection.release();
+    }
+  },
+};
+
+export default defaultDb;

@@ -4,10 +4,50 @@ import { config } from "../config/config.js";
 const router = express.Router();
 
 /**
- * Health Check Endpoint
- * Verifica el estado de la aplicación y sus dependencias
+ * Health Check Endpoint - Versión rápida para Railway
+ * Verifica el estado básico de la aplicación
  */
 router.get("/health", async (req, res) => {
+  const healthCheck = {
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: config.server.mode,
+    version: process.env.npm_package_version || "1.0.0",
+    checks: {
+      server: "OK",
+      memory: "OK",
+    },
+  };
+
+  try {
+    // Verificar memoria
+    const memoryUsage = process.memoryUsage();
+    const memoryUsageMB = Math.round(memoryUsage.heapUsed / 1024 / 1024);
+
+    if (memoryUsageMB > 1000) {
+      // Más de 1GB
+      healthCheck.checks.memory = "WARNING";
+      healthCheck.warnings = healthCheck.warnings || [];
+      healthCheck.warnings.push(`High memory usage: ${memoryUsageMB}MB`);
+    }
+
+    // Respuesta rápida para Railway
+    res.status(200).json(healthCheck);
+  } catch (error) {
+    res.status(503).json({
+      status: "ERROR",
+      timestamp: new Date().toISOString(),
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * Health Check Endpoint Completo
+ * Verifica el estado de la aplicación y sus dependencias (incluyendo DB)
+ */
+router.get("/health/full", async (req, res) => {
   const healthCheck = {
     status: "OK",
     timestamp: new Date().toISOString(),

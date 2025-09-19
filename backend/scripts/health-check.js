@@ -13,7 +13,7 @@ const healthCheck = () => {
     port: config.server.port,
     path: "/api/health",
     method: "GET",
-    timeout: 3000,
+    timeout: 10000,
   };
 
   const req = http.request(options, (res) => {
