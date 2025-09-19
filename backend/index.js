@@ -196,9 +196,9 @@ app.use(errorHandler);
 // Iniciar servidor
 const PORT = process.env.PORT || config.server.port || 3000;
 
-// Configurar trust proxy para Railway
+// Configurar trust proxy de manera segura para Railway
 if (process.env.NODE_ENV === "production") {
-  app.set("trust proxy", true);
+  app.set("trust proxy", 1); // Solo confiar en el primer proxy (Railway)
 }
 
 app.listen(PORT, "0.0.0.0", () => {
