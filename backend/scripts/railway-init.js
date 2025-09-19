@@ -58,9 +58,10 @@ class RailwayInitializer {
         );
 
         if (attempt === maxAttempts) {
-          throw new Error(
-            "Base de datos no disponible después de múltiples intentos",
+          appLogger.warn(
+            "⚠️ Base de datos no disponible después de múltiples intentos. Continuando sin verificación de DB.",
           );
+          return; // Continuar sin fallar
         }
 
         await new Promise((resolve) => setTimeout(resolve, 5000));
