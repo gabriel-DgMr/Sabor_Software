@@ -56,7 +56,7 @@ COPY --chown=sabor:nodejs backend/ ./
 COPY --from=frontend-build --chown=sabor:nodejs /app/frontend/dist ./public/dist
 
 # Copiar imágenes de productos existentes
-COPY --chown=sabor:nodejs backend/public/uploads/productos/* ./public/uploads/productos/
+COPY --chown=sabor:nodejs public/uploads/productos/* ./public/uploads/productos/
 
 # Crear directorios necesarios con permisos correctos
 RUN mkdir -p logs public/uploads/temp && \
