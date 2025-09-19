@@ -71,6 +71,18 @@ class RailwayInitializer {
   }
 
   async initializeDatabase() {
+    // Verificar si la base de datos ya está configurada
+    const skipDatabaseInit =
+      process.env.SKIP_DB_INIT === "true" ||
+      process.env.DB_INITIALIZED === "true";
+
+    if (skipDatabaseInit) {
+      appLogger.info(
+        "📊 Base de datos ya configurada, saltando inicialización automática",
+      );
+      return;
+    }
+
     if (!this.isFirstDeploy) {
       appLogger.info(
         "📊 Base de datos ya inicializada, saltando configuración",
@@ -84,10 +96,19 @@ class RailwayInitializer {
       const dbSetup = new DatabaseSetup();
       await dbSetup.run();
 
-      // Marcar como inicializada (esto se puede hacer via Railway API o variable de entorno)
+      // Marcar como inicializada
       appLogger.info("✅ Base de datos inicializada correctamente");
     } catch (error) {
       appLogger.error("❌ Error inicializando base de datos:", error);
+      // No fallar si la DB ya existe
+      if (
+        error.message.includes("already exists") ||
+        error.message.includes("Duplicate") ||
+        error.message.includes("database exists")
+      ) {
+        appLogger.warn("⚠️ Base de datos ya existe, continuando...");
+        return;
+      }
       throw error;
     }
   }
