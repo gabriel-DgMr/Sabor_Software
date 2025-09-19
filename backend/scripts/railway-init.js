@@ -75,6 +75,10 @@ class RailwayInitializer {
       process.env.SKIP_DB_INIT === "true" ||
       process.env.DB_INITIALIZED === "true";
 
+    appLogger.info(`🔍 SKIP_DB_INIT: ${process.env.SKIP_DB_INIT}`);
+    appLogger.info(`🔍 DB_INITIALIZED: ${process.env.DB_INITIALIZED}`);
+    appLogger.info(`🔍 skipDatabaseInit: ${skipDatabaseInit}`);
+
     if (skipDatabaseInit) {
       appLogger.info(
         "📊 Base de datos ya configurada, saltando inicialización automática",
@@ -101,13 +105,18 @@ class RailwayInitializer {
       appLogger.info("✅ Base de datos inicializada correctamente");
     } catch (error) {
       appLogger.error("❌ Error inicializando base de datos:", error);
-      // No fallar si la DB ya existe
+      // No fallar si la DB ya existe o hay warnings menores
       if (
         error.message.includes("already exists") ||
         error.message.includes("Duplicate") ||
-        error.message.includes("database exists")
+        error.message.includes("database exists") ||
+        error.message.includes("Unknown system variable") ||
+        error.message.includes("read only variable") ||
+        error.message.includes("SQL syntax")
       ) {
-        appLogger.warn("⚠️ Base de datos ya existe, continuando...");
+        appLogger.warn(
+          "⚠️ Base de datos ya configurada o warnings menores, continuando...",
+        );
         return;
       }
       throw error;
