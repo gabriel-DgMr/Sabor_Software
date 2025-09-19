@@ -139,25 +139,37 @@ class RailwayInitializer {
   async healthCheck() {
     appLogger.info("🏥 Ejecutando verificación de salud...");
 
+    // Verificar si debemos saltar la verificación de base de datos
+    const skipDatabaseCheck =
+      process.env.SKIP_DB_INIT === "true" ||
+      process.env.DB_INITIALIZED === "true";
+
     try {
-      // Verificar conexión a base de datos
-      const mysql = await import("mysql2/promise");
-      const connection = await mysql.createConnection({
-        host: config.db.host,
-        user: config.db.user,
-        password: config.db.password,
-        database: config.db.database,
-        port: config.db.port,
-      });
+      // Solo verificar base de datos si no está marcada para saltarse
+      if (!skipDatabaseCheck) {
+        // Verificar conexión a base de datos
+        const mysql = await import("mysql2/promise");
+        const connection = await mysql.createConnection({
+          host: config.db.host,
+          user: config.db.user,
+          password: config.db.password,
+          database: config.db.database,
+          port: config.db.port,
+        });
 
-      const [rows] = await connection.execute(
-        "SELECT COUNT(*) as count FROM usuarios",
-      );
-      await connection.end();
+        const [rows] = await connection.execute(
+          "SELECT COUNT(*) as count FROM usuarios",
+        );
+        await connection.end();
 
-      appLogger.info(
-        `✅ Base de datos operativa - ${rows[0].count} usuarios registrados`,
-      );
+        appLogger.info(
+          `✅ Base de datos operativa - ${rows[0].count} usuarios registrados`,
+        );
+      } else {
+        appLogger.info(
+          "📊 Saltando verificación de base de datos (SKIP_DB_INIT=true)",
+        );
+      }
 
       // Verificar variables de entorno críticas
       const criticalVars = ["JWT_SECRET", "COOKIE_SECRET", "DB_PASSWORD"];
@@ -174,6 +186,15 @@ class RailwayInitializer {
       }
     } catch (error) {
       appLogger.error("❌ Error en verificación de salud:", error);
+
+      // Si SKIP_DB_INIT está activo, no fallar por errores de DB
+      if (skipDatabaseCheck && error.message.includes("database")) {
+        appLogger.warn(
+          "⚠️ Error de base de datos ignorado (SKIP_DB_INIT=true)",
+        );
+        return;
+      }
+
       throw error;
     }
   }
