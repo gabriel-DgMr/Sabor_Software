@@ -88,6 +88,33 @@ class DatabaseSetup {
         console.log("✅ Script de producción ejecutado correctamente");
       }
 
+      // Crear tabla usuarios si no existe (necesaria para la aplicación)
+      if (isProduction) {
+        console.log("📄 Creando tabla usuarios si no existe...");
+        const usuariosScriptPath = path.join(
+          __dirname,
+          "../create-usuarios-table.sql",
+        );
+        if (fs.existsSync(usuariosScriptPath)) {
+          const usuariosScript = fs.readFileSync(usuariosScriptPath, "utf8");
+          const connection = this.rootConnection || this.connection;
+
+          // Dividir el script en comandos individuales
+          const commands = usuariosScript
+            .split(";")
+            .map((cmd) => cmd.trim())
+            .filter((cmd) => cmd.length > 0 && !cmd.startsWith("--"));
+
+          for (const command of commands) {
+            if (command.trim()) {
+              await connection.execute(command);
+            }
+          }
+
+          console.log("✅ Tabla usuarios creada/verificada correctamente");
+        }
+      }
+
       // Ejecutar script principal de esquema solo si es necesario
       const schemaPath = path.join(__dirname, "../db.sql");
       if (fs.existsSync(schemaPath) && !isProduction) {

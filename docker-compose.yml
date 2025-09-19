@@ -11,8 +11,8 @@ services:
       MYSQL_DATABASE: ${DB_NAME:-sabor_production_db}
       MYSQL_USER: ${DB_USER:-sabor_user}
       MYSQL_PASSWORD: ${DB_PASSWORD:-sabor_password_2024}
-      MYSQL_CHARSET: utf8mb4
-      MYSQL_COLLATION: utf8mb4_unicode_ci
+      MYSQL_CHARSET: utf8_general_ci
+      MYSQL_COLLATION: utf8_general_ci
     ports:
       - "3306:3306"
     volumes:
