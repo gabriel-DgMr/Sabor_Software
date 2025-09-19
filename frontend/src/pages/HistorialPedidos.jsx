@@ -269,7 +269,7 @@ const HistorialPedidos = () => {
                               >
                                 {producto.imagen_producto && (
                                   <img
-                                    src={`http://localhost:3000${producto.imagen_producto}`}
+                                    src={`${producto.imagen_producto}`}
                                     alt={producto.nombre_producto}
                                     style={{
                                       width: '40px',

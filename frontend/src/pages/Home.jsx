@@ -74,7 +74,7 @@ const Home = () => {
   const imagenesCarrusel = useMemo(
     () =>
       state.productos.map(p => ({
-        src: `http://localhost:3000${p.imagen_producto}`,
+        src: `${p.imagen_producto}`,
         alt: p.nombre_producto,
       })),
     [state.productos]

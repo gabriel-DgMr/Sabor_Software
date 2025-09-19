@@ -692,7 +692,7 @@ export default function Carrito() {
                           {item.imagen_producto && (
                             <img
                               className="carrito_item_imagen"
-                              src={`http://localhost:3000${item.imagen_producto}`}
+                              src={`${item.imagen_producto}`}
                               alt={item.nombre_producto}
                               style={{
                                 width: '48px',

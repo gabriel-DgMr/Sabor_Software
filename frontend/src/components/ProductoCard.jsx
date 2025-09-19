@@ -78,7 +78,7 @@ const ProductoCard = React.memo(({ producto }) => {
         <img
           alt={producto.nombre_producto}
           className="productos__imagen"
-          src={`${import.meta.env.VITE_API_URL || ''}${producto.imagen_producto}`}
+          src={`${producto.imagen_producto}`}
         />
         <div className="productos__info">
           <h4 className="productos__nombre">{producto.nombre_producto}</h4>
@@ -152,7 +152,7 @@ const ProductoCard = React.memo(({ producto }) => {
                   <img
                     alt={producto.nombre_producto}
                     className="dialogo-agregar-producto__imagen"
-                    src={`${import.meta.env.VITE_API_URL || ''}${producto.imagen_producto}`}
+                    src={`${producto.imagen_producto}`}
                   />
                   <div className="dialogo-agregar-producto__info">
                     <h3 className="dialogo-agregar-producto__nombre">{producto.nombre_producto}</h3>

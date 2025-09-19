@@ -180,7 +180,7 @@ const MisCalificaciones = () => {
                       <div key={producto.id_producto} className="product-rating-card">
                         <div className="product-info">
                           <img
-                            src={`http://localhost:3000${producto.imagen_producto}`}
+                            src={`${producto.imagen_producto}`}
                             alt={producto.nombre_producto}
                             className="product-image"
                           />
