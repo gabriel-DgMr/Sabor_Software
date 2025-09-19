@@ -63,7 +63,7 @@ const ProductRatingModal = ({
         <div className="rating-modal-content">
           <div className="product-info">
             <img
-              src={`https://sabor-production.up.railway.app${producto.imagen_producto}`}
+              src={getImageUrl(producto.imagen_producto)}
               alt={producto.nombre_producto}
               className="product-image"
             />

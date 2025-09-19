@@ -27,7 +27,8 @@ function PaginaNoEncontrada() {
       />
       <h1 className="pagina-no-encontrada__titulo">404 - Página no encontrada</h1>
       <p className="pagina-no-encontrada__descripcion">
-        Lo sentimos, la página que buscas no existe o ha sido movida.<br />
+        Lo sentimos, la página que buscas no existe o ha sido movida.
+        <br />
         Por favor, verifica la URL o vuelve al inicio.
       </p>
       <Link aria-label="Volver al inicio" className="pagina-no-encontrada__boton" to="/">
@@ -37,4 +38,4 @@ function PaginaNoEncontrada() {
   );
 }
 
-export default PaginaNoEncontrada; 
+export default PaginaNoEncontrada;

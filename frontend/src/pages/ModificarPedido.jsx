@@ -21,7 +21,7 @@ const ModificarPedido = () => {
     }
   }, []);
 
-  const eliminarItem = (index) => {
+  const eliminarItem = index => {
     removeItemFromCart(index);
   };
 
@@ -50,10 +50,7 @@ const ModificarPedido = () => {
                     {item.precio.toLocaleString('es-CO')} COP
                   </div>
                 </div>
-                <button
-                  className="carrito_btn eliminar"
-                  onClick={() => eliminarItem(index)}
-                >
+                <button className="carrito_btn eliminar" onClick={() => eliminarItem(index)}>
                   🗑️ {t('carrito_eliminar')}
                 </button>
               </div>
@@ -73,10 +70,10 @@ const ModificarPedido = () => {
                     borderRadius: '8px',
                     border: '1px solid #ddd',
                     fontSize: '1rem',
-                    resize: 'vertical'
+                    resize: 'vertical',
                   }}
                   value={recomendaciones}
-                  onChange={(e) => setRecomendaciones(e.target.value)}
+                  onChange={e => setRecomendaciones(e.target.value)}
                 />
               </div>
             </div>
@@ -87,23 +84,17 @@ const ModificarPedido = () => {
                 width: '100%',
                 marginTop: '20px',
                 padding: '15px',
-                fontSize: '1.2rem'
+                fontSize: '1.2rem',
               }}
               onClick={agregarProducto}
             >
               + {t('modificar_agregar_producto')}
             </button>
-            <div className='modificar__botones--pagarregresar'>
-              <button
-                className="carrito_btn__pagar"
-                onClick={confirmarCambios}
-              >
+            <div className="modificar__botones--pagarregresar">
+              <button className="carrito_btn__pagar" onClick={confirmarCambios}>
                 {t('modificar_confirmar_cambios')}
               </button>
-              <button
-                className="carrito_btn__regresar"
-                onClick={() => navigate('/carrito')}
-              >
+              <button className="carrito_btn__regresar" onClick={() => navigate('/carrito')}>
                 {t('modificar_regresar')}
               </button>
             </div>
@@ -115,4 +106,4 @@ const ModificarPedido = () => {
   );
 };
 
-export default ModificarPedido; 
+export default ModificarPedido;

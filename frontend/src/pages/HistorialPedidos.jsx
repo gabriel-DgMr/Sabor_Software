@@ -269,7 +269,7 @@ const HistorialPedidos = () => {
                               >
                                 {producto.imagen_producto && (
                                   <img
-                                    src={`https://sabor-production.up.railway.app${producto.imagen_producto}`}
+                                    src={getImageUrl(producto.imagen_producto)}
                                     alt={producto.nombre_producto}
                                     style={{
                                       width: '40px',

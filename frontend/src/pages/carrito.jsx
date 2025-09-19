@@ -7,6 +7,7 @@ import '../styles/carrito.css';
 import { GoX, GoCheck, GoAlert, GoTrash, GoCreditCard } from 'react-icons/go';
 import { BsCash, BsHouse } from 'react-icons/bs';
 import { IoCart } from 'react-icons/io5';
+import { getImageUrl } from '../utils/imageUtils.js';
 
 import DialogoModal from '../components/DialogoExito.jsx';
 import Footer from '../components/Footer.jsx';
@@ -692,7 +693,7 @@ export default function Carrito() {
                           {item.imagen_producto && (
                             <img
                               className="carrito_item_imagen"
-                              src={`https://sabor-production.up.railway.app${item.imagen_producto}`}
+                              src={getImageUrl(item.imagen_producto)}
                               alt={item.nombre_producto}
                               style={{
                                 width: '48px',

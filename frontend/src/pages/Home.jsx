@@ -13,6 +13,7 @@ import ProductoCard from '../components/ProductoCard.jsx';
 import { useCategorias } from '../context/CategoriaContext';
 import { useProductos } from '../context/ProductoContext';
 import { useCart } from '../context/useCart.js';
+import { getImageUrl } from '../utils/imageUtils.js';
 import { useDebounce } from '../hooks/useDebounce.js';
 import { useAuth } from '../context/AuthContext';
 import { GoX } from 'react-icons/go';

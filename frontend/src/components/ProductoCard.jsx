@@ -6,6 +6,7 @@ import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
 
 import { useCart } from '../context/useCart.js';
 import { FormatPriceCOP } from '../utils/format.js';
+import { getImageUrl } from '../utils/imageUtils.js';
 
 import MensajeExito from './DialogoExito.jsx';
 import { GoCheck, GoX } from 'react-icons/go';
@@ -78,7 +79,7 @@ const ProductoCard = React.memo(({ producto }) => {
         <img
           alt={producto.nombre_producto}
           className="productos__imagen"
-          src={`https://sabor-production.up.railway.app${producto.imagen_producto}`}
+          src={getImageUrl(producto.imagen_producto)}
         />
         <div className="productos__info">
           <h4 className="productos__nombre">{producto.nombre_producto}</h4>
@@ -152,7 +153,7 @@ const ProductoCard = React.memo(({ producto }) => {
                   <img
                     alt={producto.nombre_producto}
                     className="dialogo-agregar-producto__imagen"
-                    src={`https://sabor-production.up.railway.app${producto.imagen_producto}`}
+                    src={getImageUrl(producto.imagen_producto)}
                   />
                   <div className="dialogo-agregar-producto__info">
                     <h3 className="dialogo-agregar-producto__nombre">{producto.nombre_producto}</h3>

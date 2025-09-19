@@ -1,6 +1,6 @@
 /**
  * Componente ResetPasswordContainer
- * 
+ *
  * Este componente actúa como contenedor para el componente ResetPassword.
  * Maneja los mensajes globales y la navegación después de restablecer la contraseña.
  * Proporciona una capa adicional de manejo de estado y navegación.
@@ -18,9 +18,7 @@ import './AuthPage.css';
 // Componente de alerta visualmente consistente para reset password
 const ResetAlert = ({ type, message }) => {
   if (!message) return null;
-  const icon = type === 'success'
-    ? <GoCheck className="GoCheck" />
-    : <GoX className="GoX" />;
+  const icon = type === 'success' ? <GoCheck className="GoCheck" /> : <GoX className="GoX" />;
   return (
     <div className="alerta-sin-tarjeta">
       {icon}
@@ -42,7 +40,8 @@ const ResetPasswordContainer = () => {
    */
   const handleShowMessage = (type, text) => {
     setGlobalMessage({ type, text });
-    const selector = type === 'success' ? '.formulario__mensaje-exito' : '.formulario__mensaje-error';
+    const selector =
+      type === 'success' ? '.formulario__mensaje-exito' : '.formulario__mensaje-error';
 
     // Animar la aparición del mensaje
     setTimeout(() => animateElement(selector, 'fade-in'), 0);
@@ -82,7 +81,7 @@ const ResetPasswordContainer = () => {
       <div className="modal__contenido">
         {/* Componente principal de restablecimiento de contraseña */}
         <ResetPassword onShowMessage={handleShowMessage} />
-        
+
         {/* Mensaje global que se muestra sobre el formulario */}
         {globalMessage.text && (
           <ResetAlert type={globalMessage.type} message={globalMessage.text} />
@@ -92,4 +91,4 @@ const ResetPasswordContainer = () => {
   );
 };
 
-export default ResetPasswordContainer; 
+export default ResetPasswordContainer;
