@@ -176,7 +176,7 @@ app.use(
 
 app.use(
   "/uploads/productos",
-  express.static(path.join(__dirname, "../public/uploads/productos"), {
+  express.static(path.join(__dirname, "public/uploads/productos"), {
     setHeaders: (res, filePath) => {
       if (
         filePath.endsWith(".js") ||

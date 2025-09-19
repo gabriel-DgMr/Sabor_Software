@@ -19,35 +19,52 @@ const sendVerificationEmail = async (
   nombre_usuario,
   codigo,
 ) => {
-  const mailOptions = {
-    from: config.email.user,
-    to: correo_usuario,
-    subject: "Verifica tu cuenta - Sabor",
-    html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #ff6f00;">¡Bienvenido a Sabor!</h2>
-                <p>Hola <strong>${nombre_usuario}</strong>,</p>
-                <p>Gracias por registrarte en Sabor. Para activar tu cuenta, necesitas verificar tu dirección de email.</p>
-                
-                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0;">
-                    <h3 style="color: #333; margin: 0;">Tu código de verificación es:</h3>
-                    <div style="font-size: 32px; font-weight: bold; color: #ff6f00; letter-spacing: 5px; margin: 15px 0;">
-                        ${codigo}
-                    </div>
-                    <p style="color: #666; margin: 0;">Este código expira en 15 minutos</p>
-                </div>
-                
-                <p>Si no solicitaste este registro, puedes ignorar este email.</p>
-                
-                <p style="color: #666; font-size: 14px;">
-                    Saludos,<br>
-                    El equipo de Sabor
-                </p>
-            </div>
-        `,
-  };
+  try {
+    console.log(`📧 Enviando email de verificación a: ${correo_usuario}`);
+    console.log(`📧 Configuración email user: ${config.email.user}`);
 
-  await transporter.sendMail(mailOptions);
+    if (!config.email.user || !config.email.password) {
+      throw new Error("Configuración de email no encontrada");
+    }
+
+    const mailOptions = {
+      from: config.email.user,
+      to: correo_usuario,
+      subject: "Verifica tu cuenta - Sabor",
+      html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                  <h2 style="color: #ff6f00;">¡Bienvenido a Sabor!</h2>
+                  <p>Hola <strong>${nombre_usuario}</strong>,</p>
+                  <p>Gracias por registrarte en Sabor. Para activar tu cuenta, necesitas verificar tu dirección de email.</p>
+                  
+                  <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center; margin: 20px 0;">
+                      <h3 style="color: #333; margin: 0;">Tu código de verificación es:</h3>
+                      <div style="font-size: 32px; font-weight: bold; color: #ff6f00; letter-spacing: 5px; margin: 15px 0;">
+                          ${codigo}
+                      </div>
+                      <p style="color: #666; margin: 0;">Este código expira en 15 minutos</p>
+                  </div>
+                  
+                  <p>Si no solicitaste este registro, puedes ignorar este email.</p>
+                  
+                  <p style="color: #666; font-size: 14px;">
+                      Saludos,<br>
+                      El equipo de Sabor
+                  </p>
+              </div>
+          `,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log(
+      `✅ Email enviado exitosamente a: ${correo_usuario}`,
+      result.messageId,
+    );
+    return result;
+  } catch (error) {
+    console.error(`❌ Error enviando email a ${correo_usuario}:`, error);
+    throw error;
+  }
 };
 
 // controlador para registrar un nuevo usuario
@@ -114,7 +131,14 @@ export const registerUser = async (req, res) => {
     const codigo = await authModel.generateVerificationCode(userId);
 
     // Enviar email de verificación
-    await sendVerificationEmail(correo_usuario, nombre_usuario, codigo);
+    try {
+      await sendVerificationEmail(correo_usuario, nombre_usuario, codigo);
+      console.log(`✅ Usuario ${nombre_usuario} registrado exitosamente`);
+    } catch (emailError) {
+      console.error("❌ Error enviando email de verificación:", emailError);
+      // No fallar el registro si el email falla, pero logear el error
+      // El usuario puede solicitar reenvío de código después
+    }
 
     res.status(201).json({
       message:
@@ -124,6 +148,20 @@ export const registerUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Error en registro:", error);
+
+    // Manejar errores específicos
+    if (error.code === "ER_DUP_ENTRY") {
+      return res.status(400).json({
+        message: "El correo electrónico ya está registrado",
+      });
+    }
+
+    if (error.message.includes("email")) {
+      return res.status(500).json({
+        message: "Error en el servicio de email. Por favor, intenta más tarde.",
+      });
+    }
+
     res.status(400).json({
       message: error.message || "Error al registrar usuario",
     });
