@@ -189,6 +189,30 @@ app.use(
   }),
 );
 
+// Servir archivos estáticos del frontend React
+app.use(
+  express.static(path.join(__dirname, "public/dist"), {
+    index: false, // No servir index.html automáticamente
+    setHeaders: (res, filePath) => {
+      // Configurar headers para archivos estáticos
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-cache");
+      } else if (
+        filePath.match(
+          /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/,
+        )
+      ) {
+        res.setHeader("Cache-Control", "public, max-age=31536000"); // 1 año
+      }
+    },
+  }),
+);
+
+// Ruta para servir el index.html del frontend
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public/dist/index.html"));
+});
+
 // Middlewares de error
 app.use(notFoundHandler);
 app.use(errorHandler);
