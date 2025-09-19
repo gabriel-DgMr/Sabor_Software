@@ -88,23 +88,31 @@ class DatabaseSetup {
         console.log("✅ Script de producción ejecutado correctamente");
       }
 
-      // Ejecutar script principal de esquema
+      // Ejecutar script principal de esquema solo si es necesario
       const schemaPath = path.join(__dirname, "../db.sql");
-      if (fs.existsSync(schemaPath)) {
+      if (fs.existsSync(schemaPath) && !isProduction) {
         console.log("📄 Ejecutando script de esquema principal...");
         const schemaScript = fs.readFileSync(schemaPath, "utf8");
         await this.connection.execute(`USE \`${config.db.database}\``);
         await this.connection.execute(schemaScript);
         console.log("✅ Esquema principal ejecutado correctamente");
+      } else if (isProduction) {
+        console.log(
+          "📊 Saltando script de esquema en producción (base de datos ya configurada)",
+        );
       }
 
-      // Ejecutar migración de PayU si existe
+      // Ejecutar migración de PayU si existe y no es producción
       const payuMigrationPath = path.join(__dirname, "../migration_payu.sql");
-      if (fs.existsSync(payuMigrationPath)) {
+      if (fs.existsSync(payuMigrationPath) && !isProduction) {
         console.log("📄 Ejecutando migración de PayU...");
         const payuScript = fs.readFileSync(payuMigrationPath, "utf8");
         await this.connection.execute(payuScript);
         console.log("✅ Migración de PayU ejecutada correctamente");
+      } else if (isProduction) {
+        console.log(
+          "📊 Saltando migración de PayU en producción (base de datos ya configurada)",
+        );
       }
     } catch (error) {
       console.error("❌ Error configurando base de datos:", error.message);
