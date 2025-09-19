@@ -81,7 +81,7 @@ class DatabaseSetup {
 
         for (const command of commands) {
           if (command.trim()) {
-            await connection.execute(command);
+            await connection.query(command);
           }
         }
 
@@ -93,8 +93,10 @@ class DatabaseSetup {
       if (fs.existsSync(schemaPath)) {
         console.log("📄 Ejecutando script de esquema principal...");
         const schemaScript = fs.readFileSync(schemaPath, "utf8");
-        await this.connection.execute(`USE \`${config.db.database}\``);
-        await this.connection.execute(schemaScript);
+
+        // Usar query() en lugar de execute() para evitar problemas con prepared statements
+        await this.connection.query(`USE \`${config.db.database}\``);
+        await this.connection.query(schemaScript);
         console.log("✅ Esquema principal ejecutado correctamente");
       }
 
@@ -103,7 +105,7 @@ class DatabaseSetup {
       if (fs.existsSync(payuMigrationPath)) {
         console.log("📄 Ejecutando migración de PayU...");
         const payuScript = fs.readFileSync(payuMigrationPath, "utf8");
-        await this.connection.execute(payuScript);
+        await this.connection.query(payuScript);
         console.log("✅ Migración de PayU ejecutada correctamente");
       }
     } catch (error) {
