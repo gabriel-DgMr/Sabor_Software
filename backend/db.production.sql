@@ -1,1 +1,0 @@
-SELECT 'Configuración de producción aplicada correctamente' as status;

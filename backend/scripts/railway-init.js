@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import { config } from "../src/config/config.js";
-import DatabaseSetup from "./db-setup.js";
 import { appLogger } from "../src/middleware/logger.js";
 
 /**
@@ -93,6 +92,8 @@ class RailwayInitializer {
     appLogger.info("🔧 Inicializando base de datos para Railway...");
 
     try {
+      // Importar DatabaseSetup dinámicamente solo si es necesario
+      const { default: DatabaseSetup } = await import("./db-setup.js");
       const dbSetup = new DatabaseSetup();
       await dbSetup.run();
 
