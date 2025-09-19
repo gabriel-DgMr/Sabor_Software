@@ -117,8 +117,10 @@ backup/
 
 # Uploads (will be mounted as volume)
 uploads/
-public/uploads/
 backend/public/uploads/
+
+# Allow product images to be copied to Docker
+!public/uploads/productos/
 
 # SSL certificates (will be mounted separately)
 ssl/
