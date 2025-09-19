@@ -18,6 +18,7 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  Filler,
 } from 'chart.js';
 
 ChartJS.register(
@@ -29,7 +30,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  Filler
 );
 
 const DashboardVentas = () => {
@@ -57,7 +59,7 @@ const DashboardVentas = () => {
   }, []);
 
   const handleGeneratePDF = () => {
-    generatePDF('dashboard-ventas.pdf', 'Dashboard de Ventas');
+    generatePDF('dashboard-ventas.pdf', 'Dashboard de Ventas', 'sales', metrics);
   };
 
   if (loading) return <div>Cargando...</div>;
@@ -295,6 +297,7 @@ const DashboardVentas = () => {
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
+                    backgroundColor: '#ffffff',
                     plugins: {
                       legend: { display: false },
                       tooltip: {
@@ -347,6 +350,7 @@ const DashboardVentas = () => {
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
+                    backgroundColor: '#ffffff',
                     plugins: {
                       legend: {
                         position: 'right',
@@ -388,6 +392,7 @@ const DashboardVentas = () => {
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
+                  backgroundColor: '#ffffff',
                   plugins: {
                     legend: { display: false },
                     tooltip: {

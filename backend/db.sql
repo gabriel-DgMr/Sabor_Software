@@ -132,8 +132,13 @@ CREATE TABLE pedidos (
   fecha_pedido timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   fecha_modificacion timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   total_pedido decimal(10,2) NOT NULL DEFAULT 0.00,
-  metodo_pago ENUM('efectivo','tarjeta','transferencia') DEFAULT NULL,
+  metodo_pago ENUM('efectivo','tarjeta','transferencia','payu') DEFAULT NULL,
   notas text,
+  tipo_servicio ENUM('mesa','domicilio') NOT NULL DEFAULT 'mesa',
+  direccion_entrega TEXT DEFAULT NULL,
+  detalle_direccion VARCHAR(255) DEFAULT NULL,
+  referencia_pago VARCHAR(255) DEFAULT NULL,
+  recomendaciones TEXT DEFAULT NULL,
   PRIMARY KEY (id_pedido),
   CONSTRAINT fk_pedidos_mesas FOREIGN KEY (id_mesa) REFERENCES mesas (id_mesa) ON DELETE SET NULL,
   CONSTRAINT fk_pedidos_estados FOREIGN KEY (id_estado) REFERENCES estados (id_estado) ON DELETE RESTRICT
@@ -195,6 +200,22 @@ CREATE TABLE excepciones_horarios (
     motivo VARCHAR(255),
     activo BOOLEAN DEFAULT true
 );
+
+-- Tabla de calificaciones de productos
+CREATE TABLE calificaciones_productos (
+    id_calificacion INT PRIMARY KEY AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    id_producto INT NOT NULL,
+    id_pedido INT NOT NULL,
+    calificacion TINYINT NOT NULL CHECK (calificacion >= 1 AND calificacion <= 5),
+    comentario TEXT,
+    fecha_calificacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_modificacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_producto) REFERENCES productos(id_producto) ON DELETE CASCADE,
+    FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_product_order (id_usuario, id_producto, id_pedido)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ========================
 -- INSERCIÓN DE DATOS BASE
@@ -365,6 +386,48 @@ BEGIN
   UPDATE productos SET stock = stock + OLD.cantidad WHERE id_producto = OLD.id_producto;
 END//
 
+-- Trigger para actualizar calificación promedio cuando se agrega una calificación
+CREATE TRIGGER after_calificacion_insert
+AFTER INSERT ON calificaciones_productos
+FOR EACH ROW
+BEGIN
+  UPDATE productos 
+  SET calificacion = (
+    SELECT ROUND(AVG(calificacion), 1) 
+    FROM calificaciones_productos 
+    WHERE id_producto = NEW.id_producto
+  )
+  WHERE id_producto = NEW.id_producto;
+END//
+
+-- Trigger para actualizar calificación promedio cuando se modifica una calificación
+CREATE TRIGGER after_calificacion_update
+AFTER UPDATE ON calificaciones_productos
+FOR EACH ROW
+BEGIN
+  UPDATE productos 
+  SET calificacion = (
+    SELECT ROUND(AVG(calificacion), 1) 
+    FROM calificaciones_productos 
+    WHERE id_producto = NEW.id_producto
+  )
+  WHERE id_producto = NEW.id_producto;
+END//
+
+-- Trigger para actualizar calificación promedio cuando se elimina una calificación
+CREATE TRIGGER after_calificacion_delete
+AFTER DELETE ON calificaciones_productos
+FOR EACH ROW
+BEGIN
+  UPDATE productos 
+  SET calificacion = COALESCE((
+    SELECT ROUND(AVG(calificacion), 1) 
+    FROM calificaciones_productos 
+    WHERE id_producto = OLD.id_producto
+  ), 0)
+  WHERE id_producto = OLD.id_producto;
+END//
+
 DELIMITER ;
 
 -- ========================
@@ -375,21 +438,13 @@ CREATE INDEX idx_pedidos_estado ON pedidos(id_estado);
 CREATE INDEX idx_reservaciones_fecha ON reservaciones(fecha_reservacion);
 CREATE INDEX idx_categoria_traducciones_idioma ON categoria_traducciones(idioma);
 CREATE INDEX idx_categoria_traducciones_categoria ON categoria_traducciones(categoria_id);
+CREATE INDEX idx_pedidos_referencia_pago ON pedidos(referencia_pago);
+CREATE INDEX idx_calificaciones_producto ON calificaciones_productos(id_producto);
+CREATE INDEX idx_calificaciones_usuario ON calificaciones_productos(id_usuario);
 
 -- ========================
--- AJUSTE DE STOCK PARA PRUEBAS
+-- CONFIGURACIÓN FINAL
 -- ========================
 
--- Permitir NULL en metodo_pago e id_empleado
-ALTER TABLE pedidos 
-  MODIFY metodo_pago ENUM('efectivo','tarjeta','transferencia') DEFAULT NULL;
-  
- -- Campos agregados DOMICILIO 
-  ALTER TABLE pedidos 
-ADD COLUMN tipo_servicio ENUM('mesa','domicilio') NOT NULL DEFAULT 'mesa' AFTER notas;
-
-ALTER TABLE pedidos 
-ADD COLUMN direccion_entrega VARCHAR(255) AFTER tipo_servicio;
-
-ALTER TABLE pedidos 
-ADD COLUMN detalle_direccion VARCHAR(100) AFTER direccion_entrega;
+-- Los campos de PayU ya están incluidos en la definición de la tabla pedidos
+-- No es necesario hacer ALTER TABLE adicionales

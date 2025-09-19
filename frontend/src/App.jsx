@@ -15,6 +15,7 @@ import Login from './pages/auth/Login.jsx';
 import Register from './pages/auth/Register.jsx';
 import ResetPasswordContainer from './pages/auth/ResetPasswordContainer.jsx';
 import Carrito from './pages/carrito.jsx';
+import CheckoutPayU from './pages/CheckoutPayU.jsx';
 // import Checkout from './pages/Checkout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import DashboardVentas from './pages/DashboardVentas.jsx';
@@ -24,6 +25,7 @@ import HomeAdministrador from './pages/HomeAdministrador.jsx';
 import EscanearQR from './pages/EscanearQR.jsx';
 import HistorialPedidos from './pages/HistorialPedidos.jsx';
 import HistorialReservas from './pages/HistorialReservas.jsx';
+import MisCalificaciones from './pages/MisCalificaciones.jsx';
 import Home from './pages/Home.jsx';
 import ModificarPedido from './pages/ModificarPedido.jsx';
 import PaginaNoEncontrada from './pages/PaginaNoEncontrada.jsx';
@@ -55,6 +57,7 @@ function App() {
                 <Route element={<RoleBasedRedirect />} path="/redirect" />
                 <Route element={<Reservas />} path="/reservas" />
                 <Route element={<Carrito />} path="/carrito" />
+                <Route element={<CheckoutPayU />} path="/checkout" />
                 {/* <Route element={<Checkout />} path="/checkout" /> */}
                 <Route element={<ModificarPedido />} path="/carrito/modificar/:id" />
                 <Route element={<QuienesSomos />} path="/quienes-somos" />
@@ -192,6 +195,14 @@ function App() {
                     </ProtectedRoute>
                   }
                   path="/historial-reservas"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <MisCalificaciones />
+                    </ProtectedRoute>
+                  }
+                  path="/mis-calificaciones"
                 />
 
                 {/* Ruta 404 */}

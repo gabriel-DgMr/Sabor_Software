@@ -26,6 +26,9 @@ import { dirname } from "path";
 import helmet from "helmet";
 import mensajeContactoRoutes from "./src/routes/contactoRoutes.js";
 import mercadopagoRoutes from "./src/routes/mercadopagoRoutes.js";
+import payuRoutes from "./src/routes/payuRoutes.js";
+import webhookRoutes from "./src/routes/webhookRoutes.js";
+import calificacionRoutes from "./src/routes/calificacionRoutes.js";
 
 import dashboardRoutes from "./src/routes/dashboardRoutes.js";
 
@@ -94,6 +97,9 @@ app.use("/api/pedidos", pedidoRoutes);
 app.use("/api/horarios", horarioRoutes);
 app.use("/api", mensajeContactoRoutes);
 app.use("/api/mercadopago", mercadopagoRoutes);
+app.use("/api/payu", payuRoutes);
+app.use("/api/webhook", webhookRoutes);
+app.use("/api/calificaciones", calificacionRoutes);
 
 app.use("/api/dashboard", dashboardRoutes);
 

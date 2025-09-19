@@ -183,6 +183,9 @@ const Pedidos = () => {
                   <p className="pedido__hora">Hora: {pedido.hora}</p>
                   <p className="pedido__total">Total: ${pedido.total?.toLocaleString()}</p>
                   {pedido.notas && <p className="pedido__notas">Notas: {pedido.notas}</p>}
+                  {pedido.metodo_pago === 'payu' && pedido.referencia_pago && (
+                    <p className="pedido__payu">💳 Pago PayU: {pedido.referencia_pago}</p>
+                  )}
                   {pedido.tipo_servicio === 'domicilio' && (
                     <p className="pedido__direccion">
                       📍 Domicilio: {pedido.direccion_entrega}

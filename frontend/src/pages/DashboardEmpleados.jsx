@@ -18,6 +18,7 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  Filler,
 } from 'chart.js';
 
 ChartJS.register(
@@ -29,7 +30,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  Filler
 );
 
 const DashboardEmpleados = () => {
@@ -57,7 +59,7 @@ const DashboardEmpleados = () => {
   }, []);
 
   const handleGeneratePDF = () => {
-    generatePDF('dashboard-trabajadores.pdf', 'Dashboard de Trabajadores');
+    generatePDF('dashboard-trabajadores.pdf', 'Dashboard de Trabajadores', 'employees', metrics);
   };
 
   if (loading) return <div>Cargando...</div>;
@@ -290,6 +292,7 @@ const DashboardEmpleados = () => {
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
+                    backgroundColor: '#ffffff',
                     plugins: {
                       legend: { display: false },
                       tooltip: {
@@ -335,6 +338,7 @@ const DashboardEmpleados = () => {
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
+                    backgroundColor: '#ffffff',
                     plugins: {
                       legend: {
                         position: 'right',

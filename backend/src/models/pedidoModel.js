@@ -431,18 +431,45 @@ export const confirmarPedido = async (
   tipo_servicio,
   direccion_entrega = null,
   detalle_direccion = null,
+  referencia_pago = null,
+  estado_pago = null,
+  recomendaciones = null,
 ) => {
   let connection;
   try {
+    console.log("🔄 ===== CONFIRMANDO PEDIDO EN MODELO =====");
+    console.log("📋 Parámetros del modelo:", {
+      userId,
+      metodo_pago,
+      tipo_servicio,
+      direccion_entrega,
+      detalle_direccion,
+      referencia_pago,
+      estado_pago,
+      recomendaciones,
+    });
+
     connection = await pool.getConnection();
+    console.log("🔗 Conexión a BD obtenida");
     await connection.beginTransaction();
+    console.log("📝 Transacción iniciada");
 
     const [carrito] = await connection.query(
       "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 1 LIMIT 1",
       [userId],
     );
-    if (carrito.length === 0) throw new Error("No hay carrito");
+    console.log("🛒 Carrito encontrado:", carrito.length > 0 ? "SÍ" : "NO");
+    console.log("🛒 Datos del carrito:", carrito);
+
+    if (carrito.length === 0) {
+      console.error(
+        "❌ No se encontró carrito activo para el usuario:",
+        userId,
+      );
+      throw new Error("No hay carrito");
+    }
     const id_pedido = carrito[0].id_pedido;
+    console.log("🆔 ID del pedido a confirmar:", id_pedido);
 
     // Revalidar stock y precio de todos los productos antes de confirmar
     const [items] = await connection.query(
@@ -464,29 +491,83 @@ export const confirmarPedido = async (
       }
     }
 
+    // Determinar el estado del pedido
+    const estadoFinal = estado_pago || 2; // Por defecto pendiente (2), puede ser pagado (3)
+    console.log("📊 Estado final del pedido:", estadoFinal);
+
     // 🔹 Actualizar pedido con los datos extra
-    await connection.query(
+    console.log("📝 Actualizando pedido en BD...");
+    const [updateResult] = await connection.query(
       `UPDATE pedidos 
-       SET metodo_pago = ?, tipo_servicio = ?, direccion_entrega = ?, detalle_direccion = ?, id_estado = 2 
+       SET metodo_pago = ?, tipo_servicio = ?, direccion_entrega = ?, detalle_direccion = ?, 
+           referencia_pago = ?, recomendaciones = ?, id_estado = ?
        WHERE id_pedido = ?`,
       [
         metodo_pago,
         tipo_servicio,
         direccion_entrega,
         detalle_direccion,
+        referencia_pago,
+        recomendaciones,
+        estadoFinal,
         id_pedido,
       ],
     );
 
+    console.log("✅ Resultado de actualización:", updateResult);
+    console.log("✅ Filas afectadas:", updateResult.affectedRows);
+
     await connection.commit();
+    console.log("✅ Transacción confirmada");
+    console.log("🎉 Pedido confirmado exitosamente con ID:", id_pedido);
     return id_pedido;
   } catch (error) {
-    if (connection) await connection.rollback();
+    console.error("❌ ===== ERROR AL CONFIRMAR PEDIDO EN MODELO =====");
+    console.error("❌ Error completo:", error);
+    console.error("❌ Mensaje de error:", error.message);
+    console.error("❌ Stack trace:", error.stack);
+    if (connection) {
+      console.log("🔄 Haciendo rollback de la transacción...");
+      await connection.rollback();
+    }
     throw error;
   } finally {
     if (connection) connection.release();
   }
 };
+// Actualizar estado de pedido por referencia de pago (para webhooks de PayU)
+export const updatePedidoEstadoPorReferencia = async (
+  referencia_pago,
+  nuevoEstado,
+) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    // Buscar y actualizar el pedido por referencia de pago
+    const [result] = await connection.query(
+      "UPDATE pedidos SET id_estado = ? WHERE referencia_pago = ?",
+      [nuevoEstado, referencia_pago],
+    );
+
+    if (result.affectedRows === 0) {
+      throw new Error(
+        `No se encontró pedido con referencia: ${referencia_pago}`,
+      );
+    }
+
+    console.log(
+      `Pedido actualizado: referencia=${referencia_pago}, estado=${nuevoEstado}`,
+    );
+    return result.affectedRows;
+  } catch (error) {
+    console.error("Error al actualizar pedido por referencia:", error);
+    throw error;
+  } finally {
+    if (connection) connection.release();
+  }
+};
+
 // Limpieza de carritos abandonados (puedes programar esto con un cron job externo)
 export const limpiarCarritosAbandonados = async (horas = 24) => {
   try {
@@ -535,6 +616,8 @@ export const getAllPedidosForAdmin = async () => {
         p.tipo_servicio,
         p.direccion_entrega,
         p.detalle_direccion,
+        p.metodo_pago,
+        p.referencia_pago,
         e.nombre_estado,
         e.id_estado,
         u.nombre_usuario,
@@ -572,6 +655,8 @@ export const getAllPedidosForAdmin = async () => {
       tipo_servicio: row.tipo_servicio,
       direccion_entrega: row.direccion_entrega,
       detalle_direccion: row.detalle_direccion,
+      metodo_pago: row.metodo_pago,
+      referencia_pago: row.referencia_pago,
       fecha_pedido: row.fecha_pedido,
     }));
 

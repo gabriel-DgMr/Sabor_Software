@@ -236,6 +236,18 @@
     min-height: 100vh;
 }
 
+/* Estilo para información de PayU */
+.pedido__payu {
+    color: var(--primary-600);
+    font-weight: 600;
+    background-color: var(--primary-50);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 4px solid var(--primary-500);
+    margin: 8px 0;
+    font-size: 0.9rem;
+}
+
 .pedidos__encabezado {
     margin-bottom: 2rem;
     text-align: center;

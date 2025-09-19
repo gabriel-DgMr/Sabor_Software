@@ -142,6 +142,13 @@ const Header = () => {
                       </Link>
                       <Link
                         className="menu-perfil__opcion"
+                        to="/mis-calificaciones"
+                        onClick={closeMobileMenu}
+                      >
+                        Mis Calificaciones
+                      </Link>
+                      <Link
+                        className="menu-perfil__opcion"
                         to="/actualizar-datos"
                         onClick={closeMobileMenu}
                       >
@@ -246,6 +253,9 @@ const Header = () => {
                     </Link>
                     <Link className="menu-perfil__opcion" to="/historial-reservas">
                       {t('ver_historial_reservas')}
+                    </Link>
+                    <Link className="menu-perfil__opcion" to="/mis-calificaciones">
+                      Mis Calificaciones
                     </Link>
                     <Link className="menu-perfil__opcion" to="/actualizar-datos">
                       {t('actualizar_datos')}

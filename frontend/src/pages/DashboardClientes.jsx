@@ -17,6 +17,7 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  Filler,
 } from 'chart.js';
 
 ChartJS.register(
@@ -27,7 +28,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  Filler
 );
 
 const DashboardClientes = () => {
@@ -55,7 +57,7 @@ const DashboardClientes = () => {
   }, []);
 
   const handleGeneratePDF = () => {
-    generatePDF('dashboard-clientes.pdf', 'Dashboard de Clientes');
+    generatePDF('dashboard-clientes.pdf', 'Dashboard de Clientes', 'clients', metrics);
   };
 
   if (loading) return <div>Cargando...</div>;
@@ -278,6 +280,7 @@ const DashboardClientes = () => {
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
+                    backgroundColor: '#ffffff',
                     plugins: {
                       legend: { display: false },
                       tooltip: {
@@ -322,6 +325,7 @@ const DashboardClientes = () => {
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
+                    backgroundColor: '#ffffff',
                     plugins: {
                       legend: {
                         position: 'right',

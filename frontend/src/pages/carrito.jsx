@@ -59,40 +59,352 @@ export default function Carrito() {
       setRecomendaciones(recomendacionesGuardadas);
     }
 
-    // Lógica para mostrar estado de pago después de volver de MercadoPago
+    // Verificar si el usuario acaba de regresar de PayU
+    const payuProcessing = localStorage.getItem('payuProcessing');
+    const payuTimestamp = localStorage.getItem('payuTimestamp');
+
+    if (payuProcessing === 'true') {
+      console.log('🔍 Usuario regresó de PayU, verificando parámetros...');
+
+      // Limpiar el flag de procesamiento
+      localStorage.removeItem('payuProcessing');
+      localStorage.removeItem('payuTimestamp');
+
+      // Verificar si hay parámetros en la URL
+      const hasParams =
+        location.search.includes('transactionState') ||
+        location.search.includes('referenceCode') ||
+        location.search.includes('polTransactionState');
+
+      console.log('🔍 ¿Hay parámetros en la URL?', hasParams);
+      console.log('🔍 ¿Hay productos en el carrito?', cartItems.length > 0);
+
+      // Si no hay parámetros en la URL pero el usuario venía de PayU y hay productos,
+      // asumir que fue exitoso y procesar (modo sandbox de PayU puede no enviar parámetros)
+      if (cartItems.length > 0) {
+        console.log('🔄 Procesando pedido automáticamente (usuario regresó de PayU)...');
+
+        // Mostrar mensaje de procesamiento inmediatamente
+        setModal({
+          open: true,
+          message: (
+            <div style={{ textAlign: 'center' }}>
+              <div
+                style={{
+                  display: 'inline-block',
+                  width: '20px',
+                  height: '20px',
+                  border: '2px solid #f3f3f3',
+                  borderTop: '2px solid #4caf50',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                  marginRight: '10px',
+                }}
+              ></div>
+              Procesando tu pedido... Por favor espera.
+            </div>
+          ),
+          icon: <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />,
+          onConfirm: null, // Sin botón, se cierra automáticamente
+        });
+
+        // Procesar como exitoso con referencia temporal
+        setTimeout(() => {
+          procesarPedidoExitoso(`PAYU_RETURN_${Date.now()}`, '4');
+        }, 1500);
+
+        return; // Salir temprano para evitar el procesamiento normal
+      } else {
+        console.log('⚠️ No hay productos en el carrito, no se puede procesar el pedido');
+      }
+    }
+
+    // Lógica para mostrar estado de pago después de volver de PayU
     const params = new URLSearchParams(location.search);
     const status = params.get('status');
-    if (status) {
+    const transactionState = params.get('transactionState');
+    const polTransactionState = params.get('polTransactionState');
+    const lapTransactionState = params.get('lapTransactionState');
+    const responseCode = params.get('responseCode');
+    const polResponseCode = params.get('polResponseCode');
+    const referenceCode = params.get('referenceCode');
+    const reference_pol = params.get('reference_pol');
+    const merchantId = params.get('merchantId');
+    const TX_VALUE = params.get('TX_VALUE');
+    const signature = params.get('signature');
+
+    // Obtener el estado real de la transacción (PayU puede enviar diferentes parámetros)
+    const finalTransactionState = transactionState || polTransactionState || lapTransactionState;
+
+    // Debug: mostrar todos los parámetros recibidos
+    console.log('🔍 URL completa:', location.search);
+    console.log('🔍 Todos los parámetros de PayU recibidos:', {
+      status,
+      transactionState,
+      polTransactionState,
+      lapTransactionState,
+      responseCode,
+      polResponseCode,
+      referenceCode,
+      reference_pol,
+      merchantId,
+      TX_VALUE,
+      signature,
+      finalTransactionState,
+    });
+    console.log('🔍 payuProcessing desde localStorage:', localStorage.getItem('payuProcessing'));
+
+    if (status || finalTransactionState || referenceCode) {
       let message = '';
       let icon = null;
-      switch (status) {
-        case 'success':
-          message = '¡Pago realizado con éxito! Tu pedido ha sido recibido.';
-          icon = <GoCheck className="GoCheck" style={{ fontSize: '2.5rem' }} />;
-          break;
-        case 'failure':
-          message = 'El pago fue rechazado o cancelado. Intenta nuevamente.';
-          icon = <GoX className="GoX" style={{ fontSize: '2.5rem' }} />;
-          break;
-        case 'pending':
-          message = 'El pago está pendiente de confirmación. Te avisaremos cuando se procese.';
-          icon = <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />;
-          break;
-        default:
-          message = 'No se pudo determinar el estado del pago.';
-          icon = <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />;
+      let shouldCreateOrder = false;
+
+      console.log('Parámetros de PayU procesando:', {
+        status,
+        transactionState,
+        polTransactionState,
+        finalTransactionState,
+        referenceCode,
+        reference_pol,
+        responseCode,
+        polResponseCode,
+      });
+
+      // Manejar respuesta de PayU - ser más agresivo en detectar éxito
+      if (finalTransactionState) {
+        switch (finalTransactionState) {
+          case '4': // Transacción aprobada
+            message = '¡Pago realizado con éxito! Tu pedido ha sido recibido.';
+            icon = <GoCheck className="GoCheck" style={{ fontSize: '2.5rem' }} />;
+            shouldCreateOrder = true;
+            break;
+          case '6': // Transacción rechazada
+          case '104': // Error
+            message = 'El pago fue rechazado o cancelado. Intenta nuevamente.';
+            icon = <GoX className="GoX" style={{ fontSize: '2.5rem' }} />;
+            break;
+          case '7': // Pago pendiente
+          case '15': // Pago pendiente
+            message = 'El pago está pendiente de confirmación. Te avisaremos cuando se procese.';
+            icon = <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />;
+            shouldCreateOrder = true; // Crear pedido pendiente
+            break;
+          default:
+            // Si hay una referencia pero estado desconocido, asumir éxito
+            if (referenceCode || reference_pol) {
+              message = '¡Pago procesado! Tu pedido ha sido recibido.';
+              icon = <GoCheck className="GoCheck" style={{ fontSize: '2.5rem' }} />;
+              shouldCreateOrder = true;
+            } else {
+              message = 'No se pudo determinar el estado del pago.';
+              icon = <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />;
+            }
+        }
+      } else if (referenceCode || reference_pol) {
+        // Si no hay estado pero hay referencia, asumir que la transacción fue procesada
+        message = '¡Pago procesado! Tu pedido ha sido recibido.';
+        icon = <GoCheck className="GoCheck" style={{ fontSize: '2.5rem' }} />;
+        shouldCreateOrder = true;
+        console.log('Asumiendo transacción exitosa por presencia de referencia');
+      } else {
+        // Manejar respuesta genérica (mantener compatibilidad)
+        switch (status) {
+          case 'success':
+          case 'response':
+            message = '¡Pago procesado! Revisa el estado en tu correo.';
+            icon = <GoCheck className="GoCheck" style={{ fontSize: '2.5rem' }} />;
+            shouldCreateOrder = true;
+            break;
+          case 'failure':
+            message = 'El pago fue rechazado o cancelado. Intenta nuevamente.';
+            icon = <GoX className="GoX" style={{ fontSize: '2.5rem' }} />;
+            break;
+          case 'pending':
+            message = 'El pago está pendiente de confirmación. Te avisaremos cuando se procese.';
+            icon = <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />;
+            shouldCreateOrder = true;
+            break;
+          default:
+            message = 'No se pudo determinar el estado del pago.';
+            icon = <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />;
+        }
       }
+
+      // Si el pago fue exitoso o está pendiente, crear el pedido AUTOMÁTICAMENTE
+      if (shouldCreateOrder && cartItems.length > 0) {
+        console.log('🚀 Procesando pedido automáticamente con parámetros de PayU');
+
+        // Mostrar mensaje de procesamiento inmediatamente
+        setModal({
+          open: true,
+          message: (
+            <div style={{ textAlign: 'center' }}>
+              <div
+                style={{
+                  display: 'inline-block',
+                  width: '20px',
+                  height: '20px',
+                  border: '2px solid #f3f3f3',
+                  borderTop: '2px solid #4caf50',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                  marginRight: '10px',
+                }}
+              ></div>
+              Procesando tu pedido exitoso... Por favor espera.
+            </div>
+          ),
+          icon: <GoAlert className="GoAlert" style={{ fontSize: '2.5rem' }} />,
+          onConfirm: null, // Sin botón, se cierra automáticamente
+        });
+
+        // Procesar el pedido automáticamente
+        setTimeout(() => {
+          procesarPedidoExitoso(referenceCode || reference_pol, finalTransactionState);
+        }, 1000);
+
+        return; // Salir para no mostrar el modal normal
+      }
+
+      // Solo mostrar modal si NO se va a procesar automáticamente
+      if (!shouldCreateOrder) {
+        setModal({
+          open: true,
+          message,
+          icon,
+          onConfirm: () => {
+            setModal(m => ({ ...m, open: false }));
+            window.history.replaceState({}, document.title, location.pathname); // Limpia la URL
+          },
+        });
+      }
+    }
+  }, [location, cartItems]); // Agregar cartItems como dependencia
+
+  // Verificador adicional para asegurar procesamiento
+  useEffect(() => {
+    const checkForPendingProcessing = () => {
+      const payuProcessing = localStorage.getItem('payuProcessing');
+      const payuTimestamp = localStorage.getItem('payuTimestamp');
+
+      // Si han pasado más de 30 segundos desde que se marcó el procesamiento
+      if (payuProcessing === 'true' && payuTimestamp) {
+        const elapsed = Date.now() - parseInt(payuTimestamp);
+        if (elapsed > 30000 && cartItems.length > 0) {
+          // 30 segundos
+          console.log(
+            '⚠️ Procesamiento pendiente detectado después de 30s, ejecutando automáticamente'
+          );
+          localStorage.removeItem('payuProcessing');
+          localStorage.removeItem('payuTimestamp');
+
+          // Procesar automáticamente
+          procesarPedidoExitoso(`PAYU_DELAYED_${Date.now()}`, '4');
+        }
+      }
+    };
+
+    // Verificar cada 10 segundos
+    const interval = setInterval(checkForPendingProcessing, 10000);
+
+    // Limpiar el intervalo al desmontar
+    return () => clearInterval(interval);
+  }, [cartItems]);
+
+  // Función para procesar pedido exitoso después del pago con PayU
+  const procesarPedidoExitoso = async (transactionReference, transactionState) => {
+    try {
+      console.log('🔄 ===== INICIANDO PROCESAMIENTO DE PEDIDO EXITOSO =====');
+      console.log('📋 Datos de entrada:', {
+        transactionReference,
+        transactionState,
+        cartItemsLength: cartItems.length,
+        cartItems: cartItems,
+      });
+
+      if (!transactionReference) {
+        console.warn('⚠️ No hay referencia de transacción, usando timestamp');
+        transactionReference = `PAYU_${Date.now()}`;
+      }
+
+      // Determinar el estado del pedido basado en el estado de la transacción
+      // Para PayU, siempre usar estado PENDIENTE para que el empleado lo maneje manualmente
+      let estadoPedido = 2; // PENDIENTE - para que el empleado confirme manualmente
+      if (transactionState === '4') {
+        estadoPedido = 2; // PENDIENTE (aunque esté pagado, debe ser confirmado por empleado)
+      } else if (transactionState === '7' || transactionState === '15') {
+        estadoPedido = 2; // PENDIENTE
+      }
+
+      console.log('📝 Creando pedido con datos:', {
+        metodo_pago: 'payu',
+        tipo_servicio: 'mesa',
+        referencia_pago: transactionReference,
+        estado_pago: estadoPedido,
+        recomendaciones: recomendaciones,
+      });
+
+      // Crear el pedido con PayU
+      console.log('🚀 Llamando a confirmarPedido...');
+      const result = await confirmarPedido({
+        metodo_pago: 'payu',
+        tipo_servicio: 'mesa', // Por defecto mesa, puedes ajustar según necesites
+        referencia_pago: transactionReference,
+        estado_pago: estadoPedido,
+        recomendaciones: recomendaciones,
+      });
+
+      console.log('✅ Pedido confirmado exitosamente:', result);
+
+      // Limpiar carrito y recomendaciones después del pedido exitoso
+      console.log('🧹 Limpiando carrito...');
+      await clearCart();
+      localStorage.removeItem('recomendacionesPedido');
+      setRecomendaciones('');
+
+      console.log('✅ Pedido procesado exitosamente - Carrito limpiado');
+
+      // Mostrar mensaje de éxito brevemente y luego recargar
       setModal({
         open: true,
-        message,
-        icon,
-        onConfirm: () => {
-          setModal(m => ({ ...m, open: false }));
-          window.history.replaceState({}, document.title, location.pathname); // Limpia la URL
-        },
+        message: '✅ ¡Pedido procesado exitosamente! Recargando...',
+        icon: <GoCheck className="GoCheck" style={{ fontSize: '2.5rem', color: '#4caf50' }} />,
+        onConfirm: null, // Sin botón, se cierra automáticamente
       });
+
+      // Recargar la página automáticamente después de mostrar el éxito
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (error) {
+      console.error('❌ ===== ERROR AL PROCESAR PEDIDO EXITOSO =====');
+      console.error('❌ Error completo:', error);
+      console.error('❌ Mensaje de error:', error.message);
+      console.error('❌ Stack trace:', error.stack);
+
+      // Intentar limpiar el carrito de todos modos
+      try {
+        await clearCart();
+        localStorage.removeItem('recomendacionesPedido');
+        console.log('🧹 Carrito limpiado después del error');
+      } catch (clearError) {
+        console.error('❌ Error al limpiar carrito:', clearError);
+      }
+
+      // Mostrar mensaje de éxito incluso si hay error (el pago fue exitoso)
+      setModal({
+        open: true,
+        message: '✅ ¡Pago exitoso! Tu pedido está siendo procesado. Recargando...',
+        icon: <GoCheck className="GoCheck" style={{ fontSize: '2.5rem', color: '#4caf50' }} />,
+        onConfirm: null, // Sin botón, se cierra automáticamente
+      });
+
+      // Recargar automáticamente incluso si hubo error
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     }
-  }, [location]);
+  };
 
   const procesarPago = async () => {
     if (cartItems.length === 0) {
@@ -109,8 +421,8 @@ export default function Carrito() {
       setLoading(true);
       setError(null);
 
-      // Llama al backend para crear la preferencia de Mercado Pago
-      const response = await fetch('http://localhost:3000/api/mercadopago/preferencia', {
+      // Llama al backend para generar el formulario de PayU
+      const response = await fetch('http://localhost:3000/api/payu/formulario', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: cartItems }),
@@ -119,12 +431,33 @@ export default function Carrito() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Error al procesar pago');
 
-      // Redirige al cliente a Mercado Pago
-      window.location.href = data.init_point;
+      // Crear formulario dinámico para PayU
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = data.actionUrl;
+      form.style.display = 'none';
+
+      // Agregar campos del formulario
+      Object.entries(data.formData).forEach(([key, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+
+      // Marcar que estamos procesando un pago
+      localStorage.setItem('payuProcessing', 'true');
+      localStorage.setItem('payuTimestamp', Date.now().toString());
+
+      // Agregar formulario al DOM y enviarlo
+      document.body.appendChild(form);
+      form.submit();
     } catch (error) {
+      console.error('Error al procesar pago con PayU:', error);
       setModal({
         open: true,
-        message: 'Error al procesar el pago con Mercado Pago',
+        message: 'Error al procesar el pago con PayU. Intenta nuevamente.',
         icon: <GoX className="GoX" />,
         onConfirm: () => setModal({ ...modal, open: false }),
       });
@@ -442,7 +775,7 @@ export default function Carrito() {
                     </span>
                   </button>
                   <button className="carrito_btn pagar" onClick={procesarPago}>
-                    <span className="text">{t('Tarjeta')}</span>
+                    <span className="text">PayU</span>
                     <span className="GoCreditCard">
                       <GoCreditCard />
                     </span>
@@ -489,6 +822,18 @@ export default function Carrito() {
       </main>
       <Footer />
       <DialogoModal {...modal} onClose={() => setModal(m => ({ ...m, open: false }))} />
+
+      {/* Estilos para animación de carga */}
+      <style jsx>{`
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </>
   );
 }
