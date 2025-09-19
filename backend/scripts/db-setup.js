@@ -72,7 +72,19 @@ class DatabaseSetup {
         const productionScript = fs.readFileSync(productionScriptPath, "utf8");
 
         const connection = this.rootConnection || this.connection;
-        await connection.execute(productionScript);
+
+        // Dividir el script en comandos individuales y ejecutarlos uno por uno
+        const commands = productionScript
+          .split(";")
+          .map((cmd) => cmd.trim())
+          .filter((cmd) => cmd.length > 0 && !cmd.startsWith("--"));
+
+        for (const command of commands) {
+          if (command.trim()) {
+            await connection.execute(command);
+          }
+        }
+
         console.log("✅ Script de producción ejecutado correctamente");
       }
 
