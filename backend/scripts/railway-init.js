@@ -126,8 +126,8 @@ class RailwayInitializer {
       );
     }
 
-    // Configurar trust proxy
-    process.env.TRUST_PROXY = "true";
+    // Configurar trust proxy de manera segura (solo 1 nivel de proxy)
+    process.env.TRUST_PROXY = "1";
 
     // Configurar logging para Railway
     if (!process.env.LOG_LEVEL) {

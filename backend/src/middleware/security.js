@@ -15,6 +15,8 @@ export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
     },
     standardHeaders: true,
     legacyHeaders: false,
+    // Configurar trust proxy de manera segura para Railway
+    trustProxy: process.env.NODE_ENV === "production" ? 1 : false,
   });
 };
 
@@ -28,6 +30,8 @@ export const authRateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Configurar trust proxy de manera segura para Railway
+  trustProxy: process.env.NODE_ENV === "production" ? 1 : false,
   handler: (req, res, next, options) => {
     // Log de seguridad para intentos de fuerza bruta
     if (process.env.NODE_ENV === "production") {
@@ -50,6 +54,8 @@ export const registerRateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Configurar trust proxy de manera segura para Railway
+  trustProxy: process.env.NODE_ENV === "production" ? 1 : false,
 });
 
 // Rate limiter para mensajes de contacto (máx 3 por día por IP)
@@ -61,6 +67,8 @@ export const contactoRateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Configurar trust proxy de manera segura para Railway
+  trustProxy: process.env.NODE_ENV === "production" ? 1 : false,
 });
 
 // Configuración de Helmet para headers de seguridad
@@ -352,8 +360,8 @@ export const pathTraversalProtection = (req, res, next) => {
 
 // Configuración de seguridad para producción
 export const productionSecurityConfig = {
-  // Configurar trust proxy para obtener IPs reales detrás de proxies
-  trustProxy: process.env.NODE_ENV === "production",
+  // Configurar trust proxy de manera segura para Railway (solo confiar en 1 proxy)
+  trustProxy: process.env.NODE_ENV === "production" ? 1 : false,
 
   // Headers de seguridad adicionales
   securityHeaders: {
