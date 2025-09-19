@@ -206,6 +206,24 @@ export const appLogger = {
       console.debug("🐛 DEBUG:", JSON.stringify(logEntry));
     }
   },
+
+  error: (message, error = null, additionalInfo = {}) => {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      level: "ERROR",
+      message,
+      error: error
+        ? {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          }
+        : null,
+      ...additionalInfo,
+    };
+
+    console.error("🚨 ERROR:", JSON.stringify(logEntry));
+  },
 };
 
 // Función para limpiar logs antiguos (ejecutar diariamente)
