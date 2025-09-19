@@ -7,9 +7,17 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
     "start": "node index.js",
+    "start:prod": "NODE_ENV=production node scripts/railway-init.js && NODE_ENV=production node index.js",
+    "build": "echo \"Backend build completed - using ES modules\"",
     "security-check": "npm audit",
+    "security-check:prod": "npm audit --audit-level=high",
     "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix"
+    "lint:fix": "eslint src/ --fix",
+    "clean": "rm -rf logs/* uploads/temp/*",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed": "node scripts/seed.js",
+    "health-check": "node scripts/health-check.js",
+    "railway:init": "node scripts/railway-init.js"
   },
   "author": "",
   "license": "ISC",

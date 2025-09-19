@@ -30,6 +30,7 @@ import payuRoutes from "./src/routes/payuRoutes.js";
 import webhookRoutes from "./src/routes/webhookRoutes.js";
 import calificacionRoutes from "./src/routes/calificacionRoutes.js";
 import dashboardRoutes from "./src/routes/dashboardRoutes.js";
+import healthRoutes from "./src/routes/healthRoutes.js";
 
 // NUEVO: Importa las rutas de domicilios
 import domicilioRoutes from "./src/routes/domicilioRoutes.js";
@@ -56,16 +57,45 @@ app.use(
   }),
 );
 
-// Configuración de CORS más permisiva para desarrollo
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-    maxAge: 86400, // 24 horas
-  }),
-);
+// Configuración de CORS dinámico para desarrollo y producción
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Permitir requests sin origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+
+    // Lista de orígenes permitidos
+    const allowedOrigins = [
+      "http://localhost:5173", // Desarrollo frontend
+      "http://localhost:3000", // Desarrollo backend
+      "http://localhost:4173", // Preview frontend
+    ];
+
+    // En producción, agregar URLs de Railway y CORS_ORIGIN
+    if (process.env.NODE_ENV === "production") {
+      if (process.env.RAILWAY_STATIC_URL) {
+        allowedOrigins.push(process.env.RAILWAY_STATIC_URL);
+      }
+      if (process.env.CORS_ORIGIN) {
+        allowedOrigins.push(process.env.CORS_ORIGIN);
+      }
+      if (process.env.FRONTEND_URL) {
+        allowedOrigins.push(process.env.FRONTEND_URL);
+      }
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  maxAge: 86400, // 24 horas
+};
+
+app.use(cors(corsOptions));
 
 // Rate limiting general
 app.use(createRateLimiter());
@@ -106,6 +136,9 @@ app.use("/api/dashboard", dashboardRoutes);
 
 // NUEVO: Ruta para historial de domicilios
 app.use("/api/domicilios", domicilioRoutes);
+
+// Health check routes (sin autenticación para monitoreo)
+app.use("/api", healthRoutes);
 
 // Servir archivos estáticos con validaciones de seguridad
 // Ruta principal para uploads
@@ -161,12 +194,26 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // Iniciar servidor
-const PORT = config.server.port;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || config.server.port || 3000;
+
+// Configurar trust proxy para Railway
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", true);
+}
+
+app.listen(PORT, "0.0.0.0", () => {
   console.log(
     `Servidor corriendo en puerto ${PORT} en modo ${config.server.mode}`,
   );
   console.log("Configuración de seguridad activada");
+
+  // Log adicional para Railway
+  if (process.env.RAILWAY_ENVIRONMENT) {
+    console.log(
+      `🚄 Desplegado en Railway - Environment: ${process.env.RAILWAY_ENVIRONMENT}`,
+    );
+    console.log(`🌐 URL: ${process.env.RAILWAY_STATIC_URL || "No disponible"}`);
+  }
 });
 
 export default app;

@@ -7,9 +7,21 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build:prod",
+    "build:backend": "cd backend && npm run build",
+    "start": "cd backend && npm run start:prod",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "clean:all": "rm -rf node_modules && cd backend && rm -rf node_modules && cd ../frontend && rm -rf node_modules dist",
+    "security-check:all": "npm audit && cd backend && npm run security-check:prod && cd ../frontend && npm audit",
+    "deploy:prepare": "npm run clean:all && npm run install:all && npm run security-check:all && npm run build"
   },
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.0.0",
     "husky": "^8.0.0",

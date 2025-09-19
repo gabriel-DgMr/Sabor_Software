@@ -1,0 +1,88 @@
+# Railway ignore file - archivos que no se suben a Railway
+
+# Frontend (no necesario para el backend service)
+frontend/
+public/
+qrs/
+
+# Documentación
+*.md
+docs/
+PRODUCTION-DEPLOYMENT.md
+railway-setup.md
+
+# Archivos de desarrollo
+.env.example
+.env.development
+.env.local
+env.production.example
+
+# Logs locales
+logs/
+*.log
+
+# Archivos de desarrollo
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+test/
+tests/
+**/*.test.js
+**/*.spec.js
+
+# Coverage
+coverage/
+.nyc_output
+
+# Temporary folders
+tmp/
+temp/
+backend/temp/
+
+# Backup files
+backup/
+*.backup
+
+# Docker files (no necesarios para Railway)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Scripts de despliegue local
+deploy.sh
+deploy.ps1
+
+# Git
+.git/
+.gitignore
+
+# Node modules (Railway los instala)
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build outputs que no son necesarios
+frontend/dist/
+
+# Archivos de configuración local
+.eslintrc*
+.prettierrc*
+nodemon.json
+
+# SSL certificates
+ssl/
+*.pem
+*.key
+*.crt
+
+# Uploads locales (usar storage externo en producción)
+backend/public/uploads/
+uploads/
