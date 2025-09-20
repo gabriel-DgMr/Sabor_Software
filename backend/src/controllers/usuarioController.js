@@ -55,7 +55,10 @@ export const updateusuario = async (req, res) => {
       // Eliminar imagen anterior si existe
       const usuario = await authModel.getusuarioById(id);
       if (usuario && usuario.imagen_usuario) {
-        const oldImagePath = path.join("uploads", usuario.imagen_usuario);
+        const oldImagePath = path.join(
+          "public/uploads",
+          usuario.imagen_usuario,
+        );
         if (fs.existsSync(oldImagePath)) {
           fs.unlinkSync(oldImagePath);
         }
