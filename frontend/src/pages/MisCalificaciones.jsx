@@ -8,7 +8,7 @@ import LoadingScreen from '../components/LoadingScreen';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import '../styles/misCalificaciones.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 const MisCalificaciones = () => {
   const { user, isAuthenticated } = useAuth();

@@ -30,7 +30,7 @@ const HistorialPedidos = () => {
           return;
         }
 
-        const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api') + '/pedidos';
+        const apiUrl = (import.meta.env.VITE_API_URL || '/api') + '/pedidos';
         const res = await axios.get(apiUrl, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: false,
@@ -56,7 +56,7 @@ const HistorialPedidos = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const apiUrl = import.meta.env.VITE_API_URL || '/api';
       const res = await axios.get(`${apiUrl}/calificaciones/pedido/${pedidoId}/productos`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -98,7 +98,7 @@ const HistorialPedidos = () => {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Token no encontrado');
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const apiUrl = import.meta.env.VITE_API_URL || '/api';
       await axios.post(`${apiUrl}/calificaciones`, ratingData, {
         headers: {
           Authorization: `Bearer ${token}`,
