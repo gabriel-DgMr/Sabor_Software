@@ -49,17 +49,14 @@ RUN addgroup -g 1001 -S nodejs && \
 # Copiar dependencias del backend desde stage anterior
 COPY --from=backend-setup --chown=sabor:nodejs /app/node_modules ./node_modules
 
+# Copiar directorio completo de uploads (incluye imágenes de productos)
+COPY --chown=sabor:nodejs public/uploads ./public/uploads
+
 # Copiar código del backend
 COPY --chown=sabor:nodejs backend/ ./
 
 # Copiar build del frontend a directorio estático del backend
 COPY --from=frontend-build --chown=sabor:nodejs /app/frontend/dist ./public/dist
-
-# Copiar directorio completo de uploads (incluye imágenes de productos)
-COPY --chown=sabor:nodejs public/uploads ./public/uploads
-
-# Asegurar que las imágenes del backend también estén disponibles
-COPY --chown=sabor:nodejs backend/public/uploads ./public/uploads
 
 # Crear directorios necesarios con permisos correctos
 RUN mkdir -p logs public/uploads/temp && \
