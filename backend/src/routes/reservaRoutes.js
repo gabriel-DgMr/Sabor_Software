@@ -24,6 +24,14 @@ router.get("/historial", authenticateToken, getHistorialReservas);
 // Rutas protegidas con validaciones
 router.post("/hacerReserva", hacerReserva);
 
+// Rutas para administración de reservaciones (deben ir ANTES de las rutas con parámetros)
+router.get(
+  "/",
+  authenticateToken,
+  checkPermission("manage_reservations"),
+  getAllReservaciones,
+);
+
 // Ruta para crear reservas desde administración
 router.post(
   "/",
@@ -38,14 +46,6 @@ router.put(
   authenticateToken,
   checkPermission("manage_reservations"),
   actualizarReservaAdmin,
-);
-
-// Rutas para administración de reservaciones
-router.get(
-  "/",
-  authenticateToken,
-  checkPermission("manage_reservations"),
-  getAllReservaciones,
 );
 router.get(
   "/fecha/:fecha",
