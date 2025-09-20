@@ -97,7 +97,7 @@ const ReservacionesAdministrador = () => {
       const token = localStorage.getItem('token');
       console.log('🔍 Token obtenido:', token ? 'Sí' : 'No');
 
-      const url = '/api/reservas';
+      const url = (import.meta.env.VITE_API_URL || '/api') + '/reservas';
       console.log('🔍 Haciendo petición a:', url);
 
       const response = await fetch(url, {
