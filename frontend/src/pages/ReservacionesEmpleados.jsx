@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import MenuLateral from '../components/MenuLateralAdministrador';
+import MenuLateral from '../components/MenuLateralEmpleado';
 import LoadingScreen from '../components/LoadingScreen';
 import { GoCheck, GoX } from 'react-icons/go';
 import '../styles/empleados.css';

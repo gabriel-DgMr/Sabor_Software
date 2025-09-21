@@ -116,7 +116,7 @@ const ProductosAdministrar = () => {
                       <img
                         alt={producto.nombre_producto}
                         className="productos__imagen"
-                        src={`http://localhost:3000/${producto.imagen_producto}`}
+                        src={`http://localhost:3000${producto.imagen_producto}`}
                       />
                       <div className="productos__info">
                         <h4 className="productos__nombre">{producto.nombre_producto}</h4>

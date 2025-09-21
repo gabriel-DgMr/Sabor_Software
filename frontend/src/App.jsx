@@ -36,6 +36,9 @@ import SobreNosotros from './pages/SobreNosotros.jsx';
 import HomeEmpleados from './pages/HomeEmpleados.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 import ProductosEmpleados from './pages/ProductosEmpleados.jsx';
+import UsuariosAdministrar from './pages/AdministrarUsuarios.jsx';
+import PedidosEmpleados from './pages/PedidosEmpleados.jsx';
+import ReservacionesEmpleados from './pages/ReservacionesEmpleados.jsx';
 
 function App() {
   return (
@@ -138,7 +141,17 @@ function App() {
                 <Route
                   element={
                     <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador', 'Empleado']}>
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <UsuariosAdministrar />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/administrador/usuarios"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
                         <PedidosAdministrar />
                       </RoleProtectedRoute>
                     </ProtectedRoute>
@@ -148,7 +161,7 @@ function App() {
                 <Route
                   element={
                     <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador', 'Empleado']}>
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
                         <ReservasAdministrar />
                       </RoleProtectedRoute>
                     </ProtectedRoute>
@@ -176,6 +189,26 @@ function App() {
                     </ProtectedRoute>
                   }
                   path="/empleado/productos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Empleado']}>
+                        <PedidosEmpleados />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/empleado/pedidos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Empleado']}>
+                        <ReservacionesEmpleados />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/empleado/reservaciones"
                 />
 
                 {/* Usuario autenticado */}

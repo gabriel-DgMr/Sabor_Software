@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaUserCircle, FaBars, FaTimes } from 'react-icons/fa';
+import { FiPower } from 'react-icons/fi';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext.jsx';
@@ -13,7 +14,7 @@ const MenuLateral = () => {
   const opcionesGenerales = [
     { nombre: 'Inicio', ruta: '/HomeEmpleados' },
     { nombre: 'Productos', ruta: '/empleado/productos' },
-    { nombre: 'Reservaciones', ruta: '/empleados/reservaciones' },
+    { nombre: 'Reservaciones', ruta: '/empleado/reservaciones' },
     { nombre: 'Pedidos', ruta: '/empleado/pedidos' },
     { nombre: 'Domicilios', ruta: '/empleado/domicilios' },
   ];
@@ -39,19 +40,22 @@ const MenuLateral = () => {
         <img alt="Logo Sabor" className="menu-lateral__logo" src="/images/logo_sabor.png" />
 
         <hr className="menu-lateral__separador" />
+        <div className="menu-lateral__contenedor-cliente">
+          <button aria-label="Cerrar sesión" className="menu-lateral__cliente">
+            <FaUserCircle size={32} />
+            <span className="menu-lateral__cliente-nombre">{user?.nombre_usuario}</span>
+          </button>
 
-        <button
-          aria-label="Cerrar sesión"
-          className="menu-lateral__usuario"
-          onClick={() => {
-            logout();
-            closeMenu();
-          }}
-        >
-          <FaUserCircle size={32} />
-          <span className="menu-lateral__usuario-nombre">{user?.nombre_usuario}</span>
-        </button>
-
+          <button
+            className="menu-lateral-cerrar"
+            onClick={() => {
+              logout();
+              closeMenu();
+            }}
+          >
+            <FiPower size={30} />
+          </button>
+        </div>
         <hr className="menu-lateral__separador" />
 
         {/* Opciones generales */}

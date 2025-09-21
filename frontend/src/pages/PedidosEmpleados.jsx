@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-import MenuLateral from '../components/MenuLateralAdministrador';
+import MenuLateral from '../components/MenuLateralEmpleado';
 
 import {
   obtenerPedidos,
@@ -18,7 +18,7 @@ const estadoTexto = estado => {
   return mapearEstado(estado);
 };
 
-const Pedidos = () => {
+const PedidosEmpleados = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [filtroActivo, setFiltroActivo] = useState('todos');
   const [pedidos, setPedidos] = useState([]);
