@@ -212,25 +212,110 @@
 /* Responsive */
 @media (max-width: 768px) {
   .dashboard-container {
-    padding: 16px;
+    padding: 12px;
+  }
+  
+  .dashboard-title {
+    font-size: 24px;
   }
   
   .metrics-grid {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
+  }
+  
+  .metric-card {
+    padding: 16px;
+    min-width: auto;
+  }
+  
+  .metric-card-title {
+    font-size: 16px;
+  }
+  
+  .metric-card-value {
+    font-size: 20px;
   }
   
   .charts-container {
     flex-direction: column;
+    gap: 16px;
   }
   
   .chart-container {
     min-width: 100%;
+    padding: 16px;
+  }
+  
+  .chart-title {
+    font-size: 14px;
   }
   
   .dashboard-header {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     align-items: flex-start;
+  }
+
+  .table-container {
+    padding: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .data-table {
+    min-width: 600px;
+    font-size: 14px;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 8px 6px;
+    white-space: nowrap;
+  }
+  
+  .status-badge,
+  .role-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 8px;
+  }
+  
+  .dashboard-title {
+    font-size: 20px;
+  }
+  
+  .metric-card {
+    padding: 12px;
+  }
+  
+  .metric-card-title {
+    font-size: 14px;
+  }
+  
+  .metric-card-value {
+    font-size: 18px;
+  }
+  
+  .chart-container {
+    padding: 12px;
+  }
+  
+  .table-container {
+    padding: 12px;
+  }
+  
+  .data-table {
+    font-size: 12px;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 6px 4px;
   }
 }

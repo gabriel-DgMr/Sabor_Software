@@ -71,4 +71,19 @@ router.delete(
   usuarioController.deleteusuario,
 );
 
+// Rutas para gestión de roles
+router.get(
+  "/roles",
+  authenticateToken,
+  checkRole(["Administrador"]),
+  usuarioController.getAllRoles,
+);
+
+router.put(
+  "/actualizar-rol/:id",
+  authenticateToken,
+  checkRole(["Administrador"]),
+  usuarioController.actualizarRolUsuario,
+);
+
 export default router;

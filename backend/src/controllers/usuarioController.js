@@ -106,3 +106,66 @@ export const deleteusuario = async (req, res) => {
     });
   }
 };
+
+// Obtener todos los roles
+export const getAllRoles = async (req, res) => {
+  try {
+    const roles = await authModel.getAllRoles();
+    res.json(roles);
+  } catch (error) {
+    console.error("Error al obtener roles:", error);
+    res.status(500).json({
+      message: "Error al obtener la lista de roles",
+    });
+  }
+};
+
+// Actualizar rol de usuario
+export const actualizarRolUsuario = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { id_rol } = req.body;
+
+    // Validar que el id_rol sea válido
+    if (!id_rol || isNaN(id_rol)) {
+      return res.status(400).json({
+        message: "ID de rol inválido",
+      });
+    }
+
+    // Verificar que el usuario existe
+    const usuario = await authModel.getusuarioById(id);
+    if (!usuario) {
+      return res.status(404).json({
+        message: "Usuario no encontrado",
+      });
+    }
+
+    // Verificar que el rol existe
+    const roles = await authModel.getAllRoles();
+    const rolExiste = roles.some((rol) => rol.id_rol === parseInt(id_rol));
+    if (!rolExiste) {
+      return res.status(400).json({
+        message: "Rol no válido",
+      });
+    }
+
+    // Actualizar el rol
+    const success = await authModel.updateUserRole(id, id_rol);
+
+    if (!success) {
+      return res.status(404).json({
+        message: "No se pudo actualizar el rol del usuario",
+      });
+    }
+
+    res.json({
+      message: "Rol de usuario actualizado exitosamente",
+    });
+  } catch (error) {
+    console.error("Error al actualizar rol de usuario:", error);
+    res.status(500).json({
+      message: "Error al actualizar el rol del usuario",
+    });
+  }
+};

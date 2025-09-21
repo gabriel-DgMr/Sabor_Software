@@ -12,6 +12,7 @@ const MenuLateral = () => {
 
   const opcionesGenerales = [
     { nombre: 'Inicio', ruta: '/HomeAdministrador' },
+    { nombre: 'Usuarios', ruta: '/administrador/usuarios' },
     { nombre: 'Reservaciones', ruta: '/administrador/reservaciones' },
     { nombre: 'Productos', ruta: '/administrador/productos' },
     { nombre: 'Pedidos', ruta: '/administrador/pedidos' },

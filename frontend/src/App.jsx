@@ -34,6 +34,7 @@ import PedidosAdministrar from './pages/PedidosAdministrador.jsx';
 import ProductosAdministrar from './pages/ProductosAdministrador.jsx';
 import QuienesSomos from './pages/QuienesSomos.jsx';
 import ReservasAdministrar from './pages/ReservacionesAdministrador.jsx';
+import UsuariosAdministrador from './pages/UsuariosAdministrador.jsx';
 import Reservas from './pages/Reservas.jsx';
 import SobreNosotros from './pages/SobreNosotros.jsx';
 import HomeEmpleados from './pages/HomeEmpleados.jsx';
@@ -118,6 +119,16 @@ function App() {
                     </ProtectedRoute>
                   }
                   path="/administrar/panel/trabajadores"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <UsuariosAdministrador />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/administrador/usuarios"
                 />
                 <Route
                   element={
