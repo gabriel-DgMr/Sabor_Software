@@ -79,6 +79,11 @@ export const helmetConfig = helmet({
       styleSrc: ["self", "unsafe-inline"],
       scriptSrc: ["self"],
       imgSrc: ["self", "data:", "https:"],
+      formAction: [
+        "self",
+        "https://checkout.payulatam.com",
+        "https://sandbox.checkout.payulatam.com",
+      ],
     },
   },
   crossOriginEmbedderPolicy: false,

@@ -63,6 +63,11 @@ app.use(
         imgSrc: ["'self'", "data:", "https:", "https://cdn.jsdelivr.net"],
         fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
         connectSrc: connectSrcDirectives,
+        formAction: [
+          "'self'",
+          "https://checkout.payulatam.com",
+          "https://sandbox.checkout.payulatam.com",
+        ],
       },
     },
     crossOriginEmbedderPolicy: false,
