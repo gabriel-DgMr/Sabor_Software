@@ -61,7 +61,26 @@ router.get("/imagen-perfil/:filename", authenticateToken, (req, res) => {
       if (fs.existsSync(fallbackPath)) {
         res.sendFile(fallbackPath);
       } else {
-        res.status(404).json({ error: "Imagen no encontrada" });
+        console.log("❌ Imagen no encontrada en ninguna ubicación:", filename);
+
+        // Crear imagen placeholder temporal
+        const placeholderPath = path.join(
+          __dirname,
+          "../../public/uploads",
+          "placeholder.png",
+        );
+        if (fs.existsSync(placeholderPath)) {
+          console.log("🔄 Sirviendo imagen placeholder");
+          res.sendFile(placeholderPath);
+        } else {
+          // Si no hay placeholder, devolver imagen por defecto
+          res.status(404).json({
+            error: "Imagen no encontrada",
+            message:
+              "La imagen de perfil no está disponible. Por favor, sube una nueva imagen.",
+            filename: filename,
+          });
+        }
       }
     }
   } catch (error) {
