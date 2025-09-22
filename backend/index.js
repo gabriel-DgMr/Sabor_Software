@@ -147,6 +147,29 @@ app.use("/api", healthRoutes);
 // ============================
 // Archivos estáticos seguros
 // ============================
+console.log("🔍 Configurando archivos estáticos...");
+console.log("📁 Directorio actual:", __dirname);
+console.log("📁 Ruta de uploads:", path.join(__dirname, "public/uploads"));
+console.log(
+  "📁 ¿Existe la carpeta?",
+  fs.existsSync(path.join(__dirname, "public/uploads")),
+);
+
+if (fs.existsSync(path.join(__dirname, "public/uploads"))) {
+  const files = fs.readdirSync(path.join(__dirname, "public/uploads"));
+  console.log("📁 Archivos en uploads:", files);
+}
+
+// Middleware de debug para uploads
+app.use("/uploads", (req, res, next) => {
+  console.log("🔍 Petición a uploads:", req.path);
+  console.log("🔍 Archivo solicitado:", req.path);
+  const filePath = path.join(__dirname, "public/uploads", req.path);
+  console.log("🔍 Ruta completa del archivo:", filePath);
+  console.log("🔍 ¿Existe el archivo?", fs.existsSync(filePath));
+  next();
+});
+
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "public/uploads"), {
