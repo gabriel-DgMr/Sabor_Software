@@ -17,11 +17,18 @@ export const getImageUrl = imagePath => {
 
   // Obtener la URL base según el entorno
   const getBaseUrl = () => {
+    // Usar variable de entorno si está disponible
+    if (import.meta.env.VITE_API_URL) {
+      // Remover '/api' del final si está presente para obtener la URL base
+      return import.meta.env.VITE_API_URL.replace('/api', '');
+    }
+
     // En desarrollo, usar localhost
     if (import.meta.env.DEV) {
       return 'http://localhost:3000';
     }
-    // En producción, usar Railway
+
+    // En producción, usar Railway como fallback
     return 'https://sabor-production.up.railway.app';
   };
 
