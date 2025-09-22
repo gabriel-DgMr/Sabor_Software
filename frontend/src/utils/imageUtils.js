@@ -8,10 +8,14 @@
  * @returns {string} URL completa de la imagen
  */
 export const getImageUrl = imagePath => {
-  if (!imagePath) return '';
+  if (!imagePath) {
+    console.log('🖼️ getImageUrl: imagePath vacío');
+    return '';
+  }
 
   // Si la imagen ya tiene protocolo, devolverla tal como está
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    console.log('🖼️ getImageUrl: URL completa detectada:', imagePath);
     return imagePath;
   }
 
@@ -34,13 +38,24 @@ export const getImageUrl = imagePath => {
 
   const baseUrl = getBaseUrl();
 
+  let finalUrl;
   // Si la imagen empieza con /, usar la URL base directamente
   if (imagePath.startsWith('/')) {
-    return `${baseUrl}${imagePath}`;
+    finalUrl = `${baseUrl}${imagePath}`;
+  } else {
+    // Si no empieza con /, agregar la ruta de uploads
+    finalUrl = `${baseUrl}/uploads/${imagePath}`;
   }
 
-  // Si no empieza con /, agregar la ruta de uploads
-  return `${baseUrl}/uploads/${imagePath}`;
+  console.log('🖼️ getImageUrl:', {
+    input: imagePath,
+    baseUrl,
+    output: finalUrl,
+    env: import.meta.env.DEV ? 'development' : 'production',
+    viteApiUrl: import.meta.env.VITE_API_URL || 'no definida',
+  });
+
+  return finalUrl;
 };
 
 /**

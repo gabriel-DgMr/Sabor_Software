@@ -217,7 +217,7 @@ export const deactivateUser = async (id_usuario) => {
 export const getAllusuarios = async () => {
   const [rows] = await pool.query(
     `SELECT u.id_usuario, u.nombre_usuario, u.correo_usuario, u.telefono_usuario, 
-            u.imagen_usuario, u.fecha_registro, u.fecha_modificacion, u.id_rol, r.nombre_rol
+            u.fecha_registro, u.fecha_modificacion, u.id_rol, r.nombre_rol
      FROM usuarios u 
      JOIN roles r ON u.id_rol = r.id_rol 
      WHERE u.activo = true`,

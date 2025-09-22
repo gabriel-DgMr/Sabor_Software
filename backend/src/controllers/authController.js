@@ -329,13 +329,22 @@ export const logoutUser = (req, res) => {
 export const getUserProfile = async (req, res) => {
   try {
     const userId = req.user.id; // Corregido: usar 'id' en vez de 'userId'
+    console.log("🔍 Obteniendo perfil para usuario:", req.user.email);
+
     const user = await authModel.getUserByEmail(req.user.email);
 
     if (!user) {
+      console.log("❌ Usuario no encontrado:", req.user.email);
       return res.status(404).json({
         message: "usuario no encontrado",
       });
     }
+
+    console.log("✅ Usuario encontrado:", {
+      id: user.id_usuario,
+      nombre: user.nombre_usuario,
+      imagen: user.imagen_usuario || "sin imagen",
+    });
 
     res.json({ user });
   } catch (error) {

@@ -18,7 +18,6 @@ const MenuLateral = () => {
     { nombre: 'Productos', ruta: '/administrador/productos' },
     { nombre: 'Pedidos', ruta: '/administrador/pedidos' },
     { nombre: 'Domicilios', ruta: '/administrador/domicilios' },
-    { nombre: 'Usuarios', ruta: '/administrador/usuarios' },
     { nombre: 'Panel de control', ruta: '/administrador/panel' },
   ];
 
