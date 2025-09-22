@@ -6,6 +6,7 @@ import { useProductos } from '../context/ProductoContext';
 import { productoService } from '../services/productoService';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils';
 import { validarProducto, validarImagen } from '../utils/validaciones';
+import { getImageUrl } from '../utils/imageUtils.js';
 import { GoCheck, GoX } from 'react-icons/go';
 
 import '../styles/empleados.css';
