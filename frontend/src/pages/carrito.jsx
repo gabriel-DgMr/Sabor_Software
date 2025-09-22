@@ -15,7 +15,7 @@ import Header from '../components/Header.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useCart } from '../context/useCart.js';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = `${import.meta.env.VITE_API_URL || '/api'}`;
 
 // Componente de alerta visualmente consistente para el carrito
 const CarritoAlert = ({ message }) => {
@@ -423,7 +423,7 @@ export default function Carrito() {
       setError(null);
 
       // Llama al backend para generar el formulario de PayU
-      const response = await fetch('http://localhost:3000/api/payu/formulario', {
+      const response = await fetch(`${API_URL}/payu/formulario`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: cartItems }),

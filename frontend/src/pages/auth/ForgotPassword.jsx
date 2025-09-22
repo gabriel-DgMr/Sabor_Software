@@ -70,13 +70,16 @@ const ForgotPassword = ({ onShowMessage }) => {
     try {
       setLoading(true);
       // Enviar solicitud al servidor
-      const response = await fetch('http://localhost:3000/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ correo_usuario: correo_usuario.trim() }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || '/api'}/auth/forgot-password`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ correo_usuario: correo_usuario.trim() }),
+        }
+      );
 
       const data = await response.json();
 

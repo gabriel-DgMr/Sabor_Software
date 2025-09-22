@@ -37,7 +37,9 @@ const ResetPassword = ({ onShowMessage }) => {
       try {
         setLoading(true);
         // Verificar el token con el servidor
-        const response = await fetch(`http://localhost:3000/api/auth/reset-password/${token}`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL || '/api'}/auth/reset-password/${token}`
+        );
         const data = await response.json();
 
         // Evitar actualizaciones si el componente se desmontó
@@ -128,13 +130,16 @@ const ResetPassword = ({ onShowMessage }) => {
 
     try {
       // Enviar la nueva contraseña al servidor
-      const response = await fetch(`http://localhost:3000/api/auth/reset-password/${token}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ contraseña_cliente }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || '/api'}/auth/reset-password/${token}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ contraseña_cliente }),
+        }
+      );
 
       const data = await response.json();
 
