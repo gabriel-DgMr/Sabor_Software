@@ -163,7 +163,7 @@ app.use(
 
 // Servir archivos estáticos del frontend React
 app.use(
-  express.static(path.join(__dirname, "public/dist"), {
+  express.static(path.join(__dirname, "../frontend/dist"), {
     index: false,
     setHeaders: (res, filePath) => {
       if (filePath.endsWith(".html")) {
@@ -181,7 +181,13 @@ app.use(
 
 // Ruta para servir el index.html del frontend
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/dist/index.html"));
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+});
+
+// Ruta catch-all para SPA (Single Page Application)
+// Debe ir DESPUÉS de todas las rutas de API y ANTES de los middlewares de error
+app.get(/^(?!\/api\/).*$/, (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
 // ============================
