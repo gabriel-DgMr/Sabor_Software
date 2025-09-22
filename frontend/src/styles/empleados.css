@@ -1280,7 +1280,7 @@
 .campo__input:disabled {
     background-color: var(--neutral-100);
     cursor: not-allowed;
-    opacity: 0.7;
+    opacity: 1;
 }
 
 /* Estilo cuando se pasa el mouse por encima */
@@ -1486,7 +1486,7 @@
 }
 
 .productos__boton:disabled {
-    opacity: 0.7;
+    opacity: 1;
     cursor: not-allowed;
     transform: none !important;
 }
@@ -1518,7 +1518,7 @@
 }
 
 .descripcion__boton:disabled {
-    opacity: 0.7;
+    opacity: 1;
     cursor: not-allowed;
 }
 
@@ -1977,7 +1977,7 @@
 }
 
 .reservaciones__editor .descripcion__boton:disabled {
-  opacity: 0.7;
+  opacity: 1;
   cursor: not-allowed;
   transform: none !important;
 }
