@@ -40,7 +40,7 @@ import SobreNosotros from './pages/SobreNosotros.jsx';
 import HomeEmpleados from './pages/HomeEmpleados.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 import ProductosEmpleados from './pages/ProductosEmpleados.jsx';
-import UsuariosAdministrar from './pages/AdministrarUsuarios.jsx';
+import DomiciliosEmpleados from './pages/DomiciliosEmpleados.jsx';
 import PedidosEmpleados from './pages/PedidosEmpleados.jsx';
 import ReservacionesEmpleados from './pages/ReservacionesEmpleados.jsx';
 
@@ -147,16 +147,6 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <UsuariosAdministrar />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrador/usuarios"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
                         <PedidosAdministrar />
                       </RoleProtectedRoute>
                     </ProtectedRoute>
@@ -172,6 +162,16 @@ function App() {
                     </ProtectedRoute>
                   }
                   path="/administrador/reservaciones"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <DomiciliosEmpleados />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/administrador/domicilios"
                 />
 
                 {/* Empleados */}
@@ -194,6 +194,16 @@ function App() {
                     </ProtectedRoute>
                   }
                   path="/empleado/productos"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Empleado']}>
+                        <DomiciliosEmpleados />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/empleado/domicilios"
                 />
                 <Route
                   element={

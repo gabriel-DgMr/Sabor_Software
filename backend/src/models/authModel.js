@@ -228,7 +228,7 @@ export const getAllusuarios = async () => {
 // Obtener usuario por ID
 export const getusuarioById = async (id_usuario) => {
   const [rows] = await pool.query(
-    "SELECT id_usuario, nombre_usuario, correo_usuario, telefono_usuario, fecha_registro, fecha_modificacion FROM usuarios WHERE id_usuario = ? AND activo = true",
+    "SELECT id_usuario, nombre_usuario, correo_usuario, telefono_usuario, imagen_usuario, fecha_registro, fecha_modificacion FROM usuarios WHERE id_usuario = ? AND activo = true",
     [id_usuario],
   );
   return rows.length > 0 ? rows[0] : null;

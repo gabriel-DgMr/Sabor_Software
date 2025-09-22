@@ -3,10 +3,20 @@ import axios from 'axios';
 const API_URL = `${import.meta.env.VITE_API_URL || '/api'}/domicilios`;
 
 const domicilioService = {
-  // Obtener historial de domicilios
+  // Obtener historial de domicilios (cliente)
   getHistorialDomicilios: () => {
-    const token = localStorage.getItem('token'); // <-- aquí tomas el token guardado al hacer login
+    const token = localStorage.getItem('token'); // token guardado al hacer login
     return axios.get(`${API_URL}/historial`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  },
+
+  // Obtener todos los domicilios (empleado/admin)
+  getDomicilios: () => {
+    const token = localStorage.getItem('token');
+    return axios.get(`${API_URL}/todos`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
