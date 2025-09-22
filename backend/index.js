@@ -118,7 +118,7 @@ app.use(cors(corsOptions));
 // ============================
 // Middlewares globales
 // ============================
-app.use(createRateLimiter());
+// app.use(createRateLimiter()); // Deshabilitado temporalmente
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser(config.cookie.secret));
@@ -134,7 +134,7 @@ app.use("/api/auth", (req, res, next) => {
 // ============================
 // Rutas API
 // ============================
-app.use("/api/auth", authRateLimiter, authRoutes);
+app.use("/api/auth", /* authRateLimiter, */ authRoutes);
 app.use("/api/productos", productoRoutes);
 app.use("/api/categorias", categoriaRoutes);
 app.use("/api/reservas", reservaRoutes);
