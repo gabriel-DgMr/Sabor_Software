@@ -36,7 +36,7 @@ const ActualizarDatos = () => {
       setTelefono(user.telefono_usuario || '');
       // Si el usuario ya tiene una imagen de perfil, mostrarla
       if (user.imagen_usuario) {
-        setImagenPreview(getImageUrl(`uploads/${user.imagen_usuario}`));
+        setImagenPreview(user.imagen_usuario);
       }
     }
   }, [user]);
