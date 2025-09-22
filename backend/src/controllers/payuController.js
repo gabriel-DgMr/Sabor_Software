@@ -98,7 +98,7 @@ export const crearOrdenPago = async (req, res) => {
           description: description.substring(0, 255), // PayU limita a 255 caracteres
           language: "es",
           signature: signature,
-          notifyUrl: `${PAYU_CONFIG.FRONTEND_URL}/api/webhook/payu`,
+          notifyUrl: `${PAYU_CONFIG.BACKEND_URL}/api/webhook/payu`,
           additionalValues: {
             TX_VALUE: {
               value: totalAmount,
@@ -106,11 +106,11 @@ export const crearOrdenPago = async (req, res) => {
             },
           },
           buyer: {
-            merchantBuyerId: "1",
-            fullName: "Cliente Sabor",
-            emailAddress: "cliente@sabor.com",
-            contactPhone: "3001234567",
-            dniNumber: "12345678",
+            merchantBuyerId: req.user?.id_usuario?.toString() || "1",
+            fullName: req.user?.nombre_usuario || "Cliente Sabor",
+            emailAddress: req.user?.correo_usuario || "cliente@sabor.com",
+            contactPhone: req.user?.telefono_usuario || "3001234567",
+            dniNumber: req.user?.documento_usuario || "12345678",
             shippingAddress: {
               street1: "Calle 123 #45-67",
               street2: "",
@@ -118,7 +118,7 @@ export const crearOrdenPago = async (req, res) => {
               state: "Bogotá D.C.",
               country: "CO",
               postalCode: "110111",
-              phone: "3001234567",
+              phone: req.user?.telefono_usuario || "3001234567",
             },
           },
           shippingAddress: {
@@ -132,11 +132,11 @@ export const crearOrdenPago = async (req, res) => {
           },
         },
         payer: {
-          merchantPayerId: "1",
-          fullName: "Cliente Sabor",
-          emailAddress: "cliente@sabor.com",
-          contactPhone: "3001234567",
-          dniNumber: "12345678",
+          merchantPayerId: req.user?.id_usuario?.toString() || "1",
+          fullName: req.user?.nombre_usuario || "Cliente Sabor",
+          emailAddress: req.user?.correo_usuario || "cliente@sabor.com",
+          contactPhone: req.user?.telefono_usuario || "3001234567",
+          dniNumber: req.user?.documento_usuario || "12345678",
           billingAddress: {
             street1: "Calle 123 #45-67",
             street2: "",
@@ -144,7 +144,7 @@ export const crearOrdenPago = async (req, res) => {
             state: "Bogotá D.C.",
             country: "CO",
             postalCode: "110111",
-            phone: "3001234567",
+            phone: req.user?.telefono_usuario || "3001234567",
           },
         },
         creditCard: {
@@ -285,6 +285,14 @@ export const generarFormularioPago = async (req, res) => {
       actionUrl: PAYU_CONFIG.TEST_MODE
         ? "https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/"
         : "https://checkout.payulatam.com/ppp-web-gateway-payu/",
+    });
+    console.log("🔧 Configuración PayU:", {
+      testMode: PAYU_CONFIG.TEST_MODE,
+      apiLogin: PAYU_CONFIG.API_LOGIN,
+      merchantId: PAYU_CONFIG.MERCHANT_ID,
+      accountId: PAYU_CONFIG.ACCOUNT_ID,
+      frontendUrl: PAYU_CONFIG.FRONTEND_URL,
+      backendUrl: PAYU_CONFIG.BACKEND_URL,
     });
     console.log("📋 FormData completo:", JSON.stringify(formData, null, 2));
 
