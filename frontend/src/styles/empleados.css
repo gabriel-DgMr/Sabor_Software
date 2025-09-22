@@ -1074,6 +1074,8 @@
     grid-template-columns: 60% 35%;
     gap: 4rem;
     margin: 3rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
@@ -1081,7 +1083,10 @@
         grid-template-columns: 1fr;
         gap: 1.5rem;
         margin: 2rem 1rem;
+        width: calc(100% - 2rem);
+        box-sizing: border-box;
     }
+}
 
     .pedidos {
         padding: 1.5rem 1rem;
@@ -1126,6 +1131,8 @@
     .productos__grid {
         margin: 1rem 0.5rem;
         gap: 1rem;
+        width: calc(100% - 1rem);
+        box-sizing: border-box;
     }
 
     .titulos__empleados {
@@ -1238,11 +1245,16 @@
     border: solid 2px var(--primary-500);
     padding: 2rem;
     border-radius: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .campo__input {
     border: solid 2px var(--primary-500);
     border-radius: .5rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 /* Estilo para el contenedor del select */
 .descripcion__campo {
@@ -1639,6 +1651,8 @@
     align-items: center;
     width: 100%;
     margin: 2rem;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .productos__vista {
