@@ -3,7 +3,6 @@ import {
   crearOrdenPago,
   generarFormularioPago,
   consultarTransaccion,
-  simularPago,
 } from "../controllers/payuController.js";
 import { authenticateToken } from "../middleware/auth.js";
 
@@ -21,8 +20,5 @@ router.get(
   authenticateToken,
   consultarTransaccion,
 );
-
-// Simular pago (para modo simulación sin cuenta PayU)
-router.get("/simulate", simularPago);
 
 export default router;

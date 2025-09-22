@@ -448,26 +448,62 @@ export default function Carrito() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Error al procesar pago');
 
-      // Verificar si está en modo simulación
-      if (data.simulation) {
-        console.log('🎭 Modo simulación detectado:', data.message);
+      // Verificar si está en modo sandbox
+      if (data.sandbox) {
+        console.log('🧪 Modo sandbox detectado:', data.message);
 
-        // Mostrar mensaje de simulación
+        // Mostrar mensaje informativo de sandbox
         setModal({
           open: true,
-          message: '🎭 Modo Simulación: El pago será simulado (no se procesará pago real)',
-          icon: <GoAlert className="GoAlert" style={{ fontSize: '2.5rem', color: '#ff9800' }} />,
+          message: (
+            <div>
+              <h3 style={{ marginBottom: '10px' }}>🧪 Modo Prueba (Sandbox)</h3>
+              <p>Puedes probar el flujo completo de pago con tarjetas de prueba.</p>
+              <p>
+                <strong>Tarjetas de prueba:</strong>
+              </p>
+              <ul style={{ textAlign: 'left', marginTop: '10px' }}>
+                <li>
+                  ✅ <strong>Aprobada:</strong> 4097440000000004
+                </li>
+                <li>
+                  ❌ <strong>Rechazada:</strong> 4097440000000008
+                </li>
+                <li>
+                  ⏳ <strong>Pendiente:</strong> 4097440000000007
+                </li>
+              </ul>
+              <p style={{ marginTop: '10px', fontSize: '0.9em', color: '#666' }}>
+                CVV: 123 | Fecha: Cualquier fecha futura
+              </p>
+            </div>
+          ),
+          icon: <GoAlert className="GoAlert" style={{ fontSize: '2.5rem', color: '#2196f3' }} />,
           onConfirm: () => {
             setModal(m => ({ ...m, open: false }));
 
-            // Marcar que estamos procesando un pago simulado
+            // Marcar que estamos procesando un pago
             localStorage.setItem('payuProcessing', 'true');
             localStorage.setItem('payuTimestamp', Date.now().toString());
 
-            // Redirigir a la URL simulada después de 2 segundos
-            setTimeout(() => {
-              window.location.href = data.simulatedUrl;
-            }, 2000);
+            // Crear formulario y redirigir a PayU sandbox
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = data.actionUrl;
+            form.style.display = 'none';
+
+            // Agregar campos del formulario
+            Object.entries(data.formData).forEach(([key, value]) => {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = key;
+              input.value = value;
+              form.appendChild(input);
+            });
+
+            // Agregar formulario al DOM y enviarlo
+            document.body.appendChild(form);
+            form.submit();
           },
         });
         return;

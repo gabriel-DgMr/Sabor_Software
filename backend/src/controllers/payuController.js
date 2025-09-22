@@ -3,17 +3,11 @@ import crypto from "crypto-js";
 
 // Configuración PayU usando variables de entorno
 const PAYU_CONFIG = {
-  // URLs - usar sandbox por defecto hasta tener cuenta real
-  API_URL:
-    process.env.PAYU_TEST_MODE === "false" && process.env.PAYU_API_LOGIN
-      ? "https://api.payulatam.com/payments-api/4.0/service.cgi"
-      : "https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi",
-  REPORTS_URL:
-    process.env.PAYU_TEST_MODE === "false" && process.env.PAYU_API_LOGIN
-      ? "https://api.payulatam.com/reports-api/4.0/service.cgi"
-      : "https://sandbox.api.payulatam.com/reports-api/4.0/service.cgi",
+  // URLs - usar sandbox por defecto (modo prueba)
+  API_URL: "https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi",
+  REPORTS_URL: "https://sandbox.api.payulatam.com/reports-api/4.0/service.cgi",
 
-  // Credenciales - usar sandbox por defecto hasta tener cuenta real
+  // Credenciales de sandbox (modo prueba)
   API_LOGIN: process.env.PAYU_API_LOGIN || "pRRXKOl8ikMmt9u",
   API_KEY: process.env.PAYU_API_KEY || "4Vj8eK4rloUd272L48hsrarnUA",
   MERCHANT_ID: process.env.PAYU_MERCHANT_ID || "508029",
@@ -25,12 +19,11 @@ const PAYU_CONFIG = {
   // URL del backend
   BACKEND_URL: process.env.BACKEND_URL || "http://localhost:3000",
 
-  // Modo de prueba - forzar sandbox si no hay credenciales reales
-  TEST_MODE:
-    !process.env.PAYU_API_LOGIN || process.env.PAYU_TEST_MODE === "true",
+  // Siempre en modo prueba (sandbox)
+  TEST_MODE: true,
 
-  // Indicador de modo simulación
-  SIMULATION_MODE: !process.env.PAYU_API_LOGIN,
+  // Indicador de modo sandbox
+  SANDBOX_MODE: true,
 };
 
 /**
@@ -292,7 +285,7 @@ export const generarFormularioPago = async (req, res) => {
     });
     console.log("🔧 Configuración PayU:", {
       testMode: PAYU_CONFIG.TEST_MODE,
-      simulationMode: PAYU_CONFIG.SIMULATION_MODE,
+      sandboxMode: PAYU_CONFIG.SANDBOX_MODE,
       apiLogin: PAYU_CONFIG.API_LOGIN,
       merchantId: PAYU_CONFIG.MERCHANT_ID,
       accountId: PAYU_CONFIG.ACCOUNT_ID,
@@ -300,75 +293,30 @@ export const generarFormularioPago = async (req, res) => {
       backendUrl: PAYU_CONFIG.BACKEND_URL,
     });
 
-    // Advertencia si está en modo simulación
-    if (PAYU_CONFIG.SIMULATION_MODE) {
-      console.warn(
-        "⚠️ MODO SIMULACIÓN ACTIVO - No hay cuenta PayU configurada",
-      );
-      console.warn(
-        "⚠️ Los pagos serán simulados, no se procesarán transacciones reales",
-      );
-    }
+    // Información del modo sandbox
+    console.log("🧪 MODO SANDBOX ACTIVO - PayU en modo prueba");
+    console.log(
+      "🧪 Los usuarios pueden probar el flujo completo con tarjetas de prueba",
+    );
     console.log("📋 FormData completo:", JSON.stringify(formData, null, 2));
 
-    // Si está en modo simulación, simular el pago directamente
-    if (PAYU_CONFIG.SIMULATION_MODE) {
-      console.log("🎭 SIMULANDO PAGO - Redirigiendo a simulación local");
-
-      // Simular éxito después de 2 segundos
-      setTimeout(() => {
-        // Redirigir al carrito con parámetros de éxito simulados
-        const simulatedUrl = `${PAYU_CONFIG.FRONTEND_URL}/carrito?status=success&referenceCode=${referenceCode}&transactionState=4&TX_VALUE=${totalAmount}`;
-        console.log("🎭 URL de simulación:", simulatedUrl);
-      }, 2000);
-
-      return res.json({
-        success: true,
-        simulation: true,
-        message: "Modo simulación activo - No se procesarán pagos reales",
-        simulatedUrl: `${PAYU_CONFIG.FRONTEND_URL}/carrito?status=success&referenceCode=${referenceCode}&transactionState=4&TX_VALUE=${totalAmount}`,
-        formData: formData,
-        actionUrl: `${PAYU_CONFIG.BACKEND_URL}/api/payu/simulate`,
-        referenceCode: referenceCode,
-      });
-    }
+    // Modo sandbox - redirigir a PayU sandbox real
+    console.log(
+      "🧪 REDIRIGIENDO A PAYU SANDBOX - Los usuarios pueden probar con tarjetas de prueba",
+    );
 
     res.json({
       success: true,
+      sandbox: true,
+      message: "Modo sandbox - Puedes probar con tarjetas de prueba",
       formData: formData,
-      actionUrl: PAYU_CONFIG.TEST_MODE
-        ? "https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/"
-        : "https://checkout.payulatam.com/ppp-web-gateway-payu/",
+      actionUrl: "https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/",
       referenceCode: referenceCode,
     });
   } catch (error) {
     console.error("Error al generar formulario PayU:", error);
     res.status(500).json({
       error: "Error al generar formulario de pago",
-      details: error.message,
-    });
-  }
-};
-
-/**
- * Simula un pago exitoso (para modo simulación)
- */
-export const simularPago = async (req, res) => {
-  try {
-    console.log("🎭 Simulando pago exitoso...");
-
-    const { referenceCode, amount } = req.query;
-
-    // Simular delay de procesamiento
-    setTimeout(() => {
-      const simulatedUrl = `${PAYU_CONFIG.FRONTEND_URL}/carrito?status=success&referenceCode=${referenceCode}&transactionState=4&TX_VALUE=${amount}`;
-      console.log("🎭 Redirigiendo a:", simulatedUrl);
-      res.redirect(simulatedUrl);
-    }, 2000);
-  } catch (error) {
-    console.error("Error en simulación de pago:", error);
-    res.status(500).json({
-      error: "Error en simulación de pago",
       details: error.message,
     });
   }
