@@ -8,6 +8,7 @@ import {
   mapearEstado,
   obtenerSiguienteEstado,
   mapearEstadoAId,
+  marcarPedidoRecibido, // 🔹 Nuevo método en tu service
 } from '../services/pedidosService';
 
 import '../styles/empleados.css';
@@ -16,6 +17,7 @@ const DomiciliosEmpleados = () => {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [pedidos, setPedidos] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [actualizando, setActualizando] = useState({}); // Para manejar botones individuales
 
   useEffect(() => {
     const cargarPedidos = async () => {
@@ -26,8 +28,7 @@ const DomiciliosEmpleados = () => {
 
       try {
         const datosPedidos = await obtenerPedidos();
-        // 🔹 Filtrar solo pedidos a domicilio
-        setPedidos(datosPedidos.filter(p => p.tipo_servicio === 'domicilio'));
+        setPedidos(datosPedidos.filter((p) => p.tipo_servicio === 'domicilio'));
       } catch (err) {
         console.error('Error al cargar pedidos:', err);
       } finally {
@@ -46,13 +47,33 @@ const DomiciliosEmpleados = () => {
       const nuevoEstadoId = mapearEstadoAId(siguienteEstado);
       await actualizarEstadoPedido(pedidoId, nuevoEstadoId);
 
-      setPedidos(prev =>
-        prev.map(p =>
-          p.id === pedidoId ? { ...p, estado: siguienteEstado, id_estado: nuevoEstadoId } : p
+      setPedidos((prev) =>
+        prev.map((p) =>
+          p.id === pedidoId
+            ? { ...p, estado: siguienteEstado, id_estado: nuevoEstadoId }
+            : p
         )
       );
     } catch (err) {
       console.error('Error al cambiar estado:', err);
+    }
+  };
+
+  const marcarRecibido = async (pedidoId) => {
+    try {
+      setActualizando((prev) => ({ ...prev, [pedidoId]: true }));
+      await marcarPedidoRecibido(pedidoId);
+
+      setPedidos((prev) =>
+        prev.map((p) =>
+          p.id === pedidoId ? { ...p, recibido_cliente: true } : p
+        )
+      );
+    } catch (err) {
+      console.error('Error al marcar pedido como recibido:', err);
+      alert('No se pudo marcar como recibido. Intenta de nuevo.');
+    } finally {
+      setActualizando((prev) => ({ ...prev, [pedidoId]: false }));
     }
   };
 
@@ -68,7 +89,7 @@ const DomiciliosEmpleados = () => {
           ) : pedidos.length === 0 ? (
             <p>No hay pedidos a domicilio para mostrar.</p>
           ) : (
-            pedidos.map(pedido => (
+            pedidos.map((pedido) => (
               <article key={pedido.id} className="pedido">
                 <div className="pedido__contenido">
                   <h2 className="pedido__titulo">
@@ -82,10 +103,13 @@ const DomiciliosEmpleados = () => {
                   {pedido.notas && <p className="pedido__notas">Notas: {pedido.notas}</p>}
                   <p className="pedido__total">Total: ${pedido.total?.toLocaleString()}</p>
                 </div>
+
                 <div className="pedido__info">
                   <span className={`pedido__estado pedido__estado--${pedido.estado}`}>
                     {mapearEstado(pedido.estado)}
                   </span>
+
+                  {/* Botón cambiar estado */}
                   <button
                     className="pedido__boton"
                     onClick={() => cambiarEstado(pedido.id, pedido.estado)}
@@ -93,6 +117,21 @@ const DomiciliosEmpleados = () => {
                   >
                     Cambiar Estado
                   </button>
+
+                  {/* Botón recibido */}
+                  {!pedido.recibido_cliente && (
+                    <button
+                      className="pedido__boton pedido__boton--recibido"
+                      onClick={() => marcarRecibido(pedido.id)}
+                      disabled={actualizando[pedido.id]}
+                    >
+                      {actualizando[pedido.id] ? 'Marcando...' : 'Marcar como recibido'}
+                    </button>
+                  )}
+
+                  {pedido.recibido_cliente && (
+                    <span className="pedido__recibido">Pedido recibido ✅</span>
+                  )}
                 </div>
               </article>
             ))

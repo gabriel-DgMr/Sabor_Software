@@ -10,7 +10,6 @@ const router = express.Router();
 // Ruta para que el cliente vea su propio historial de domicilios
 router.get("/historial", authMiddleware, getHistorialDomicilios);
 
-<<<<<<< HEAD
 // Ruta para que empleados/administradores vean todos los domicilios
 router.get(
   "/todos",
@@ -20,6 +19,3 @@ router.get(
 );
 
 export default router;
-=======
-export default router;
->>>>>>> origin/develop
