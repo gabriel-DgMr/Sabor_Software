@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import fs from "fs";
 import { config } from "./src/config/config.js";
 import {
   errorHandler,
@@ -161,33 +162,67 @@ app.use(
   }),
 );
 
-// Servir archivos estáticos del frontend React
-app.use(
-  express.static(path.join(__dirname, "../frontend/dist"), {
-    index: false,
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith(".html")) {
-        res.setHeader("Cache-Control", "no-cache");
-      } else if (
-        filePath.match(
-          /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/,
-        )
-      ) {
-        res.setHeader("Cache-Control", "public, max-age=31536000");
-      }
-    },
-  }),
-);
+// Configurar rutas de archivos estáticos del frontend React
+// Intentar diferentes rutas para desarrollo y producción
+const frontendPaths = [
+  path.join(__dirname, "../frontend/dist"),
+  path.join(__dirname, "public/dist"),
+  path.join(__dirname, "dist"),
+  path.join(process.cwd(), "frontend/dist"),
+  path.join(process.cwd(), "dist"),
+];
+
+let frontendPath = null;
+for (const testPath of frontendPaths) {
+  if (fs.existsSync(testPath)) {
+    frontendPath = testPath;
+    break;
+  }
+}
+
+if (frontendPath) {
+  console.log(`📁 Sirviendo archivos estáticos desde: ${frontendPath}`);
+
+  // Servir archivos estáticos del frontend React
+  app.use(
+    express.static(frontendPath, {
+      index: false,
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith(".html")) {
+          res.setHeader("Cache-Control", "no-cache");
+        } else if (
+          filePath.match(
+            /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/,
+          )
+        ) {
+          res.setHeader("Cache-Control", "public, max-age=31536000");
+        }
+      },
+    }),
+  );
+} else {
+  console.warn(
+    "⚠️ No se encontró la carpeta de archivos estáticos del frontend",
+  );
+}
 
 // Ruta para servir el index.html del frontend
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+  if (frontendPath) {
+    res.sendFile(path.join(frontendPath, "index.html"));
+  } else {
+    res.status(404).json({ error: "Frontend no disponible" });
+  }
 });
 
 // Ruta catch-all para SPA (Single Page Application)
 // Debe ir DESPUÉS de todas las rutas de API y ANTES de los middlewares de error
 app.get(/^(?!\/api\/).*$/, (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+  if (frontendPath) {
+    res.sendFile(path.join(frontendPath, "index.html"));
+  } else {
+    res.status(404).json({ error: "Frontend no disponible" });
+  }
 });
 
 // ============================
