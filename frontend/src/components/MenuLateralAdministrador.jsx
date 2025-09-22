@@ -23,8 +23,7 @@ const MenuLateral = () => {
 
   const opcionesPanel = [
     { nombre: 'Ventas', ruta: '/administrar/panel/ventas' },
-    { nombre: 'Clientes', ruta: '/administrar/panel/clientes' },
-    { nombre: 'Trabajadores', ruta: '/administrar/panel/trabajadores' },
+    { nombre: 'Usuarios', ruta: '/administrar/panel/usuarios' },
     { nombre: 'Inventario', ruta: '/administrar/panel/inventario' },
   ];
 

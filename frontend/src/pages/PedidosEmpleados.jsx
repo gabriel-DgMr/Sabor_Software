@@ -47,11 +47,7 @@ const PedidosEmpleados = () => {
 
       const nuevoEstadoId = mapearEstadoAId(siguienteEstado);
 
-      setPedidos(prev =>
-        prev.map(p =>
-          p.id === pedidoId ? { ...p, cambiandoEstado: true } : p
-        )
-      );
+      setPedidos(prev => prev.map(p => (p.id === pedidoId ? { ...p, cambiandoEstado: true } : p)));
 
       await actualizarEstadoPedido(pedidoId, nuevoEstadoId);
 
@@ -64,18 +60,12 @@ const PedidosEmpleados = () => {
       );
     } catch (err) {
       console.error('Error al cambiar estado:', err);
-      setPedidos(prev =>
-        prev.map(p =>
-          p.id === pedidoId ? { ...p, cambiandoEstado: false } : p
-        )
-      );
+      setPedidos(prev => prev.map(p => (p.id === pedidoId ? { ...p, cambiandoEstado: false } : p)));
     }
   };
 
   const pedidosFiltrados =
-    filtroActivo === 'todos'
-      ? pedidos
-      : pedidos.filter(p => p.tipo_servicio === filtroActivo);
+    filtroActivo === 'todos' ? pedidos : pedidos.filter(p => p.tipo_servicio === filtroActivo);
 
   return (
     <div className="layout">
@@ -123,9 +113,7 @@ const PedidosEmpleados = () => {
                     <p className="pedido__mesa">Mesa: {pedido.mesa}</p>
                   )}
 
-                  {pedido.notas && (
-                    <p className="pedido__notas">Notas: {pedido.notas}</p>
-                  )}
+                  {pedido.notas && <p className="pedido__notas">Notas: {pedido.notas}</p>}
 
                   {pedido.metodo_pago === 'payu' && pedido.referencia_pago && (
                     <p className="pedido__payu">💳 Pago PayU: {pedido.referencia_pago}</p>
@@ -138,9 +126,7 @@ const PedidosEmpleados = () => {
                     </p>
                   )}
 
-                  <p className="pedido__total">
-                    Total: ${pedido.total?.toLocaleString()}
-                  </p>
+                  <p className="pedido__total">Total: ${pedido.total?.toLocaleString()}</p>
                 </div>
 
                 <div className="pedido__info">
@@ -155,8 +141,8 @@ const PedidosEmpleados = () => {
                     {pedido.cambiandoEstado
                       ? '🔄 Actualizando...'
                       : pedido.estado === 'completado'
-                      ? '✅ Completado'
-                      : `➡️ Cambiar a ${mapearEstado(obtenerSiguienteEstado(pedido.estado))}`}
+                        ? '✅ Completado'
+                        : `➡️ Cambiar a ${mapearEstado(obtenerSiguienteEstado(pedido.estado))}`}
                   </button>
                 </div>
               </article>
