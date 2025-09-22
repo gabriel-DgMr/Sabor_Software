@@ -22,6 +22,9 @@ const PAYU_CONFIG = {
   // URL del frontend
   FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",
 
+  // URL del backend
+  BACKEND_URL: process.env.BACKEND_URL || "http://localhost:3000",
+
   // Modo de prueba
   TEST_MODE: process.env.PAYU_TEST_MODE === "true",
 };
@@ -215,11 +218,18 @@ export const crearOrdenPago = async (req, res) => {
  */
 export const generarFormularioPago = async (req, res) => {
   try {
-    const { items } = req.body;
+    const { items, buyerEmail } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({
         error: "No se proporcionaron items para el pago",
+      });
+    }
+
+    // Validar email del comprador
+    if (!buyerEmail || !buyerEmail.includes("@")) {
+      return res.status(400).json({
+        error: "Email del comprador es requerido y debe ser válido",
       });
     }
 
@@ -257,10 +267,26 @@ export const generarFormularioPago = async (req, res) => {
       currency: "COP",
       signature: signature,
       test: PAYU_CONFIG.TEST_MODE ? 1 : 0,
-      buyerEmail: "cliente@sabor.com",
+      buyerEmail: buyerEmail,
       responseUrl: `${PAYU_CONFIG.FRONTEND_URL}/carrito`,
-      confirmationUrl: `http://localhost:3000/api/webhook/payu`,
+      confirmationUrl: `${PAYU_CONFIG.BACKEND_URL}/api/webhook/payu`,
     };
+
+    // Log para debugging
+    console.log("🔍 === PAYU CHECKOUT WEB DEBUG ===");
+    console.log("📦 Items del carrito:", JSON.stringify(items, null, 2));
+    console.log("💰 Total calculado:", totalAmount);
+    console.log("📝 Código de referencia:", referenceCode);
+    console.log("🔑 Firma generada:", signature);
+    console.log("📧 Email del comprador:", buyerEmail);
+    console.log("🌐 URLs:", {
+      responseUrl: formData.responseUrl,
+      confirmationUrl: formData.confirmationUrl,
+      actionUrl: PAYU_CONFIG.TEST_MODE
+        ? "https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/"
+        : "https://checkout.payulatam.com/ppp-web-gateway-payu/",
+    });
+    console.log("📋 FormData completo:", JSON.stringify(formData, null, 2));
 
     res.json({
       success: true,

@@ -14,6 +14,7 @@ import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useCart } from '../context/useCart.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const API_URL = `${import.meta.env.VITE_API_URL || '/api'}`;
 
@@ -33,6 +34,7 @@ export default function Carrito() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const {
     cartItems,
     clearCart,
@@ -418,6 +420,17 @@ export default function Carrito() {
       return;
     }
 
+    // Verificar si el usuario está autenticado
+    if (!isAuthenticated || !user) {
+      setModal({
+        open: true,
+        message: 'Debes iniciar sesión para procesar el pago.',
+        icon: <GoAlert className="GoAlert" />,
+        onConfirm: () => setModal({ ...modal, open: false }),
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -426,7 +439,10 @@ export default function Carrito() {
       const response = await fetch(`${API_URL}/payu/formulario`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: cartItems }),
+        body: JSON.stringify({
+          items: cartItems,
+          buyerEmail: user.correo_usuario,
+        }),
       });
 
       const data = await response.json();
