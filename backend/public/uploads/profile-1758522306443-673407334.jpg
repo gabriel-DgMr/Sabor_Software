@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="shortcut icon"
+      type="image/png"
+      sizes="16x16"
+      href="/assets/logo_sabor-Be98aVWC.png"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sabor</title>
+    <script type="module" crossorigin src="/assets/index-DUnVIh3W.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/react-vendor-C7tYskqo.js">
+    <link rel="modulepreload" crossorigin href="/assets/router-vendor-MI9bbN7t.js">
+    <link rel="modulepreload" crossorigin href="/assets/ui-vendor-fBO-fEsd.js">
+    <link rel="modulepreload" crossorigin href="/assets/chart-vendor-BCavwTLc.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-B1-KIop8.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
