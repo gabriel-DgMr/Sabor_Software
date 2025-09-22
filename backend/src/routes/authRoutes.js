@@ -14,6 +14,8 @@ import {
   validateUpdateusuario,
 } from "../middleware/validateRequest.js";
 import { upload } from "../middleware/upload.js";
+import path from "path";
+import fs from "fs";
 
 const router = express.Router();
 
@@ -28,6 +30,40 @@ router.post("/resend-verification", authController.resendVerificationCode);
 router.post("/forgot-password", authController.forgotPassword);
 router.get("/reset-password/:token", authController.verifyResetToken);
 router.post("/reset-password/:token", authController.resetPassword);
+
+// Ruta para servir imagen de perfil directamente
+router.get("/imagen-perfil/:filename", authenticateToken, (req, res) => {
+  try {
+    const filename = req.params.filename;
+    const imagePath = path.join(__dirname, "../../public/uploads", filename);
+
+    console.log("🔍 Sirviendo imagen:", filename);
+    console.log("🔍 Ruta completa:", imagePath);
+    console.log("🔍 ¿Existe?", fs.existsSync(imagePath));
+
+    if (fs.existsSync(imagePath)) {
+      res.sendFile(imagePath);
+    } else {
+      // Fallback a la carpeta raíz
+      const fallbackPath = path.join(
+        __dirname,
+        "../../../public/uploads",
+        filename,
+      );
+      console.log("🔍 Fallback ruta:", fallbackPath);
+      console.log("🔍 Fallback ¿Existe?", fs.existsSync(fallbackPath));
+
+      if (fs.existsSync(fallbackPath)) {
+        res.sendFile(fallbackPath);
+      } else {
+        res.status(404).json({ error: "Imagen no encontrada" });
+      }
+    }
+  } catch (error) {
+    console.error("Error sirviendo imagen:", error);
+    res.status(500).json({ error: "Error interno" });
+  }
+});
 
 // Rutas protegidas
 router.post("/logout", authenticateToken, authController.logoutUser);
