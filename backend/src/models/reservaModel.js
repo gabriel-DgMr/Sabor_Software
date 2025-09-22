@@ -1,4 +1,5 @@
 import { dbConfig } from "../config/dbconfig.js";
+import { horarioModel } from "./horarioModel.js";
 import mysql from "mysql2/promise";
 
 const pool = mysql.createPool(dbConfig);
@@ -394,6 +395,3 @@ export const reservaModel = {
     }
   },
 };
-
-// Importar horarioModel aquí para evitar circular dependency if needed, or ensure proper import order
-import { horarioModel } from "./horarioModel.js";

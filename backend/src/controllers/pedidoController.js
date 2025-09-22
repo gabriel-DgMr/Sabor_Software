@@ -291,9 +291,30 @@ export const vaciar = async (req, res) => {
 // Confirmar pedido (finalizar carrito)
 export const confirmar = async (req, res) => {
   try {
+    console.log("🔄 ===== CONFIRMANDO PEDIDO EN BACKEND =====");
     const userId = req.user?.id;
-    const { metodo_pago, tipo_servicio, direccion_entrega, detalle_direccion } =
-      req.body;
+    console.log("👤 Usuario ID:", userId);
+
+    const {
+      metodo_pago,
+      tipo_servicio,
+      direccion_entrega,
+      detalle_direccion,
+      referencia_pago,
+      estado_pago,
+      recomendaciones,
+    } = req.body;
+
+    console.log("📋 Datos recibidos:", {
+      metodo_pago,
+      tipo_servicio,
+      direccion_entrega,
+      detalle_direccion,
+      referencia_pago,
+      estado_pago,
+      recomendaciones,
+      userId,
+    });
 
     // Validaciones
     if (!metodo_pago) {
@@ -311,14 +332,19 @@ export const confirmar = async (req, res) => {
         .json({ mensaje: "direccion_entrega es requerida para domicilio" });
     }
 
+    console.log("🚀 Llamando a confirmarPedido del modelo...");
     const id_pedido = await confirmarPedido(
       userId,
       metodo_pago,
       tipo_servicio,
       direccion_entrega,
       detalle_direccion,
+      referencia_pago,
+      estado_pago,
+      recomendaciones,
     );
 
+    console.log("✅ Pedido confirmado con ID:", id_pedido);
     res.json({ mensaje: "Pedido confirmado", id_pedido });
   } catch (error) {
     console.error("[Pedido][Confirmar] Error:", {

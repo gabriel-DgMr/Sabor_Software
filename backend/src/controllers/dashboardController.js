@@ -14,13 +14,13 @@ export const dashboardController = {
 
       // Total usuarios
       const [totalUsuariosResult] = await pool.query(
-        "SELECT COUNT(*) as total_usuarios FROM usuarios"
+        "SELECT COUNT(*) as total_usuarios FROM usuarios",
       );
       const total_usuarios = totalUsuariosResult[0]?.total_usuarios || 0;
 
       // Usuarios nuevos hoy
       const [usuariosNuevosResult] = await pool.query(
-        "SELECT COUNT(*) as usuarios_nuevos FROM usuarios WHERE DATE(fecha_registro) = CURDATE()"
+        "SELECT COUNT(*) as usuarios_nuevos FROM usuarios WHERE DATE(fecha_registro) = CURDATE()",
       );
       const usuarios_nuevos = usuariosNuevosResult[0]?.usuarios_nuevos || 0;
 
@@ -92,7 +92,8 @@ export const dashboardController = {
       });
       return res.status(500).json({
         error: "Error obteniendo métricas del dashboard",
-        details: process.env.NODE_ENV === "development" ? err.message : undefined,
+        details:
+          process.env.NODE_ENV === "development" ? err.message : undefined,
       });
     }
   },
@@ -106,25 +107,25 @@ export const dashboardController = {
 
       // Ventas totales
       const [ventasTotalesResult] = await pool.query(
-        "SELECT SUM(total_pedido) as ventas_totales FROM pedidos WHERE id_estado IN (3, 5)"
+        "SELECT SUM(total_pedido) as ventas_totales FROM pedidos WHERE id_estado IN (3, 5)",
       );
       const ventas_totales = ventasTotalesResult[0]?.ventas_totales || 0;
 
       // Ventas de hoy
       const [ventasHoyResult] = await pool.query(
-        "SELECT SUM(total_pedido) as ventas_hoy FROM pedidos WHERE DATE(fecha_pedido) = CURDATE() AND id_estado IN (3, 5)"
+        "SELECT SUM(total_pedido) as ventas_hoy FROM pedidos WHERE DATE(fecha_pedido) = CURDATE() AND id_estado IN (3, 5)",
       );
       const ventas_hoy = ventasHoyResult[0]?.ventas_hoy || 0;
 
       // Ventas de la semana
       const [ventasSemanaResult] = await pool.query(
-        "SELECT SUM(total_pedido) as ventas_semana FROM pedidos WHERE fecha_pedido >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND id_estado IN (3, 5)"
+        "SELECT SUM(total_pedido) as ventas_semana FROM pedidos WHERE fecha_pedido >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND id_estado IN (3, 5)",
       );
       const ventas_semana = ventasSemanaResult[0]?.ventas_semana || 0;
 
       // Ventas del mes (30 días)
       const [ventasMesResult] = await pool.query(
-        "SELECT SUM(total_pedido) as ventas_mes FROM pedidos WHERE fecha_pedido >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND id_estado IN (3, 5)"
+        "SELECT SUM(total_pedido) as ventas_mes FROM pedidos WHERE fecha_pedido >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND id_estado IN (3, 5)",
       );
       const ventas_mes = ventasMesResult[0]?.ventas_mes || 0;
 
@@ -186,7 +187,8 @@ export const dashboardController = {
       });
       return res.status(500).json({
         error: "Error obteniendo métricas de ventas",
-        details: process.env.NODE_ENV === "development" ? err.message : undefined,
+        details:
+          process.env.NODE_ENV === "development" ? err.message : undefined,
       });
     }
   },
@@ -200,25 +202,26 @@ export const dashboardController = {
 
       // Total empleados
       const [totalEmpleadosResult] = await pool.query(
-        "SELECT COUNT(*) as total_empleados FROM usuarios WHERE id_rol IN (2, 3)"
+        "SELECT COUNT(*) as total_empleados FROM usuarios WHERE id_rol IN (2, 3)",
       );
       const total_empleados = totalEmpleadosResult[0]?.total_empleados || 0;
 
       // Empleados activos (últimos 30 días)
       const [empleadosActivosResult] = await pool.query(
-        "SELECT COUNT(*) as empleados_activos FROM usuarios WHERE id_rol IN (2, 3) AND last_active >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)"
+        "SELECT COUNT(*) as empleados_activos FROM usuarios WHERE id_rol IN (2, 3) AND (last_active >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) OR last_active IS NULL)",
       );
-      const empleados_activos = empleadosActivosResult[0]?.empleados_activos || 0;
+      const empleados_activos =
+        empleadosActivosResult[0]?.empleados_activos || 0;
 
       // Administradores (rol = 3)
       const [administradoresResult] = await pool.query(
-        "SELECT COUNT(*) as administradores FROM usuarios WHERE id_rol = 3"
+        "SELECT COUNT(*) as administradores FROM usuarios WHERE id_rol = 3",
       );
       const administradores = administradoresResult[0]?.administradores || 0;
 
       // Empleados regulares (rol = 2)
       const [empleadosRegularesResult] = await pool.query(
-        "SELECT COUNT(*) as empleados_regulares FROM usuarios WHERE id_rol = 2"
+        "SELECT COUNT(*) as empleados_regulares FROM usuarios WHERE id_rol = 2",
       );
       const empleados_regulares =
         empleadosRegularesResult[0]?.empleados_regulares || 0;
@@ -239,6 +242,7 @@ export const dashboardController = {
           COUNT(*) as empleados_activos
         FROM usuarios
         WHERE id_rol IN (2, 3) 
+          AND last_active IS NOT NULL
           AND last_active >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
         GROUP BY DATE(last_active)
         ORDER BY fecha
@@ -286,11 +290,12 @@ export const dashboardController = {
           sqlState: err.sqlState,
           sqlMessage: err.sqlMessage,
           code: err.code,
-        }
+        },
       );
       return res.status(500).json({
         error: "Error obteniendo métricas de empleados",
-        details: process.env.NODE_ENV === "development" ? err.message : undefined,
+        details:
+          process.env.NODE_ENV === "development" ? err.message : undefined,
       });
     }
   },

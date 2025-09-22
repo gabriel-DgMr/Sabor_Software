@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
-import domicilioService from "../services/domicilioService";
+import { useEffect, useState } from 'react';
+import domicilioService from '../services/domicilioService';
 
 const HistorialDomicilios = () => {
   const [domicilios, setDomicilios] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    domicilioService.getHistorialDomicilios()
+    domicilioService
+      .getHistorialDomicilios()
       .then(res => setDomicilios(res.data))
       .catch(() => setDomicilios([]))
       .finally(() => setLoading(false));
@@ -32,14 +33,12 @@ const HistorialDomicilios = () => {
       </div>
 
       <div className="historial-pedidos-lista">
-        {domicilios.map((d) => (
+        {domicilios.map(d => (
           <div key={d.id_pedido} className="pedido-tarjeta">
             <div className="pedido-tarjeta-header">
-              <span className="pedido-fecha">
-                {new Date(d.fecha_pedido).toLocaleString()}
-              </span>
-              <span className={`pedido-estado ${d.estado?.toLowerCase() || "pendiente"}`}>
-                {d.estado || "pendiente"}
+              <span className="pedido-fecha">{new Date(d.fecha_pedido).toLocaleString()}</span>
+              <span className={`pedido-estado ${d.estado?.toLowerCase() || 'pendiente'}`}>
+                {d.estado || 'pendiente'}
               </span>
             </div>
 
@@ -50,9 +49,7 @@ const HistorialDomicilios = () => {
 
             <div className="pedido-total">
               Total:
-              <span className="pedido-total-monto">
-                ${d.total || "0.00"}
-              </span>
+              <span className="pedido-total-monto">${d.total || '0.00'}</span>
             </div>
 
             {d.recomendacion && (

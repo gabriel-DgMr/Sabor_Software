@@ -13,6 +13,7 @@ import ProductoCard from '../components/ProductoCard.jsx';
 import { useCategorias } from '../context/CategoriaContext';
 import { useProductos } from '../context/ProductoContext';
 import { useCart } from '../context/useCart.js';
+import { getImageUrl } from '../utils/imageUtils.js';
 import { useDebounce } from '../hooks/useDebounce.js';
 import { useAuth } from '../context/AuthContext';
 import { GoX } from 'react-icons/go';
@@ -74,7 +75,7 @@ const Home = () => {
   const imagenesCarrusel = useMemo(
     () =>
       state.productos.map(p => ({
-        src: `http://localhost:3000${p.imagen_producto}`,
+        src: `https://sabor-production.up.railway.app/${p.imagen_producto}`,
         alt: p.nombre_producto,
       })),
     [state.productos]

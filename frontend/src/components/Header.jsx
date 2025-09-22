@@ -149,6 +149,13 @@ const Header = () => {
                       </Link>
                       <Link
                         className="menu-perfil__opcion"
+                        to="/mis-calificaciones"
+                        onClick={closeMobileMenu}
+                      >
+                        Mis Calificaciones
+                      </Link>
+                      <Link
+                        className="menu-perfil__opcion"
                         to="/actualizar-datos"
                         onClick={closeMobileMenu}
                       >
@@ -238,7 +245,7 @@ const Header = () => {
                 </p>
                 {user?.imagen_usuario ? (
                   <img
-                    src={`http://localhost:3000/uploads/${user.imagen_usuario}`}
+                    src={`https://sabor-production.up.railway.app/uploads/${user.imagen_usuario}`}
                     alt="Foto de perfil"
                     className="encabezado__icono-cliente encabezado__icono-cliente--foto"
                     style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }}
@@ -253,6 +260,9 @@ const Header = () => {
                     </Link>
                     <Link className="menu-perfil__opcion" to="/historial-reservas">
                       {t('ver_historial_reservas')}
+                    </Link>
+                    <Link className="menu-perfil__opcion" to="/mis-calificaciones">
+                      Mis Calificaciones
                     </Link>
                     {/* NUEVO: Botón historial de domicilios (escritorio) */}
                     <Link className="menu-perfil__opcion" to="/historial-domicilios">
@@ -275,7 +285,7 @@ const Header = () => {
                 <p className="encabezado__nombre-cliente">{t('iniciar_sesion')}</p>
                 {user?.imagen_usuario ? (
                   <img
-                    src={`http://localhost:3000/uploads/${user.imagen_usuario}`}
+                    src={`https://sabor-production.up.railway.app/uploads/${user.imagen_usuario}`}
                     alt="Foto de perfil"
                     className="encabezado__icono-cliente encabezado__icono-cliente--foto"
                     style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }}
@@ -294,6 +304,4 @@ const Header = () => {
   );
 };
 
-
 export default Header;
-

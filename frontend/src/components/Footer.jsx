@@ -11,9 +11,7 @@ import { validarCaracteresEspeciales, validarEspaciosInicioFinal } from '../util
 
 const FooterAlert = ({ type, message }) => {
   if (!message) return null;
-  const icon = type === 'success'
-    ? <GoCheck className="GoCheck" />
-    : <GoX className="GoX" />;
+  const icon = type === 'success' ? <GoCheck className="GoCheck" /> : <GoX className="GoX" />;
   return (
     <div className="alerta-con-tarjeta">
       {icon}
@@ -81,7 +79,7 @@ const Footer = () => {
       const res = await fetch('/api/contacto', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mensaje: experiencia })
+        body: JSON.stringify({ mensaje: experiencia }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al enviar el mensaje');
@@ -111,50 +109,54 @@ const Footer = () => {
   };
 
   return (
-      <footer className="pie-pagina">
-        <div className="pie-pagina__contacto">
-          <h3 className="pie-pagina__titulo">{t('contactanos')}</h3>
-          <h4 className="pie-pagina__subtitulo">{t('nuestras_redes')}</h4>
-          <div className="pie-pagina__redes">
-            <div className="pie-pagina__icono-red">
-              <FaFacebook size={32} />
-            </div>
-            <div className="pie-pagina__icono-red">
-              <FaTiktok size={32} />
-            </div>
-            <div className="pie-pagina__icono-red">
-              <AiFillInstagram size={32} />
-            </div>
-            <div className="pie-pagina__icono-red">
-              <BsTwitterX size={32} />
-            </div>
-            <div className="pie-pagina__icono-red">
-              <FaYoutube size={32} />
-            </div>
+    <footer className="pie-pagina">
+      <div className="pie-pagina__contacto">
+        <h3 className="pie-pagina__titulo">{t('contactanos')}</h3>
+        <h4 className="pie-pagina__subtitulo">{t('nuestras_redes')}</h4>
+        <div className="pie-pagina__redes">
+          <div className="pie-pagina__icono-red">
+            <FaFacebook size={32} />
+          </div>
+          <div className="pie-pagina__icono-red">
+            <FaTiktok size={32} />
+          </div>
+          <div className="pie-pagina__icono-red">
+            <AiFillInstagram size={32} />
+          </div>
+          <div className="pie-pagina__icono-red">
+            <BsTwitterX size={32} />
+          </div>
+          <div className="pie-pagina__icono-red">
+            <FaYoutube size={32} />
           </div>
         </div>
+      </div>
 
-        <div className="pie-pagina__nosotros">
-          <h3 className="pie-pagina__titulo">{t('sobre_nosotros')}</h3>
-          <h4 className="pie-pagina__subtitulo">
-            <Link className='nosotros-opc' to="/quienes-somos">{t('quienes_somos')}</Link>
-            <Link className='nosotros-opc' to="/sobre-nosotros">{t('descubrenos')}</Link>
-          </h4>
-        </div>
-        <form noValidate className="cuentanos" onSubmit={handleSubmit}>
-          <h3 className="pie-pagina__titulo">{t('cuentanos')}</h3>
-          <textarea
-            className="cuentanos__input"
-            placeholder={t('tu_experiencia')}
-            value={experiencia}
-            onChange={e => setExperiencia(e.target.value)}
-          />
-          <button className="cuentanos__boton" type="submit">
-            {t('enviar')}
-          </button>
-          <FooterAlert type={error ? 'error' : 'success'} message={error || mensaje} />
-        </form>
-      </footer>
+      <div className="pie-pagina__nosotros">
+        <h3 className="pie-pagina__titulo">{t('sobre_nosotros')}</h3>
+        <h4 className="pie-pagina__subtitulo">
+          <Link className="nosotros-opc" to="/quienes-somos">
+            {t('quienes_somos')}
+          </Link>
+          <Link className="nosotros-opc" to="/sobre-nosotros">
+            {t('descubrenos')}
+          </Link>
+        </h4>
+      </div>
+      <form noValidate className="cuentanos" onSubmit={handleSubmit}>
+        <h3 className="pie-pagina__titulo">{t('cuentanos')}</h3>
+        <textarea
+          className="cuentanos__input"
+          placeholder={t('tu_experiencia')}
+          value={experiencia}
+          onChange={e => setExperiencia(e.target.value)}
+        />
+        <button className="cuentanos__boton" type="submit">
+          {t('enviar')}
+        </button>
+        <FooterAlert type={error ? 'error' : 'success'} message={error || mensaje} />
+      </form>
+    </footer>
   );
 };
 

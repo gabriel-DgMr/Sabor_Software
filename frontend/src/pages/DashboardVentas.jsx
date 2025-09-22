@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import dashboardService from '../services/dashboardService';
 import MenuLateral from '../components/MenuLateralAdministrador';
+import PDFDownloadButton from '../components/PDFDownloadButton';
+import { usePDFGenerator } from '../hooks/usePDFGenerator';
 import '../styles/empleados.css';
+import '../styles/dashboard.css';
+import '../styles/charts.css';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -14,6 +18,7 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  Filler,
 } from 'chart.js';
 
 ChartJS.register(
@@ -25,13 +30,15 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  Filler
 );
 
 const DashboardVentas = () => {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { contentRef, generatePDF } = usePDFGenerator();
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -51,14 +58,18 @@ const DashboardVentas = () => {
     fetchMetrics();
   }, []);
 
+  const handleGeneratePDF = () => {
+    generatePDF('dashboard-ventas.pdf', 'Dashboard de Ventas', 'sales', metrics);
+  };
+
   if (loading) return <div>Cargando...</div>;
 
   if (error) {
     return (
       <div className="layout">
         <MenuLateral />
-        <main className="dashboard__ventas" style={{ padding: 24 }}>
-          <h1 style={{ fontSize: 28, marginBottom: 24 }}>Ventas</h1>
+        <main className="dashboard-container">
+          <h1 className="dashboard-title">Ventas</h1>
           <div
             style={{
               background: '#ffebee',
@@ -95,8 +106,8 @@ const DashboardVentas = () => {
     return (
       <div className="layout">
         <MenuLateral />
-        <main className="dashboard__ventas" style={{ padding: 24 }}>
-          <h1 style={{ fontSize: 28, marginBottom: 24 }}>Ventas</h1>
+        <main className="dashboard-container">
+          <h1 className="dashboard-title">Ventas</h1>
           <div
             style={{
               background: '#e3f2fd',
@@ -175,7 +186,8 @@ const DashboardVentas = () => {
         pointBackgroundColor: '#4CAF50',
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
-        pointRadius: 4,
+        pointRadius: 6,
+        pointHoverRadius: 8,
       },
     ],
   };
@@ -193,6 +205,8 @@ const DashboardVentas = () => {
             ? ventasPorMetodo.map(v => v.total || 0)
             : [0],
         backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#E91E63', '#9C27B0'],
+        borderWidth: 2,
+        borderColor: '#fff',
       },
     ],
   };
@@ -219,6 +233,8 @@ const DashboardVentas = () => {
         backgroundColor: 'rgba(33, 150, 243, 0.8)',
         borderColor: '#2196F3',
         borderWidth: 1,
+        borderRadius: 4,
+        borderSkipped: false,
       },
     ],
   };
@@ -226,168 +242,216 @@ const DashboardVentas = () => {
   return (
     <div className="layout">
       <MenuLateral />
-      <main className="dashboard__ventas" style={{ padding: 24 }}>
-        <h1 style={{ fontSize: 28, marginBottom: 24 }}>Ventas</h1>
-
-        {/* Tarjetas métricas */}
-        <div style={{ display: 'flex', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
-          {[
-            {
-              label: 'Ventas Totales',
-              value: formatCurrency(ventas_totales || 0),
-              description: 'Historial completo',
-            },
-            {
-              label: 'Ventas Hoy',
-              value: formatCurrency(ventas_hoy || 0),
-              description: 'Día actual',
-            },
-            {
-              label: 'Ventas Semana',
-              value: formatCurrency(ventas_semana || 0),
-              description: 'Últimos 7 días',
-            },
-            {
-              label: 'Ventas Mes',
-              value: formatCurrency(ventas_mes || 0),
-              description: 'Últimos 30 días',
-            },
-          ].map(card => (
-            <div
-              key={card.label}
-              style={{
-                background: '#4CAF50',
-                color: '#fff',
-                borderRadius: 12,
-                padding: 24,
-                minWidth: 180,
-                boxShadow: '0 2px 8px #0001',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-              }}
-            >
-              <div>
-                <div style={{ fontSize: 18, marginBottom: 4 }}>{card.label}</div>
-                <div style={{ fontSize: 12, opacity: 0.8 }}>{card.description}</div>
-              </div>
-              <div style={{ fontSize: 24, fontWeight: 600, marginTop: 8 }}>{card.value}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Gráficas */}
-        <div style={{ display: 'flex', gap: 24, marginBottom: 32 }}>
-          <div
-            style={{
-              flex: 2,
-              background: '#fff',
-              borderRadius: 12,
-              padding: 24,
-              boxShadow: '0 2px 8px #0001',
-            }}
-          >
-            <div style={{ fontWeight: 600, marginBottom: 8 }}>Ventas por Día</div>
-            <Line
-              data={lineData}
-              options={{
-                responsive: true,
-                plugins: { legend: { display: false } },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: {
-                      callback: function (value) {
-                        return formatCurrency(value);
-                      },
-                    },
-                  },
-                },
-              }}
-              height={200}
-            />
-          </div>
-
-          <div
-            style={{
-              flex: 1,
-              background: '#fff',
-              borderRadius: 12,
-              padding: 24,
-              boxShadow: '0 2px 8px #0001',
-            }}
-          >
-            <div style={{ fontWeight: 600, marginBottom: 8 }}>Ventas por Método de Pago</div>
-            <Doughnut
-              data={doughnutData}
-              options={{
-                plugins: {
-                  legend: { position: 'right' },
-                  tooltip: {
-                    callbacks: {
-                      label: function (context) {
-                        const value = context.parsed;
-                        return `${context.label}: ${formatCurrency(value)}`;
-                      },
-                    },
-                  },
-                },
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Productos más vendidos */}
-        <div
-          style={{
-            background: '#fff',
-            borderRadius: 12,
-            padding: 24,
-            boxShadow: '0 2px 8px #0001',
-          }}
-        >
-          <div style={{ fontWeight: 600, marginBottom: 16 }}>Productos Más Vendidos</div>
-          <Bar
-            data={barData}
-            options={{
-              responsive: true,
-              plugins: { legend: { display: false } },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                },
-              },
-            }}
-            height={100}
+      <main className="dashboard-container">
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">Ventas</h1>
+          <PDFDownloadButton
+            onGeneratePDF={handleGeneratePDF}
+            disabled={loading || error || !metrics}
           />
+        </div>
 
-          {/* Tabla de productos */}
-          {productosVendidos && productosVendidos.length > 0 && (
-            <div style={{ marginTop: 24 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
-                    <th style={{ padding: 12, textAlign: 'left' }}>Producto</th>
-                    <th style={{ padding: 12, textAlign: 'right' }}>Cantidad</th>
-                    <th style={{ padding: 12, textAlign: 'right' }}>Ingresos</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {productosVendidos.slice(0, 10).map((producto, index) => (
-                    <tr key={index} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                      <td style={{ padding: 12 }}>{producto.nombre_producto}</td>
-                      <td style={{ padding: 12, textAlign: 'right' }}>
-                        {producto.cantidad_vendida}
-                      </td>
-                      <td style={{ padding: 12, textAlign: 'right' }}>
-                        {formatCurrency(producto.ingresos)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* Contenido para PDF */}
+        <div ref={contentRef} className="dashboard-content">
+          {/* Tarjetas métricas */}
+          <div className="metrics-grid">
+            {[
+              {
+                label: 'Ventas Totales',
+                value: formatCurrency(ventas_totales || 0),
+                description: 'Historial completo',
+              },
+              {
+                label: 'Ventas Hoy',
+                value: formatCurrency(ventas_hoy || 0),
+                description: 'Día actual',
+              },
+              {
+                label: 'Ventas Semana',
+                value: formatCurrency(ventas_semana || 0),
+                description: 'Últimos 7 días',
+              },
+              {
+                label: 'Ventas Mes',
+                value: formatCurrency(ventas_mes || 0),
+                description: 'Últimos 30 días',
+              },
+            ].map(card => (
+              <div key={card.label} className="metric-card metric-card--sales">
+                <div className="metric-card-header">
+                  <div className="metric-card-title">{card.label}</div>
+                  <div className="metric-card-description">{card.description}</div>
+                </div>
+                <div className="metric-card-value">{card.value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Gráficas */}
+          <div className="charts-container">
+            <div className="chart-container chart-container--large line-chart">
+              <div className="chart-title">Ventas por Día</div>
+              <div className="chart-wrapper chart-wrapper--large">
+                <Line
+                  data={lineData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    backgroundColor: '#ffffff',
+                    plugins: {
+                      legend: { display: false },
+                      tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#4CAF50',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: {
+                          label: function (context) {
+                            return `Ventas: ${formatCurrency(context.parsed.y)}`;
+                          },
+                        },
+                      },
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        grid: {
+                          color: 'rgba(0, 0, 0, 0.1)',
+                        },
+                        ticks: {
+                          color: '#666',
+                          callback: function (value) {
+                            return formatCurrency(value);
+                          },
+                        },
+                      },
+                      x: {
+                        grid: {
+                          color: 'rgba(0, 0, 0, 0.1)',
+                        },
+                        ticks: {
+                          color: '#666',
+                        },
+                      },
+                    },
+                  }}
+                />
+              </div>
             </div>
-          )}
+
+            <div className="chart-container chart-container--small doughnut-chart">
+              <div className="chart-title">Ventas por Método de Pago</div>
+              <div className="chart-wrapper chart-wrapper--small">
+                <Doughnut
+                  data={doughnutData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    backgroundColor: '#ffffff',
+                    plugins: {
+                      legend: {
+                        position: 'right',
+                        labels: {
+                          usePointStyle: true,
+                          padding: 20,
+                          font: {
+                            size: 12,
+                          },
+                        },
+                      },
+                      tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#FF9800',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        callbacks: {
+                          label: function (context) {
+                            const value = context.parsed;
+                            return `${context.label}: ${formatCurrency(value)}`;
+                          },
+                        },
+                      },
+                    },
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Productos más vendidos */}
+          <div className="chart-container bar-chart">
+            <div className="chart-title">Productos Más Vendidos</div>
+            <div className="chart-wrapper chart-wrapper--large">
+              <Bar
+                data={barData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  backgroundColor: '#ffffff',
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      titleColor: '#fff',
+                      bodyColor: '#fff',
+                      borderColor: '#2196F3',
+                      borderWidth: 1,
+                      cornerRadius: 8,
+                    },
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                      },
+                      ticks: {
+                        color: '#666',
+                      },
+                    },
+                    x: {
+                      grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                      },
+                      ticks: {
+                        color: '#666',
+                      },
+                    },
+                  },
+                }}
+              />
+            </div>
+
+            {/* Tabla de productos */}
+            {productosVendidos && productosVendidos.length > 0 && (
+              <div className="table-container">
+                <div className="table-title">Top 10 Productos Más Vendidos</div>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Producto</th>
+                      <th>Cantidad</th>
+                      <th>Ingresos</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productosVendidos.slice(0, 10).map((producto, index) => (
+                      <tr key={index}>
+                        <td>{producto.nombre_producto}</td>
+                        <td style={{ textAlign: 'right' }}>{producto.cantidad_vendida}</td>
+                        <td style={{ textAlign: 'right' }}>{formatCurrency(producto.ingresos)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </div>

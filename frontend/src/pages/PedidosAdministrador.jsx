@@ -51,9 +51,7 @@ const PedidosAdministrador = () => {
   const cambiarEstado = async (pedidoId, estadoActual) => {
     try {
       setPedidos(prevPedidos =>
-        prevPedidos.map(p =>
-          p.id === pedidoId ? { ...p, cambiandoEstado: true } : p
-        )
+        prevPedidos.map(p => (p.id === pedidoId ? { ...p, cambiandoEstado: true } : p))
       );
 
       const siguienteEstado = obtenerSiguienteEstado(estadoActual);
@@ -83,9 +81,7 @@ const PedidosAdministrador = () => {
     } catch (err) {
       console.error('Error al cambiar estado:', err);
       setPedidos(prevPedidos =>
-        prevPedidos.map(p =>
-          p.id === pedidoId ? { ...p, cambiandoEstado: false } : p
-        )
+        prevPedidos.map(p => (p.id === pedidoId ? { ...p, cambiandoEstado: false } : p))
       );
       setError(`Error al actualizar el pedido ${pedidoId}: ${err.message}`);
     }
@@ -106,9 +102,7 @@ const PedidosAdministrador = () => {
   };
 
   const pedidosFiltrados =
-    filtroActivo === 'todos'
-      ? pedidos
-      : pedidos.filter(p => p.estado === filtroActivo);
+    filtroActivo === 'todos' ? pedidos : pedidos.filter(p => p.estado === filtroActivo);
 
   return (
     <div className="layout">
@@ -163,17 +157,15 @@ const PedidosAdministrador = () => {
                   </h2>
                   <p className="pedido__productos">{pedido.productos}</p>
                   <p className="pedido__hora">Hora: {pedido.hora}</p>
-                  <p className="pedido__total">
-                    Total: ${pedido.total?.toLocaleString()}
-                  </p>
-                  {pedido.notas && (
-                    <p className="pedido__notas">Notas: {pedido.notas}</p>
+                  <p className="pedido__total">Total: ${pedido.total?.toLocaleString()}</p>
+                  {pedido.notas && <p className="pedido__notas">Notas: {pedido.notas}</p>}
+                  {pedido.metodo_pago === 'payu' && pedido.referencia_pago && (
+                    <p className="pedido__payu">💳 Pago PayU: {pedido.referencia_pago}</p>
                   )}
                   {pedido.tipo_servicio === 'domicilio' && (
                     <p className="pedido__direccion">
                       📍 Domicilio: {pedido.direccion_entrega}
-                      {pedido.detalle_direccion &&
-                        ` - ${pedido.detalle_direccion}`}
+                      {pedido.detalle_direccion && ` - ${pedido.detalle_direccion}`}
                     </p>
                   )}
                   <button
@@ -181,29 +173,21 @@ const PedidosAdministrador = () => {
                       pedido.cambiandoEstado ? 'pedido__boton--cargando' : ''
                     }`}
                     onClick={() => cambiarEstado(pedido.id, pedido.estado)}
-                    disabled={
-                      pedido.estado === 'completado' || pedido.cambiandoEstado
-                    }
+                    disabled={pedido.estado === 'completado' || pedido.cambiandoEstado}
                   >
                     {pedido.cambiandoEstado
                       ? '🔄 Actualizando...'
                       : pedido.estado === 'completado'
-                      ? '✅ Completado'
-                      : `➡️ Cambiar a ${mapearEstado(
-                          obtenerSiguienteEstado(pedido.estado)
-                        )}`}
+                        ? '✅ Completado'
+                        : `➡️ Cambiar a ${mapearEstado(obtenerSiguienteEstado(pedido.estado))}`}
                   </button>
                 </div>
                 <div className="pedido__info">
-                  <span
-                    className={`pedido__estado pedido__estado--${pedido.estado}`}
-                  >
+                  <span className={`pedido__estado pedido__estado--${pedido.estado}`}>
                     {estadoTexto(pedido.estado)}
                   </span>
                   <p className="pedido__mesa">
-                    {pedido.tipo_servicio === 'mesa'
-                      ? `MESA: ${pedido.mesa}`
-                      : 'DOMICILIO'}
+                    {pedido.tipo_servicio === 'mesa' ? `MESA: ${pedido.mesa}` : 'DOMICILIO'}
                   </p>
                 </div>
               </article>

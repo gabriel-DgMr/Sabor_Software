@@ -3,7 +3,7 @@ import React, { createContext, useState, useEffect, useCallback } from 'react';
 
 const CartContext = createContext(null);
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
@@ -207,11 +207,27 @@ export const CartProvider = ({ children }) => {
     tipo_servicio,
     direccion_entrega,
     detalle_direccion,
+    referencia_pago,
+    estado_pago,
+    recomendaciones,
   } = {}) => {
     try {
+      console.log('🔄 ===== INICIANDO CONFIRMAR PEDIDO =====');
+      console.log('📋 Parámetros recibidos:', {
+        metodo_pago,
+        tipo_servicio,
+        direccion_entrega,
+        detalle_direccion,
+        referencia_pago,
+        estado_pago,
+        recomendaciones,
+      });
+
       setLoading(true);
       setError(null);
       const token = localStorage.getItem('token');
+      console.log('🔑 Token presente:', !!token);
+
       if (!token) {
         throw new Error('Debes iniciar sesión para confirmar el pedido');
       }
@@ -224,6 +240,9 @@ export const CartProvider = ({ children }) => {
         throw new Error('La dirección de entrega es requerida para pedidos a domicilio');
       }
 
+      console.log('🌐 Haciendo petición al backend...');
+      console.log('📡 URL:', `${API_URL}/pedidos/carrito/confirmar`);
+
       const response = await fetch(`${API_URL}/pedidos/carrito/confirmar`, {
         method: 'POST',
         headers: {
@@ -231,11 +250,20 @@ export const CartProvider = ({ children }) => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          metodo_pago, // 'efectivo' | 'tarjeta' | 'transferencia'
+          metodo_pago, // 'efectivo' | 'tarjeta' | 'transferencia' | 'payu'
           tipo_servicio, // 'mesa' | 'domicilio'
           direccion_entrega, // requerido si tipo_servicio === 'domicilio'
           detalle_direccion, // opcional (apto/piso/habitación)
+          referencia_pago, // referencia de PayU o otra plataforma de pago
+          estado_pago, // estado del pago (2: pendiente, 3: pagado, 4: cancelado)
+          recomendaciones, // recomendaciones del cliente
         }),
+      });
+
+      console.log('📡 Respuesta del servidor:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
       });
 
       if (!response.ok) {
@@ -250,9 +278,13 @@ export const CartProvider = ({ children }) => {
 
       // Limpiar carrito después de confirmar
       setCartItems([]);
-      return await response.json();
+      const result = await response.json();
+      console.log('✅ Pedido confirmado en backend:', result);
+      return result;
     } catch (error) {
-      console.error('Error al confirmar pedido:', error);
+      console.error('❌ ===== ERROR AL CONFIRMAR PEDIDO =====');
+      console.error('❌ Error completo:', error);
+      console.error('❌ Mensaje de error:', error.message);
       setError(error.message);
       throw error;
     } finally {

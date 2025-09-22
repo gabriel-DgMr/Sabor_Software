@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { GoCheck, GoX, GoAlert } from "react-icons/go";
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { GoCheck, GoX, GoAlert } from 'react-icons/go';
 import DialogoModal from '../components/DialogoExito.jsx';
 import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
@@ -39,18 +39,26 @@ export default function Checkout() {
       onConfirm: () => {
         setModal(m => ({ ...m, open: false }));
         navigate('/');
-      }
+      },
     });
   }, [location, navigate]);
 
   return (
     <>
       <Header />
-      <main className="carrito_bg" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <main
+        className="carrito_bg"
+        style={{
+          minHeight: '60vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         {/* El modal se encarga de mostrar el mensaje */}
       </main>
       <Footer />
       <DialogoModal {...modal} onClose={() => setModal(m => ({ ...m, open: false }))} />
     </>
   );
-} 
+}

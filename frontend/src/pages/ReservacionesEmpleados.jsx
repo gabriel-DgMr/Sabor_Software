@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import MenuLateral from '../components/MenuLateralAdministrador';
+import MenuLateral from '../components/MenuLateralEmpleado';
 import LoadingScreen from '../components/LoadingScreen';
 import { GoCheck, GoX } from 'react-icons/go';
 import '../styles/empleados.css';
@@ -97,7 +97,7 @@ const ReservacionesEmpleados = () => {
       const token = localStorage.getItem('token');
       console.log('🔍 Token obtenido:', token ? 'Sí' : 'No');
 
-      const url = '/api/reservas';
+      const url = (import.meta.env.VITE_API_URL || '/api') + '/reservas';
       console.log('🔍 Haciendo petición a:', url);
 
       const response = await fetch(url, {

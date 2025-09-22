@@ -513,45 +513,137 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .carrito_bg {
+    padding: 15px;
+  }
+  
   .carrito_contenido {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 25px;
+    max-width: 100%;
   }
   
   .carrito_titulo {
-    font-size: 2rem;
+    font-size: 2.4rem;
+    margin-bottom: 20px;
+  }
+  
+  .carrito_pedidos,
+  .carrito_detalles {
+    padding: 25px 20px;
+    border-radius: 15px;
   }
   
   .carrito_pedido_acciones {
     flex-direction: column;
+    gap: 15px;
   }
   
   .carrito_btn {
     width: 100%;
     justify-content: center;
+    padding: 15px 20px;
+    font-size: 1.6rem;
   }
   
   .carrito_item_info {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 12px;
   }
   
   .carrito_item_controles {
-    align-self: flex-end;
+    align-self: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .carrito_item_nombre {
+    text-align: center;
+    font-size: 1.4rem;
+    min-width: auto;
+  }
+
+  .carrito_btn_cantidad,
+  .carrito_btn_eliminar {
+    width: 42px;
+    height: 42px;
+    font-size: 1.6rem;
+  }
+
+  .carrito_cantidad {
+    font-size: 1.6rem;
+    min-width: 42px;
   }
 }
 
 @media (max-width: 480px) {
   .carrito_bg {
-    padding: 10px;
+    padding: 8px;
+  }
+  
+  .carrito_contenido {
+    gap: 15px;
   }
   
   .carrito_pedidos,
   .carrito_detalles {
-    padding: 15px;
+    padding: 15px 12px;
+    border-radius: 12px;
   }
   
   .carrito_titulo {
-    font-size: 1.8rem;
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+
+  .carrito_pedido {
+    padding: 20px 15px;
+    margin-bottom: 20px;
+  }
+
+  .carrito_pedido_titulo {
+    font-size: 1.7rem;
+    margin-bottom: 12px;
+  }
+
+  .carrito_item {
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+
+  .carrito_item_nombre {
+    font-size: 1.3rem;
+  }
+
+  .carrito_btn_cantidad,
+  .carrito_btn_eliminar {
+    width: 36px;
+    height: 36px;
+    font-size: 1.4rem;
+  }
+
+  .carrito_cantidad {
+    font-size: 1.4rem;
+    min-width: 36px;
+  }
+
+  .carrito_pedido_total {
+    font-size: 1.7rem;
+    padding: 20px 15px;
+    margin-bottom: 20px;
+  }
+
+  .carrito_btn {
+    padding: 12px 15px;
+    font-size: 1.4rem;
+    min-height: 50px;
+  }
+
+  .carrito_btn.eliminar,
+  .carrito_btn.cerrar,
+  .carrito_btn.pagar {
+    width: 100%;
+    height: 50px;
   }
 }

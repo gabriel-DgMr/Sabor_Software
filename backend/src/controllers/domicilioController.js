@@ -7,7 +7,7 @@ export const getHistorialDomicilios = async (req, res) => {
     const domicilios = await domicilioModel.getDomiciliosByUserId(id_usuario);
     res.json(domicilios);
   } catch (error) {
-    console.error("Error en getHistorialDomicilios:", error);
+    console.error("Error en getHistorialDomicilios:", error); // log detallado
     res.status(500).json({ message: error.message });
   }
 };
@@ -18,7 +18,7 @@ export const getDomicilios = async (req, res) => {
     const domicilios = await domicilioModel.getDomicilios();
     res.json(domicilios);
   } catch (error) {
-    console.error("Error al obtener domicilios:", error);
-    res.status(500).json({ message: "Error al obtener domicilios" });
+    console.error("Error en getDomicilios:", error);
+    res.status(500).json({ message: error.message });
   }
 };

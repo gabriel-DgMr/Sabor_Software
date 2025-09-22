@@ -213,10 +213,14 @@ export const deactivateUser = async (id_usuario) => {
   return result.affectedRows > 0;
 };
 
-// Obtener todos los usuarios
+// Obtener todos los usuarios con sus roles
 export const getAllusuarios = async () => {
   const [rows] = await pool.query(
-    "SELECT id_usuario, nombre_usuario, correo_usuario, telefono_usuario, fecha_registro, fecha_modificacion FROM usuarios WHERE activo = true",
+    `SELECT u.id_usuario, u.nombre_usuario, u.correo_usuario, u.telefono_usuario, 
+            u.fecha_registro, u.fecha_modificacion, u.id_rol, r.nombre_rol
+     FROM usuarios u 
+     JOIN roles r ON u.id_rol = r.id_rol 
+     WHERE u.activo = true`,
   );
   return rows;
 };
@@ -277,5 +281,22 @@ export const updatePassword = async (id_usuario, newPassword) => {
     [hashedPassword, id_usuario],
   );
 
+  return result.affectedRows > 0;
+};
+
+// Obtener todos los roles
+export const getAllRoles = async () => {
+  const [rows] = await pool.query(
+    "SELECT id_rol, nombre_rol FROM roles ORDER BY id_rol",
+  );
+  return rows;
+};
+
+// Actualizar rol de usuario
+export const updateUserRole = async (id_usuario, id_rol) => {
+  const [result] = await pool.query(
+    "UPDATE usuarios SET id_rol = ?, fecha_modificacion = CURRENT_TIMESTAMP WHERE id_usuario = ? AND activo = true",
+    [id_rol, id_usuario],
+  );
   return result.affectedRows > 0;
 };

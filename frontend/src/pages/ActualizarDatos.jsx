@@ -35,7 +35,7 @@ const ActualizarDatos = () => {
       setTelefono(user.telefono_usuario || '');
       // Si el usuario ya tiene una imagen de perfil, mostrarla
       if (user.imagen_usuario) {
-        setImagenPreview(`http://localhost:3000/uploads/${user.imagen_usuario}`);
+        setImagenPreview(`https://sabor-production.up.railway.app/uploads/${user.imagen_usuario}`);
       }
     }
   }, [user]);

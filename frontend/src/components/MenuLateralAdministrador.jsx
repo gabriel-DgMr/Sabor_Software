@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaUserCircle, FaBars, FaTimes } from 'react-icons/fa';
+import { FiPower } from 'react-icons/fi';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext.jsx';
@@ -12,21 +13,23 @@ const MenuLateral = () => {
 
   const opcionesGenerales = [
     { nombre: 'Inicio', ruta: '/HomeAdministrador' },
+    { nombre: 'Usuarios', ruta: '/administrador/usuarios' },
     { nombre: 'Reservaciones', ruta: '/administrador/reservaciones' },
     { nombre: 'Productos', ruta: '/administrador/productos' },
     { nombre: 'Pedidos', ruta: '/administrador/pedidos' },
     { nombre: 'Domicilios', ruta: '/administrador/domicilios' },
+    { nombre: 'Usuarios', ruta: '/administrador/usuarios' },
     { nombre: 'Panel de control', ruta: '/administrador/panel' },
   ];
 
   const opcionesPanel = [
-    { nombre: 'Ventas', ruta: '/administrador/panel/ventas' },
-    { nombre: 'Clientes', ruta: '/administrador/panel/clientes' },
-    { nombre: 'Trabajadores', ruta: '/administrador/panel/trabajadores' },
-    { nombre: 'Inventario', ruta: '/administrador/panel/inventario' },
+    { nombre: 'Ventas', ruta: '/administrar/panel/ventas' },
+    { nombre: 'Clientes', ruta: '/administrar/panel/clientes' },
+    { nombre: 'Trabajadores', ruta: '/administrar/panel/trabajadores' },
+    { nombre: 'Inventario', ruta: '/administrar/panel/inventario' },
   ];
 
-  const enPanel = location.pathname.startsWith('/administrador/panel');
+  const enPanel = location.pathname.startsWith('/administrar/panel');
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -50,17 +53,22 @@ const MenuLateral = () => {
 
         <hr className="menu-lateral__separador" />
 
-        <button
-          aria-label="Cerrar sesión"
-          className="menu-lateral__cliente"
-          onClick={() => {
-            logout();
-            closeMenu();
-          }}
-        >
-          <FaUserCircle size={32} />
-          <span className="menu-lateral__cliente-nombre">{user?.nombre_usuario || 'Invitado'}</span>
-        </button>
+        <div className="menu-lateral__contenedor-cliente">
+          <button aria-label="Cerrar sesión" className="menu-lateral__cliente">
+            <FaUserCircle size={32} />
+            <span className="menu-lateral__cliente-nombre">{user?.nombre_usuario}</span>
+          </button>
+
+          <button
+            className="menu-lateral-cerrar"
+            onClick={() => {
+              logout();
+              closeMenu();
+            }}
+          >
+            <FiPower size={30} />
+          </button>
+        </div>
 
         <hr className="menu-lateral__separador" />
 

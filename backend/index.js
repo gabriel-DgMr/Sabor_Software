@@ -28,6 +28,9 @@ import mensajeContactoRoutes from "./src/routes/contactoRoutes.js";
 import mercadopagoRoutes from "./src/routes/mercadopagoRoutes.js";
 import webhookRoutes from "./src/routes/webhookRoutes.js";
 import dashboardRoutes from "./src/routes/dashboardRoutes.js";
+import payuRoutes from "./src/routes/payuRoutes.js";
+import calificacionRoutes from "./src/routes/calificacionRoutes.js";
+import healthRoutes from "./src/routes/healthRoutes.js";
 import domicilioRoutes from "./src/routes/domicilioRoutes.js";
 
 const app = express();
@@ -43,10 +46,11 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "'data:'", "'https:'", "'http://localhost:3000'"],
-        fontSrc: ["'self'", "'data:'"],
+        imgSrc: ["'self'", "data:", "https:", "https://cdn.jsdelivr.net"],
+        fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
+        connectSrc: ["'self'", "https://sabor-production.up.railway.app"],
       },
     },
     crossOriginEmbedderPolicy: false,
@@ -55,17 +59,44 @@ app.use(
 );
 
 // ============================
-// Configuración CORS
+// Configuración de CORS dinámico
 // ============================
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-    maxAge: 86400, // 24 horas
-  }),
-);
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "http://localhost:4173",
+      "https://sabor-production.up.railway.app",
+    ];
+
+    if (process.env.NODE_ENV === "production") {
+      if (process.env.RAILWAY_STATIC_URL) {
+        allowedOrigins.push(process.env.RAILWAY_STATIC_URL);
+      }
+      if (process.env.CORS_ORIGIN) {
+        allowedOrigins.push(process.env.CORS_ORIGIN);
+      }
+      if (process.env.FRONTEND_URL) {
+        allowedOrigins.push(process.env.FRONTEND_URL);
+      }
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  maxAge: 86400,
+};
+
+app.use(cors(corsOptions));
 
 // ============================
 // Middlewares globales
@@ -94,9 +125,12 @@ app.use("/api/pedidos", pedidoRoutes);
 app.use("/api/horarios", horarioRoutes);
 app.use("/api", mensajeContactoRoutes);
 app.use("/api/mercadopago", mercadopagoRoutes);
+app.use("/api/payu", payuRoutes);
 app.use("/api/webhook", webhookRoutes);
+app.use("/api/calificaciones", calificacionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/domicilios", domicilioRoutes);
+app.use("/api", healthRoutes);
 
 // ============================
 // Archivos estáticos seguros
@@ -120,29 +154,35 @@ app.use(
       res.setHeader("X-Content-Type-Options", "nosniff");
 
       if (filePath.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-        res.setHeader("Cache-Control", "public, max-age=31536000"); // 1 año
+        res.setHeader("Cache-Control", "public, max-age=31536000");
         res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
       }
     },
   }),
 );
 
+// Servir archivos estáticos del frontend React
 app.use(
-  "/uploads/productos",
-  express.static(path.join(__dirname, "../public/uploads/productos"), {
+  express.static(path.join(__dirname, "public/dist"), {
+    index: false,
     setHeaders: (res, filePath) => {
-      if (
-        filePath.endsWith(".js") ||
-        filePath.endsWith(".php") ||
-        filePath.endsWith(".exe")
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-cache");
+      } else if (
+        filePath.match(
+          /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/,
+        )
       ) {
-        res.setHeader("Content-Type", "text/plain");
+        res.setHeader("Cache-Control", "public, max-age=31536000");
       }
-      res.setHeader("X-Content-Type-Options", "nosniff");
-      res.setHeader("X-Frame-Options", "DENY");
     },
   }),
 );
+
+// Ruta para servir el index.html del frontend
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public/dist/index.html"));
+});
 
 // ============================
 // Middlewares de error
@@ -153,12 +193,24 @@ app.use(errorHandler);
 // ============================
 // Iniciar servidor
 // ============================
-const PORT = config.server.port;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || config.server.port || 3000;
+
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
+app.listen(PORT, "0.0.0.0", () => {
   console.log(
     `Servidor corriendo en puerto ${PORT} en modo ${config.server.mode}`,
   );
   console.log("Configuración de seguridad activada");
+
+  if (process.env.RAILWAY_ENVIRONMENT) {
+    console.log(
+      `🚄 Desplegado en Railway - Environment: ${process.env.RAILWAY_ENVIRONMENT}`,
+    );
+    console.log(`🌐 URL: ${process.env.RAILWAY_STATIC_URL || "No disponible"}`);
+  }
 });
 
 export default app;

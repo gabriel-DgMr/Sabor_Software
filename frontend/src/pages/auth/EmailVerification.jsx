@@ -49,7 +49,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
             onVerificationSuccess();
           }
           onBackToLogin();
-        }, 5000);
+        }, 2000);
       } else {
         setError(data.message);
         setTimeout(() => animateElements('.formulario__mensaje-error', 'fade-in'), 0);
