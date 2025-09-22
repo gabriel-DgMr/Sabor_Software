@@ -448,7 +448,32 @@ export default function Carrito() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Error al procesar pago');
 
-      // Crear formulario dinámico para PayU
+      // Verificar si está en modo simulación
+      if (data.simulation) {
+        console.log('🎭 Modo simulación detectado:', data.message);
+
+        // Mostrar mensaje de simulación
+        setModal({
+          open: true,
+          message: '🎭 Modo Simulación: El pago será simulado (no se procesará pago real)',
+          icon: <GoAlert className="GoAlert" style={{ fontSize: '2.5rem', color: '#ff9800' }} />,
+          onConfirm: () => {
+            setModal(m => ({ ...m, open: false }));
+
+            // Marcar que estamos procesando un pago simulado
+            localStorage.setItem('payuProcessing', 'true');
+            localStorage.setItem('payuTimestamp', Date.now().toString());
+
+            // Redirigir a la URL simulada después de 2 segundos
+            setTimeout(() => {
+              window.location.href = data.simulatedUrl;
+            }, 2000);
+          },
+        });
+        return;
+      }
+
+      // Crear formulario dinámico para PayU real
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = data.actionUrl;
