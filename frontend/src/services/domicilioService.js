@@ -24,7 +24,7 @@ const domicilioService = {
   },
 
   // Crear un nuevo domicilio
-  crearDomicilio: (data) => {
+  crearDomicilio: data => {
     const token = localStorage.getItem('token');
     return axios.post(`${API_URL}`, data, {
       headers: {
@@ -44,7 +44,7 @@ const domicilioService = {
   },
 
   // Eliminar un domicilio
-  eliminarDomicilio: (id) => {
+  eliminarDomicilio: id => {
     const token = localStorage.getItem('token');
     return axios.delete(`${API_URL}/${id}`, {
       headers: {

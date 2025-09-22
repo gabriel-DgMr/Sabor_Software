@@ -1,7 +1,7 @@
 import express from "express";
 import {
   getHistorialDomicilios,
-  getDomicilios // <-- nuevo controlador para empleados/admin
+  getDomicilios, // <-- nuevo controlador para empleados/admin
 } from "../controllers/domicilioController.js";
 import { authMiddleware, checkRole } from "../middleware/auth.js";
 
@@ -15,7 +15,7 @@ router.get(
   "/todos",
   authMiddleware,
   checkRole(["Empleado", "Administrador"]),
-  getDomicilios
+  getDomicilios,
 );
 
 export default router;

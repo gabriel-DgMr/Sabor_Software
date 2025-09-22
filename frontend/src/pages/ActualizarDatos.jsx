@@ -4,6 +4,7 @@ import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { ANIM_DURATION, VISIBLE_DURATION, animateElements } from '../utils/animationUtils.js';
+import { getImageUrl } from '../utils/imageUtils.js';
 import {
   validarEmail,
   validarTelefono,
@@ -35,7 +36,7 @@ const ActualizarDatos = () => {
       setTelefono(user.telefono_usuario || '');
       // Si el usuario ya tiene una imagen de perfil, mostrarla
       if (user.imagen_usuario) {
-        setImagenPreview(`https://sabor-production.up.railway.app/uploads/${user.imagen_usuario}`);
+        setImagenPreview(user.imagen_usuario);
       }
     }
   }, [user]);
@@ -178,7 +179,7 @@ const ActualizarDatos = () => {
       }
 
       const response = await fetch(
-        `http://localhost:3000/api/auth/actualizarusuario/${user.id_usuario}`,
+        `${import.meta.env.VITE_API_URL || '/api'}/auth/actualizarusuario/${user.id_usuario}`,
         {
           method: 'PUT',
           headers: {

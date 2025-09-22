@@ -14,8 +14,9 @@ import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useCart } from '../context/useCart.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = `${import.meta.env.VITE_API_URL || '/api'}`;
 
 // Componente de alerta visualmente consistente para el carrito
 const CarritoAlert = ({ message }) => {
@@ -33,6 +34,7 @@ export default function Carrito() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const {
     cartItems,
     clearCart,
@@ -418,21 +420,96 @@ export default function Carrito() {
       return;
     }
 
+    // Verificar si el usuario está autenticado
+    if (!isAuthenticated || !user) {
+      setModal({
+        open: true,
+        message: 'Debes iniciar sesión para procesar el pago.',
+        icon: <GoAlert className="GoAlert" />,
+        onConfirm: () => setModal({ ...modal, open: false }),
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
 
       // Llama al backend para generar el formulario de PayU
-      const response = await fetch('http://localhost:3000/api/payu/formulario', {
+      const response = await fetch(`${API_URL}/payu/formulario`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: cartItems }),
+        body: JSON.stringify({
+          items: cartItems,
+          buyerEmail: user.correo_usuario,
+        }),
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Error al procesar pago');
 
-      // Crear formulario dinámico para PayU
+      // Verificar si está en modo sandbox
+      if (data.sandbox) {
+        console.log('🧪 Modo sandbox detectado:', data.message);
+
+        // Mostrar mensaje informativo de sandbox
+        setModal({
+          open: true,
+          message: (
+            <div>
+              <h3 style={{ marginBottom: '10px' }}>🧪 Modo Prueba (Sandbox)</h3>
+              <p>Puedes probar el flujo completo de pago con tarjetas de prueba.</p>
+              <p>
+                <strong>Tarjetas de prueba:</strong>
+              </p>
+              <ul style={{ textAlign: 'left', marginTop: '10px' }}>
+                <li>
+                  ✅ <strong>Aprobada:</strong> 4097440000000004
+                </li>
+                <li>
+                  ❌ <strong>Rechazada:</strong> 4097440000000008
+                </li>
+                <li>
+                  ⏳ <strong>Pendiente:</strong> 4097440000000007
+                </li>
+              </ul>
+              <p style={{ marginTop: '10px', fontSize: '0.9em', color: '#666' }}>
+                CVV: 123 | Fecha: Cualquier fecha futura
+              </p>
+            </div>
+          ),
+          icon: <GoAlert className="GoAlert" style={{ fontSize: '2.5rem', color: '#2196f3' }} />,
+          onConfirm: () => {
+            setModal(m => ({ ...m, open: false }));
+
+            // Marcar que estamos procesando un pago
+            localStorage.setItem('payuProcessing', 'true');
+            localStorage.setItem('payuTimestamp', Date.now().toString());
+
+            // Crear formulario y redirigir a PayU sandbox
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = data.actionUrl;
+            form.style.display = 'none';
+
+            // Agregar campos del formulario
+            Object.entries(data.formData).forEach(([key, value]) => {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = key;
+              input.value = value;
+              form.appendChild(input);
+            });
+
+            // Agregar formulario al DOM y enviarlo
+            document.body.appendChild(form);
+            form.submit();
+          },
+        });
+        return;
+      }
+
+      // Crear formulario dinámico para PayU real
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = data.actionUrl;

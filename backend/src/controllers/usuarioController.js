@@ -2,6 +2,11 @@ import * as authModel from "../models/authModel.js";
 import validator from "validator";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 // Obtener todos los usuarios
 export const getAllusuarios = async (req, res) => {
   try {
@@ -56,7 +61,8 @@ export const updateusuario = async (req, res) => {
       const usuario = await authModel.getusuarioById(id);
       if (usuario && usuario.imagen_usuario) {
         const oldImagePath = path.join(
-          "public/uploads",
+          __dirname,
+          "../../public/uploads",
           usuario.imagen_usuario,
         );
         if (fs.existsSync(oldImagePath)) {

@@ -75,7 +75,7 @@ const Home = () => {
   const imagenesCarrusel = useMemo(
     () =>
       state.productos.map(p => ({
-        src: `https://sabor-production.up.railway.app/${p.imagen_producto}`,
+        src: getImageUrl(p.imagen_producto),
         alt: p.nombre_producto,
       })),
     [state.productos]
@@ -202,7 +202,7 @@ const Home = () => {
         {/* Sección de categorías */}
         <section className="seccion seccion--categorias">
           <div className="carrusel-productos">
-            {imagenesCarrusel.length > 0 && (
+            {imagenesCarrusel.length > 0 ? (
               <>
                 <button
                   aria-label="Anterior"
@@ -217,6 +217,11 @@ const Home = () => {
                     alt={imagenesCarrusel[indiceCarrusel].alt}
                     className="carrusel-productos__imagen carrusel-productos__imagen--full"
                     src={imagenesCarrusel[indiceCarrusel].src}
+                    onError={e => {
+                      e.target.src = '/images/logo_sabor.png';
+                      e.target.onerror = null; // Prevenir bucle infinito
+                    }}
+                    loading="lazy"
                   />
                 </div>
                 <button
@@ -228,6 +233,17 @@ const Home = () => {
                   <FaChevronRight aria-hidden="true" className="carrusel-productos__icono-flecha" />
                 </button>
               </>
+            ) : (
+              <div className="carrusel-productos__sin-productos">
+                <img
+                  alt="Logo Sabor"
+                  className="carrusel-productos__imagen carrusel-productos__imagen--placeholder"
+                  src="/images/logo_sabor.png"
+                />
+                <p className="carrusel-productos__mensaje">
+                  {t('cargando_productos') || 'Cargando productos...'}
+                </p>
+              </div>
             )}
           </div>
           <div className="contenedor__categorias">

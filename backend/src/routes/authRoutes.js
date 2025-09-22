@@ -14,6 +14,13 @@ import {
   validateUpdateusuario,
 } from "../middleware/validateRequest.js";
 import { upload } from "../middleware/upload.js";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const router = express.Router();
 
@@ -28,6 +35,59 @@ router.post("/resend-verification", authController.resendVerificationCode);
 router.post("/forgot-password", authController.forgotPassword);
 router.get("/reset-password/:token", authController.verifyResetToken);
 router.post("/reset-password/:token", authController.resetPassword);
+
+// Ruta para servir imagen de perfil directamente
+router.get("/imagen-perfil/:filename", authenticateToken, (req, res) => {
+  try {
+    const filename = req.params.filename;
+    const imagePath = path.join(__dirname, "../../public/uploads", filename);
+
+    console.log("🔍 Sirviendo imagen:", filename);
+    console.log("🔍 Ruta completa:", imagePath);
+    console.log("🔍 ¿Existe?", fs.existsSync(imagePath));
+
+    if (fs.existsSync(imagePath)) {
+      res.sendFile(imagePath);
+    } else {
+      // Fallback a la carpeta raíz
+      const fallbackPath = path.join(
+        __dirname,
+        "../../../public/uploads",
+        filename,
+      );
+      console.log("🔍 Fallback ruta:", fallbackPath);
+      console.log("🔍 Fallback ¿Existe?", fs.existsSync(fallbackPath));
+
+      if (fs.existsSync(fallbackPath)) {
+        res.sendFile(fallbackPath);
+      } else {
+        console.log("❌ Imagen no encontrada en ninguna ubicación:", filename);
+
+        // Crear imagen placeholder temporal
+        const placeholderPath = path.join(
+          __dirname,
+          "../../public/uploads",
+          "placeholder.png",
+        );
+        if (fs.existsSync(placeholderPath)) {
+          console.log("🔄 Sirviendo imagen placeholder");
+          res.sendFile(placeholderPath);
+        } else {
+          // Si no hay placeholder, devolver imagen por defecto
+          res.status(404).json({
+            error: "Imagen no encontrada",
+            message:
+              "La imagen de perfil no está disponible. Por favor, sube una nueva imagen.",
+            filename: filename,
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error sirviendo imagen:", error);
+    res.status(500).json({ error: "Error interno" });
+  }
+});
 
 // Rutas protegidas
 router.post("/logout", authenticateToken, authController.logoutUser);

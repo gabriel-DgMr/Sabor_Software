@@ -3,17 +3,11 @@ import crypto from "crypto-js";
 
 // Configuración PayU usando variables de entorno
 const PAYU_CONFIG = {
-  // URLs - cambiar a producción cuando sea necesario
-  API_URL:
-    process.env.PAYU_TEST_MODE === "true"
-      ? "https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi"
-      : "https://api.payulatam.com/payments-api/4.0/service.cgi",
-  REPORTS_URL:
-    process.env.PAYU_TEST_MODE === "true"
-      ? "https://sandbox.api.payulatam.com/reports-api/4.0/service.cgi"
-      : "https://api.payulatam.com/reports-api/4.0/service.cgi",
+  // URLs - usar sandbox por defecto (modo prueba)
+  API_URL: "https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi",
+  REPORTS_URL: "https://sandbox.api.payulatam.com/reports-api/4.0/service.cgi",
 
-  // Credenciales desde variables de entorno
+  // Credenciales de sandbox (modo prueba)
   API_LOGIN: process.env.PAYU_API_LOGIN || "pRRXKOl8ikMmt9u",
   API_KEY: process.env.PAYU_API_KEY || "4Vj8eK4rloUd272L48hsrarnUA",
   MERCHANT_ID: process.env.PAYU_MERCHANT_ID || "508029",
@@ -22,8 +16,14 @@ const PAYU_CONFIG = {
   // URL del frontend
   FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",
 
-  // Modo de prueba
-  TEST_MODE: process.env.PAYU_TEST_MODE === "true",
+  // URL del backend
+  BACKEND_URL: process.env.BACKEND_URL || "http://localhost:3000",
+
+  // Siempre en modo prueba (sandbox)
+  TEST_MODE: true,
+
+  // Indicador de modo sandbox
+  SANDBOX_MODE: true,
 };
 
 /**
@@ -95,7 +95,7 @@ export const crearOrdenPago = async (req, res) => {
           description: description.substring(0, 255), // PayU limita a 255 caracteres
           language: "es",
           signature: signature,
-          notifyUrl: `${PAYU_CONFIG.FRONTEND_URL}/api/webhook/payu`,
+          notifyUrl: `${PAYU_CONFIG.BACKEND_URL}/api/webhook/payu`,
           additionalValues: {
             TX_VALUE: {
               value: totalAmount,
@@ -103,11 +103,11 @@ export const crearOrdenPago = async (req, res) => {
             },
           },
           buyer: {
-            merchantBuyerId: "1",
-            fullName: "Cliente Sabor",
-            emailAddress: "cliente@sabor.com",
-            contactPhone: "3001234567",
-            dniNumber: "12345678",
+            merchantBuyerId: req.user?.id_usuario?.toString() || "1",
+            fullName: req.user?.nombre_usuario || "Cliente Sabor",
+            emailAddress: req.user?.correo_usuario || "cliente@sabor.com",
+            contactPhone: req.user?.telefono_usuario || "3001234567",
+            dniNumber: req.user?.documento_usuario || "12345678",
             shippingAddress: {
               street1: "Calle 123 #45-67",
               street2: "",
@@ -115,7 +115,7 @@ export const crearOrdenPago = async (req, res) => {
               state: "Bogotá D.C.",
               country: "CO",
               postalCode: "110111",
-              phone: "3001234567",
+              phone: req.user?.telefono_usuario || "3001234567",
             },
           },
           shippingAddress: {
@@ -129,11 +129,11 @@ export const crearOrdenPago = async (req, res) => {
           },
         },
         payer: {
-          merchantPayerId: "1",
-          fullName: "Cliente Sabor",
-          emailAddress: "cliente@sabor.com",
-          contactPhone: "3001234567",
-          dniNumber: "12345678",
+          merchantPayerId: req.user?.id_usuario?.toString() || "1",
+          fullName: req.user?.nombre_usuario || "Cliente Sabor",
+          emailAddress: req.user?.correo_usuario || "cliente@sabor.com",
+          contactPhone: req.user?.telefono_usuario || "3001234567",
+          dniNumber: req.user?.documento_usuario || "12345678",
           billingAddress: {
             street1: "Calle 123 #45-67",
             street2: "",
@@ -141,7 +141,7 @@ export const crearOrdenPago = async (req, res) => {
             state: "Bogotá D.C.",
             country: "CO",
             postalCode: "110111",
-            phone: "3001234567",
+            phone: req.user?.telefono_usuario || "3001234567",
           },
         },
         creditCard: {
@@ -215,11 +215,18 @@ export const crearOrdenPago = async (req, res) => {
  */
 export const generarFormularioPago = async (req, res) => {
   try {
-    const { items } = req.body;
+    const { items, buyerEmail } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({
         error: "No se proporcionaron items para el pago",
+      });
+    }
+
+    // Validar email del comprador
+    if (!buyerEmail || !buyerEmail.includes("@")) {
+      return res.status(400).json({
+        error: "Email del comprador es requerido y debe ser válido",
       });
     }
 
@@ -257,17 +264,53 @@ export const generarFormularioPago = async (req, res) => {
       currency: "COP",
       signature: signature,
       test: PAYU_CONFIG.TEST_MODE ? 1 : 0,
-      buyerEmail: "cliente@sabor.com",
+      buyerEmail: buyerEmail,
       responseUrl: `${PAYU_CONFIG.FRONTEND_URL}/carrito`,
-      confirmationUrl: `http://localhost:3000/api/webhook/payu`,
+      confirmationUrl: `${PAYU_CONFIG.BACKEND_URL}/api/webhook/payu`,
     };
 
-    res.json({
-      success: true,
-      formData: formData,
+    // Log para debugging
+    console.log("🔍 === PAYU CHECKOUT WEB DEBUG ===");
+    console.log("📦 Items del carrito:", JSON.stringify(items, null, 2));
+    console.log("💰 Total calculado:", totalAmount);
+    console.log("📝 Código de referencia:", referenceCode);
+    console.log("🔑 Firma generada:", signature);
+    console.log("📧 Email del comprador:", buyerEmail);
+    console.log("🌐 URLs:", {
+      responseUrl: formData.responseUrl,
+      confirmationUrl: formData.confirmationUrl,
       actionUrl: PAYU_CONFIG.TEST_MODE
         ? "https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/"
         : "https://checkout.payulatam.com/ppp-web-gateway-payu/",
+    });
+    console.log("🔧 Configuración PayU:", {
+      testMode: PAYU_CONFIG.TEST_MODE,
+      sandboxMode: PAYU_CONFIG.SANDBOX_MODE,
+      apiLogin: PAYU_CONFIG.API_LOGIN,
+      merchantId: PAYU_CONFIG.MERCHANT_ID,
+      accountId: PAYU_CONFIG.ACCOUNT_ID,
+      frontendUrl: PAYU_CONFIG.FRONTEND_URL,
+      backendUrl: PAYU_CONFIG.BACKEND_URL,
+    });
+
+    // Información del modo sandbox
+    console.log("🧪 MODO SANDBOX ACTIVO - PayU en modo prueba");
+    console.log(
+      "🧪 Los usuarios pueden probar el flujo completo con tarjetas de prueba",
+    );
+    console.log("📋 FormData completo:", JSON.stringify(formData, null, 2));
+
+    // Modo sandbox - redirigir a PayU sandbox real
+    console.log(
+      "🧪 REDIRIGIENDO A PAYU SANDBOX - Los usuarios pueden probar con tarjetas de prueba",
+    );
+
+    res.json({
+      success: true,
+      sandbox: true,
+      message: "Modo sandbox - Puedes probar con tarjetas de prueba",
+      formData: formData,
+      actionUrl: "https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/",
       referenceCode: referenceCode,
     });
   } catch (error) {

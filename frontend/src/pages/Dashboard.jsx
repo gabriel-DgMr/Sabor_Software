@@ -28,15 +28,7 @@ const Dashboard = () => {
                   className="acciones-principales__boton dashboard__acciones"
                   onClick={() => navigate('/administrar/panel/clientes')}
                 >
-                  Clientes{' '}
-                </button>
-              </li>
-              <li className="acciones-principales__item">
-                <button
-                  className="acciones-principales__boton dashboard__acciones"
-                  onClick={() => navigate('/administrar/panel/trabajadores')}
-                >
-                  Empleados
+                  Usuarios
                 </button>
               </li>
               <li className="acciones-principales__item">

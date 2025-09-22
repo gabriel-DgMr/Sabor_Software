@@ -298,6 +298,21 @@ export const loginUser = async (req, res) => {
       { expiresIn: config.jwt.expiresIn },
     );
 
+    // Construir URL completa de la imagen si existe
+    let imagenUrl = null;
+    if (user.imagen_usuario) {
+      const baseUrl =
+        process.env.NODE_ENV === "production"
+          ? "https://sabor-production.up.railway.app"
+          : "http://localhost:3000";
+      imagenUrl = `${baseUrl}/api/auth/imagen-perfil/${user.imagen_usuario}`;
+    }
+
+    const userWithImageUrl = {
+      ...user,
+      imagen_usuario: imagenUrl,
+    };
+
     // Configurar cookie
     res.cookie("token", token, {
       httpOnly: true,
@@ -308,7 +323,7 @@ export const loginUser = async (req, res) => {
 
     res.json({
       message: "Login exitoso",
-      user,
+      user: userWithImageUrl,
       token,
     });
   } catch (error) {
@@ -329,15 +344,40 @@ export const logoutUser = (req, res) => {
 export const getUserProfile = async (req, res) => {
   try {
     const userId = req.user.id; // Corregido: usar 'id' en vez de 'userId'
+    console.log("🔍 Obteniendo perfil para usuario:", req.user.email);
+
     const user = await authModel.getUserByEmail(req.user.email);
 
     if (!user) {
+      console.log("❌ Usuario no encontrado:", req.user.email);
       return res.status(404).json({
         message: "usuario no encontrado",
       });
     }
 
-    res.json({ user });
+    // Construir URL completa de la imagen si existe
+    let imagenUrl = null;
+    if (user.imagen_usuario) {
+      const baseUrl =
+        process.env.NODE_ENV === "production"
+          ? "https://sabor-production.up.railway.app"
+          : "http://localhost:3000";
+      imagenUrl = `${baseUrl}/api/auth/imagen-perfil/${user.imagen_usuario}`;
+    }
+
+    const userWithImageUrl = {
+      ...user,
+      imagen_usuario: imagenUrl,
+    };
+
+    console.log("✅ Usuario encontrado:", {
+      id: user.id_usuario,
+      nombre: user.nombre_usuario,
+      imagen: user.imagen_usuario || "sin imagen",
+      imagenUrl: imagenUrl || "sin URL",
+    });
+
+    res.json({ user: userWithImageUrl });
   } catch (error) {
     console.error("Error al obtener perfil:", error);
     res.status(500).json({

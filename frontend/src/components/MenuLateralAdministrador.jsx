@@ -18,14 +18,12 @@ const MenuLateral = () => {
     { nombre: 'Productos', ruta: '/administrador/productos' },
     { nombre: 'Pedidos', ruta: '/administrador/pedidos' },
     { nombre: 'Domicilios', ruta: '/administrador/domicilios' },
-    { nombre: 'Usuarios', ruta: '/administrador/usuarios' },
     { nombre: 'Panel de control', ruta: '/administrador/panel' },
   ];
 
   const opcionesPanel = [
     { nombre: 'Ventas', ruta: '/administrar/panel/ventas' },
-    { nombre: 'Clientes', ruta: '/administrar/panel/clientes' },
-    { nombre: 'Trabajadores', ruta: '/administrar/panel/trabajadores' },
+    { nombre: 'Usuarios', ruta: '/administrar/panel/usuarios' },
     { nombre: 'Inventario', ruta: '/administrar/panel/inventario' },
   ];
 

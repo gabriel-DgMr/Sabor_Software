@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import fs from "fs";
 import { config } from "./src/config/config.js";
 import { errorHandler, notFoundHandler } from "./src/middleware/errorHandler.js";
 import {
@@ -39,6 +40,17 @@ const __dirname = dirname(__filename);
 // ============================
 // Seguridad con Helmet
 // ============================
+// Configurar CSP basado en el entorno
+const isDevelopment = process.env.NODE_ENV !== "production";
+const connectSrcDirectives = [
+  "'self'",
+  "https://sabor-production.up.railway.app",
+];
+
+if (isDevelopment) {
+  connectSrcDirectives.push("http://localhost:3000", "http://127.0.0.1:3000");
+}
+
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -48,7 +60,12 @@ app.use(
         scriptSrc: ["'self'"],
         imgSrc: ["'self'", "data:", "https:", "https://cdn.jsdelivr.net"],
         fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
-        connectSrc: ["'self'", "https://sabor-production.up.railway.app"],
+        connectSrc: connectSrcDirectives,
+        formAction: [
+          "'self'",
+          "https://checkout.payulatam.com",
+          "https://sandbox.checkout.payulatam.com",
+        ],
       },
     },
     crossOriginEmbedderPolicy: false,
@@ -88,7 +105,7 @@ app.use(cors(corsOptions));
 // ============================
 // Middlewares globales
 // ============================
-app.use(createRateLimiter());
+// app.use(createRateLimiter()); // Deshabilitado temporalmente
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser(config.cookie.secret));
@@ -104,7 +121,7 @@ app.use("/api/auth", (req, res, next) => {
 // ============================
 // Rutas API
 // ============================
-app.use("/api/auth", authRateLimiter, authRoutes);
+app.use("/api/auth", /* authRateLimiter, */ authRoutes);
 app.use("/api/productos", productoRoutes);
 app.use("/api/categorias", categoriaRoutes);
 app.use("/api/reservas", reservaRoutes);
@@ -122,6 +139,30 @@ app.use("/api", healthRoutes);
 // ============================
 // Archivos estáticos seguros
 // ============================
+console.log("🔍 Configurando archivos estáticos...");
+console.log("📁 Directorio actual:", __dirname);
+console.log("📁 Ruta de uploads:", path.join(__dirname, "public/uploads"));
+console.log(
+  "📁 ¿Existe la carpeta?",
+  fs.existsSync(path.join(__dirname, "public/uploads")),
+);
+
+if (fs.existsSync(path.join(__dirname, "public/uploads"))) {
+  const files = fs.readdirSync(path.join(__dirname, "public/uploads"));
+  console.log("📁 Archivos en uploads:", files);
+}
+
+// Middleware de debug para uploads
+app.use("/uploads", (req, res, next) => {
+  console.log("🔍 Petición a uploads:", req.path);
+  console.log("🔍 Archivo solicitado:", req.path);
+  const filePath = path.join(__dirname, "public/uploads", req.path);
+  console.log("🔍 Ruta completa del archivo:", filePath);
+  console.log("🔍 ¿Existe el archivo?", fs.existsSync(filePath));
+  next();
+});
+
+// Servir archivos desde backend/public/uploads
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "public/uploads"), {
@@ -145,21 +186,97 @@ app.use(
 );
 
 app.use(
-  express.static(path.join(__dirname, "public/dist"), {
-    index: false,
+  "/uploads",
+  express.static(path.join(__dirname, "../public/uploads"), {
     setHeaders: (res, filePath) => {
       if (filePath.endsWith(".html")) {
         res.setHeader("Cache-Control", "no-cache");
       } else if (filePath.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/)) {
-        res.setHeader("Cache-Control", "public, max-age=31536000");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Methods", "GET");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+        if (
+          filePath.endsWith(".js") ||
+          filePath.endsWith(".php") ||
+          filePath.endsWith(".exe")
+        ) {
+          res.setHeader("Content-Type", "text/plain");
+        }
+
+        res.setHeader("X-Content-Type-Options", "nosniff");
+
+        if (filePath.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+          res.setHeader("Cache-Control", "public, max-age=31536000");
+          res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+        }
       }
     },
   })
 );
 
 // Servir el index.html del frontend
+// Configurar rutas de archivos estáticos del frontend React
+// Intentar diferentes rutas para desarrollo y producción
+const frontendPaths = [
+  path.join(__dirname, "../frontend/dist"),
+  path.join(__dirname, "public/dist"),
+  path.join(__dirname, "dist"),
+  path.join(process.cwd(), "frontend/dist"),
+  path.join(process.cwd(), "dist"),
+];
+
+let frontendPath = null;
+for (const testPath of frontendPaths) {
+  if (fs.existsSync(testPath)) {
+    frontendPath = testPath;
+    break;
+  }
+}
+
+if (frontendPath) {
+  console.log(`📁 Sirviendo archivos estáticos desde: ${frontendPath}`);
+
+  // Servir archivos estáticos del frontend React
+  app.use(
+    express.static(frontendPath, {
+      index: false,
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith(".html")) {
+          res.setHeader("Cache-Control", "no-cache");
+        } else if (
+          filePath.match(
+            /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/,
+          )
+        ) {
+          res.setHeader("Cache-Control", "public, max-age=31536000");
+        }
+      },
+    }),
+  );
+} else {
+  console.warn(
+    "⚠️ No se encontró la carpeta de archivos estáticos del frontend",
+  );
+}
+
+// Ruta para servir el index.html del frontend
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/dist/index.html"));
+  if (frontendPath) {
+    res.sendFile(path.join(frontendPath, "index.html"));
+  } else {
+    res.status(404).json({ error: "Frontend no disponible" });
+  }
+});
+
+// Ruta catch-all para SPA (Single Page Application)
+// Debe ir DESPUÉS de todas las rutas de API y ANTES de los middlewares de error
+app.get(/^(?!\/api\/).*$/, (req, res) => {
+  if (frontendPath) {
+    res.sendFile(path.join(frontendPath, "index.html"));
+  } else {
+    res.status(404).json({ error: "Frontend no disponible" });
+  }
 });
 
 // ============================

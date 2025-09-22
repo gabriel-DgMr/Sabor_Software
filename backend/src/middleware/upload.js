@@ -1,9 +1,14 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
-// Crear directorio de uploads si no existe
-const uploadDir = "public/uploads";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Crear directorio de uploads si no existe usando ruta absoluta
+const uploadDir = path.join(__dirname, "../../public/uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
