@@ -32,43 +32,40 @@ const storage = multer.diskStorage({
       cb(error);
     }
   },
-  filename: async (req, file, cb) => {
+  filename: (req, file, cb) => {
     try {
       // Obtener la extensión del archivo original
       const ext = path.extname(file.originalname);
 
-      // Obtener nombre del producto y categoría
+      // Generar un nombre único con timestamp
+      const timestamp = Date.now();
+      const randomString = Math.random().toString(36).substring(2, 8);
+
+      // Obtener nombre del producto (sin consulta async)
       const nombreProducto = req.body.nombre_producto || "producto";
-      const categoriaId = req.body.id_categoria_producto;
 
-      // Obtener el nombre de la categoría
-      let nombreCategoria = "categoria";
-      if (categoriaId) {
-        const categoria = await categoriaModel.getCategoriaById(categoriaId);
-        if (categoria) {
-          nombreCategoria = categoria.nombre_categoria;
-        }
-      }
-
-      // Limpiar nombres
+      // Limpiar nombre del producto
       const limpiarNombre = (nombre) => {
         return nombre
           .toLowerCase()
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "") // Eliminar acentos
           .replace(/[^a-z0-9ñ]/g, "") // Mantener solo letras, números y ñ
-          .substring(0, 30);
+          .substring(0, 20);
       };
 
       const productoLimpio = limpiarNombre(nombreProducto);
-      const categoriaLimpia = limpiarNombre(nombreCategoria);
 
-      // Crear el nombre final del archivo
-      const filename = `${productoLimpio}_${categoriaLimpia}${ext}`;
+      // Crear el nombre final del archivo con timestamp para evitar duplicados
+      const filename = `${productoLimpio}_${timestamp}_${randomString}${ext}`;
 
       cb(null, filename);
     } catch (error) {
-      cb(error);
+      console.error("Error en filename multer:", error);
+      // Generar nombre de fallback
+      const timestamp = Date.now();
+      const ext = path.extname(file.originalname);
+      cb(null, `producto_${timestamp}${ext}`);
     }
   },
 });
