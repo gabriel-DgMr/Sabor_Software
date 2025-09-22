@@ -170,9 +170,37 @@ app.use("/uploads", (req, res, next) => {
   next();
 });
 
+// Servir archivos desde backend/public/uploads
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "public/uploads"), {
+    setHeaders: (res, filePath) => {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "GET");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+      if (
+        filePath.endsWith(".js") ||
+        filePath.endsWith(".php") ||
+        filePath.endsWith(".exe")
+      ) {
+        res.setHeader("Content-Type", "text/plain");
+      }
+
+      res.setHeader("X-Content-Type-Options", "nosniff");
+
+      if (filePath.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+        res.setHeader("Cache-Control", "public, max-age=31536000");
+        res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+      }
+    },
+  }),
+);
+
+// Servir archivos desde public/uploads en la raíz del proyecto (fallback)
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "../public/uploads"), {
     setHeaders: (res, filePath) => {
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Methods", "GET");
