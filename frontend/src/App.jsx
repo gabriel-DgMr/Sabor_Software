@@ -40,7 +40,7 @@ import SobreNosotros from './pages/SobreNosotros.jsx';
 import HomeEmpleados from './pages/HomeEmpleados.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 import ProductosEmpleados from './pages/ProductosEmpleados.jsx';
-import DomiciliosEmpleados from './pages/DomiciliosEmpleados.jsx'; 
+import DomiciliosEmpleados from './pages/DomiciliosEmpleados.jsx';
 import PedidosEmpleados from './pages/PedidosEmpleados.jsx';
 import ReservacionesEmpleados from './pages/ReservacionesEmpleados.jsx';
 
@@ -162,6 +162,16 @@ function App() {
                     </ProtectedRoute>
                   }
                   path="/administrador/reservaciones"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <DomiciliosEmpleados />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/administrador/domicilios"
                 />
 
                 {/* Empleados */}

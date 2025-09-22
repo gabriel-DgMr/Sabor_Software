@@ -34,7 +34,7 @@ const EmpleadosHome = () => {
               <li className="acciones-principales__item">
                 <button
                   className="acciones-principales__boton"
-                  onClick={() => navigate('/administrar/reservaciones')}
+                  onClick={() => navigate('/administrador/reservaciones')}
                 >
                   Administrar Reservaciones
                 </button>
