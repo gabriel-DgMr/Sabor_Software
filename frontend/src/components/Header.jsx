@@ -50,32 +50,31 @@ const Header = () => {
                   <Link className="encabezado__link" to="/sobre-nosotros">
                     {t('sobre_nosotros')}
                   </Link>
+                  <nav aria-label="Selector de idioma" className="encabezado__idioma">
+                    <button
+                      aria-label="Cambiar a español"
+                      aria-pressed={i18n.language === 'es'}
+                      className={`menu-perfil__idioma-boton${i18n.language === 'es' ? ' menu-perfil__idioma-boton--activo' : ''}`}
+                      title="Español"
+                      type="button"
+                      onClick={() => handleIdioma('es')}
+                    >
+                      <ReactCountryFlag svg countryCode="ES" />
+                    </button>
+                    <button
+                      aria-label="Cambiar a inglés"
+                      aria-pressed={i18n.language === 'en'}
+                      className={`menu-perfil__idioma-boton${i18n.language === 'en' ? ' menu-perfil__idioma-boton--activo' : ''}`}
+                      title="English"
+                      type="button"
+                      onClick={() => handleIdioma('en')}
+                    >
+                      <ReactCountryFlag svg countryCode="US" />
+                    </button>
+                  </nav>
                 </>
               )}
             </nav>
-            <nav aria-label="Selector de idioma" className="encabezado__idioma">
-              <button
-                aria-label="Cambiar a español"
-                aria-pressed={i18n.language === 'es'}
-                className={`menu-perfil__idioma-boton${i18n.language === 'es' ? ' menu-perfil__idioma-boton--activo' : ''}`}
-                title="Español"
-                type="button"
-                onClick={() => handleIdioma('es')}
-              >
-                <ReactCountryFlag svg countryCode="ES" />
-              </button>
-              <button
-                aria-label="Cambiar a inglés"
-                aria-pressed={i18n.language === 'en'}
-                className={`menu-perfil__idioma-boton${i18n.language === 'en' ? ' menu-perfil__idioma-boton--activo' : ''}`}
-                title="English"
-                type="button"
-                onClick={() => handleIdioma('en')}
-              >
-                <ReactCountryFlag svg countryCode="US" />
-              </button>
-            </nav>
-
             {isMobileMenu ? (
               isAuthenticated ? (
                 <div className="encabezado__cliente encabezado__cliente--mobile">
@@ -222,7 +221,7 @@ const Header = () => {
                         {t('sobre_nosotros')}
                       </Link>
                       <button
-                        className="menu-perfil__opcion"
+                        className="menu-perfil__opcion menu-perfil__opcion-iniciar"
                         onClick={() => {
                           setShowLogin(true);
                           closeMobileMenu();
@@ -262,11 +261,11 @@ const Header = () => {
                       {t('ver_historial_reservas')}
                     </Link>
                     <Link className="menu-perfil__opcion" to="/mis-calificaciones">
-                      Mis Calificaciones
+                      {t('mis_calificaciones')}
                     </Link>
                     {/* NUEVO: Botón historial de domicilios (escritorio) */}
                     <Link className="menu-perfil__opcion" to="/historial-domicilios">
-                      {t('ver_historial_domicilios', 'Ver historial de domicilios')}
+                      {t('ver_historial_domicilios')}
                     </Link>
                     <Link className="menu-perfil__opcion" to="/actualizar-datos">
                       {t('actualizar_datos')}

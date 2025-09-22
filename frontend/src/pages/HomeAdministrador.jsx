@@ -36,7 +36,7 @@ const EmpleadosHome = () => {
                   className="acciones-principales__boton"
                   onClick={() => navigate('/administrar/reservaciones')}
                 >
-                  Administrar Reservaciones
+                  Gestión de Reservaciones
                 </button>
               </li>
               <li className="acciones-principales__item">
@@ -44,7 +44,7 @@ const EmpleadosHome = () => {
                   className="acciones-principales__boton"
                   onClick={() => navigate('/administrador/productos')}
                 >
-                  Administrar Productos
+                  Gestión de Productos
                 </button>
               </li>
               <li className="acciones-principales__item">
@@ -52,7 +52,7 @@ const EmpleadosHome = () => {
                   className="acciones-principales__boton"
                   onClick={() => navigate('/administrador/pedidos')}
                 >
-                  Administrar Pedidos
+                  Gestión de Pedidos
                 </button>
               </li>
               <li className="acciones-principales__item">
@@ -60,15 +60,7 @@ const EmpleadosHome = () => {
                   className="acciones-principales__boton"
                   onClick={() => navigate('/administrador/domicilios')}
                 >
-                  Administrar Domicilios
-                </button>
-              </li>
-              <li className="acciones-principales__item">
-                <button
-                  className="acciones-principales__boton"
-                  onClick={() => navigate('/administrador/usuarios')}
-                >
-                  Administrar Usuarios
+                  Gestión de Domicilios
                 </button>
               </li>
               <li className="acciones-principales__item">
@@ -76,7 +68,7 @@ const EmpleadosHome = () => {
                   className="acciones-principales__boton"
                   onClick={() => navigate('/administrador/panel')}
                 >
-                  Ver reportes
+                  Panel de control
                 </button>
               </li>
             </ul>
