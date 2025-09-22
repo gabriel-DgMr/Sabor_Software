@@ -15,13 +15,25 @@ export const getImageUrl = imagePath => {
     return imagePath;
   }
 
-  // Si la imagen empieza con /, usar la URL base de Railway
+  // Obtener la URL base según el entorno
+  const getBaseUrl = () => {
+    // En desarrollo, usar localhost
+    if (import.meta.env.DEV) {
+      return 'http://localhost:3000';
+    }
+    // En producción, usar Railway
+    return 'https://sabor-production.up.railway.app';
+  };
+
+  const baseUrl = getBaseUrl();
+
+  // Si la imagen empieza con /, usar la URL base directamente
   if (imagePath.startsWith('/')) {
-    return `https://sabor-production.up.railway.app${imagePath}`;
+    return `${baseUrl}${imagePath}`;
   }
 
   // Si no empieza con /, agregar la ruta de uploads
-  return `https://sabor-production.up.railway.app/uploads/${imagePath}`;
+  return `${baseUrl}/uploads/${imagePath}`;
 };
 
 /**

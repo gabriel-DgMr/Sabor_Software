@@ -5,6 +5,7 @@ import { FaUserCircle, FaBars, FaTimes } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext.jsx';
+import { getImageUrl } from '../utils/imageUtils.js';
 import AuthPage from '../pages/auth/index.jsx';
 
 const Header = () => {
@@ -245,7 +246,7 @@ const Header = () => {
                 </p>
                 {user?.imagen_usuario ? (
                   <img
-                    src={`https://sabor-production.up.railway.app/uploads/${user.imagen_usuario}`}
+                    src={getImageUrl(`uploads/${user.imagen_usuario}`)}
                     alt="Foto de perfil"
                     className="encabezado__icono-cliente encabezado__icono-cliente--foto"
                     style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }}
@@ -285,7 +286,7 @@ const Header = () => {
                 <p className="encabezado__nombre-cliente">{t('iniciar_sesion')}</p>
                 {user?.imagen_usuario ? (
                   <img
-                    src={`https://sabor-production.up.railway.app/uploads/${user.imagen_usuario}`}
+                    src={getImageUrl(`uploads/${user.imagen_usuario}`)}
                     alt="Foto de perfil"
                     className="encabezado__icono-cliente encabezado__icono-cliente--foto"
                     style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }}
