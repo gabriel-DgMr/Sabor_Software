@@ -42,6 +42,17 @@ const __dirname = dirname(__filename);
 // ============================
 // Seguridad con Helmet
 // ============================
+// Configurar CSP basado en el entorno
+const isDevelopment = process.env.NODE_ENV !== "production";
+const connectSrcDirectives = [
+  "'self'",
+  "https://sabor-production.up.railway.app",
+];
+
+if (isDevelopment) {
+  connectSrcDirectives.push("http://localhost:3000", "http://127.0.0.1:3000");
+}
+
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -51,7 +62,7 @@ app.use(
         scriptSrc: ["'self'"],
         imgSrc: ["'self'", "data:", "https:", "https://cdn.jsdelivr.net"],
         fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
-        connectSrc: ["'self'", "https://sabor-production.up.railway.app"],
+        connectSrc: connectSrcDirectives,
       },
     },
     crossOriginEmbedderPolicy: false,
