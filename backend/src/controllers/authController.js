@@ -4,14 +4,48 @@ import validator from "validator";
 import { config } from "../config/config.js";
 import nodemailer from "nodemailer";
 
-// Configurar el transporter de nodemailer
+// Configurar el transporter de nodemailer con configuración mejorada para producción
 const transporter = nodemailer.createTransport({
   service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // true para 465, false para otros puertos
   auth: {
     user: config.email.user,
     pass: config.email.password,
   },
+  tls: {
+    rejectUnauthorized: false,
+  },
+  connectionTimeout: 60000, // 60 segundos
+  greetingTimeout: 30000, // 30 segundos
+  socketTimeout: 60000, // 60 segundos
+  pool: true, // Usar pool de conexiones
+  maxConnections: 5, // Máximo 5 conexiones
+  maxMessages: 100, // Máximo 100 mensajes por conexión
+  rateDelta: 20000, // 20 segundos entre lotes
+  rateLimit: 5, // Máximo 5 emails por lote
 });
+
+// Función para enviar email con reintentos
+const sendWithRetry = async (mailOptions, maxRetries = 3) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await transporter.sendMail(mailOptions);
+      console.log(`✅ Email enviado exitosamente (intento ${attempt})`);
+      return result;
+    } catch (error) {
+      console.error(`❌ Error en intento ${attempt}:`, error.message);
+
+      if (attempt === maxRetries) {
+        throw error;
+      }
+
+      // Esperar antes del siguiente intento
+      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+};
 
 // Función para enviar email de verificación
 const sendVerificationEmail = async (
@@ -20,7 +54,9 @@ const sendVerificationEmail = async (
   codigo,
 ) => {
   try {
-    console.log(`📧 Enviando email de verificación a: ${correo_usuario}`);
+    console.log(
+      `📧 [${new Date().toISOString()}] Iniciando envío a: ${correo_usuario}`,
+    );
     console.log(`📧 Configuración email user: ${config.email.user}`);
 
     if (!config.email.user || !config.email.password) {
@@ -28,7 +64,7 @@ const sendVerificationEmail = async (
     }
 
     const mailOptions = {
-      from: config.email.user,
+      from: `"Sabor App" <${config.email.user}>`,
       to: correo_usuario,
       subject: "Verifica tu cuenta - Sabor",
       html: `
@@ -53,16 +89,32 @@ const sendVerificationEmail = async (
                   </p>
               </div>
           `,
+      headers: {
+        "X-Mailer": "Sabor App",
+        "X-Priority": "3",
+        "X-MSMail-Priority": "Normal",
+      },
     };
 
-    const result = await transporter.sendMail(mailOptions);
+    const result = await sendWithRetry(mailOptions);
+
     console.log(
-      `✅ Email enviado exitosamente a: ${correo_usuario}`,
-      result.messageId,
+      `✅ [${new Date().toISOString()}] Email enviado exitosamente:`,
+      {
+        to: correo_usuario,
+        messageId: result.messageId,
+        response: result.response,
+      },
     );
+
     return result;
   } catch (error) {
-    console.error(`❌ Error enviando email a ${correo_usuario}:`, error);
+    console.error(`❌ [${new Date().toISOString()}] Error enviando email:`, {
+      to: correo_usuario,
+      error: error.message,
+      code: error.code,
+      response: error.response,
+    });
     throw error;
   }
 };

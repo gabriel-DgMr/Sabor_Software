@@ -56,6 +56,7 @@ export const mapearEstado = estado => {
     'en-preparacion': 'En preparación',
     completado: 'Completado',
     cancelado: 'Cancelado',
+    recibido: 'Recibido',
   };
   return estadosMap[estado] || estado;
 };
@@ -67,6 +68,7 @@ export const mapearEstadoAId = estado => {
     'en-preparacion': 5,
     completado: 3,
     cancelado: 4,
+    recibido: 6,
   };
   return estadosMap[estado] || 2;
 };

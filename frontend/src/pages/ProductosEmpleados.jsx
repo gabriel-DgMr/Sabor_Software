@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import MenuLateral from '../components/MenuLateralEmpleado.jsx';
 import { useProductos } from '../context/ProductoContext';
 import { productoService } from '../services/productoService';
+import { getImageUrl } from '../utils/imageUtils.js';
 import { GoX } from 'react-icons/go';
 
 import '../styles/empleados.css';

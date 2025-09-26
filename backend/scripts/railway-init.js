@@ -43,7 +43,17 @@ class RailwayInitializer {
           user: config.db.user,
           password: config.db.password,
           port: config.db.port,
-          connectTimeout: 5000,
+          database: config.db.database,
+          // Configuraciones mejoradas para producción
+          connectTimeout: 30000,
+          acquireTimeout: 60000,
+          timeout: 60000,
+          reconnect: true,
+          ssl:
+            process.env.NODE_ENV === "production"
+              ? { rejectUnauthorized: false }
+              : false,
+          charset: "utf8mb4",
         });
 
         await connection.execute("SELECT 1");
@@ -165,6 +175,16 @@ class RailwayInitializer {
           password: config.db.password,
           database: config.db.database,
           port: config.db.port,
+          // Configuraciones mejoradas para producción
+          connectTimeout: 30000,
+          acquireTimeout: 60000,
+          timeout: 60000,
+          reconnect: true,
+          ssl:
+            process.env.NODE_ENV === "production"
+              ? { rejectUnauthorized: false }
+              : false,
+          charset: "utf8mb4",
         });
 
         const [rows] = await connection.execute(

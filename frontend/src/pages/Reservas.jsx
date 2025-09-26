@@ -339,10 +339,10 @@ const Reservas = () => {
             >
               <div className="prog-step__circle">{step > n ? '✔' : n}</div>
               <div className="prog-step__label">
-                {n === 1 && 'Selección'}
-                {n === 2 && 'Información'}
-                {n === 3 && 'Adicional'}
-                {n === 4 && 'Confirmación'}
+                {n === 1 && t('selection')}
+                {n === 2 && t('information')}
+                {n === 3 && t('additional')}
+                {n === 4 && t('confirmation')}
               </div>
             </div>
           ))}
@@ -388,14 +388,6 @@ const Reservas = () => {
               {fecha.formato}
             </button>
           ))}
-        {/* Botón para abrir el calendario completo (no funcional, solo mueestra) */}
-        {/* <button
-          className="calendar_button"
-          type="button"
-          onClick={() => alert('esto solo es un ejemplo')}
-        >
-          <i className="calendar_icon" />
-        </button> */}
         {formErrors.fecha && <small className="reservas__input-error">{formErrors.fecha}</small>}
       </div>
     );
@@ -584,12 +576,12 @@ const Reservas = () => {
                 <div className="prog-step__circle">{num}</div>
                 <span className="prog-step__label">
                   {num === 1
-                    ? 'Selección'
+                    ? t('selection')
                     : num === 2
-                      ? 'Información'
+                      ? t('information')
                       : num === 3
-                        ? 'Adicional'
-                        : 'Confirmación'}
+                        ? t('additional')
+                        : t('confirmation')}
                 </span>
                 {num < 4 && <span className="prog-step__bar"></span>}
               </div>

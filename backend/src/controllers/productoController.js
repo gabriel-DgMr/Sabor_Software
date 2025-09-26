@@ -106,6 +106,10 @@ export const productoController = {
       // Crear el producto en la base de datos
       const nuevoProductoId = await productoModel.createProducto(productoData);
 
+      // El uploadMiddleware ya procesó y renombró la imagen
+      // No necesitamos renombrar nuevamente
+      console.log("Imagen procesada por uploadMiddleware:", req.file.filename);
+
       // Guardar traducción en inglés si viene en el body
       const { descripcion_en } = req.body;
       if (descripcion_en && descripcion_en.trim() !== "") {

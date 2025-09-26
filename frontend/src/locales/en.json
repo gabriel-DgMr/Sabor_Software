@@ -59,7 +59,7 @@
   "reservas_no_disponible": "Not available",
   "reservas_seleccion": "Selection",
   "reservas-main__titulo": "Reservation",
-  "reservas_cantidad_personas-label": "number of people",
+  "reservas_cantidad_personas-label": "Number of people",
   "reservas_hora": "TIME",
   "reservas_cantidad_personas": "0",
   "reservas_info_contacto": "For more information, complaints or claims, please write to\nEmail: sabor.software@sabor.com\nTel: +57 3044562016",
@@ -220,5 +220,19 @@
   "aplicando_filtros": "Applying filters...",
   "no_encontrado": "We haven't found that product.",
   "categorias_todas": "All categories",
-  "mis_calificaciones": "My ratings"
+  "mis_calificaciones": "My ratings",
+  "ver_historial_domicilios": "View food delivery history",
+  "selection": "Selection",
+  "information": "Information",
+  "additional": "Additional",
+  "confirmation": "Confirmation",
+  "loading-title": "Loading, please wait",
+  "dialog": {
+    "units": "Units:",
+    "specialRequest": "Special request:",
+    "specialRequestPlaceholder": "Any special request for this product?",
+    "adding": "Adding...",
+    "add": "Add",
+    "cancel": "Cancel"
+  }
 }

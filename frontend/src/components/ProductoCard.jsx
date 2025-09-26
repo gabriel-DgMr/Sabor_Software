@@ -164,7 +164,7 @@ const ProductoCard = React.memo(({ producto }) => {
                 </div>
                 <div className="dialogo-agregar-producto__derecha">
                   <label className="dialogo-agregar-producto__label">
-                    Unidades:
+                    {t('dialog.units')}
                     <input
                       className="dialogo-agregar-producto__input"
                       min="1"
@@ -175,10 +175,10 @@ const ProductoCard = React.memo(({ producto }) => {
                     />
                   </label>
                   <label className="dialogo-agregar-producto__label">
-                    Petición especial:
+                    {t('dialog.specialRequest')}
                     <textarea
                       className="dialogo-agregar-producto__textarea"
-                      placeholder="¿Alguna petición especial para este producto?"
+                      placeholder={t('dialog.specialRequestPlaceholder')}
                       value={peticion}
                       onChange={e => setPeticion(e.target.value)}
                       disabled={loading}
@@ -190,14 +190,14 @@ const ProductoCard = React.memo(({ producto }) => {
                       onClick={handleConfirmarAgregar}
                       disabled={loading}
                     >
-                      {loading ? 'Agregando...' : 'Agregar'}
+                      {loading ? t('dialog.adding') : t('dialog.add')}
                     </button>
                     <button
                       className="dialogo-agregar-producto__boton dialogo-agregar-producto__boton--cancelar"
                       onClick={handleCancelarAgregar}
                       disabled={loading}
                     >
-                      Cancelar
+                      {t('dialog.cancel')}
                     </button>
                   </div>
                 </div>

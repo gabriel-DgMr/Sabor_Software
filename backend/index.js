@@ -27,6 +27,7 @@ import payuRoutes from "./src/routes/payuRoutes.js";
 import calificacionRoutes from "./src/routes/calificacionRoutes.js";
 import healthRoutes from "./src/routes/healthRoutes.js";
 import domicilioRoutes from "./src/routes/domicilioRoutes.js";
+import emailTestRoutes from "./src/routes/emailTestRoutes.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -58,7 +59,13 @@ app.use(
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:", "https://cdn.jsdelivr.net"],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "blob:",
+          "https:",
+          "https://cdn.jsdelivr.net",
+        ],
         fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
         connectSrc: connectSrcDirectives,
         formAction: [
@@ -135,6 +142,7 @@ app.use("/api/calificaciones", calificacionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/domicilios", domicilioRoutes);
 app.use("/api", healthRoutes);
+app.use("/api/email", emailTestRoutes);
 
 // ============================
 // Archivos estáticos seguros
