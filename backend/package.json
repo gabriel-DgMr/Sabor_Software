@@ -17,6 +17,8 @@
     "db:migrate": "node scripts/migrate.js",
     "db:seed": "node scripts/seed.js",
     "health-check": "node scripts/health-check.js",
+    "db:diagnostic": "node scripts/db-diagnostic.js",
+    "db:test": "node scripts/test-db-connection.js",
     "railway:init": "node scripts/railway-init.js"
   },
   "author": "",

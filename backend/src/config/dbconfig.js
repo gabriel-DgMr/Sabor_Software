@@ -2,6 +2,7 @@
 import mysql from "mysql2/promise";
 import { config } from "./config.js";
 
+// Configuración de conexión mejorada para producción
 export const dbConfig = {
   host: config.db.host,
   user: config.db.user,
@@ -11,6 +12,19 @@ export const dbConfig = {
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  // Configuraciones adicionales para producción
+  acquireTimeout: 60000,
+  timeout: 60000,
+  reconnect: true,
+  // Configuraciones específicas para Railway/Producción
+  ssl:
+    process.env.NODE_ENV === "production"
+      ? { rejectUnauthorized: false }
+      : false,
+  // Configuración de timeout para conexiones lentas
+  connectTimeout: 30000,
+  // Configuración de charset
+  charset: "utf8mb4",
 };
 
 // Función para crear conexiones individuales usando variables de entorno
@@ -21,6 +35,16 @@ export const createConnection = async () => {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
+    // Configuraciones adicionales para producción
+    acquireTimeout: 60000,
+    timeout: 60000,
+    reconnect: true,
+    ssl:
+      process.env.NODE_ENV === "production"
+        ? { rejectUnauthorized: false }
+        : false,
+    connectTimeout: 30000,
+    charset: "utf8mb4",
   });
   return connection;
 };
