@@ -5,7 +5,7 @@ import nodemailer from "nodemailer";
 const router = express.Router();
 
 // Configurar transporter para pruebas
-const testTransporter = nodemailer.createTransporter({
+const testTransporter = nodemailer.createTransport({
   service: "gmail",
   host: "smtp.gmail.com",
   port: 587,
