@@ -17,25 +17,29 @@ console.log(`🌍 Entorno: ${process.env.NODE_ENV || "development"}`);
 console.log(`⏰ Timestamp: ${new Date().toISOString()}`);
 
 console.log("\n📋 Variables de entorno cargadas:");
-console.log(`DB_HOST: ${process.env.DB_HOST}`);
-console.log(`DB_USER: ${process.env.DB_USER}`);
+console.log(`MYSQLHOST: ${process.env.MYSQLHOST || "No configurada"}`);
+console.log(`MYSQLUSER: ${process.env.MYSQLUSER || "No configurada"}`);
+console.log(
+  `MYSQLPASSWORD: ${process.env.MYSQLPASSWORD ? "***" : "No configurada"}`,
+);
+console.log(`MYSQLDATABASE: ${process.env.MYSQLDATABASE || "No configurada"}`);
+console.log(`MYSQLPORT: ${process.env.MYSQLPORT || "No configurada"}`);
+console.log(`DB_HOST: ${process.env.DB_HOST || "No configurada"}`);
+console.log(`DB_USER: ${process.env.DB_USER || "No configurada"}`);
 console.log(
   `DB_PASSWORD: ${process.env.DB_PASSWORD ? "***" : "No configurada"}`,
 );
-console.log(`DB_NAME: ${process.env.DB_NAME}`);
-console.log(`DB_PORT: ${process.env.DB_PORT}`);
+console.log(`DB_NAME: ${process.env.DB_NAME || "No configurada"}`);
+console.log(`DB_PORT: ${process.env.DB_PORT || "No configurada"}`);
 
 // Configuración de conexión
 const dbConfig = {
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306,
-  connectTimeout: 30000,
-  acquireTimeout: 60000,
-  timeout: 60000,
-  reconnect: true,
+  host: process.env.MYSQLHOST || process.env.DB_HOST,
+  user: process.env.MYSQLUSER || process.env.DB_USER,
+  password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
+  database: process.env.MYSQLDATABASE || process.env.DB_NAME,
+  port: process.env.MYSQLPORT || process.env.DB_PORT || 3306,
+  connectTimeout: 10000,
   ssl:
     process.env.NODE_ENV === "production"
       ? { rejectUnauthorized: false }

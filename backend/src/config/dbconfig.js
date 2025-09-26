@@ -1,6 +1,5 @@
 // Conexion a base de datos mySQL
 import mysql from "mysql2/promise";
-import mysqlSync from "mysql2";
 import { config } from "./config.js";
 
 // Configuración de conexión mejorada para producción
@@ -14,34 +13,38 @@ export const dbConfig = {
   connectionLimit: 10,
   queueLimit: 0,
   // Configuraciones adicionales para producción
-  acquireTimeout: 10000,
+  acquireTimeout: 60000,
+  timeout: 60000,
+  reconnect: true,
   // Configuraciones específicas para Railway/Producción
   ssl:
     process.env.NODE_ENV === "production"
       ? { rejectUnauthorized: false }
       : false,
   // Configuración de timeout para conexiones lentas
-  connectTimeout: 10000,
+  connectTimeout: 30000,
   // Configuración de charset
   charset: "utf8mb4",
 };
 
 // Función para crear conexiones individuales usando variables de entorno
-export const createConnection = () => {
-  const connection = mysqlSync.createConnection({
-    host: process.env.MYSQLHOST || process.env.DB_HOST,
-    port: process.env.MYSQLPORT || process.env.DB_PORT,
-    user: process.env.MYSQLUSER || process.env.DB_USER,
-    password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
-    database: process.env.MYSQLDATABASE || process.env.DB_NAME,
+export const createConnection = async () => {
+  const connection = await mysql.createConnection({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
     // Configuraciones adicionales para producción
+    acquireTimeout: 60000,
+    timeout: 60000,
+    reconnect: true,
     ssl:
       process.env.NODE_ENV === "production"
         ? { rejectUnauthorized: false }
         : false,
-    connectTimeout: 10000, // reemplaza 'timeout'
+    connectTimeout: 30000,
     charset: "utf8mb4",
-    // ❌ NO acquireTimeout ni reconnect
   });
   return connection;
 };
