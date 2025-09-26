@@ -41,7 +41,6 @@ export const productoController = {
     try {
       console.log("Body recibido:", req.body);
       console.log("Archivo recibido:", req.file);
-      console.log("Headers recibidos:", req.headers);
 
       const {
         nombre_producto,
@@ -51,16 +50,6 @@ export const productoController = {
         calificacion = 0,
         ventas = 0,
       } = req.body;
-
-      // Validaciones adicionales de datos
-      console.log("Datos extraídos:", {
-        nombre_producto,
-        descripcion_producto,
-        precio_producto,
-        id_categoria_producto,
-        calificacion,
-        ventas,
-      });
 
       // Validaciones
       if (!nombre_producto || !precio_producto || !id_categoria_producto) {
@@ -112,18 +101,12 @@ export const productoController = {
 
       // Guardar traducción en inglés si viene en el body
       const { descripcion_en } = req.body;
-      if (descripcion_en && descripcion_en.trim() !== "") {
-        try {
-          await productoTraduccionModel.upsertProductoTraduccion(
-            nuevoProductoId,
-            "en",
-            descripcion_en,
-          );
-          console.log("Traducción guardada exitosamente");
-        } catch (traduccionError) {
-          console.error("Error guardando traducción:", traduccionError);
-          // No fallar la creación del producto por error en traducción
-        }
+      if (descripcion_en) {
+        await productoTraduccionModel.upsertProductoTraduccion(
+          nuevoProductoId,
+          "en",
+          descripcion_en,
+        );
       }
 
       // Enviar respuesta exitosa
@@ -133,27 +116,9 @@ export const productoController = {
       });
     } catch (error) {
       console.error("Error en createProducto:", error);
-      console.error("Stack trace:", error.stack);
-
-      // Limpiar archivo subido en caso de error
-      if (req.file && req.file.path) {
-        try {
-          const fs = await import("fs/promises");
-          await fs.unlink(req.file.path);
-          console.log("Archivo limpiado después del error:", req.file.path);
-        } catch (cleanupError) {
-          console.error("Error limpiando archivo:", cleanupError);
-        }
-      }
-
       res.status(500).json({
         message: "Error interno del servidor",
-        error:
-          process.env.NODE_ENV === "development"
-            ? error.message
-            : "Error al crear el producto",
-        details:
-          process.env.NODE_ENV === "development" ? error.stack : undefined,
+        error: error.message,
       });
     }
   },

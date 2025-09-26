@@ -835,35 +835,6 @@
     color: #b71c1c;
 }
 
-.reservaciones__error-content {
-    padding-right: 2rem;
-}
-
-.reservaciones__error-help {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 0.5rem;
-    border-left: 4px solid #ff9800;
-}
-
-.reservaciones__error-help h4 {
-    margin: 0 0 0.5rem 0;
-    color: #e65100;
-    font-size: 1rem;
-}
-
-.reservaciones__error-help ul {
-    margin: 0;
-    padding-left: 1.5rem;
-}
-
-.reservaciones__error-help li {
-    margin-bottom: 0.5rem;
-    color: #d84315;
-    font-weight: 500;
-}
-
 .reservaciones__contenedor-horas {
     display: flex;
     flex-direction: column;
