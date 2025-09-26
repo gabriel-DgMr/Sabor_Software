@@ -78,7 +78,7 @@ export const helmetConfig = helmet({
       defaultSrc: ["self"],
       styleSrc: ["self", "unsafe-inline"],
       scriptSrc: ["self"],
-      imgSrc: ["self", "data:", "https:"],
+      imgSrc: ["self", "data:", "blob:", "https:"],
       formAction: [
         "self",
         "https://checkout.payulatam.com",

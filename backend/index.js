@@ -60,7 +60,13 @@ app.use(
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:", "https://cdn.jsdelivr.net"],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "blob:",
+          "https:",
+          "https://cdn.jsdelivr.net",
+        ],
         fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
         connectSrc: connectSrcDirectives,
         formAction: [
