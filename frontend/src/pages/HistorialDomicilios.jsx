@@ -65,7 +65,7 @@ const HistorialDomicilios = () => {
   };
 
   const puedeMarcarComoRecibido = estado => {
-    return estado === 'Completado' || estado === 'completado';
+    return estado && estado.toLowerCase() === 'completado';
   };
 
   if (loading)
@@ -162,7 +162,7 @@ const HistorialDomicilios = () => {
               )}
 
               {/* Mensaje para pedidos ya recibidos */}
-              {d.nombre_estado === 'Recibido' && (
+              {d.nombre_estado && d.nombre_estado.toLowerCase() === 'recibido' && (
                 <div className="pedido-recibido">
                   <GoCheck className="icono-recibido" />
                   <span>Domicilio recibido</span>
