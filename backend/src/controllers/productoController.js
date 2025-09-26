@@ -1,6 +1,5 @@
 import { productoModel } from "../models/productoModel.js";
 import { categoriaModel } from "../models/categoriaModel.js";
-import { renameProductImage } from "../config/multerConfig.js";
 import { productoTraduccionModel } from "../models/productoModel.js";
 
 export const productoController = {
@@ -96,25 +95,9 @@ export const productoController = {
       // Crear el producto en la base de datos
       const nuevoProductoId = await productoModel.createProducto(productoData);
 
-      // Renombrar la imagen con el ID del producto
-      try {
-        const newImageName = await renameProductImage(
-          req.file.filename,
-          nuevoProductoId,
-          categoria.nombre_categoria,
-          nombre_producto,
-        );
-
-        // Actualizar el producto con el nuevo nombre de imagen
-        await productoModel.updateProducto(nuevoProductoId, {
-          imagen_producto: newImageName,
-        });
-
-        console.log("Imagen renombrada exitosamente:", newImageName);
-      } catch (renameError) {
-        console.error("Error renombrando imagen:", renameError);
-        // No fallar la creación del producto por un error de renombrado
-      }
+      // El uploadMiddleware ya procesó y renombró la imagen
+      // No necesitamos renombrar nuevamente
+      console.log("Imagen procesada por uploadMiddleware:", req.file.filename);
 
       // Guardar traducción en inglés si viene en el body
       const { descripcion_en } = req.body;
