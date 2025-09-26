@@ -182,14 +182,35 @@ export const registerUser = async (req, res) => {
     // Generar código de verificación
     const codigo = await authModel.generateVerificationCode(userId);
 
-    // Enviar email de verificación
+    // Enviar email de verificación en background (no bloquear respuesta)
     try {
-      await sendVerificationEmail(correo_usuario, nombre_usuario, codigo);
+      // Si quieres desactivar envío en ciertos entornos: EMAIL_ENABLED=false
+      const emailEnabled =
+        process.env.EMAIL_ENABLED !== "false" &&
+        Boolean(config.email.user) &&
+        Boolean(config.email.password);
+
+      if (emailEnabled) {
+        setImmediate(async () => {
+          try {
+            await sendVerificationEmail(correo_usuario, nombre_usuario, codigo);
+            console.log(`✅ Email de verificación enviado a ${correo_usuario}`);
+          } catch (emailError) {
+            console.error(
+              "❌ Error enviando email de verificación:",
+              emailError,
+            );
+          }
+        });
+      } else {
+        console.warn(
+          "✉️ Envío de email deshabilitado por EMAIL_ENABLED=false. Se generó el código igualmente.",
+        );
+      }
       console.log(`✅ Usuario ${nombre_usuario} registrado exitosamente`);
-    } catch (emailError) {
-      console.error("❌ Error enviando email de verificación:", emailError);
-      // No fallar el registro si el email falla, pero logear el error
-      // El usuario puede solicitar reenvío de código después
+    } catch (emailWrapError) {
+      // No impedir la creación del usuario por errores ajenos al email
+      console.error("⚠️ Error no crítico en flujo de email:", emailWrapError);
     }
 
     res.status(201).json({
