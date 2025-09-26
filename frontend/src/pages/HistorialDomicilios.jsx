@@ -119,6 +119,13 @@ const HistorialDomicilios = () => {
               </div>
 
               <div className="pedido-productos">
+                <h4>Productos:</h4>
+                <p className="producto-nombre">
+                  {d.productos_str || 'No hay productos registrados'}
+                </p>
+              </div>
+
+              <div className="pedido-direccion">
                 <h4>Dirección de entrega:</h4>
                 <p className="producto-nombre">{d.direccion_entrega}</p>
                 {d.detalle_direccion && (

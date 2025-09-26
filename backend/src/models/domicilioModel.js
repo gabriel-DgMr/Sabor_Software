@@ -4,10 +4,20 @@ const pool = mysql.createPool(dbConfig);
 
 export const getDomiciliosByUserId = async (id_usuario) => {
   const [rows] = await pool.query(
-    `SELECT p.*, e.nombre_estado, e.id_estado
+    `SELECT 
+       p.*, 
+       e.nombre_estado, 
+       e.id_estado,
+       GROUP_CONCAT(
+         CONCAT(dp.cantidad, ' x ', pr.nombre_producto, ' - $', (dp.cantidad * dp.precio_unitario))
+         SEPARATOR ', '
+       ) AS productos_str
      FROM pedidos p
      JOIN estados e ON p.id_estado = e.id_estado
+     LEFT JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
+     LEFT JOIN productos pr ON dp.id_producto = pr.id_producto
      WHERE p.id_usuario = ? AND p.tipo_servicio = 'domicilio'
+     GROUP BY p.id_pedido
      ORDER BY p.fecha_pedido DESC`,
     [id_usuario],
   );
@@ -16,11 +26,23 @@ export const getDomiciliosByUserId = async (id_usuario) => {
 
 export const getDomicilios = async () => {
   const [rows] = await pool.query(
-    `SELECT p.*, e.nombre_estado, e.id_estado, u.nombre_usuario, u.telefono_usuario
+    `SELECT 
+       p.*, 
+       e.nombre_estado, 
+       e.id_estado, 
+       u.nombre_usuario, 
+       u.telefono_usuario,
+       GROUP_CONCAT(
+         CONCAT(dp.cantidad, ' x ', pr.nombre_producto, ' - $', (dp.cantidad * dp.precio_unitario))
+         SEPARATOR ', '
+       ) AS productos_str
      FROM pedidos p
      JOIN estados e ON p.id_estado = e.id_estado
      JOIN usuarios u ON p.id_usuario = u.id_usuario
+     LEFT JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
+     LEFT JOIN productos pr ON dp.id_producto = pr.id_producto
      WHERE p.tipo_servicio = 'domicilio'
+     GROUP BY p.id_pedido
      ORDER BY p.fecha_pedido DESC`,
   );
   return rows;
