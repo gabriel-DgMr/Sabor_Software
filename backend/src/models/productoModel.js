@@ -59,7 +59,7 @@ export const productoModel = {
       const productos = rows.map((producto) => ({
         ...producto,
         imagen_producto: producto.imagen_producto
-          ? `/uploads/productos/${producto.imagen_producto}`
+          ? `/uploads/${producto.imagen_producto}`
           : null,
       }));
 
@@ -80,7 +80,7 @@ export const productoModel = {
       if (!rows[0]) return null;
       const producto = rows[0];
       producto.imagen_producto = producto.imagen_producto
-        ? `/uploads/productos/${producto.imagen_producto}`
+        ? `/uploads/${producto.imagen_producto}`
         : null;
       return producto;
     } catch (error) {
