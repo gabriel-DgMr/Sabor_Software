@@ -12,10 +12,6 @@ export const dbConfig = {
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  // Configuraciones adicionales para producción
-  acquireTimeout: 60000,
-  timeout: 60000,
-  reconnect: true,
   // Configuraciones específicas para Railway/Producción
   ssl:
     process.env.NODE_ENV === "production"
@@ -35,10 +31,6 @@ export const createConnection = async () => {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    // Configuraciones adicionales para producción
-    acquireTimeout: 60000,
-    timeout: 60000,
-    reconnect: true,
     ssl:
       process.env.NODE_ENV === "production"
         ? { rejectUnauthorized: false }
