@@ -396,25 +396,12 @@ export const updateEstadoPedido = async (req, res) => {
       });
     }
 
-    // Validar que el estado sea válido (2=PENDIENTE, 3=COMPLETADO, 4=CANCELADO, 5=EN PREPARACION, 6=RECIBIDO)
-    const estadosValidos = [2, 3, 4, 5, 6];
+    // Validar que el estado sea válido (2=PENDIENTE, 3=COMPLETADO, 4=CANCELADO, 5=EN PREPARACION)
+    const estadosValidos = [2, 3, 4, 5];
     if (!estadosValidos.includes(nuevoEstado)) {
       return res.status(400).json({
         mensaje:
-          "Estado inválido. Estados válidos: 2=PENDIENTE, 3=COMPLETADO, 4=CANCELADO, 5=EN PREPARACION, 6=RECIBIDO",
-      });
-    }
-
-    // Verificar que el pedido no esté en estado "Recibido" (6) - no se puede cambiar
-    const [pedidoActual] = await pool.query(
-      "SELECT id_estado FROM pedidos WHERE id_pedido = ?",
-      [id],
-    );
-
-    if (pedidoActual.length > 0 && pedidoActual[0].id_estado === 6) {
-      return res.status(400).json({
-        mensaje:
-          "No se puede cambiar el estado de un pedido que ya fue marcado como recibido",
+          "Estado inválido. Estados válidos: 2=PENDIENTE, 3=COMPLETADO, 4=CANCELADO, 5=EN PREPARACION",
       });
     }
 

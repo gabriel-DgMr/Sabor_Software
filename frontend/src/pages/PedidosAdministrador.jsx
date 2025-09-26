@@ -173,19 +173,13 @@ const PedidosAdministrador = () => {
                       pedido.cambiandoEstado ? 'pedido__boton--cargando' : ''
                     }`}
                     onClick={() => cambiarEstado(pedido.id, pedido.estado)}
-                    disabled={
-                      pedido.estado === 'completado' ||
-                      pedido.estado === 'recibido' ||
-                      pedido.cambiandoEstado
-                    }
+                    disabled={pedido.estado === 'completado' || pedido.cambiandoEstado}
                   >
                     {pedido.cambiandoEstado
                       ? '🔄 Actualizando...'
                       : pedido.estado === 'completado'
                         ? '✅ Completado'
-                        : pedido.estado === 'recibido'
-                          ? '📦 Recibido'
-                          : `➡️ Cambiar a ${mapearEstado(obtenerSiguienteEstado(pedido.estado))}`}
+                        : `➡️ Cambiar a ${mapearEstado(obtenerSiguienteEstado(pedido.estado))}`}
                   </button>
                 </div>
                 <div className="pedido__info">
