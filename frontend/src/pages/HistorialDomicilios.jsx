@@ -6,7 +6,7 @@ import { GoCheck, GoX } from 'react-icons/go';
 const HistorialDomicilios = () => {
   const [domicilios, setDomicilios] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState({}); // Para manejar estados de botones individuales
+  const [updating, setUpdating] = useState({});
   const [marcandoRecibido, setMarcandoRecibido] = useState({});
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
 
@@ -28,18 +28,22 @@ const HistorialDomicilios = () => {
   }, []);
 
   // Marcar como recibido
-  const handleRecibido = async (id_pedido) => {
+  const handleRecibido = async id_pedido => {
     try {
-      setUpdating((prev) => ({ ...prev, [id_pedido]: true }));
+      setUpdating(prev => ({ ...prev, [id_pedido]: true }));
       setMarcandoRecibido(prev => ({ ...prev, [id_pedido]: true }));
 
       await domicilioService.marcarComoRecibido(id_pedido);
 
-      // Actualizar el estado local
-      setDomicilios((prev) =>
-        prev.map((d) =>
-          d.id_pedido === id_pedido 
-            ? { ...d, recibido_cliente: true, id_estado: 6, nombre_estado: 'Recibido' } 
+      setDomicilios(prev =>
+        prev.map(d =>
+          d.id_pedido === id_pedido
+            ? {
+                ...d,
+                recibido_cliente: true,
+                id_estado: 6,
+                nombre_estado: 'Recibido',
+              }
             : d
         )
       );
@@ -49,19 +53,17 @@ const HistorialDomicilios = () => {
         tipo: 'success',
       });
 
-      // Limpiar mensaje después de 3 segundos
       setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000);
     } catch (error) {
-      console.error("Error al marcar pedido como recibido:", error);
+      console.error('Error al marcar pedido como recibido:', error);
       setMensaje({
         texto: error.response?.data?.message || 'Error al marcar como recibido',
         tipo: 'error',
       });
 
-      // Limpiar mensaje después de 5 segundos
       setTimeout(() => setMensaje({ texto: '', tipo: '' }), 5000);
     } finally {
-      setUpdating((prev) => ({ ...prev, [id_pedido]: false }));
+      setUpdating(prev => ({ ...prev, [id_pedido]: false }));
       setMarcandoRecibido(prev => ({ ...prev, [id_pedido]: false }));
     }
   };
@@ -88,7 +90,6 @@ const HistorialDomicilios = () => {
         <div>Cargando...</div>
       </>
     );
-  }
 
   if (!domicilios || domicilios.length === 0) {
     return (
@@ -115,7 +116,9 @@ const HistorialDomicilios = () => {
         {/* Mensaje de estado */}
         {mensaje.texto && (
           <div
-            className={`mensaje ${mensaje.tipo === 'success' ? 'mensaje-success' : 'mensaje-error'}`}
+            className={`mensaje ${
+              mensaje.tipo === 'success' ? 'mensaje-success' : 'mensaje-error'
+            }`}
           >
             {mensaje.tipo === 'success' ? <GoCheck /> : <GoX />}
             <span>{mensaje.texto}</span>
@@ -123,7 +126,7 @@ const HistorialDomicilios = () => {
         )}
 
         <div className="historial-pedidos-lista">
-          {domicilios.map((d) => (
+          {domicilios.map(d => (
             <div key={d.id_pedido} className="pedido-tarjeta">
               <div className="pedido-tarjeta-header">
                 <span className="pedido-fecha">{new Date(d.fecha_pedido).toLocaleString()}</span>
@@ -149,14 +152,18 @@ const HistorialDomicilios = () => {
 
               <div className="pedido-total">
                 <h4>Total:</h4>
-                <p className="producto-precio">${(d.total_pedido || d.total || 0).toLocaleString()}</p>
+                <p className="producto-precio">
+                  ${(d.total_pedido || d.total || 0).toLocaleString()}
+                </p>
               </div>
 
               {/* Botón para marcar como recibido */}
               {puedeMarcarComoRecibido(d.nombre_estado) && (
                 <div className="pedido-acciones">
                   <button
-                    className={`btn-marcar-recibido ${marcandoRecibido[d.id_pedido] ? 'cargando' : ''}`}
+                    className={`btn-marcar-recibido ${
+                      marcandoRecibido[d.id_pedido] ? 'cargando' : ''
+                    }`}
                     onClick={() => handleRecibido(d.id_pedido)}
                     disabled={marcandoRecibido[d.id_pedido]}
                   >
@@ -189,7 +196,7 @@ const HistorialDomicilios = () => {
                   onClick={() => handleRecibido(d.id_pedido)}
                   disabled={updating[d.id_pedido]}
                 >
-                  {updating[d.id_pedido] ? "Marcando..." : "Marcar como recibido"}
+                  {updating[d.id_pedido] ? 'Marcando...' : 'Marcar como recibido'}
                 </button>
               ) : (
                 <span className="pedido-recibido">Pedido recibido ✅</span>
