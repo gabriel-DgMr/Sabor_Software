@@ -6,7 +6,7 @@ export const ejemploConexionIndividual = async () => {
   let connection;
   try {
     // Crear conexión individual usando variables de entorno directamente
-    connection = await createConnection();
+    connection = createConnection();
 
     // Ejecutar consulta
     const [rows] = await connection.execute("SELECT * FROM usuarios LIMIT 1");
@@ -43,7 +43,7 @@ export const ejemploPool = async () => {
 export const ejemploTransaccionConConexion = async () => {
   let connection;
   try {
-    connection = await createConnection();
+    connection = createConnection();
     await connection.beginTransaction();
 
     // Realizar operaciones dentro de la transacción

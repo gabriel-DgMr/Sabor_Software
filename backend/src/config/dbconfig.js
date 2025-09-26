@@ -1,5 +1,6 @@
 // Conexion a base de datos mySQL
 import mysql from "mysql2/promise";
+import mysqlSync from "mysql2";
 import { config } from "./config.js";
 
 // Configuración de conexión mejorada para producción
@@ -26,8 +27,8 @@ export const dbConfig = {
 };
 
 // Función para crear conexiones individuales usando variables de entorno
-export const createConnection = async () => {
-  const connection = await mysql.createConnection({
+export const createConnection = () => {
+  const connection = mysqlSync.createConnection({
     host: process.env.MYSQLHOST || process.env.DB_HOST,
     port: process.env.MYSQLPORT || process.env.DB_PORT,
     user: process.env.MYSQLUSER || process.env.DB_USER,
@@ -38,8 +39,9 @@ export const createConnection = async () => {
       process.env.NODE_ENV === "production"
         ? { rejectUnauthorized: false }
         : false,
-    connectTimeout: 10000,
+    connectTimeout: 10000, // reemplaza 'timeout'
     charset: "utf8mb4",
+    // ❌ NO acquireTimeout ni reconnect
   });
   return connection;
 };
