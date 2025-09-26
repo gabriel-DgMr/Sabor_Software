@@ -111,7 +111,7 @@ function App() {
                       </RoleProtectedRoute>
                     </ProtectedRoute>
                   }
-                  path="/administrar/panel/clientes"
+                  path="/administrar/panel/usuarios"
                 />
                 <Route
                   element={
