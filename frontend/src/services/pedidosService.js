@@ -84,3 +84,19 @@ export const obtenerSiguienteEstado = estadoActual => {
 
   return secuenciaEstados[indiceActual + 1];
 };
+
+export const marcarPedidoRecibido = async (id_pedido) => {
+  const response = await fetch(`/api/pedidos/recibir/${id_pedido}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      // Agrega token si es necesario
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al marcar el pedido como recibido");
+  }
+
+  return await response.json();
+};

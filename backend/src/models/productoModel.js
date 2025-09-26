@@ -15,7 +15,7 @@ export const productoModel = {
                     COALESCE(pt.descripcion, p.descripcion_producto) AS descripcion_producto,
                     p.precio_producto,
                     p.imagen_producto,
-                    p.id_categoria,
+                    p.id_categoria AS id_categoria_producto,
                     c.nombre_categoria,
                     p.activo,
                     p.calificacion,
@@ -74,7 +74,7 @@ export const productoModel = {
   getProductoById: async (id) => {
     try {
       const [rows] = await pool.query(
-        "SELECT * FROM productos WHERE id_producto = ? AND activo = 1",
+        "SELECT *, id_categoria AS id_categoria_producto FROM productos WHERE id_producto = ? AND activo = 1",
         [id],
       );
       if (!rows[0]) return null;
@@ -168,10 +168,16 @@ export const productoModel = {
   getProductosByCategoria: async (categoriaId) => {
     try {
       const [rows] = await pool.query(
-        "SELECT * FROM productos WHERE id_categoria = ? AND activo = 1",
+        "SELECT *, id_categoria AS id_categoria_producto FROM productos WHERE id_categoria = ? AND activo = 1",
         [categoriaId],
       );
-      return rows;
+      const productos = rows.map((producto) => ({
+        ...producto,
+        imagen_producto: producto.imagen_producto
+          ? `/uploads/productos/${producto.imagen_producto}`
+          : null,
+      }));
+      return productos;
     } catch (error) {
       throw new Error(
         "Error al obtener productos por categoría: " + error.message,

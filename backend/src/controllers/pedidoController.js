@@ -1,10 +1,11 @@
 import {
   getPedidos as getPedidosFromModel,
-  deletePedido as deletePedidoFromModel,
-  createPedido as createPedidoFromModel,
-  updatePedido as updatePedidoFromModel,
   getAllPedidosForAdmin,
+  getPedidoById as getPedidoByIdFromModel,
   updatePedidoEstado,
+  updatePedidoById,
+  deletePedidoById,
+  marcarPedidoRecibido,
 } from "../models/pedidoModel.js";
 import { dbConfig } from "../config/dbconfig.js";
 import mysql from "mysql2/promise";
@@ -175,130 +176,161 @@ export const updatePedido = async (req, res) => {
 import {
   getCarritoByUser,
   createCarrito,
-  addOrUpdateProductoCarrito,
-  updateCantidadProductoCarrito,
-  removeProductoCarrito,
-  vaciarCarrito,
+  addOrUpdateProducto,
+  updateCantidadProducto,
+  removeProducto as removeProductoFromModel,
+  vaciar as vaciarFromModel,
   confirmarPedido,
 } from "../models/pedidoModel.js";
 
-// Obtener el carrito actual del cliente
+// =====================
+// PEDIDOS
+// =====================
+
+export const getPedidos = async (req, res) => {
+  try {
+    const pedidos = req.onlyOwn
+      ? await getPedidosFromModel(req.user.id)
+      : await getAllPedidosForAdmin();
+    res.json(pedidos);
+  } catch (error) {
+    console.error("Error en getPedidos:", error);
+    res.status(500).json({ mensaje: "Error al obtener los pedidos", error: error.message });
+  }
+};
+
+export const getPedidoById = async (req, res) => {
+  try {
+    const pedido = await getPedidoByIdFromModel(req.user.id, req.params.id);
+    if (!pedido) return res.status(404).json({ mensaje: "Pedido no encontrado" });
+    res.json(pedido);
+  } catch (error) {
+    console.error("Error en getPedidoById:", error);
+    res.status(500).json({ mensaje: "Error al obtener el pedido", error: error.message });
+  }
+};
+
+export const updatePedido = async (req, res) => {
+  try {
+    const actualizado = await updatePedidoById(req.params.id, req.body);
+    if (!actualizado) return res.status(404).json({ mensaje: "Pedido no encontrado" });
+    res.json({ mensaje: "Pedido actualizado", pedido: actualizado });
+  } catch (error) {
+    console.error("Error en updatePedido:", error);
+    res.status(500).json({ mensaje: "Error al actualizar el pedido", error: error.message });
+  }
+};
+
+export const deletePedido = async (req, res) => {
+  try {
+    const eliminado = await deletePedidoById(req.params.id);
+    if (!eliminado) return res.status(404).json({ mensaje: "Pedido no encontrado" });
+    res.json({ mensaje: "Pedido eliminado correctamente" });
+  } catch (error) {
+    console.error("Error en deletePedido:", error);
+    res.status(500).json({ mensaje: "Error al eliminar el pedido", error: error.message });
+  }
+};
+
+export const updateEstadoPedido = async (req, res) => {
+  try {
+    const { nuevoEstado } = req.body;
+    const actualizado = await updatePedidoEstado(req.params.id, nuevoEstado);
+    if (!actualizado) return res.status(404).json({ mensaje: "Pedido no encontrado" });
+    res.json({ mensaje: "Estado actualizado", pedidoId: req.params.id, nuevoEstado });
+  } catch (error) {
+    console.error("Error en updateEstadoPedido:", error);
+    res.status(500).json({ mensaje: "Error al actualizar estado", error: error.message });
+  }
+};
+
+export const recibirPedido = async (req, res) => {
+  try {
+    const recibido = await marcarPedidoRecibido(req.user.id, req.params.id);
+    if (!recibido) return res.status(404).json({ mensaje: "Pedido no encontrado o no autorizado" });
+    res.json({ mensaje: "Pedido marcado como recibido", pedidoId: req.params.id });
+  } catch (error) {
+    console.error("Error en recibirPedido:", error);
+    res.status(500).json({ mensaje: "Error al marcar como recibido", error: error.message });
+  }
+};
+
+// =====================
+// CARRITO
+// =====================
+
 export const getCarrito = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const carrito = await getCarritoByUser(userId);
+    let carrito = await getCarritoByUser(req.user.id);
     if (!carrito) {
-      // Si no hay carrito, crear uno vacío
-      const id_pedido = await createCarrito(userId);
-      return res.json({ id_pedido, items: [] });
+      const id_pedido = await createCarrito(req.user.id);
+      carrito = { id_pedido, items: [] };
     }
-    // Asegurar que siempre haya una propiedad 'items' (aunque esté vacía)
-    if (!carrito.items) {
-      carrito.items = [];
-    }
+    if (!carrito.items) carrito.items = [];
     res.json(carrito);
   } catch (error) {
     console.error("Error en getCarrito:", error);
-    res
-      .status(500)
-      .json({ mensaje: "Error al obtener el carrito", error: error.message });
+    res.status(500).json({ mensaje: "Error al obtener el carrito", error: error.message });
   }
 };
 
-// Agregar producto al carrito
 export const addProductoCarrito = async (req, res) => {
   try {
-    const userId = req.user.id;
     const { id_producto, cantidad } = req.body;
-    if (!id_producto || !cantidad || cantidad <= 0) {
-      return res.status(400).json({
-        mensaje:
-          "id_producto y cantidad son requeridos y cantidad debe ser mayor a 0",
-      });
-    }
-    const id_pedido = await addOrUpdateProductoCarrito(
-      userId,
-      id_producto,
-      cantidad,
-    );
-    res.json({
-      mensaje: "Producto agregado/actualizado en el carrito",
-      id_pedido,
-    });
+    if (!id_producto || !cantidad || cantidad <= 0)
+      return res.status(400).json({ mensaje: "id_producto y cantidad son requeridos" });
+
+    const id_pedido = await addOrUpdateProducto(req.user.id, id_producto, cantidad);
+    res.json({ mensaje: "Producto agregado/actualizado", id_pedido });
   } catch (error) {
     console.error("Error en addProductoCarrito:", error);
-    res.status(500).json({
-      mensaje: error.message || "Error al agregar producto al carrito",
-      error: error.message,
-    });
+    res.status(500).json({ mensaje: error.message });
   }
 };
 
-// Modificar cantidad de un producto en el carrito
 export const updateCantidadCarrito = async (req, res) => {
   try {
-    const userId = req.user.id;
     const { id_producto, cantidad } = req.body;
-    if (!id_producto || !cantidad || cantidad <= 0) {
-      return res.status(400).json({
-        mensaje:
-          "id_producto y cantidad son requeridos y cantidad debe ser mayor a 0",
-      });
-    }
-    const id_pedido = await updateCantidadProductoCarrito(
-      userId,
-      id_producto,
-      cantidad,
-    );
+    if (!id_producto || !cantidad || cantidad <= 0)
+      return res.status(400).json({ mensaje: "id_producto y cantidad son requeridos" });
+
+    const id_pedido = await updateCantidadProducto(req.user.id, id_producto, cantidad);
     res.json({ mensaje: "Cantidad actualizada", id_pedido });
   } catch (error) {
     console.error("Error en updateCantidadCarrito:", error);
-    res.status(500).json({
-      mensaje: error.message || "Error al actualizar cantidad",
-      error: error.message,
-    });
+    res.status(500).json({ mensaje: error.message });
   }
 };
 
-// Eliminar producto del carrito
 export const removeProducto = async (req, res) => {
   try {
-    const userId = req.user.id;
     const { id_producto } = req.body;
-    if (!id_producto) {
-      return res.status(400).json({ mensaje: "id_producto es requerido" });
-    }
-    const id_pedido = await removeProductoCarrito(userId, id_producto);
+    if (!id_producto) return res.status(400).json({ mensaje: "id_producto es requerido" });
+
+    const id_pedido = await removeProductoFromModel(req.user.id, id_producto);
     res.json({ mensaje: "Producto eliminado del carrito", id_pedido });
   } catch (error) {
     console.error("Error en removeProducto:", error);
-    res
-      .status(500)
-      .json({ mensaje: "Error al eliminar producto", error: error.message });
+    res.status(500).json({ mensaje: error.message });
   }
 };
 
-// Vaciar carrito
 export const vaciar = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const id_pedido = await vaciarCarrito(userId);
+    const id_pedido = await vaciarFromModel(req.user.id);
     res.json({ mensaje: "Carrito vaciado", id_pedido });
   } catch (error) {
     console.error("Error en vaciar:", error);
-    res
-      .status(500)
-      .json({ mensaje: "Error al vaciar carrito", error: error.message });
+    res.status(500).json({ mensaje: error.message });
   }
 };
 
-// Confirmar pedido (finalizar carrito)
+// =====================
+// CONFIRMAR PEDIDO
+// =====================
+
 export const confirmar = async (req, res) => {
   try {
-    console.log("🔄 ===== CONFIRMANDO PEDIDO EN BACKEND =====");
-    const userId = req.user?.id;
-    console.log("👤 Usuario ID:", userId);
-
     const {
       metodo_pago,
       tipo_servicio,
@@ -309,46 +341,19 @@ export const confirmar = async (req, res) => {
       recomendaciones,
     } = req.body;
 
-    console.log("📋 Datos recibidos:", {
-      metodo_pago,
-      tipo_servicio,
-      direccion_entrega,
-      detalle_direccion,
-      referencia_pago,
-      estado_pago,
-      recomendaciones,
-      userId,
-    });
+    if (!metodo_pago) return res.status(400).json({ mensaje: "metodo_pago es requerido" });
 
-    // Validaciones
-    if (!metodo_pago) {
-      return res.status(400).json({ mensaje: "metodo_pago es requerido" });
-    }
-    if (!userId) {
-      return res.status(401).json({ mensaje: "Usuario no autenticado" });
-    }
-    if (!tipo_servicio || !["mesa", "domicilio"].includes(tipo_servicio)) {
-      return res.status(400).json({ mensaje: "tipo_servicio inválido" });
-    }
-    if (tipo_servicio === "domicilio" && !direccion_entrega) {
-      return res
-        .status(400)
-        .json({ mensaje: "direccion_entrega es requerida para domicilio" });
-    }
-
-    console.log("🚀 Llamando a confirmarPedido del modelo...");
     const id_pedido = await confirmarPedido(
-      userId,
+      req.user.id,
       metodo_pago,
       tipo_servicio,
       direccion_entrega,
       detalle_direccion,
       referencia_pago,
       estado_pago,
-      recomendaciones,
+      recomendaciones
     );
 
-    console.log("✅ Pedido confirmado con ID:", id_pedido);
     res.json({ mensaje: "Pedido confirmado", id_pedido });
   } catch (error) {
     console.error("[Pedido][Confirmar] Error:", {
