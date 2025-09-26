@@ -49,9 +49,13 @@ export const getDomicilios = async () => {
 };
 
 export const marcarDomicilioComoRecibido = async (id_pedido, id_usuario) => {
+  let connection;
+
   try {
+    connection = await pool.getConnection();
+
     // Verificar que el pedido pertenece al usuario y es un domicilio
-    const [pedido] = await pool.query(
+    const [pedido] = await connection.query(
       `SELECT id_pedido, id_estado, tipo_servicio 
        FROM pedidos 
        WHERE id_pedido = ? AND id_usuario = ? AND tipo_servicio = 'domicilio'`,
@@ -69,8 +73,17 @@ export const marcarDomicilioComoRecibido = async (id_pedido, id_usuario) => {
       );
     }
 
+    // Asegurar que el estado "Recibido" existe
+    await connection.query(
+      `INSERT INTO estados (id_estado, nombre_estado, descripcion_estado) 
+       VALUES (6, 'Recibido', 'Pedido a domicilio recibido por el cliente')
+       ON DUPLICATE KEY UPDATE 
+         nombre_estado = VALUES(nombre_estado),
+         descripcion_estado = VALUES(descripcion_estado)`,
+    );
+
     // Actualizar el estado a "recibido" (ID 6)
-    const [result] = await pool.query(
+    const [result] = await connection.query(
       `UPDATE pedidos 
        SET id_estado = 6 
        WHERE id_pedido = ? AND id_usuario = ?`,
@@ -81,5 +94,9 @@ export const marcarDomicilioComoRecibido = async (id_pedido, id_usuario) => {
   } catch (error) {
     console.error("Error al marcar domicilio como recibido:", error);
     throw error;
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 };
