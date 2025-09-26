@@ -187,48 +187,17 @@ import {
 // PEDIDOS
 // =====================
 
-export const getPedidos = async (req, res) => {
-  try {
-    const pedidos = req.onlyOwn
-      ? await getPedidosFromModel(req.user.id)
-      : await getAllPedidosForAdmin();
-    res.json(pedidos);
-  } catch (error) {
-    console.error("Error en getPedidos:", error);
-    res.status(500).json({ mensaje: "Error al obtener los pedidos", error: error.message });
-  }
-};
-
 export const getPedidoById = async (req, res) => {
   try {
     const pedido = await getPedidoByIdFromModel(req.user.id, req.params.id);
-    if (!pedido) return res.status(404).json({ mensaje: "Pedido no encontrado" });
+    if (!pedido)
+      return res.status(404).json({ mensaje: "Pedido no encontrado" });
     res.json(pedido);
   } catch (error) {
     console.error("Error en getPedidoById:", error);
-    res.status(500).json({ mensaje: "Error al obtener el pedido", error: error.message });
-  }
-};
-
-export const updatePedido = async (req, res) => {
-  try {
-    const actualizado = await updatePedidoById(req.params.id, req.body);
-    if (!actualizado) return res.status(404).json({ mensaje: "Pedido no encontrado" });
-    res.json({ mensaje: "Pedido actualizado", pedido: actualizado });
-  } catch (error) {
-    console.error("Error en updatePedido:", error);
-    res.status(500).json({ mensaje: "Error al actualizar el pedido", error: error.message });
-  }
-};
-
-export const deletePedido = async (req, res) => {
-  try {
-    const eliminado = await deletePedidoById(req.params.id);
-    if (!eliminado) return res.status(404).json({ mensaje: "Pedido no encontrado" });
-    res.json({ mensaje: "Pedido eliminado correctamente" });
-  } catch (error) {
-    console.error("Error en deletePedido:", error);
-    res.status(500).json({ mensaje: "Error al eliminar el pedido", error: error.message });
+    res
+      .status(500)
+      .json({ mensaje: "Error al obtener el pedido", error: error.message });
   }
 };
 
@@ -236,22 +205,37 @@ export const updateEstadoPedido = async (req, res) => {
   try {
     const { nuevoEstado } = req.body;
     const actualizado = await updatePedidoEstado(req.params.id, nuevoEstado);
-    if (!actualizado) return res.status(404).json({ mensaje: "Pedido no encontrado" });
-    res.json({ mensaje: "Estado actualizado", pedidoId: req.params.id, nuevoEstado });
+    if (!actualizado)
+      return res.status(404).json({ mensaje: "Pedido no encontrado" });
+    res.json({
+      mensaje: "Estado actualizado",
+      pedidoId: req.params.id,
+      nuevoEstado,
+    });
   } catch (error) {
     console.error("Error en updateEstadoPedido:", error);
-    res.status(500).json({ mensaje: "Error al actualizar estado", error: error.message });
+    res
+      .status(500)
+      .json({ mensaje: "Error al actualizar estado", error: error.message });
   }
 };
 
 export const recibirPedido = async (req, res) => {
   try {
     const recibido = await marcarPedidoRecibido(req.user.id, req.params.id);
-    if (!recibido) return res.status(404).json({ mensaje: "Pedido no encontrado o no autorizado" });
-    res.json({ mensaje: "Pedido marcado como recibido", pedidoId: req.params.id });
+    if (!recibido)
+      return res
+        .status(404)
+        .json({ mensaje: "Pedido no encontrado o no autorizado" });
+    res.json({
+      mensaje: "Pedido marcado como recibido",
+      pedidoId: req.params.id,
+    });
   } catch (error) {
     console.error("Error en recibirPedido:", error);
-    res.status(500).json({ mensaje: "Error al marcar como recibido", error: error.message });
+    res
+      .status(500)
+      .json({ mensaje: "Error al marcar como recibido", error: error.message });
   }
 };
 
@@ -270,7 +254,9 @@ export const getCarrito = async (req, res) => {
     res.json(carrito);
   } catch (error) {
     console.error("Error en getCarrito:", error);
-    res.status(500).json({ mensaje: "Error al obtener el carrito", error: error.message });
+    res
+      .status(500)
+      .json({ mensaje: "Error al obtener el carrito", error: error.message });
   }
 };
 
@@ -278,9 +264,15 @@ export const addProductoCarrito = async (req, res) => {
   try {
     const { id_producto, cantidad } = req.body;
     if (!id_producto || !cantidad || cantidad <= 0)
-      return res.status(400).json({ mensaje: "id_producto y cantidad son requeridos" });
+      return res
+        .status(400)
+        .json({ mensaje: "id_producto y cantidad son requeridos" });
 
-    const id_pedido = await addOrUpdateProducto(req.user.id, id_producto, cantidad);
+    const id_pedido = await addOrUpdateProducto(
+      req.user.id,
+      id_producto,
+      cantidad,
+    );
     res.json({ mensaje: "Producto agregado/actualizado", id_pedido });
   } catch (error) {
     console.error("Error en addProductoCarrito:", error);
@@ -292,9 +284,15 @@ export const updateCantidadCarrito = async (req, res) => {
   try {
     const { id_producto, cantidad } = req.body;
     if (!id_producto || !cantidad || cantidad <= 0)
-      return res.status(400).json({ mensaje: "id_producto y cantidad son requeridos" });
+      return res
+        .status(400)
+        .json({ mensaje: "id_producto y cantidad son requeridos" });
 
-    const id_pedido = await updateCantidadProducto(req.user.id, id_producto, cantidad);
+    const id_pedido = await updateCantidadProducto(
+      req.user.id,
+      id_producto,
+      cantidad,
+    );
     res.json({ mensaje: "Cantidad actualizada", id_pedido });
   } catch (error) {
     console.error("Error en updateCantidadCarrito:", error);
@@ -305,7 +303,8 @@ export const updateCantidadCarrito = async (req, res) => {
 export const removeProducto = async (req, res) => {
   try {
     const { id_producto } = req.body;
-    if (!id_producto) return res.status(400).json({ mensaje: "id_producto es requerido" });
+    if (!id_producto)
+      return res.status(400).json({ mensaje: "id_producto es requerido" });
 
     const id_pedido = await removeProductoFromModel(req.user.id, id_producto);
     res.json({ mensaje: "Producto eliminado del carrito", id_pedido });
@@ -341,7 +340,8 @@ export const confirmar = async (req, res) => {
       recomendaciones,
     } = req.body;
 
-    if (!metodo_pago) return res.status(400).json({ mensaje: "metodo_pago es requerido" });
+    if (!metodo_pago)
+      return res.status(400).json({ mensaje: "metodo_pago es requerido" });
 
     const id_pedido = await confirmarPedido(
       req.user.id,
@@ -351,7 +351,7 @@ export const confirmar = async (req, res) => {
       detalle_direccion,
       referencia_pago,
       estado_pago,
-      recomendaciones
+      recomendaciones,
     );
 
     res.json({ mensaje: "Pedido confirmado", id_pedido });
@@ -365,84 +365,5 @@ export const confirmar = async (req, res) => {
     res
       .status(500)
       .json({ mensaje: "Error al confirmar pedido", error: error.message });
-  }
-};
-
-// Obtener un pedido por ID
-export const getPedidoById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user.id;
-    // Buscar el pedido por id y cliente
-    const [pedidos] = await import("../models/pedidoModel.js").then((m) =>
-      m.getPedidoById(userId, id),
-    );
-    if (!pedidos) {
-      return res.status(404).json({ mensaje: "Pedido no encontrado" });
-    }
-    res.json(pedidos);
-  } catch (error) {
-    console.error("Error en getPedidoById:", error);
-    res
-      .status(500)
-      .json({ mensaje: "Error al obtener el pedido", error: error.message });
-  }
-};
-
-// Actualizar estado de un pedido (solo para administradores)
-export const updateEstadoPedido = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { nuevoEstado } = req.body;
-
-    if (!id) {
-      return res.status(400).json({ mensaje: "ID de pedido no proporcionado" });
-    }
-
-    if (!nuevoEstado || typeof nuevoEstado !== "number") {
-      return res.status(400).json({
-        mensaje: "nuevoEstado es requerido y debe ser un número",
-      });
-    }
-
-    // Validar que el estado sea válido (2=PENDIENTE, 3=COMPLETADO, 4=CANCELADO, 5=EN PREPARACION, 6=RECIBIDO)
-    const estadosValidos = [2, 3, 4, 5, 6];
-    if (!estadosValidos.includes(nuevoEstado)) {
-      return res.status(400).json({
-        mensaje:
-          "Estado inválido. Estados válidos: 2=PENDIENTE, 3=COMPLETADO, 4=CANCELADO, 5=EN PREPARACION, 6=RECIBIDO",
-      });
-    }
-
-    // Verificar que el pedido no esté en estado "Recibido" (6) - no se puede cambiar
-    const [pedidoActual] = await pool.query(
-      "SELECT id_estado FROM pedidos WHERE id_pedido = ?",
-      [id],
-    );
-
-    if (pedidoActual.length > 0 && pedidoActual[0].id_estado === 6) {
-      return res.status(400).json({
-        mensaje:
-          "No se puede cambiar el estado de un pedido que ya fue marcado como recibido",
-      });
-    }
-
-    const actualizado = await updatePedidoEstado(id, nuevoEstado);
-
-    if (!actualizado) {
-      return res.status(404).json({ mensaje: "Pedido no encontrado" });
-    }
-
-    res.json({
-      mensaje: "Estado del pedido actualizado exitosamente",
-      pedidoId: id,
-      nuevoEstado,
-    });
-  } catch (error) {
-    console.error("Error en updateEstadoPedido:", error);
-    res.status(500).json({
-      mensaje: "Error al actualizar el estado del pedido",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
-    });
   }
 };
