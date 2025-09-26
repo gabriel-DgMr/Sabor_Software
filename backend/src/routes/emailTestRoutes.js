@@ -1,31 +1,15 @@
 import express from "express";
 import { config } from "../config/config.js";
-import nodemailer from "nodemailer";
+import {
+  createEmailTransporter,
+  sendWithRetry,
+  verifyEmailTransport,
+} from "../config/emailConfig.js";
 
 const router = express.Router();
 
-// Configurar transporter para pruebas
-const testTransporter = nodemailer.createTransport({
-  service: "gmail",
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: config.email.user,
-    pass: config.email.password,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-  connectionTimeout: 60000,
-  greetingTimeout: 30000,
-  socketTimeout: 60000,
-  pool: true,
-  maxConnections: 5,
-  maxMessages: 100,
-  rateDelta: 20000,
-  rateLimit: 5,
-});
+// Transporter para pruebas
+const testTransporter = createEmailTransporter();
 
 // Endpoint para probar la configuración de email
 router.get("/test-email-config", async (req, res) => {
@@ -47,7 +31,7 @@ router.get("/test-email-config", async (req, res) => {
     }
 
     // Verificar conexión SMTP
-    await testTransporter.verify();
+    await verifyEmailTransport();
 
     res.json({
       status: "success",
@@ -119,7 +103,7 @@ router.post("/send-test-email", async (req, res) => {
       },
     };
 
-    const result = await testTransporter.sendMail(mailOptions);
+    const result = await sendWithRetry(testTransporter, mailOptions);
 
     console.log(`✅ Email de prueba enviado exitosamente:`, {
       to: testEmail,
@@ -180,7 +164,7 @@ router.get("/email-diagnostics", async (req, res) => {
 
     // Test 2: Verificar conexión SMTP
     try {
-      await testTransporter.verify();
+      await verifyEmailTransport();
       diagnostics.tests.smtpConnection = "✅ Conectado";
     } catch (error) {
       diagnostics.tests.smtpConnection = `❌ Error: ${error.message}`;

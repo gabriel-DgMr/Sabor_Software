@@ -2,50 +2,15 @@ import * as authModel from "../models/authModel.js";
 import jwt from "jsonwebtoken";
 import validator from "validator";
 import { config } from "../config/config.js";
-import nodemailer from "nodemailer";
+import {
+  createEmailTransporter,
+  sendWithRetry,
+} from "../config/emailConfig.js";
 
-// Configurar el transporter de nodemailer con configuración mejorada para producción
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // true para 465, false para otros puertos
-  auth: {
-    user: config.email.user,
-    pass: config.email.password,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-  connectionTimeout: 60000, // 60 segundos
-  greetingTimeout: 30000, // 30 segundos
-  socketTimeout: 60000, // 60 segundos
-  pool: true, // Usar pool de conexiones
-  maxConnections: 5, // Máximo 5 conexiones
-  maxMessages: 100, // Máximo 100 mensajes por conexión
-  rateDelta: 20000, // 20 segundos entre lotes
-  rateLimit: 5, // Máximo 5 emails por lote
-});
+// Transporter centralizado
+const transporter = createEmailTransporter();
 
-// Función para enviar email con reintentos
-const sendWithRetry = async (mailOptions, maxRetries = 3) => {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const result = await transporter.sendMail(mailOptions);
-      console.log(`✅ Email enviado exitosamente (intento ${attempt})`);
-      return result;
-    } catch (error) {
-      console.error(`❌ Error en intento ${attempt}:`, error.message);
-
-      if (attempt === maxRetries) {
-        throw error;
-      }
-
-      // Esperar antes del siguiente intento
-      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-    }
-  }
-};
+// La función sendWithRetry ahora viene desde emailConfig y recibe transporter
 
 // Función para enviar email de verificación
 const sendVerificationEmail = async (
@@ -96,7 +61,7 @@ const sendVerificationEmail = async (
       },
     };
 
-    const result = await sendWithRetry(mailOptions);
+    const result = await sendWithRetry(transporter, mailOptions);
 
     console.log(
       `✅ [${new Date().toISOString()}] Email enviado exitosamente:`,
@@ -530,7 +495,7 @@ export const forgotPassword = async (req, res) => {
             `,
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendWithRetry(transporter, mailOptions);
 
     res.json({
       message:
