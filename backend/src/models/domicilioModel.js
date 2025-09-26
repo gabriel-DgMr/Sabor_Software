@@ -75,11 +75,10 @@ export const marcarDomicilioComoRecibido = async (id_pedido, id_usuario) => {
 
     // Asegurar que el estado "Recibido" existe
     await connection.query(
-      `INSERT INTO estados (id_estado, nombre_estado, descripcion_estado) 
-       VALUES (6, 'Recibido', 'Pedido a domicilio recibido por el cliente')
+      `INSERT INTO estados (id_estado, nombre_estado) 
+       VALUES (6, 'Recibido')
        ON DUPLICATE KEY UPDATE 
-         nombre_estado = VALUES(nombre_estado),
-         descripcion_estado = VALUES(descripcion_estado)`,
+         nombre_estado = VALUES(nombre_estado)`,
     );
 
     // Actualizar el estado a "recibido" (ID 6)
