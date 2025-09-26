@@ -23,7 +23,7 @@ const PedidosAdministrador = () => {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
 
-  // 📌 Cargar pedidos al montar el componente
+  //  Cargar pedidos al montar el componente
   useEffect(() => {
     const cargarPedidos = async () => {
       if (!isAuthenticated || authLoading) {
@@ -129,7 +129,7 @@ const PedidosAdministrador = () => {
               onClick={refrescarPedidos}
               title="Refrescar pedidos"
             >
-              🔄 Refrescar
+              Refrescar
             </button>
           </div>
         </header>
@@ -139,7 +139,7 @@ const PedidosAdministrador = () => {
             <p className="pedidos__mensaje">Verificando autenticación...</p>
           ) : !isAuthenticated ? (
             <div className="pedidos__mensaje pedidos__mensaje--error">
-              <h3>🔒 Acceso Restringido</h3>
+              <h3>Acceso Restringido</h3>
               <p>Necesitas iniciar sesión como administrador para ver los pedidos.</p>
             </div>
           ) : cargando ? (

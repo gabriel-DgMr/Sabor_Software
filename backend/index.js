@@ -3,10 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import fs from "fs";
 import { config } from "./src/config/config.js";
-import {
-  errorHandler,
-  notFoundHandler,
-} from "./src/middleware/errorHandler.js";
+import { errorHandler, notFoundHandler } from "./src/middleware/errorHandler.js";
 import {
   helmetConfig,
   createRateLimiter,
@@ -15,16 +12,13 @@ import {
   sanitizeInput,
   preventSQLInjection,
 } from "./src/middleware/security.js";
+
 import authRoutes from "./src/routes/authRoutes.js";
 import productoRoutes from "./src/routes/productoRoutes.js";
 import categoriaRoutes from "./src/routes/categoriaRoutes.js";
 import reservaRoutes from "./src/routes/reservaRoutes.js";
 import pedidoRoutes from "./src/routes/pedidoRoutes.js";
 import horarioRoutes from "./src/routes/horarioRoutes.js";
-import path from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-import helmet from "helmet";
 import mensajeContactoRoutes from "./src/routes/contactoRoutes.js";
 import mercadopagoRoutes from "./src/routes/mercadopagoRoutes.js";
 import webhookRoutes from "./src/routes/webhookRoutes.js";
@@ -35,8 +29,12 @@ import healthRoutes from "./src/routes/healthRoutes.js";
 import domicilioRoutes from "./src/routes/domicilioRoutes.js";
 import emailTestRoutes from "./src/routes/emailTestRoutes.js";
 
-const app = express();
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import helmet from "helmet";
 
+const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -79,40 +77,29 @@ app.use(
     },
     crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
-  }),
+  })
 );
 
 // ============================
-// Configuración de CORS dinámico
+// Configuración de CORS
 // ============================
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:4173",
+  "https://sabor-production.up.railway.app",
+];
+
+if (process.env.NODE_ENV === "production") {
+  if (process.env.RAILWAY_STATIC_URL) allowedOrigins.push(process.env.RAILWAY_STATIC_URL);
+  if (process.env.CORS_ORIGIN) allowedOrigins.push(process.env.CORS_ORIGIN);
+  if (process.env.FRONTEND_URL) allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-
-    const allowedOrigins = [
-      "http://localhost:5173",
-      "http://localhost:3000",
-      "http://localhost:4173",
-      "https://sabor-production.up.railway.app",
-    ];
-
-    if (process.env.NODE_ENV === "production") {
-      if (process.env.RAILWAY_STATIC_URL) {
-        allowedOrigins.push(process.env.RAILWAY_STATIC_URL);
-      }
-      if (process.env.CORS_ORIGIN) {
-        allowedOrigins.push(process.env.CORS_ORIGIN);
-      }
-      if (process.env.FRONTEND_URL) {
-        allowedOrigins.push(process.env.FRONTEND_URL);
-      }
-    }
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -192,11 +179,7 @@ app.use(
       res.setHeader("Access-Control-Allow-Methods", "GET");
       res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-      if (
-        filePath.endsWith(".js") ||
-        filePath.endsWith(".php") ||
-        filePath.endsWith(".exe")
-      ) {
+      if (filePath.endsWith(".js") || filePath.endsWith(".php") || filePath.endsWith(".exe")) {
         res.setHeader("Content-Type", "text/plain");
       }
 
@@ -207,36 +190,40 @@ app.use(
         res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
       }
     },
-  }),
+  })
 );
 
-// Servir archivos desde public/uploads en la raíz del proyecto (fallback)
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "../public/uploads"), {
     setHeaders: (res, filePath) => {
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Access-Control-Allow-Methods", "GET");
-      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-cache");
+      } else if (filePath.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/)) {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Methods", "GET");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-      if (
-        filePath.endsWith(".js") ||
-        filePath.endsWith(".php") ||
-        filePath.endsWith(".exe")
-      ) {
-        res.setHeader("Content-Type", "text/plain");
-      }
+        if (
+          filePath.endsWith(".js") ||
+          filePath.endsWith(".php") ||
+          filePath.endsWith(".exe")
+        ) {
+          res.setHeader("Content-Type", "text/plain");
+        }
 
-      res.setHeader("X-Content-Type-Options", "nosniff");
+        res.setHeader("X-Content-Type-Options", "nosniff");
 
-      if (filePath.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-        res.setHeader("Cache-Control", "public, max-age=31536000");
-        res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+        if (filePath.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+          res.setHeader("Cache-Control", "public, max-age=31536000");
+          res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+        }
       }
     },
-  }),
+  })
 );
 
+// Servir el index.html del frontend
 // Configurar rutas de archivos estáticos del frontend React
 // Intentar diferentes rutas para desarrollo y producción
 const frontendPaths = [
@@ -316,16 +303,12 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(
-    `Servidor corriendo en puerto ${PORT} en modo ${config.server.mode}`,
-  );
+  console.log(`Servidor corriendo en puerto ${PORT} en modo ${config.server.mode}`);
   console.log("Configuración de seguridad activada");
 
   if (process.env.RAILWAY_ENVIRONMENT) {
-    console.log(
-      `🚄 Desplegado en Railway - Environment: ${process.env.RAILWAY_ENVIRONMENT}`,
-    );
-    console.log(`🌐 URL: ${process.env.RAILWAY_STATIC_URL || "No disponible"}`);
+    console.log(`Desplegado en Railway - Environment: ${process.env.RAILWAY_ENVIRONMENT}`);
+    console.log(`URL: ${process.env.RAILWAY_STATIC_URL || "No disponible"}`);
   }
 });
 

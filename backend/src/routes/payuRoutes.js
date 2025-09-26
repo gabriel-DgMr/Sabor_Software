@@ -4,16 +4,21 @@ import {
   generarFormularioPago,
   consultarTransaccion,
 } from "../controllers/payuController.js";
+import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Crear orden de pago directo
-router.post("/orden", crearOrdenPago);
+// Crear orden de pago directo (requiere autenticación)
+router.post("/orden", authenticateToken, crearOrdenPago);
 
-// Generar datos para formulario de pago
-router.post("/formulario", generarFormularioPago);
+// Generar datos para formulario de pago (requiere autenticación)
+router.post("/formulario", authenticateToken, generarFormularioPago);
 
-// Consultar estado de transacción
-router.get("/consultar/:referenceCode", consultarTransaccion);
+// Consultar estado de transacción (requiere autenticación)
+router.get(
+  "/consultar/:referenceCode",
+  authenticateToken,
+  consultarTransaccion,
+);
 
 export default router;

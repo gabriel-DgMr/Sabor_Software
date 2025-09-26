@@ -95,7 +95,10 @@ const ReservacionesAdministrador = () => {
       setError(null);
 
       const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
       console.log('🔍 Token obtenido:', token ? 'Sí' : 'No');
+      console.log('🔍 Usuario actual:', user);
+      console.log('🔍 Rol del usuario:', user.nombre_rol);
 
       const url = (import.meta.env.VITE_API_URL || '/api') + '/reservas';
       console.log('🔍 Haciendo petición a:', url);
@@ -114,6 +117,23 @@ const ReservacionesAdministrador = () => {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Error en respuesta:', errorText);
+
+        // Si es error de permisos, mostrar mensaje más específico
+        if (response.status === 403) {
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch (e) {
+            errorData = { message: errorText };
+          }
+
+          if (errorData.code === 'INSUFFICIENT_PERMISSIONS') {
+            throw new Error(
+              `Acceso denegado: Tu rol actual (${user.nombre_rol || 'Usuario'}) no tiene permisos para gestionar reservas. Se requiere rol de Administrador o Empleado.`
+            );
+          }
+        }
+
         throw new Error(`Error al cargar las reservas: ${response.status} - ${errorText}`);
       }
 
@@ -509,10 +529,22 @@ const ReservacionesAdministrador = () => {
 
   // Agrupar reservas por bloques de hora
   const bloques = [
+    { titulo: 'RESERVACIONES DE 7:00 AM - 8:00 AM', inicio: 7, fin: 8 },
+    { titulo: 'RESERVACIONES DE 8:00 AM - 9:00 AM', inicio: 8, fin: 9 },
+    { titulo: 'RESERVACIONES DE 9:00 AM - 10:00 AM', inicio: 9, fin: 10 },
+    { titulo: 'RESERVACIONES DE 10:00 AM - 11:00 AM', inicio: 10, fin: 11 },
+    { titulo: 'RESERVACIONES DE 11:00 AM - 12:00 PM', inicio: 11, fin: 12 },
+    { titulo: 'RESERVACIONES DE 12:00 PM - 1:00 PM', inicio: 12, fin: 13 },
+    { titulo: 'RESERVACIONES DE 1:00 PM - 2:00 PM', inicio: 13, fin: 14 },
+    { titulo: 'RESERVACIONES DE 2:00 PM - 3:00 PM', inicio: 14, fin: 15 },
+    { titulo: 'RESERVACIONES DE 3:00 PM - 4:00 PM', inicio: 15, fin: 16 },
+    { titulo: 'RESERVACIONES DE 4:00 PM - 5:00 PM', inicio: 16, fin: 17 },
+    { titulo: 'RESERVACIONES DE 5:00 PM - 6:00 PM', inicio: 17, fin: 18 },
     { titulo: 'RESERVACIONES DE 6:00 PM - 7:00 PM', inicio: 18, fin: 19 },
     { titulo: 'RESERVACIONES DE 7:00 PM - 8:00 PM', inicio: 19, fin: 20 },
     { titulo: 'RESERVACIONES DE 8:00 PM - 9:00 PM', inicio: 20, fin: 21 },
     { titulo: 'RESERVACIONES DE 9:00 PM - 10:00 PM', inicio: 21, fin: 22 },
+    { titulo: 'RESERVACIONES DE 10:00 PM - 11:00 PM', inicio: 22, fin: 23 },
   ];
 
   const reservasPorBloque = (inicio, fin) => {
@@ -572,7 +604,22 @@ const ReservacionesAdministrador = () => {
 
         {error && (
           <div className="reservaciones__error">
-            {error}
+            <div className="reservaciones__error-content">
+              <strong>Error:</strong> {error}
+              {error.includes('Acceso denegado') && (
+                <div className="reservaciones__error-help">
+                  <h4>💡 ¿Cómo solucionar este problema?</h4>
+                  <ul>
+                    <li>
+                      Contacta al administrador del sistema para que cambie tu rol a "Administrador"
+                      o "Empleado"
+                    </li>
+                    <li>Solo los usuarios con estos roles pueden gestionar reservaciones</li>
+                    <li>Tu rol actual no tiene los permisos necesarios para esta funcionalidad</li>
+                  </ul>
+                </div>
+              )}
+            </div>
             <button className="reservaciones__error-close" onClick={() => setError(null)}>
               ×
             </button>
@@ -700,10 +747,22 @@ const ReservacionesAdministrador = () => {
                   className="reservaciones__filtro-select"
                 >
                   <option value="">Cualquier hora</option>
+                  <option value="7">7:00 AM</option>
+                  <option value="8">8:00 AM</option>
+                  <option value="9">9:00 AM</option>
+                  <option value="10">10:00 AM</option>
+                  <option value="11">11:00 AM</option>
+                  <option value="12">12:00 PM</option>
+                  <option value="13">1:00 PM</option>
+                  <option value="14">2:00 PM</option>
+                  <option value="15">3:00 PM</option>
+                  <option value="16">4:00 PM</option>
+                  <option value="17">5:00 PM</option>
                   <option value="18">6:00 PM</option>
                   <option value="19">7:00 PM</option>
                   <option value="20">8:00 PM</option>
                   <option value="21">9:00 PM</option>
+                  <option value="22">10:00 PM</option>
                 </select>
               </div>
 
@@ -716,10 +775,22 @@ const ReservacionesAdministrador = () => {
                   className="reservaciones__filtro-select"
                 >
                   <option value="">Cualquier hora</option>
+                  <option value="7">7:00 AM</option>
+                  <option value="8">8:00 AM</option>
+                  <option value="9">9:00 AM</option>
+                  <option value="10">10:00 AM</option>
+                  <option value="11">11:00 AM</option>
+                  <option value="12">12:00 PM</option>
+                  <option value="13">1:00 PM</option>
+                  <option value="14">2:00 PM</option>
+                  <option value="15">3:00 PM</option>
+                  <option value="16">4:00 PM</option>
+                  <option value="17">5:00 PM</option>
                   <option value="18">6:00 PM</option>
                   <option value="19">7:00 PM</option>
                   <option value="20">8:00 PM</option>
                   <option value="21">9:00 PM</option>
+                  <option value="22">10:00 PM</option>
                 </select>
               </div>
             </div>
@@ -734,10 +805,22 @@ const ReservacionesAdministrador = () => {
               className="reservaciones__filtro-select"
             >
               <option value="todos">Todas las horas</option>
+              <option value="7">7:00 AM</option>
+              <option value="8">8:00 AM</option>
+              <option value="9">9:00 AM</option>
+              <option value="10">10:00 AM</option>
+              <option value="11">11:00 AM</option>
+              <option value="12">12:00 PM</option>
+              <option value="13">1:00 PM</option>
+              <option value="14">2:00 PM</option>
+              <option value="15">3:00 PM</option>
+              <option value="16">4:00 PM</option>
+              <option value="17">5:00 PM</option>
               <option value="18">6:00 PM</option>
               <option value="19">7:00 PM</option>
               <option value="20">8:00 PM</option>
               <option value="21">9:00 PM</option>
+              <option value="22">10:00 PM</option>
             </select>
             <button
               className="reservaciones__boton-filtrar"
@@ -1027,10 +1110,22 @@ const ReservacionesAdministrador = () => {
                   onChange={handleInputChange}
                 >
                   <option value="">Selecciona una hora</option>
+                  <option value="07:00">7:00 AM</option>
+                  <option value="08:00">8:00 AM</option>
+                  <option value="09:00">9:00 AM</option>
+                  <option value="10:00">10:00 AM</option>
+                  <option value="11:00">11:00 AM</option>
+                  <option value="12:00">12:00 PM</option>
+                  <option value="13:00">1:00 PM</option>
+                  <option value="14:00">2:00 PM</option>
+                  <option value="15:00">3:00 PM</option>
+                  <option value="16:00">4:00 PM</option>
+                  <option value="17:00">5:00 PM</option>
                   <option value="18:00">6:00 PM</option>
                   <option value="19:00">7:00 PM</option>
                   <option value="20:00">8:00 PM</option>
                   <option value="21:00">9:00 PM</option>
+                  <option value="22:00">10:00 PM</option>
                 </select>
                 {errors.hora_reservacion && (
                   <small className="formulario__mensaje-error">{errors.hora_reservacion}</small>
