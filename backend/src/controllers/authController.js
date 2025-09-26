@@ -179,6 +179,20 @@ export const registerUser = async (req, res) => {
       contraseña_usuario,
     });
 
+    // Auto activar en producción si se habilita bandera de contingencia
+    const autoVerify =
+      String(process.env.AUTO_VERIFY_ON_REGISTER || "false").toLowerCase() ===
+      "true";
+    if (autoVerify) {
+      await authModel.activateUserWithoutVerification(userId);
+      console.log("✅ Usuario auto-verificado por AUTO_VERIFY_ON_REGISTER");
+      return res.status(201).json({
+        message: "usuario registrado y activado exitosamente",
+        userId,
+        requiresVerification: false,
+      });
+    }
+
     // Generar código de verificación
     const codigo = await authModel.generateVerificationCode(userId);
 

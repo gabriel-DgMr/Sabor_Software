@@ -114,6 +114,21 @@ export const verifyCode = async (id_usuario, codigo) => {
   return true;
 };
 
+// Activar usuario sin verificación por código (uso controlado por bandera de entorno)
+export const activateUserWithoutVerification = async (id_usuario) => {
+  await pool.query(
+    "UPDATE usuarios SET activo = true, email_verificado = true WHERE id_usuario = ?",
+    [id_usuario],
+  );
+
+  // Eliminar códigos pendientes para este usuario, si existen
+  await pool.query("DELETE FROM codigos_verificacion WHERE id_usuario = ?", [
+    id_usuario,
+  ]);
+
+  return true;
+};
+
 // Obtener usuario por email (solo usuarios activos y verificados)
 export const getUserByEmail = async (correo_usuario) => {
   const [rows] = await pool.query(
