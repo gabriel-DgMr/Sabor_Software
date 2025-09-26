@@ -2,6 +2,7 @@ import express from "express";
 import {
   getHistorialDomicilios,
   getDomicilios, // <-- nuevo controlador para empleados/admin
+  marcarComoRecibido,
 } from "../controllers/domicilioController.js";
 import { authMiddleware, checkRole } from "../middleware/auth.js";
 
@@ -17,5 +18,8 @@ router.get(
   checkRole(["Empleado", "Administrador"]),
   getDomicilios,
 );
+
+// Ruta para marcar domicilio como recibido (solo para el cliente propietario)
+router.put("/:id/recibido", authMiddleware, marcarComoRecibido);
 
 export default router;

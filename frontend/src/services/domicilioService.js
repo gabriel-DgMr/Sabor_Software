@@ -52,6 +52,20 @@ const domicilioService = {
       },
     });
   },
+
+  // Marcar domicilio como recibido
+  marcarComoRecibido: id => {
+    const token = localStorage.getItem('token');
+    return axios.put(
+      `${API_URL}/${id}/recibido`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  },
 };
 
 export default domicilioService;
