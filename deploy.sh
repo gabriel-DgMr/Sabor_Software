@@ -274,6 +274,12 @@ deploy_traditional() {
     # Configurar base de datos
     cd backend
     node scripts/db-setup.js setup
+    
+    # Insertar datos de prueba si es producción
+    if [[ "$ENVIRONMENT" == "production" ]]; then
+        log "📊 Insertando datos de prueba en producción..."
+        npm run db:verify && npm run db:seed
+    fi
     cd ..
     
     # Iniciar aplicación en segundo plano
