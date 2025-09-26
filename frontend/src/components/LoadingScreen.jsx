@@ -14,7 +14,7 @@ const LoadingScreen = () => {
           <div className="orbit-circle"></div>
           <div className="orbit-circle"></div>
         </div>
-        <div className="loading-title-c">Cargando, por favor espere</div>
+        <div className="loading-title-c">{t('loading-title')}</div>
       </div>
     </div>
   );
