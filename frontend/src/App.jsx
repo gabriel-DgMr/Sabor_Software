@@ -20,7 +20,6 @@ import CheckoutPayU from './pages/CheckoutPayU.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import DashboardVentas from './pages/DashboardVentas.jsx';
 import DashboardClientes from './pages/DashboardClientes.jsx';
-import DashboardEmpleados from './pages/DashboardEmpleados.jsx';
 import HomeAdministrador from './pages/HomeAdministrador.jsx';
 import EscanearQR from './pages/EscanearQR.jsx';
 import HistorialPedidos from './pages/HistorialPedidos.jsx';
@@ -57,7 +56,6 @@ function App() {
                 <Route element={<Login />} path="/login" />
                 <Route element={<Register />} path="/register" />
                 <Route element={<ResetPasswordContainer />} path="/reset-password/:token" />
-
                 {/* Ruta de redirección automática basada en roles */}
                 <Route element={<RoleBasedRedirect />} path="/redirect" />
                 <Route element={<Reservas />} path="/reservas" />
@@ -69,9 +67,7 @@ function App() {
                 <Route element={<SobreNosotros />} path="/sobre-nosotros" />
                 <Route element={<EscanearQR />} path="/escanear-qr" />
                 <Route element={<LoadingScreen />} path="/loading-screen" />
-
                 {/* ------------------- Rutas protegidas ------------------- */}
-
                 {/* Administrador */}
                 <Route
                   element={
@@ -113,16 +109,7 @@ function App() {
                   }
                   path="/administrar/panel/usuarios"
                 />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <DashboardEmpleados />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrar/panel/trabajadores"
-                />
+                º
                 <Route
                   element={
                     <ProtectedRoute>
@@ -173,7 +160,6 @@ function App() {
                   }
                   path="/administrador/domicilios"
                 />
-
                 {/* Empleados */}
                 <Route
                   element={
@@ -225,7 +211,6 @@ function App() {
                   }
                   path="/empleado/reservaciones"
                 />
-
                 {/* Usuario autenticado */}
                 <Route
                   element={
@@ -267,7 +252,6 @@ function App() {
                   }
                   path="/historial-domicilios"
                 />
-
                 {/* Ruta 404 */}
                 <Route element={<PaginaNoEncontrada />} path="*" />
               </Routes>
