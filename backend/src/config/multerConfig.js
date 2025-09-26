@@ -22,7 +22,7 @@ const ensureUploadDir = async (dirPath) => {
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
     try {
-      const uploadPath = path.join(__dirname, "../../public/uploads");
+      const uploadPath = path.join(__dirname, "../../public/uploads/productos");
       await ensureUploadDir(uploadPath);
       cb(null, uploadPath);
     } catch (error) {
@@ -64,7 +64,7 @@ export const renameProductImage = async (
   nombreProducto,
 ) => {
   try {
-    const uploadPath = path.join(__dirname, "../../public/uploads");
+    const uploadPath = path.join(__dirname, "../../public/uploads/productos");
     const oldPath = path.join(uploadPath, tempFilename);
     const ext = path.extname(tempFilename);
 
