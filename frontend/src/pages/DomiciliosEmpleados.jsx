@@ -89,9 +89,9 @@ const DomiciliosEmpleados = () => {
                   <button
                     className="pedido__boton"
                     onClick={() => cambiarEstado(pedido.id, pedido.estado)}
-                    disabled={pedido.estado === 'completado'}
+                    disabled={pedido.estado === 'completado' || pedido.estado === 'recibido'}
                   >
-                    Cambiar Estado
+                    {pedido.estado === 'recibido' ? 'Recibido' : 'Cambiar Estado'}
                   </button>
                 </div>
               </article>
