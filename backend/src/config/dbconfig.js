@@ -13,16 +13,14 @@ export const dbConfig = {
   connectionLimit: 10,
   queueLimit: 0,
   // Configuraciones adicionales para producción
-  acquireTimeout: 60000,
-  timeout: 60000,
-  reconnect: true,
+  acquireTimeout: 10000,
   // Configuraciones específicas para Railway/Producción
   ssl:
     process.env.NODE_ENV === "production"
       ? { rejectUnauthorized: false }
       : false,
   // Configuración de timeout para conexiones lentas
-  connectTimeout: 30000,
+  connectTimeout: 10000,
   // Configuración de charset
   charset: "utf8mb4",
 };
@@ -30,20 +28,17 @@ export const dbConfig = {
 // Función para crear conexiones individuales usando variables de entorno
 export const createConnection = async () => {
   const connection = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    host: process.env.MYSQLHOST || process.env.DB_HOST,
+    port: process.env.MYSQLPORT || process.env.DB_PORT,
+    user: process.env.MYSQLUSER || process.env.DB_USER,
+    password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD,
+    database: process.env.MYSQLDATABASE || process.env.DB_NAME,
     // Configuraciones adicionales para producción
-    acquireTimeout: 60000,
-    timeout: 60000,
-    reconnect: true,
     ssl:
       process.env.NODE_ENV === "production"
         ? { rejectUnauthorized: false }
         : false,
-    connectTimeout: 30000,
+    connectTimeout: 10000,
     charset: "utf8mb4",
   });
   return connection;

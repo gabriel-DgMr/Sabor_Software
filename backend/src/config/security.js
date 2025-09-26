@@ -105,9 +105,8 @@ export const securityConfig = {
   // Configuración de base de datos
   database: {
     connectionLimit: 10,
-    acquireTimeout: 60000,
-    timeout: 60000,
-    reconnect: true,
+    acquireTimeout: 10000,
+    connectTimeout: 10000,
   },
 };
 
