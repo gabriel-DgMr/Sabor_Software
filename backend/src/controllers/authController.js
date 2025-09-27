@@ -12,132 +12,7 @@ import {
 // Usar la configuración centralizada de email optimizada para Railway
 const transporter = createEmailTransporter();
 
-// Función para enviar email con reintentos
-const sendWithRetry = async (mailOptions, maxRetries = 3) => {
-  console.log(
-    `📧 [${new Date().toISOString()}] Iniciando envío de email con ${maxRetries} reintentos`,
-  );
-  console.log(`📧 Destinatario: ${mailOptions.to}`);
-  console.log(`📧 Asunto: ${mailOptions.subject}`);
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      console.log(
-        `📧 [${new Date().toISOString()}] Intento ${attempt}/${maxRetries} - Enviando email...`,
-      );
-
-      // Solo verificar conexión en el primer intento para evitar delays adicionales
-      if (attempt === 1) {
-        console.log(
-          `📧 [${new Date().toISOString()}] Verificando conexión SMTP...`,
-        );
-        try {
-          await transporter.verify();
-          console.log(
-            `✅ [${new Date().toISOString()}] Conexión SMTP verificada exitosamente`,
-          );
-        } catch (verifyError) {
-          console.log(
-            `⚠️ [${new Date().toISOString()}] Verificación falló, continuando con envío directo:`,
-            verifyError.message,
-          );
-          // Continuar con el envío aunque la verificación falle
-        }
-      }
-
-      const result = await transporter.sendMail(mailOptions);
-      console.log(
-        `✅ [${new Date().toISOString()}] Email enviado exitosamente (intento ${attempt})`,
-      );
-      console.log(`📧 Message ID: ${result.messageId}`);
-      console.log(`📧 Response: ${result.response}`);
-      return result;
-    } catch (error) {
-      console.error(
-        `❌ [${new Date().toISOString()}] Error en intento ${attempt}:`,
-        {
-          message: error.message,
-          code: error.code,
-          command: error.command,
-          response: error.response,
-          errno: error.errno,
-          syscall: error.syscall,
-          hostname: error.hostname,
-          port: error.port,
-          stack: error.stack,
-        },
-      );
-
-      if (attempt === maxRetries) {
-        console.error(
-          `❌ [${new Date().toISOString()}] Todos los intentos fallaron. Error final:`,
-          error.message,
-        );
-        throw error;
-      }
-
-      // Determinar si vale la pena reintentar basado en el tipo de error
-      const shouldRetry = shouldRetryError(error);
-      if (!shouldRetry) {
-        console.error(
-          `❌ [${new Date().toISOString()}] Error no recuperable, no reintentando:`,
-          error.message,
-        );
-        throw error;
-      }
-
-      // Calcular delay progresivo más agresivo para Railway
-      const baseDelay = error.code === "ETIMEDOUT" ? 5000 : 2000; // Delay más largo para timeouts
-      const delay = Math.min(baseDelay * Math.pow(1.5, attempt - 1), 15000); // Max 15 segundos
-
-      console.log(
-        `⏳ [${new Date().toISOString()}] Esperando ${delay}ms antes del siguiente intento...`,
-      );
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-  }
-};
-
-// Función para determinar si un error es recuperable
-const shouldRetryError = (error) => {
-  const retryableErrors = [
-    "ETIMEDOUT", // Timeout de conexión
-    "ECONNRESET", // Conexión reseteada
-    "ECONNREFUSED", // Conexión rechazada
-    "ENOTFOUND", // Host no encontrado
-    "EAI_AGAIN", // Error de DNS temporal
-    "ESOCKETTIMEDOUT", // Timeout de socket
-    "CONN", // Error de conexión SMTP
-    "TIMEOUT", // Timeout general
-  ];
-
-  const nonRetryableErrors = [
-    "EAUTH", // Error de autenticación
-    "EMESSAGE", // Error de mensaje
-    "EENVELOPE", // Error de envelope
-  ];
-
-  // Si es un error de autenticación, no reintentar
-  if (
-    nonRetryableErrors.some(
-      (code) => error.code === code || error.message?.includes(code),
-    )
-  ) {
-    return false;
-  }
-
-  // Si es un error de timeout o conexión, reintentar
-  if (
-    retryableErrors.some(
-      (code) => error.code === code || error.message?.includes(code),
-    )
-  ) {
-    return true;
-  }
-
-  // Por defecto, reintentar para errores desconocidos
-  return true;
-};
+// Las funciones sendWithRetry y shouldRetryError se importan desde emailConfig.js
 
 // Función para enviar email de verificación
 const sendVerificationEmail = async (
@@ -219,7 +94,7 @@ const sendVerificationEmail = async (
     console.log(
       `📧 [${new Date().toISOString()}] Preparando envío con sendWithRetry...`,
     );
-    const result = await sendWithRetry(mailOptions);
+    const result = await sendWithRetry(transporter, mailOptions, 5);
 
     console.log(
       `✅ [${new Date().toISOString()}] ===== EMAIL ENVIADO EXITOSAMENTE =====`,

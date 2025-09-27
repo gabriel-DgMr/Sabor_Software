@@ -29,7 +29,8 @@
     "railway:init": "node scripts/railway-init.js",
     "email:diagnostic": "node scripts/email-diagnostic.js",
     "email:test-railway": "node scripts/test-railway-email.js",
-    "email:test-smtp": "node scripts/test-smtp-config.js"
+    "email:test-smtp": "node scripts/test-smtp-config.js",
+    "email:test-ports": "node scripts/test-smtp-ports.js"
   },
   "author": "",
   "license": "ISC",
