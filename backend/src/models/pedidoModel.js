@@ -41,6 +41,31 @@ const getCartEstadoId = async () => {
 };
 
 // =====================
+// Helper: compatibilidad con columna recibido_cliente
+// =====================
+let cachedHasRecibidoCliente = null;
+
+const hasRecibidoClienteColumn = async () => {
+  if (cachedHasRecibidoCliente !== null) return cachedHasRecibidoCliente;
+  try {
+    const [rows] = await pool.query(
+      `SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'pedidos' AND COLUMN_NAME = 'recibido_cliente'
+       LIMIT 1`,
+      [dbConfig.database],
+    );
+    cachedHasRecibidoCliente = rows && rows.length > 0;
+    return cachedHasRecibidoCliente;
+  } catch (error) {
+    console.warn(
+      "No se pudo verificar columna 'recibido_cliente'. Asumiendo que no existe.",
+    );
+    cachedHasRecibidoCliente = false;
+    return false;
+  }
+};
+
+// =====================
 // PEDIDOS
 // =====================
 
@@ -48,13 +73,17 @@ const getCartEstadoId = async () => {
 export const getPedidos = async (userId) => {
   try {
     const carritoEstadoId = await getCartEstadoId();
+    const includeRecibido = await hasRecibidoClienteColumn();
+    const recibidoSelect = includeRecibido
+      ? "p.recibido_cliente AS recibido_cliente,"
+      : "0 AS recibido_cliente,";
     let query = `
       SELECT
         p.id_pedido AS id,
         p.total_pedido AS total,
         p.fecha_pedido AS createdAt,
         p.notas AS recomendaciones,
-        p.recibido_cliente,
+        ${recibidoSelect}
         e.nombre_estado AS estado,
         GROUP_CONCAT(CONCAT(dp.cantidad, ' x ', pr.nombre_producto) SEPARATOR ', ') AS items_str
       FROM pedidos p
@@ -79,7 +108,7 @@ export const getPedidos = async (userId) => {
       createdAt: row.createdAt,
       estado: row.estado,
       recomendaciones: row.recomendaciones,
-      recibido_cliente: row.recibido_cliente === 1,
+      recibido_cliente: Number(row.recibido_cliente) === 1,
       items: row.items_str ? row.items_str.split(", ") : [],
     }));
   } catch (error) {
@@ -117,9 +146,13 @@ export const getAllPedidosForAdmin = async () => {
 // Obtener pedido por ID
 export const getPedidoById = async (userId, pedidoId) => {
   try {
+    const includeRecibido = await hasRecibidoClienteColumn();
+    const recibidoSelect = includeRecibido
+      ? "p.recibido_cliente AS recibido_cliente,"
+      : "0 AS recibido_cliente,";
     const [rows] = await pool.query(
       `SELECT p.id_pedido AS id, p.total_pedido AS total, p.fecha_pedido AS createdAt,
-              p.notas AS recomendaciones, p.recibido_cliente, e.nombre_estado AS estado,
+              p.notas AS recomendaciones, ${recibidoSelect} e.nombre_estado AS estado,
               GROUP_CONCAT(CONCAT(dp.cantidad, ' x ', pr.nombre_producto) SEPARATOR ', ') AS items_str
        FROM pedidos p
        JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
@@ -139,7 +172,7 @@ export const getPedidoById = async (userId, pedidoId) => {
       createdAt: row.createdAt,
       estado: row.estado,
       recomendaciones: row.recomendaciones,
-      recibido_cliente: row.recibido_cliente === 1,
+      recibido_cliente: Number(row.recibido_cliente) === 1,
       items: row.items_str ? row.items_str.split(", ") : [],
     };
   } catch (error) {
@@ -196,10 +229,19 @@ export const getCarritoByUser = async (userId) => {
 export const createCarrito = async (userId) => {
   try {
     const carritoEstadoId = await getCartEstadoId();
-    const [result] = await pool.query(
-      "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, recibido_cliente) VALUES (?, ?, 0, 0)",
-      [userId, carritoEstadoId],
-    );
+    const includeRecibido = await hasRecibidoClienteColumn();
+    let result;
+    if (includeRecibido) {
+      [result] = await pool.query(
+        "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, recibido_cliente) VALUES (?, ?, 0, 0)",
+        [userId, carritoEstadoId],
+      );
+    } else {
+      [result] = await pool.query(
+        "INSERT INTO pedidos (id_usuario, id_estado, total_pedido) VALUES (?, ?, 0)",
+        [userId, carritoEstadoId],
+      );
+    }
     return result.insertId;
   } catch (error) {
     console.error("Error createCarrito:", error);
@@ -400,6 +442,11 @@ export const deletePedidoById = async (pedidoId) => {
 // =====================
 export const marcarPedidoRecibido = async (userId, pedidoId) => {
   try {
+    const includeRecibido = await hasRecibidoClienteColumn();
+    if (!includeRecibido) {
+      // Si la columna no existe, no hacer nada y considerar exitoso
+      return true;
+    }
     const [result] = await pool.query(
       "UPDATE pedidos SET recibido_cliente = 1 WHERE id_pedido = ? AND id_usuario = ?",
       [pedidoId, userId],
