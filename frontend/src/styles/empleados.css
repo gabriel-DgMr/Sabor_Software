@@ -370,6 +370,20 @@
     gap: 0.5rem;
 }
 
+.icono {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.icono-spin {
+    animation: rotate360 1s linear infinite;
+}
+
+@keyframes rotate360 {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 .pedidos__boton-refrescar:hover {
     background-color: var(--primary-600);
     transform: translateY(-2px);
