@@ -147,22 +147,49 @@ export const getPedidos = async (userId) => {
 // Obtener todos los pedidos (admin)
 export const getAllPedidosForAdmin = async () => {
   try {
-    const [rows] = await pool.query(`
-      SELECT
-        p.id_pedido AS id,
-        u.nombre_usuario AS cliente,
-        p.total_pedido AS total,
-        p.fecha_pedido AS createdAt,
-        p.notas AS recomendaciones,
-        e.nombre_estado AS estado,
-        p.tipo_servicio,
-        p.direccion_entrega,
-        p.detalle_direccion
-      FROM pedidos p
-      JOIN usuarios u ON p.id_usuario = u.id_usuario
-      JOIN estados e ON p.id_estado = e.id_estado
-      ORDER BY p.fecha_pedido DESC
-    `);
+    const carritoEstadoId = await getCartEstadoId();
+
+    // Columnas opcionales
+    const hasTipoServicio = await hasTableColumn("pedidos", "tipo_servicio");
+    const hasDirEntrega = await hasTableColumn("pedidos", "direccion_entrega");
+    const hasDetDir = await hasTableColumn("pedidos", "detalle_direccion");
+    const hasMetodoPago = await hasTableColumn("pedidos", "metodo_pago");
+    const hasRefPago = await hasTableColumn("pedidos", "referencia_pago");
+    const hasNotas = await hasTableColumn("pedidos", "notas");
+
+    const optionalSelectParts = [];
+    if (hasTipoServicio) optionalSelectParts.push("p.tipo_servicio");
+    if (hasDirEntrega) optionalSelectParts.push("p.direccion_entrega");
+    if (hasDetDir) optionalSelectParts.push("p.detalle_direccion");
+    if (hasMetodoPago) optionalSelectParts.push("p.metodo_pago");
+    if (hasRefPago) optionalSelectParts.push("p.referencia_pago");
+    if (hasNotas) optionalSelectParts.push("p.notas AS notas");
+
+    const optionalSelect = optionalSelectParts.length
+      ? ", " + optionalSelectParts.join(", ")
+      : "";
+
+    const [rows] = await pool.query(
+      `SELECT
+         p.id_pedido AS id,
+         u.nombre_usuario AS cliente,
+         p.total_pedido AS total,
+         p.fecha_pedido AS createdAt,
+         TIME_FORMAT(p.fecha_pedido, '%H:%i') AS hora,
+         e.nombre_estado AS estado,
+         GROUP_CONCAT(CONCAT(dp.cantidad, ' x ', pr.nombre_producto) SEPARATOR ', ') AS productos,
+         '' AS mesa
+         ${optionalSelect}
+       FROM pedidos p
+       LEFT JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
+       LEFT JOIN productos pr ON dp.id_producto = pr.id_producto
+       JOIN usuarios u ON p.id_usuario = u.id_usuario
+       JOIN estados e ON p.id_estado = e.id_estado
+       WHERE p.id_estado != ?
+       GROUP BY p.id_pedido
+       ORDER BY p.fecha_pedido DESC`,
+      [carritoEstadoId],
+    );
     return rows;
   } catch (error) {
     console.error("Error getAllPedidosForAdmin:", error);
