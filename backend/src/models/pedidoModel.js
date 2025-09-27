@@ -4,12 +4,50 @@ import mysql from "mysql2/promise";
 const pool = mysql.createPool(dbConfig);
 
 // =====================
+// Helpers de estados
+// =====================
+let cachedCartEstadoId = null;
+
+const getCartEstadoId = async () => {
+  // 1) Priorizar variable de entorno si viene definida y válida
+  const envId = parseInt(process.env.CARRITO_ESTADO_ID, 10);
+  if (!Number.isNaN(envId) && envId > 0) {
+    return envId;
+  }
+
+  // 2) Usar caché en memoria para evitar consultas repetidas
+  if (cachedCartEstadoId) return cachedCartEstadoId;
+
+  try {
+    // 3) Buscar por nombre en la tabla de estados (nombres comunes)
+    const [rows] = await pool.query(
+      `SELECT id_estado
+       FROM estados
+       WHERE LOWER(nombre_estado) IN ('carrito', 'carrito_activo', 'carrito de compras')
+       ORDER BY id_estado ASC
+       LIMIT 1`,
+    );
+    if (rows && rows.length) {
+      cachedCartEstadoId = rows[0].id_estado;
+      return cachedCartEstadoId;
+    }
+  } catch (error) {
+    console.error("Error resolviendo ID de estado 'carrito':", error);
+  }
+
+  // 4) Fallback: asumir 1 como estado de carrito (convención más común en este proyecto)
+  cachedCartEstadoId = 1;
+  return cachedCartEstadoId;
+};
+
+// =====================
 // PEDIDOS
 // =====================
 
 // Obtener pedidos de un usuario
 export const getPedidos = async (userId) => {
   try {
+    const carritoEstadoId = await getCartEstadoId();
     let query = `
       SELECT
         p.id_pedido AS id,
@@ -23,10 +61,10 @@ export const getPedidos = async (userId) => {
       JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
       JOIN productos pr ON dp.id_producto = pr.id_producto
       JOIN estados e ON p.id_estado = e.id_estado
-      WHERE p.id_estado != 1
+      WHERE p.id_estado != ?
     `;
 
-    const params = [];
+    const params = [carritoEstadoId];
     if (userId) {
       query += " AND p.id_usuario = ?";
       params.push(userId);
@@ -35,7 +73,7 @@ export const getPedidos = async (userId) => {
     query += " GROUP BY p.id_pedido ORDER BY p.fecha_pedido DESC";
     const [rows] = await pool.query(query, params);
 
-    return rows.map(row => ({
+    return rows.map((row) => ({
       id: row.id,
       total: row.total,
       createdAt: row.createdAt,
@@ -89,7 +127,7 @@ export const getPedidoById = async (userId, pedidoId) => {
        JOIN estados e ON p.id_estado = e.id_estado
        WHERE p.id_pedido = ? AND p.id_usuario = ?
        GROUP BY p.id_pedido`,
-      [pedidoId, userId]
+      [pedidoId, userId],
     );
 
     if (!rows.length) return null;
@@ -117,7 +155,7 @@ export const updatePedidoEstado = async (pedidoId, nuevoEstado) => {
   try {
     const [result] = await pool.query(
       "UPDATE pedidos SET id_estado = ? WHERE id_pedido = ?",
-      [nuevoEstado, pedidoId]
+      [nuevoEstado, pedidoId],
     );
     return result.affectedRows > 0;
   } catch (error) {
@@ -131,21 +169,22 @@ export const updatePedidoEstado = async (pedidoId, nuevoEstado) => {
 // =====================
 export const getCarritoByUser = async (userId) => {
   try {
+    const carritoEstadoId = await getCartEstadoId();
     const [rows] = await pool.query(
-      "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 2 LIMIT 1",
-      [userId]
+      "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = ? LIMIT 1",
+      [userId, carritoEstadoId],
     );
     if (!rows.length) return null;
 
     const carrito = rows[0];
     const [items] = await pool.query(
       "SELECT * FROM detalle_pedidos WHERE id_pedido = ?",
-      [carrito.id_pedido]
+      [carrito.id_pedido],
     );
-    carrito.items = items.map(i => ({
+    carrito.items = items.map((i) => ({
       id_producto: i.id_producto,
       cantidad: i.cantidad,
-      precio_unitario: i.precio_unitario
+      precio_unitario: i.precio_unitario,
     }));
     return carrito;
   } catch (error) {
@@ -156,9 +195,10 @@ export const getCarritoByUser = async (userId) => {
 
 export const createCarrito = async (userId) => {
   try {
+    const carritoEstadoId = await getCartEstadoId();
     const [result] = await pool.query(
-      "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, recibido_cliente) VALUES (?, 2, 0, 0)",
-      [userId]
+      "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, recibido_cliente) VALUES (?, ?, 0, 0)",
+      [userId, carritoEstadoId],
     );
     return result.insertId;
   } catch (error) {
@@ -174,18 +214,18 @@ export const addOrUpdateProducto = async (userId, id_producto, cantidad) => {
 
     const [existing] = await pool.query(
       "SELECT * FROM detalle_pedidos WHERE id_pedido = ? AND id_producto = ?",
-      [carrito.id_pedido, id_producto]
+      [carrito.id_pedido, id_producto],
     );
 
     if (existing.length) {
       await pool.query(
         "UPDATE detalle_pedidos SET cantidad = cantidad + ? WHERE id_pedido = ? AND id_producto = ?",
-        [cantidad, carrito.id_pedido, id_producto]
+        [cantidad, carrito.id_pedido, id_producto],
       );
     } else {
       await pool.query(
         "INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad, precio_unitario) VALUES (?, ?, ?, (SELECT precio_producto FROM productos WHERE id_producto = ?))",
-        [carrito.id_pedido, id_producto, cantidad, id_producto]
+        [carrito.id_pedido, id_producto, cantidad, id_producto],
       );
     }
 
@@ -203,7 +243,7 @@ export const updateCantidadProducto = async (userId, id_producto, cantidad) => {
 
     await pool.query(
       "UPDATE detalle_pedidos SET cantidad = ? WHERE id_pedido = ? AND id_producto = ?",
-      [cantidad, carrito.id_pedido, id_producto]
+      [cantidad, carrito.id_pedido, id_producto],
     );
 
     return carrito.id_pedido;
@@ -220,7 +260,7 @@ export const removeProducto = async (userId, id_producto) => {
 
     await pool.query(
       "DELETE FROM detalle_pedidos WHERE id_pedido = ? AND id_producto = ?",
-      [carrito.id_pedido, id_producto]
+      [carrito.id_pedido, id_producto],
     );
 
     return carrito.id_pedido;
@@ -235,7 +275,9 @@ export const vaciar = async (userId) => {
     const carrito = await getCarritoByUser(userId);
     if (!carrito) throw new Error("Carrito no encontrado");
 
-    await pool.query("DELETE FROM detalle_pedidos WHERE id_pedido = ?", [carrito.id_pedido]);
+    await pool.query("DELETE FROM detalle_pedidos WHERE id_pedido = ?", [
+      carrito.id_pedido,
+    ]);
     return carrito.id_pedido;
   } catch (error) {
     console.error("Error vaciar:", error);
@@ -254,7 +296,7 @@ export const confirmarPedido = async (
   detalle_direccion,
   referencia_pago,
   estado_pago,
-  recomendaciones
+  recomendaciones,
 ) => {
   try {
     const carrito = await getCarritoByUser(userId);
@@ -280,7 +322,7 @@ export const confirmarPedido = async (
         estado_pago || null,
         recomendaciones || null,
         carrito.id_pedido,
-      ]
+      ],
     );
 
     return carrito.id_pedido;
@@ -324,7 +366,7 @@ export const updatePedidoById = async (pedidoId, data) => {
         estado_pago || null,
         notas || null,
         pedidoId,
-      ]
+      ],
     );
 
     return result.affectedRows > 0;
@@ -339,8 +381,13 @@ export const updatePedidoById = async (pedidoId, data) => {
 // =====================
 export const deletePedidoById = async (pedidoId) => {
   try {
-    await pool.query("DELETE FROM detalle_pedidos WHERE id_pedido = ?", [pedidoId]);
-    const [result] = await pool.query("DELETE FROM pedidos WHERE id_pedido = ?", [pedidoId]);
+    await pool.query("DELETE FROM detalle_pedidos WHERE id_pedido = ?", [
+      pedidoId,
+    ]);
+    const [result] = await pool.query(
+      "DELETE FROM pedidos WHERE id_pedido = ?",
+      [pedidoId],
+    );
     return result.affectedRows > 0;
   } catch (error) {
     console.error("Error deletePedidoById:", error);
@@ -355,7 +402,7 @@ export const marcarPedidoRecibido = async (userId, pedidoId) => {
   try {
     const [result] = await pool.query(
       "UPDATE pedidos SET recibido_cliente = 1 WHERE id_pedido = ? AND id_usuario = ?",
-      [pedidoId, userId]
+      [pedidoId, userId],
     );
     return result.affectedRows > 0;
   } catch (error) {
@@ -364,13 +411,17 @@ export const marcarPedidoRecibido = async (userId, pedidoId) => {
   }
 };
 
-export const updatePedidoEstadoPorPago = async (pedidoId, estadoPago, nuevoEstado) => {
+export const updatePedidoEstadoPorPago = async (
+  pedidoId,
+  estadoPago,
+  nuevoEstado,
+) => {
   try {
     const [result] = await pool.query(
       `UPDATE pedidos
        SET estado_pago = ?, id_estado = ?
        WHERE id_pedido = ?`,
-      [estadoPago, nuevoEstado, pedidoId]
+      [estadoPago, nuevoEstado, pedidoId],
     );
     return result.affectedRows > 0;
   } catch (error) {
@@ -379,13 +430,17 @@ export const updatePedidoEstadoPorPago = async (pedidoId, estadoPago, nuevoEstad
   }
 };
 
-export const updatePedidoEstadoPorReferencia = async (referencia_pago, estado_pago, nuevoEstado) => {
+export const updatePedidoEstadoPorReferencia = async (
+  referencia_pago,
+  estado_pago,
+  nuevoEstado,
+) => {
   try {
     const [result] = await pool.query(
       `UPDATE pedidos
        SET estado_pago = ?, id_estado = ?
        WHERE referencia_pago = ?`,
-      [estado_pago, nuevoEstado, referencia_pago]
+      [estado_pago, nuevoEstado, referencia_pago],
     );
     return result.affectedRows > 0;
   } catch (error) {
