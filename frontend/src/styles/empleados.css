@@ -2627,16 +2627,7 @@
   to { opacity: 1; }
 }
 
-.modal {
-  background-color: white;
-  border-radius: 1.2rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  max-width: 500px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  animation: slideIn 0.3s ease;
-}
+
 
 @keyframes slideIn {
   from { 
@@ -2791,10 +2782,7 @@
     justify-content: center;
   }
   
-  .modal {
-    margin: 1rem;
-    width: calc(100% - 2rem);
-  }
+  
   
   .modal__footer {
     flex-direction: column;
