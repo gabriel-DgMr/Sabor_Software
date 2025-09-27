@@ -66,6 +66,33 @@ const hasRecibidoClienteColumn = async () => {
 };
 
 // =====================
+// Helper genérico: detectar columnas opcionales por tabla (con caché)
+// =====================
+const columnExistenceCache = new Map();
+const hasTableColumn = async (tableName, columnName) => {
+  const cacheKey = `${tableName}.${columnName}`;
+  if (columnExistenceCache.has(cacheKey))
+    return columnExistenceCache.get(cacheKey);
+  try {
+    const [rows] = await pool.query(
+      `SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+       WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?
+       LIMIT 1`,
+      [dbConfig.database, tableName, columnName],
+    );
+    const exists = rows && rows.length > 0;
+    columnExistenceCache.set(cacheKey, exists);
+    return exists;
+  } catch (error) {
+    console.warn(
+      `No se pudo verificar columna '${columnName}' en '${tableName}'. Asumiendo que no existe.`,
+    );
+    columnExistenceCache.set(cacheKey, false);
+    return false;
+  }
+};
+
+// =====================
 // PEDIDOS
 // =====================
 
@@ -353,28 +380,35 @@ export const confirmarPedido = async (
     const carrito = await getCarritoByUser(userId);
     if (!carrito) throw new Error("Carrito no encontrado");
 
-    await pool.query(
-      `UPDATE pedidos
-       SET id_estado = 3,
-           metodo_pago = ?,
-           tipo_servicio = ?,
-           direccion_entrega = ?,
-           detalle_direccion = ?,
-           referencia_pago = ?,
-           estado_pago = ?,
-           notas = ?
-       WHERE id_pedido = ?`,
-      [
-        metodo_pago,
-        tipo_servicio,
-        direccion_entrega || null,
-        detalle_direccion || null,
-        referencia_pago || null,
-        estado_pago || null,
-        recomendaciones || null,
-        carrito.id_pedido,
-      ],
-    );
+    // Construir UPDATE dinámico según columnas disponibles
+    const fields = ["id_estado = 3", "metodo_pago = ?", "tipo_servicio = ?"];
+    const params = [metodo_pago, tipo_servicio];
+
+    if (await hasTableColumn("pedidos", "direccion_entrega")) {
+      fields.push("direccion_entrega = ?");
+      params.push(direccion_entrega || null);
+    }
+    if (await hasTableColumn("pedidos", "detalle_direccion")) {
+      fields.push("detalle_direccion = ?");
+      params.push(detalle_direccion || null);
+    }
+    if (await hasTableColumn("pedidos", "referencia_pago")) {
+      fields.push("referencia_pago = ?");
+      params.push(referencia_pago || null);
+    }
+    if (await hasTableColumn("pedidos", "estado_pago")) {
+      fields.push("estado_pago = ?");
+      params.push(estado_pago || null);
+    }
+    if (await hasTableColumn("pedidos", "notas")) {
+      fields.push("notas = ?");
+      params.push(recomendaciones || null);
+    }
+
+    const sql = `UPDATE pedidos SET ${fields.join(", ")} WHERE id_pedido = ?`;
+    params.push(carrito.id_pedido);
+
+    await pool.query(sql, params);
 
     return carrito.id_pedido;
   } catch (error) {
@@ -398,27 +432,45 @@ export const updatePedidoById = async (pedidoId, data) => {
       notas,
     } = data;
 
-    const [result] = await pool.query(
-      `UPDATE pedidos SET
-        metodo_pago = ?,
-        tipo_servicio = ?,
-        direccion_entrega = ?,
-        detalle_direccion = ?,
-        referencia_pago = ?,
-        estado_pago = ?,
-        notas = ?
-      WHERE id_pedido = ?`,
-      [
-        metodo_pago || null,
-        tipo_servicio || null,
-        direccion_entrega || null,
-        detalle_direccion || null,
-        referencia_pago || null,
-        estado_pago || null,
-        notas || null,
-        pedidoId,
-      ],
-    );
+    const fields = [];
+    const params = [];
+    if (await hasTableColumn("pedidos", "metodo_pago")) {
+      fields.push("metodo_pago = ?");
+      params.push(metodo_pago || null);
+    }
+    if (await hasTableColumn("pedidos", "tipo_servicio")) {
+      fields.push("tipo_servicio = ?");
+      params.push(tipo_servicio || null);
+    }
+    if (await hasTableColumn("pedidos", "direccion_entrega")) {
+      fields.push("direccion_entrega = ?");
+      params.push(direccion_entrega || null);
+    }
+    if (await hasTableColumn("pedidos", "detalle_direccion")) {
+      fields.push("detalle_direccion = ?");
+      params.push(detalle_direccion || null);
+    }
+    if (await hasTableColumn("pedidos", "referencia_pago")) {
+      fields.push("referencia_pago = ?");
+      params.push(referencia_pago || null);
+    }
+    if (await hasTableColumn("pedidos", "estado_pago")) {
+      fields.push("estado_pago = ?");
+      params.push(estado_pago || null);
+    }
+    if (await hasTableColumn("pedidos", "notas")) {
+      fields.push("notas = ?");
+      params.push(notas || null);
+    }
+
+    if (fields.length === 0) {
+      return false;
+    }
+
+    const sql = `UPDATE pedidos SET ${fields.join(", ")} WHERE id_pedido = ?`;
+    params.push(pedidoId);
+
+    const [result] = await pool.query(sql, params);
 
     return result.affectedRows > 0;
   } catch (error) {
