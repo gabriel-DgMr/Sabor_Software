@@ -10,29 +10,37 @@ export const createEmailTransporter = () => {
     service: "gmail",
     host: "smtp.gmail.com",
     port: 587,
-    secure: false, // true para 465, false para otros puertos
+    secure: false, // STARTTLS en puerto 587
     auth: {
       user: config.email.user,
       pass: config.email.password,
     },
+    // Configuración TLS corregida para Railway y Gmail
     tls: {
-      rejectUnauthorized: false,
-      ciphers: "SSLv3",
-      secureProtocol: "TLSv1_2_method",
+      rejectUnauthorized: false, // Necesario para Railway
+      ciphers: "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
+      minVersion: "TLSv1.2",
+      maxVersion: "TLSv1.3",
     },
-    connectionTimeout: 30000, // 30 segundos (reducido para Railway)
-    greetingTimeout: 15000, // 15 segundos (reducido)
-    socketTimeout: 30000, // 30 segundos (reducido)
-    pool: false, // Desactivar pool para evitar problemas de conexión persistente
-    maxConnections: 1, // Una sola conexión
-    maxMessages: 1, // Un mensaje por conexión
-    rateDelta: 1000, // 1 segundo entre intentos
-    rateLimit: 1, // Un email por vez
-    // Configuraciones adicionales para Railway
+    // Timeouts optimizados para Railway
+    connectionTimeout: 60000, // 60 segundos - Gmail necesita más tiempo
+    greetingTimeout: 30000, // 30 segundos
+    socketTimeout: 60000, // 60 segundos
+    // Configuración de pool optimizada
+    pool: true, // Habilitar pool para mejor rendimiento
+    maxConnections: 2, // Máximo 2 conexiones simultáneas
+    maxMessages: 5, // 5 mensajes por conexión
+    rateDelta: 2000, // 2 segundos entre lotes
+    rateLimit: 3, // 3 emails por lote
+    // Configuraciones específicas para Gmail y Railway
     ignoreTLS: false,
     requireTLS: true,
-    debug: process.env.NODE_ENV === "development", // Solo debug en desarrollo
+    // Debug solo en desarrollo
+    debug: process.env.NODE_ENV === "development",
     logger: process.env.NODE_ENV === "development",
+    // Configuraciones adicionales para estabilidad
+    name: "sabor-production.up.railway.app", // Identificación del servidor
+    localAddress: undefined, // Permitir que el sistema elija la IP local
   });
 };
 

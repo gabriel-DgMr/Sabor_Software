@@ -2,37 +2,15 @@ import * as authModel from "../models/authModel.js";
 import jwt from "jsonwebtoken";
 import validator from "validator";
 import { config } from "../config/config.js";
-import nodemailer from "nodemailer";
+import {
+  createEmailTransporter,
+  sendWithRetry,
+  createMailOptions,
+  shouldRetryError,
+} from "../config/emailConfig.js";
 
-// Configurar el transporter de nodemailer con configuración mejorada para producción
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // true para 465, false para otros puertos
-  auth: {
-    user: config.email.user,
-    pass: config.email.password,
-  },
-  tls: {
-    rejectUnauthorized: false,
-    ciphers: "SSLv3",
-    secureProtocol: "TLSv1_2_method",
-  },
-  connectionTimeout: 30000, // 30 segundos (reducido para Railway)
-  greetingTimeout: 15000, // 15 segundos (reducido)
-  socketTimeout: 30000, // 30 segundos (reducido)
-  pool: false, // Desactivar pool para evitar problemas de conexión persistente
-  maxConnections: 1, // Una sola conexión
-  maxMessages: 1, // Un mensaje por conexión
-  rateDelta: 1000, // 1 segundo entre intentos
-  rateLimit: 1, // Un email por vez
-  // Configuraciones adicionales para Railway
-  ignoreTLS: false,
-  requireTLS: true,
-  debug: process.env.NODE_ENV === "development", // Solo debug en desarrollo
-  logger: process.env.NODE_ENV === "development",
-});
+// Usar la configuración centralizada de email optimizada para Railway
+const transporter = createEmailTransporter();
 
 // Función para enviar email con reintentos
 const sendWithRetry = async (mailOptions, maxRetries = 3) => {

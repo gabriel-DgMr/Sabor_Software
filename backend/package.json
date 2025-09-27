@@ -28,7 +28,8 @@
     "db:seed:more": "node scripts/insert-more-test-data.js",
     "railway:init": "node scripts/railway-init.js",
     "email:diagnostic": "node scripts/email-diagnostic.js",
-    "email:test-railway": "node scripts/test-railway-email.js"
+    "email:test-railway": "node scripts/test-railway-email.js",
+    "email:test-smtp": "node scripts/test-smtp-config.js"
   },
   "author": "",
   "license": "ISC",
