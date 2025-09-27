@@ -7,14 +7,18 @@ WORKDIR /app/frontend
 # Copiar package.json y package-lock.json del frontend
 COPY frontend/package*.json ./
 
-# Instalar dependencias con legacy peer deps para React 19
-RUN npm ci --legacy-peer-deps
+# Limpiar caché de npm y instalar dependencias con legacy peer deps para React 19
+RUN npm cache clean --force && \
+    rm -rf /app/frontend/node_modules/.cache && \
+    npm ci --legacy-peer-deps
 
 # Copiar código fuente del frontend
 COPY frontend/ ./
 
-# Build de producción del frontend
-RUN npm run build:prod
+# Limpiar caché antes del build y construir frontend
+RUN npm cache clean --force && \
+    rm -rf /app/frontend/node_modules/.cache && \
+    npm run build:prod
 
 # Stage 2: Setup del Backend
 FROM node:18-alpine AS backend-setup
@@ -32,8 +36,10 @@ RUN addgroup -g 1001 -S nodejs && \
 # Copiar package.json y package-lock.json del backend
 COPY backend/package*.json ./
 
-# Instalar dependencias de producción
-RUN npm ci --only=production && npm cache clean --force
+# Limpiar caché y instalar dependencias de producción
+RUN npm cache clean --force && \
+    rm -rf /app/node_modules/.cache && \
+    npm ci --only=production
 
 # Stage 3: Producción
 FROM node:18-alpine AS production
