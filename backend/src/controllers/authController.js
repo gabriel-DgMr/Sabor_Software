@@ -16,15 +16,22 @@ const transporter = nodemailer.createTransport({
   },
   tls: {
     rejectUnauthorized: false,
+    ciphers: "SSLv3",
+    secureProtocol: "TLSv1_2_method",
   },
-  connectionTimeout: 60000, // 60 segundos
-  greetingTimeout: 30000, // 30 segundos
-  socketTimeout: 60000, // 60 segundos
-  pool: true, // Usar pool de conexiones
-  maxConnections: 5, // Máximo 5 conexiones
-  maxMessages: 100, // Máximo 100 mensajes por conexión
-  rateDelta: 20000, // 20 segundos entre lotes
-  rateLimit: 5, // Máximo 5 emails por lote
+  connectionTimeout: 30000, // 30 segundos (reducido para Railway)
+  greetingTimeout: 15000, // 15 segundos (reducido)
+  socketTimeout: 30000, // 30 segundos (reducido)
+  pool: false, // Desactivar pool para evitar problemas de conexión persistente
+  maxConnections: 1, // Una sola conexión
+  maxMessages: 1, // Un mensaje por conexión
+  rateDelta: 1000, // 1 segundo entre intentos
+  rateLimit: 1, // Un email por vez
+  // Configuraciones adicionales para Railway
+  ignoreTLS: false,
+  requireTLS: true,
+  debug: process.env.NODE_ENV === "development", // Solo debug en desarrollo
+  logger: process.env.NODE_ENV === "development",
 });
 
 // Función para enviar email con reintentos
@@ -41,15 +48,23 @@ const sendWithRetry = async (mailOptions, maxRetries = 3) => {
         `📧 [${new Date().toISOString()}] Intento ${attempt}/${maxRetries} - Enviando email...`,
       );
 
-      // Verificar conexión antes del envío
+      // Solo verificar conexión en el primer intento para evitar delays adicionales
       if (attempt === 1) {
         console.log(
           `📧 [${new Date().toISOString()}] Verificando conexión SMTP...`,
         );
-        await transporter.verify();
-        console.log(
-          `✅ [${new Date().toISOString()}] Conexión SMTP verificada exitosamente`,
-        );
+        try {
+          await transporter.verify();
+          console.log(
+            `✅ [${new Date().toISOString()}] Conexión SMTP verificada exitosamente`,
+          );
+        } catch (verifyError) {
+          console.log(
+            `⚠️ [${new Date().toISOString()}] Verificación falló, continuando con envío directo:`,
+            verifyError.message,
+          );
+          // Continuar con el envío aunque la verificación falle
+        }
       }
 
       const result = await transporter.sendMail(mailOptions);
@@ -83,14 +98,67 @@ const sendWithRetry = async (mailOptions, maxRetries = 3) => {
         throw error;
       }
 
-      // Esperar antes del siguiente intento con backoff exponencial
-      const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s...
+      // Determinar si vale la pena reintentar basado en el tipo de error
+      const shouldRetry = shouldRetryError(error);
+      if (!shouldRetry) {
+        console.error(
+          `❌ [${new Date().toISOString()}] Error no recuperable, no reintentando:`,
+          error.message,
+        );
+        throw error;
+      }
+
+      // Calcular delay progresivo más agresivo para Railway
+      const baseDelay = error.code === "ETIMEDOUT" ? 5000 : 2000; // Delay más largo para timeouts
+      const delay = Math.min(baseDelay * Math.pow(1.5, attempt - 1), 15000); // Max 15 segundos
+
       console.log(
         `⏳ [${new Date().toISOString()}] Esperando ${delay}ms antes del siguiente intento...`,
       );
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
+};
+
+// Función para determinar si un error es recuperable
+const shouldRetryError = (error) => {
+  const retryableErrors = [
+    "ETIMEDOUT", // Timeout de conexión
+    "ECONNRESET", // Conexión reseteada
+    "ECONNREFUSED", // Conexión rechazada
+    "ENOTFOUND", // Host no encontrado
+    "EAI_AGAIN", // Error de DNS temporal
+    "ESOCKETTIMEDOUT", // Timeout de socket
+    "CONN", // Error de conexión SMTP
+    "TIMEOUT", // Timeout general
+  ];
+
+  const nonRetryableErrors = [
+    "EAUTH", // Error de autenticación
+    "EMESSAGE", // Error de mensaje
+    "EENVELOPE", // Error de envelope
+  ];
+
+  // Si es un error de autenticación, no reintentar
+  if (
+    nonRetryableErrors.some(
+      (code) => error.code === code || error.message?.includes(code),
+    )
+  ) {
+    return false;
+  }
+
+  // Si es un error de timeout o conexión, reintentar
+  if (
+    retryableErrors.some(
+      (code) => error.code === code || error.message?.includes(code),
+    )
+  ) {
+    return true;
+  }
+
+  // Por defecto, reintentar para errores desconocidos
+  return true;
 };
 
 // Función para enviar email de verificación

@@ -3,13 +3,33 @@ import * as authModel from "../models/authModel.js"; // Importar authModel para 
 import nodemailer from "nodemailer";
 import { config } from "../config/config.js";
 
-// Configurar el transporter de nodemailer
+// Configurar el transporter de nodemailer con configuración mejorada
 const transporter = nodemailer.createTransport({
   service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: config.email.user,
     pass: config.email.password,
   },
+  tls: {
+    rejectUnauthorized: false,
+    ciphers: "SSLv3",
+    secureProtocol: "TLSv1_2_method",
+  },
+  connectionTimeout: 30000,
+  greetingTimeout: 15000,
+  socketTimeout: 30000,
+  pool: false,
+  maxConnections: 1,
+  maxMessages: 1,
+  rateDelta: 1000,
+  rateLimit: 1,
+  ignoreTLS: false,
+  requireTLS: true,
+  debug: process.env.NODE_ENV === "development",
+  logger: process.env.NODE_ENV === "development",
 });
 
 /**
