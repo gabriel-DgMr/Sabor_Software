@@ -265,9 +265,18 @@ export const addOrUpdateProducto = async (userId, id_producto, cantidad) => {
         [cantidad, carrito.id_pedido, id_producto],
       );
     } else {
+      // Evitar error 1442: no leer de 'productos' dentro del mismo INSERT que dispara triggers que actualizan 'productos'
+      const [precioRows] = await pool.query(
+        "SELECT precio_producto FROM productos WHERE id_producto = ?",
+        [id_producto],
+      );
+      const precioUnitario =
+        Array.isArray(precioRows) && precioRows.length
+          ? precioRows[0].precio_producto
+          : 0;
       await pool.query(
-        "INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad, precio_unitario) VALUES (?, ?, ?, (SELECT precio_producto FROM productos WHERE id_producto = ?))",
-        [carrito.id_pedido, id_producto, cantidad, id_producto],
+        "INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad, precio_unitario) VALUES (?, ?, ?, ?)",
+        [carrito.id_pedido, id_producto, cantidad, precioUnitario],
       );
     }
 
