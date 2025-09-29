@@ -14,49 +14,6 @@
   padding: 20px;
 }
 
-.carrito_mesa {
-  margin-bottom: 2rem;
-}
-
-.carrito_mesa_contenedor {
-  background: #fff;
-  border-radius: 1.5rem;
-  padding: 1.5rem 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.carrito_mesa_desc {
-  color: #6b7280;
-  font-size: 1.4rem;
-}
-
-.carrito_mesa_form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.carrito_mesa_input_wrapper {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.carrito_mesa_input_wrapper input {
-  flex: 1 1 160px;
-  padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.75rem;
-  font-size: 1.4rem;
-}
-
-.carrito_mesa_input_wrapper .carrito_btn {
-  flex: 0 0 auto;
-}
 
 .carrito_titulo {
   text-align: center;
