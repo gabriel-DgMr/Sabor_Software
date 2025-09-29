@@ -3,6 +3,7 @@ import {
   crearOActualizarCalificacion,
   obtenerCalificacionesProducto,
   obtenerProductosParaCalificar,
+  obtenerProductosParaCalificarPorPedido,
   obtenerCalificacionUsuario,
   eliminarCalificacion,
 } from "../controllers/calificacionController.js";
@@ -15,6 +16,13 @@ router.post("/", authenticateToken, crearOActualizarCalificacion);
 
 // Obtener productos que el usuario puede calificar
 router.get("/mis-productos", authenticateToken, obtenerProductosParaCalificar);
+
+// Obtener productos para calificar por pedido específico
+router.get(
+  "/pedido/:pedidoId/productos",
+  authenticateToken,
+  obtenerProductosParaCalificarPorPedido,
+);
 
 // Obtener calificación específica del usuario para un producto y pedido
 router.get(

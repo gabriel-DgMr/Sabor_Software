@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import StarRating from './StarRating';
 import '../styles/productRatingModal.css';
+import { getImageUrl } from '../utils/imageUtils.js';
 
 const ProductRatingModal = ({
   isOpen,

@@ -167,6 +167,58 @@ export const getProductosParaCalificar = async (userId) => {
   }
 };
 
+// Obtener productos para calificar por pedido específico
+export const getProductosParaCalificarPorPedido = async (userId, pedidoId) => {
+  try {
+    const [rows] = await pool.query(
+      `
+      SELECT
+        p.id_pedido,
+        p.fecha_pedido,
+        pr.id_producto,
+        pr.nombre_producto,
+        pr.imagen_producto,
+        dp.cantidad,
+        dp.precio_unitario,
+        c.calificacion AS calificacion_actual,
+        c.comentario AS comentario_actual,
+        c.id_calificacion
+      FROM pedidos p
+      JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
+      JOIN productos pr ON dp.id_producto = pr.id_producto
+      LEFT JOIN calificaciones_productos c ON (
+        c.id_usuario = p.id_usuario AND 
+        c.id_producto = pr.id_producto AND 
+        c.id_pedido = p.id_pedido
+      )
+      WHERE p.id_usuario = ? AND p.id_estado = 3 AND p.id_pedido = ?
+      ORDER BY pr.nombre_producto ASC
+    `,
+      [userId, pedidoId],
+    );
+
+    return rows.map((row) => ({
+      id_pedido: row.id_pedido,
+      fecha_pedido: row.fecha_pedido,
+      id_producto: row.id_producto,
+      nombre_producto: row.nombre_producto,
+      imagen_producto: row.imagen_producto,
+      cantidad: row.cantidad,
+      precio_unitario: row.precio_unitario,
+      calificacion_actual: row.calificacion_actual,
+      comentario_actual: row.comentario_actual,
+      id_calificacion: row.id_calificacion,
+      ya_calificado: !!row.calificacion_actual,
+    }));
+  } catch (error) {
+    console.error(
+      "Error al obtener productos para calificar por pedido:",
+      error,
+    );
+    throw error;
+  }
+};
+
 // Obtener estadísticas de calificaciones de un producto
 export const getEstadisticasCalificacion = async (productoId) => {
   try {

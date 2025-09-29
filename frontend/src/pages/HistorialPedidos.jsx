@@ -6,6 +6,7 @@ import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import StarRating from '../components/StarRating.jsx';
 import RatingModal from '../components/RatingModal.jsx';
+import { getImageUrl } from '../utils/imageUtils.js';
 
 const HistorialPedidos = () => {
   const [pedidos, setPedidos] = useState([]);

@@ -3,6 +3,7 @@ import {
   getCalificacionesByProducto,
   getCalificacionUsuario,
   getProductosParaCalificar,
+  getProductosParaCalificarPorPedido,
   getEstadisticasCalificacion,
   deleteCalificacion,
 } from "../models/calificacionModel.js";
@@ -90,6 +91,40 @@ export const obtenerProductosParaCalificar = async (req, res) => {
     console.error("Error al obtener productos para calificar:", error);
     res.status(500).json({
       mensaje: "Error al obtener productos para calificar",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
+// Obtener productos para calificar por pedido específico
+export const obtenerProductosParaCalificarPorPedido = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { pedidoId } = req.params;
+
+    if (!pedidoId) {
+      return res.status(400).json({
+        mensaje: "El parámetro pedidoId es requerido",
+      });
+    }
+
+    const productos = await getProductosParaCalificarPorPedido(
+      userId,
+      pedidoId,
+    );
+
+    res.json({
+      pedidoId,
+      productos,
+      total: productos.length,
+    });
+  } catch (error) {
+    console.error(
+      "Error al obtener productos para calificar por pedido:",
+      error,
+    );
+    res.status(500).json({
+      mensaje: "Error al obtener productos para calificar por pedido",
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
