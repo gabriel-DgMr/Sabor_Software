@@ -45,6 +45,7 @@ const ProductosAdministrar = () => {
     precio_producto: '',
     id_categoria_producto: '',
     imagen_producto: null,
+    stock: '',
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
@@ -111,6 +112,12 @@ const ProductosAdministrar = () => {
         ...prev,
         [name]: numericValue,
       }));
+    } else if (name === 'stock') {
+      const numericValue = value.replace(/\D/g, '');
+      setFormData(prev => ({
+        ...prev,
+        [name]: numericValue,
+      }));
     } else {
       setFormData(prev => ({
         ...prev,
@@ -137,6 +144,7 @@ const ProductosAdministrar = () => {
       precio_producto: producto.precio_producto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'),
       id_categoria_producto: producto.id_categoria_producto,
       imagen_producto: null,
+      stock: producto.stock?.toString() ?? '',
     });
     document.querySelector('.productos__editor').scrollIntoView({ behavior: 'smooth' });
   };
@@ -176,6 +184,7 @@ const ProductosAdministrar = () => {
       descripcion_producto: formData.descripcion_producto,
       precio_producto: formData.precio_producto.replace(/\./g, '').replace(',', '.'),
       id_categoria_producto: formData.id_categoria_producto,
+      stock: formData.stock,
     };
 
     const validationErrors = validarProducto(formDataForValidation);
@@ -200,6 +209,7 @@ const ProductosAdministrar = () => {
       const datosParaEnviar = {
         ...formData,
         precio_producto: parseFloat(formData.precio_producto.replace(/\./g, '').replace(',', '.')),
+        stock: formData.stock ? parseInt(formData.stock, 10) : 0,
       };
 
       if (isEditing) {
@@ -220,6 +230,7 @@ const ProductosAdministrar = () => {
         precio_producto: '',
         id_categoria_producto: '',
         imagen_producto: null,
+        stock: '',
       });
       setImagePreview(null);
       setIsEditing(false);
@@ -478,6 +489,19 @@ const ProductosAdministrar = () => {
                   </div>
                 )}
               </div>
+              <div className="descripcion__campo">
+                <label className="campo_p">Stock:</label>
+                <input
+                  className={`campo__input ${errors.stock ? 'input--error' : ''}`}
+                  name="stock"
+                  type="text"
+                  value={formData.stock}
+                  onChange={handleInputChange}
+                />
+                {errors.stock && (
+                  <small className="formulario__mensaje-error">{errors.stock}</small>
+                )}
+              </div>
               <div className="editor__botones">
                 <button
                   className={`descripcion__boton ${loadingStates.submit ? 'descripcion__boton--loading' : ''}`}
@@ -507,6 +531,7 @@ const ProductosAdministrar = () => {
                         precio_producto: '',
                         id_categoria_producto: '',
                         imagen_producto: null,
+                        stock: '',
                       });
                       setImagePreview(null);
                     }}

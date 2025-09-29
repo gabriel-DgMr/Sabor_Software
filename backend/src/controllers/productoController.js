@@ -53,6 +53,7 @@ export const productoController = {
         id_categoria_producto,
         calificacion = 0,
         ventas = 0,
+        stock = 0,
       } = req.body;
 
       // Validaciones
@@ -92,7 +93,8 @@ export const productoController = {
         id_categoria_producto,
         imagen_producto: imagenProductoPath,
         calificacion: parseFloat(calificacion),
-        ventas: parseInt(ventas),
+        ventas: parseInt(ventas, 10),
+        stock: parseInt(stock, 10) || 0,
       };
 
       console.log("Nombre del archivo guardado en BD:", req.file.filename);
@@ -137,6 +139,7 @@ export const productoController = {
         id_categoria_producto,
         calificacion,
         ventas,
+        stock,
       } = req.body;
 
       // Validaciones
@@ -158,7 +161,8 @@ export const productoController = {
         precio_producto,
         id_categoria_producto,
         calificacion: calificacion ? parseFloat(calificacion) : undefined,
-        ventas: ventas ? parseInt(ventas) : undefined,
+        ventas: ventas ? parseInt(ventas, 10) : undefined,
+        stock: stock !== undefined ? parseInt(stock, 10) : undefined,
       };
 
       // Si se subió una nueva imagen, actualizar el nombre del archivo

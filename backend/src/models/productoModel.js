@@ -215,10 +215,11 @@ export const productoModel = {
         imagen_producto,
         calificacion = 0, // Calificación de 1.0 a 5.0 (un decimal)
         ventas = 0, // Número de ventas
+        stock = 0,
       } = productoData;
 
       const [result] = await pool.query(
-        "INSERT INTO productos (nombre_producto, descripcion_producto, precio_producto, id_categoria, imagen_producto, calificacion, ventas) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO productos (nombre_producto, descripcion_producto, precio_producto, id_categoria, imagen_producto, calificacion, ventas, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         [
           nombre_producto,
           descripcion_producto,
@@ -227,6 +228,7 @@ export const productoModel = {
           imagen_producto,
           calificacion,
           ventas,
+          stock,
         ],
       );
       return result.insertId;
@@ -246,10 +248,11 @@ export const productoModel = {
         imagen_producto,
         calificacion, // Calificación de 1.0 a 5.0 (un decimal)
         ventas, // Número de ventas
+        stock,
       } = productoData;
 
       const [result] = await pool.query(
-        "UPDATE productos SET nombre_producto = ?, descripcion_producto = ?, precio_producto = ?, id_categoria = ?, imagen_producto = ?, calificacion = ?, ventas = ? WHERE id_producto = ?",
+        "UPDATE productos SET nombre_producto = ?, descripcion_producto = ?, precio_producto = ?, id_categoria = ?, imagen_producto = ?, calificacion = ?, ventas = ?, stock = ? WHERE id_producto = ?",
         [
           nombre_producto,
           descripcion_producto,
@@ -258,6 +261,7 @@ export const productoModel = {
           imagen_producto,
           calificacion,
           ventas,
+          stock,
           id,
         ],
       );
