@@ -55,12 +55,47 @@ export default function Carrito() {
   const { t } = useTranslation();
   const [mesaContext, setMesaContext] = useMesa();
   const [mesaInput, setMesaInput] = useState(mesaContext || '');
-  const [mesaGuardada, setMesaGuardada] = useState(mesaContext || '');
+  const [mesaModal, setMesaModal] = useState({ open: false, onConfirm: null });
+  const [mesaError, setMesaError] = useState('');
 
-  useEffect(() => {
-    setMesaInput(mesaCart || mesaContext || localStorage.getItem('mesa') || '');
-    setMesaGuardada(mesaCart || mesaContext || localStorage.getItem('mesa') || '');
-  }, [mesaCart, mesaContext]);
+  const obtenerMesaActual = () => mesaCart || mesaContext || localStorage.getItem('mesa') || '';
+
+  const solicitarMesa = onReady => {
+    const mesaActual = obtenerMesaActual();
+    if (mesaActual) {
+      onReady?.(mesaActual);
+      return;
+    }
+    setMesaInput('');
+    setMesaError('');
+    setMesaModal({ open: true, onConfirm: onReady });
+  };
+
+  const cerrarMesaModal = () => setMesaModal({ open: false, onConfirm: null });
+
+  const confirmarMesaModal = () => {
+    const mesaValue = (mesaInput || '').trim();
+    if (!mesaValue) {
+      setMesaError(t('carrito_mesa_error'));
+      return;
+    }
+
+    localStorage.setItem('mesa', mesaValue);
+    setMesaContext(mesaValue);
+    setMesaCart(mesaValue);
+    cerrarMesaModal();
+
+    setModal({
+      open: true,
+      message: t('carrito_mesa_confirmada', { mesa: mesaValue }),
+      icon: <GoCheck className="GoCheck" />,
+      onConfirm: () => setModal(prev => ({ ...prev, open: false })),
+    });
+
+    if (typeof mesaModal.onConfirm === 'function') {
+      mesaModal.onConfirm(mesaValue);
+    }
+  };
 
   useEffect(() => {
     document.title = 'Sabor: Carrito';
@@ -76,7 +111,6 @@ export default function Carrito() {
       setMesaContext(storedMesa);
       setMesaCart(storedMesa);
       setMesaInput(storedMesa);
-      setMesaGuardada(storedMesa);
     }
 
     // Verificar si el usuario acaba de regresar de PayU
@@ -556,7 +590,9 @@ export default function Carrito() {
       cancelText: 'Domicilio',
       onConfirm: async () => {
         setModal(prev => ({ ...prev, open: false }));
-        await iniciarPagoPayU({ tipoServicioSeleccionado: 'mesa' });
+        solicitarMesa(async mesaAsignada => {
+          await iniciarPagoPayU({ tipoServicioSeleccionado: 'mesa' });
+        });
       },
       onCancel: () => {
         setModal({
@@ -801,6 +837,53 @@ export default function Carrito() {
     <>
       <Header />
       <main className="carrito_bg">
+        <section className="carrito_mesa">
+          <div className="carrito_mesa_contenedor">
+            <h2>{t('carrito_mesa_titulo')}</h2>
+            <p className="carrito_mesa_desc">{t('carrito_mesa_desc')}</p>
+            <div className="carrito_mesa_form">
+              <label htmlFor="mesa-input" className="carrito_mesa_label">
+                {t('carrito_mesa_label')}
+              </label>
+              <div className="carrito_mesa_input_wrapper">
+                <input
+                  id="mesa-input"
+                  type="number"
+                  min="1"
+                  placeholder={t('carrito_mesa_placeholder')}
+                  value={mesaInput}
+                  onChange={e => setMesaInput(e.target.value.replace(/[^0-9]/g, ''))}
+                />
+                <button
+                  type="button"
+                  className="carrito_btn confirmar"
+                  onClick={() => {
+                    if (!mesaInput) {
+                      setModal({
+                        open: true,
+                        message: t('carrito_mesa_error'),
+                        icon: <GoAlert className="GoAlert" />,
+                        onConfirm: () => setModal(prev => ({ ...prev, open: false })),
+                      });
+                      return;
+                    }
+                    localStorage.setItem('mesa', mesaInput);
+                    setMesaContext(mesaInput);
+                    setMesaCart(mesaInput);
+                    setModal({
+                      open: true,
+                      message: t('carrito_mesa_confirmada', { mesa: mesaInput }),
+                      icon: <GoCheck className="GoCheck" />,
+                      onConfirm: () => setModal(prev => ({ ...prev, open: false })),
+                    });
+                  }}
+                >
+                  {t('carrito_mesa_guardar')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
         <h1 className="carrito_titulo">{t('carrito_titulo')}</h1>
         <div className="carrito_contenido">
           <div className="carrito_pedidos">
@@ -819,59 +902,6 @@ export default function Carrito() {
               <div className="carrito_vacio">{t('carrito_vacio')}</div>
             ) : (
               <div key="pedido-pendiente" className="carrito_pedido">
-                <div className="carrito_mesa">
-                  <div className="carrito_mesa_contenedor">
-                    <h2>{t('carrito_mesa_titulo')}</h2>
-                    <p className="carrito_mesa_desc">{t('carrito_mesa_desc')}</p>
-                    <div className="carrito_mesa_form">
-                      <label htmlFor="mesa-input" className="carrito_mesa_label">
-                        {t('carrito_mesa_label')}
-                      </label>
-                      <div className="carrito_mesa_input_wrapper">
-                        <input
-                          id="mesa-input"
-                          type="number"
-                          min="1"
-                          placeholder={t('carrito_mesa_placeholder')}
-                          value={mesaInput}
-                          onChange={e => setMesaInput(e.target.value.replace(/[^0-9]/g, ''))}
-                        />
-                        <button
-                          type="button"
-                          className="carrito_btn confirmar"
-                          onClick={() => {
-                            if (!mesaInput) {
-                              setModal({
-                                open: true,
-                                message: t('carrito_mesa_error'),
-                                icon: <GoAlert className="GoAlert" />,
-                                onConfirm: () => setModal(prev => ({ ...prev, open: false })),
-                              });
-                              return;
-                            }
-                            localStorage.setItem('mesa', mesaInput);
-                            setMesaContext(mesaInput);
-                            setMesaCart(mesaInput);
-                            setMesaGuardada(mesaInput);
-                            setModal({
-                              open: true,
-                              message: t('carrito_mesa_confirmada', { mesa: mesaInput }),
-                              icon: <GoCheck className="GoCheck" />,
-                              onConfirm: () => setModal(prev => ({ ...prev, open: false })),
-                            });
-                          }}
-                        >
-                          {t('carrito_mesa_guardar')}
-                        </button>
-                      </div>
-                      {mesaGuardada && (
-                        <p className="carrito_mesa_actual">
-                          {t('carrito_mesa_actual', { mesa: mesaGuardada })}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
                 <div className="carrito_pedido_info">
                   <div className="carrito_pedido_titulo">
                     <span aria-label="carrito" role="img">
