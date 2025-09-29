@@ -390,10 +390,8 @@ export const loginUser = async (req, res) => {
     let imagenUrl = null;
     if (user.imagen_usuario) {
       const baseUrl =
-        process.env.NODE_ENV === "production"
-          ? "https://sabor-production.up.railway.app"
-          : "http://localhost:3000";
-      imagenUrl = `${baseUrl}/api/auth/imagen-perfil/${user.imagen_usuario}`;
+        process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get("host")}`;
+      imagenUrl = `${baseUrl.replace(/\/$/, "")}/api/auth/imagen-perfil/${user.imagen_usuario}`;
     }
 
     const userWithImageUrl = {
@@ -447,10 +445,8 @@ export const getUserProfile = async (req, res) => {
     let imagenUrl = null;
     if (user.imagen_usuario) {
       const baseUrl =
-        process.env.NODE_ENV === "production"
-          ? "https://sabor-production.up.railway.app"
-          : "http://localhost:3000";
-      imagenUrl = `${baseUrl}/api/auth/imagen-perfil/${user.imagen_usuario}`;
+        process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get("host")}`;
+      imagenUrl = `${baseUrl.replace(/\/$/, "")}/api/auth/imagen-perfil/${user.imagen_usuario}`;
     }
 
     const userWithImageUrl = {
