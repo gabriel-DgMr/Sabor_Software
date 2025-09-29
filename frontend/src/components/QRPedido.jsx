@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useMesa } from '../hooks/useMesa';
 
 const QRPedido = ({ children }) => {
-  const mesa = useMesa();
+  const [mesa] = useMesa();
   const { t } = useTranslation();
 
   return (

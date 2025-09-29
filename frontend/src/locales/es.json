@@ -237,5 +237,13 @@
     "adding": "Agregando...",
     "add": "Agregar",
     "cancel": "Cancelar"
-  }
+  },
+  "carrito_mesa_titulo": "Mesa asignada",
+  "carrito_mesa_desc": "Ingresa el número de mesa donde recibirán el pedido. Si escaneaste un código QR, la mesa se llena automáticamente.",
+  "carrito_mesa_label": "Número de mesa",
+  "carrito_mesa_placeholder": "Ej. 12",
+  "carrito_mesa_guardar": "Guardar mesa",
+  "carrito_mesa_error": "Debes ingresar un número de mesa válido",
+  "carrito_mesa_confirmada": "Mesa {{mesa}} asignada correctamente",
+  "carrito_mesa_requerida": "Asigna una mesa antes de continuar"
 }

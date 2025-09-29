@@ -9,6 +9,15 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [mesa, setMesa] = useState(() => localStorage.getItem('mesa') || '');
+
+  useEffect(() => {
+    if (mesa) {
+      localStorage.setItem('mesa', mesa);
+    } else {
+      localStorage.removeItem('mesa');
+    }
+  }, [mesa]);
 
   // Cargar carrito desde la base de datos
   const loadCart = useCallback(async () => {
@@ -66,6 +75,7 @@ export const CartProvider = ({ children }) => {
         body: JSON.stringify({
           id_producto: product.id || product.id_producto,
           cantidad: product.cantidad || 1,
+          id_mesa: product.id_mesa ?? mesa ?? localStorage.getItem('mesa') ?? null,
         }),
       });
 
@@ -210,6 +220,7 @@ export const CartProvider = ({ children }) => {
     referencia_pago,
     estado_pago,
     recomendaciones,
+    id_mesa: mesaSeleccionada,
   } = {}) => {
     try {
       console.log('🔄 ===== INICIANDO CONFIRMAR PEDIDO =====');
@@ -257,6 +268,7 @@ export const CartProvider = ({ children }) => {
           referencia_pago, // referencia de PayU o otra plataforma de pago
           estado_pago, // estado del pago (2: pendiente, 3: pagado, 4: cancelado)
           recomendaciones, // recomendaciones del cliente
+          id_mesa: mesaSeleccionada || mesa || localStorage.getItem('mesa') || null,
         }),
       });
 
@@ -312,6 +324,8 @@ export const CartProvider = ({ children }) => {
         clearCart,
         confirmarPedido,
         loadCart,
+        mesa,
+        setMesa,
       }}
     >
       {children}

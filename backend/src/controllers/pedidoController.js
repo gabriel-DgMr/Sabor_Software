@@ -209,17 +209,27 @@ export const getCarrito = async (req, res) => {
 export const addProductoCarrito = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { id_producto, cantidad } = req.body;
+    const { id_producto, cantidad, id_mesa } = req.body;
     if (!id_producto || !cantidad || cantidad <= 0) {
       return res.status(400).json({
         mensaje:
           "id_producto y cantidad son requeridos y cantidad debe ser mayor a 0",
       });
     }
+    let mesaNormalizada = null;
+    if (id_mesa !== undefined && id_mesa !== null && id_mesa !== "") {
+      mesaNormalizada = Number(id_mesa);
+      if (Number.isNaN(mesaNormalizada) || mesaNormalizada <= 0) {
+        return res
+          .status(400)
+          .json({ mensaje: "id_mesa debe ser un número positivo" });
+      }
+    }
     const id_pedido = await addOrUpdateProductoCarrito(
       userId,
       id_producto,
       cantidad,
+      mesaNormalizada,
     );
     res.json({
       mensaje: "Producto agregado/actualizado en el carrito",
@@ -307,6 +317,7 @@ export const confirmar = async (req, res) => {
       referencia_pago,
       estado_pago,
       recomendaciones,
+      id_mesa,
     } = req.body;
 
     console.log("📋 Datos recibidos:", {
@@ -317,6 +328,7 @@ export const confirmar = async (req, res) => {
       referencia_pago,
       estado_pago,
       recomendaciones,
+      id_mesa,
       userId,
     });
 
@@ -336,6 +348,22 @@ export const confirmar = async (req, res) => {
         .json({ mensaje: "direccion_entrega es requerida para domicilio" });
     }
 
+    let mesaNormalizada = null;
+    if (id_mesa !== undefined && id_mesa !== null && id_mesa !== "") {
+      mesaNormalizada = Number(id_mesa);
+      if (Number.isNaN(mesaNormalizada) || mesaNormalizada <= 0) {
+        return res
+          .status(400)
+          .json({ mensaje: "id_mesa debe ser un número positivo" });
+      }
+    }
+
+    if (tipo_servicio === "mesa" && !mesaNormalizada) {
+      return res
+        .status(400)
+        .json({ mensaje: "id_mesa es requerido para pedidos en mesa" });
+    }
+
     console.log("🚀 Llamando a confirmarPedido del modelo...");
     const id_pedido = await confirmarPedido(
       userId,
@@ -346,6 +374,7 @@ export const confirmar = async (req, res) => {
       referencia_pago,
       estado_pago,
       recomendaciones,
+      mesaNormalizada,
     );
 
     console.log("✅ Pedido confirmado con ID:", id_pedido);

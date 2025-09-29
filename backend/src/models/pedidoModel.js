@@ -199,11 +199,11 @@ export const getCarritoByUser = async (userId) => {
   }
 };
 
-export const createCarrito = async (userId) => {
+export const createCarrito = async (userId, mesa = null) => {
   try {
     const [result] = await pool.query(
-      "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, metodo_pago) VALUES (?, 1, 0, NULL)",
-      [userId],
+      "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, metodo_pago, id_mesa) VALUES (?, 1, 0, NULL, ?)",
+      [userId, mesa],
     );
     return result.insertId;
   } catch (error) {
@@ -216,6 +216,7 @@ export const addOrUpdateProductoCarrito = async (
   userId,
   id_producto,
   cantidad,
+  mesa = null,
 ) => {
   let connection;
   try {
@@ -243,12 +244,18 @@ export const addOrUpdateProductoCarrito = async (
     let id_pedido;
     if (carrito.length === 0) {
       const [result] = await connection.query(
-        "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, metodo_pago) VALUES (?, 1, 0, 'efectivo')",
-        [userId],
+        "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, metodo_pago, id_mesa) VALUES (?, 1, 0, 'efectivo', ?)",
+        [userId, mesa],
       );
       id_pedido = result.insertId;
     } else {
       id_pedido = carrito[0].id_pedido;
+      if (mesa) {
+        await connection.query(
+          "UPDATE pedidos SET id_mesa = ? WHERE id_pedido = ?",
+          [mesa, id_pedido],
+        );
+      }
     }
 
     // Agregar o actualizar producto en el carrito
@@ -441,6 +448,7 @@ export const confirmarPedido = async (
   referencia_pago = null,
   estado_pago = null,
   recomendaciones = null,
+  id_mesa = null,
 ) => {
   let connection;
   try {
@@ -454,6 +462,7 @@ export const confirmarPedido = async (
       referencia_pago,
       estado_pago,
       recomendaciones,
+      id_mesa,
     });
 
     connection = await pool.getConnection();
@@ -507,7 +516,7 @@ export const confirmarPedido = async (
     const [updateResult] = await connection.query(
       `UPDATE pedidos 
        SET metodo_pago = ?, tipo_servicio = ?, direccion_entrega = ?, detalle_direccion = ?, 
-           referencia_pago = ?, recomendaciones = ?, id_estado = ?
+           referencia_pago = ?, recomendaciones = ?, id_estado = ?, id_mesa = COALESCE(?, id_mesa)
        WHERE id_pedido = ?`,
       [
         metodo_pago,
@@ -517,6 +526,7 @@ export const confirmarPedido = async (
         referencia_pago,
         recomendaciones,
         estadoFinal,
+        id_mesa,
         id_pedido,
       ],
     );
