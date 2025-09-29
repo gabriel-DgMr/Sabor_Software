@@ -15,8 +15,8 @@ const router = express.Router();
 // Rutas públicas
 router.get("/", productoController.getAllProductos);
 
-// Rutas protegidas
-router.get("/:id", authenticateToken, productoController.getProductoById);
+// Rutas protegidas / acceso público a producto individual
+router.get("/:id", productoController.getProductoById);
 router.get(
   "/categoria/:categoriaId",
   authenticateToken,

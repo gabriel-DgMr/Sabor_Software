@@ -84,10 +84,16 @@ const ProductoCard = React.memo(({ producto }) => {
         <div className="productos__info">
           <h4 className="productos__nombre">{producto.nombre_producto}</h4>
           {/* Calificación en estrellas */}
-          <div className="productos__calificacion">
+          <div
+            className="productos__calificacion"
+            title={`Calificación promedio: ${Number(
+              producto.calificacion_promedio ?? producto.calificacion ?? 0
+            ).toFixed(1)} (${Number(producto.total_calificaciones ?? 0)} opiniones)`}
+          >
             {(() => {
               const estrellas = [];
-              const calificacion = Number(producto.calificacion) || 0;
+              const calificacion =
+                Number(producto.calificacion_promedio ?? producto.calificacion) || 0;
               for (let i = 1; i <= 5; i++) {
                 if (calificacion >= i) {
                   estrellas.push(
@@ -109,8 +115,8 @@ const ProductoCard = React.memo(({ producto }) => {
               return estrellas;
             })()}
             <span className="productos__calificacion-num">
-              {!isNaN(Number(producto.calificacion))
-                ? Number(producto.calificacion).toFixed(1)
+              {Number.isFinite(Number(producto.calificacion_promedio ?? producto.calificacion))
+                ? Number(producto.calificacion_promedio ?? producto.calificacion ?? 0).toFixed(1)
                 : '0.0'}
             </span>
           </div>

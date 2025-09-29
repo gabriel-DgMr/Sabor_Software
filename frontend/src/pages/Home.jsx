@@ -76,7 +76,9 @@ const Home = () => {
     () =>
       state.productos.map(p => ({
         src: getImageUrl(p.imagen_producto),
-        alt: p.nombre_producto,
+        alt: `${p.nombre_producto} (${Number(
+          p.calificacion_promedio ?? p.calificacion ?? 0
+        ).toFixed(1)} ⭐)`,
       })),
     [state.productos]
   );

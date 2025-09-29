@@ -150,7 +150,10 @@ export const ProductoProvider = ({ children }) => {
             case 'precio_desc':
               return b.precio_producto - a.precio_producto;
             case 'calificacion':
-              return (b.calificacion_producto || 0) - (a.calificacion_producto || 0);
+              return (
+                Number(b.calificacion_promedio ?? b.calificacion ?? 0) -
+                Number(a.calificacion_promedio ?? a.calificacion ?? 0)
+              );
             case 'ventas':
               return (b.ventas_producto || 0) - (a.ventas_producto || 0);
             default:

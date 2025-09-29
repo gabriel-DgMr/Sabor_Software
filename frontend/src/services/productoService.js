@@ -132,6 +132,13 @@ export const productoService = {
     const url = `${API_URL}/productos?${params.toString()}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error('Error al obtener productos');
-    return await response.json();
+    const data = await response.json();
+
+    return data.map(producto => ({
+      ...producto,
+      calificacion_promedio: Number(producto.calificacion_promedio ?? producto.calificacion ?? 0),
+      total_calificaciones: Number(producto.total_calificaciones ?? 0),
+      calificacion: Number(producto.calificacion_promedio ?? producto.calificacion ?? 0),
+    }));
   },
 };
