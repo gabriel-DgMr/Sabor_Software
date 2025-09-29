@@ -223,6 +223,14 @@ export const addOrUpdateProductoCarrito = async (
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
+    let mesaNormalizada = null;
+    if (mesa !== undefined && mesa !== null) {
+      const mesaNumero = Number(mesa);
+      if (!Number.isNaN(mesaNumero) && mesaNumero > 0) {
+        mesaNormalizada = mesaNumero;
+      }
+    }
+
     // Verificar stock y obtener precio actual (lock row for update)
     const [stockResult] = await connection.query(
       "SELECT stock, precio_producto FROM productos WHERE id_producto = ? FOR UPDATE",
@@ -245,15 +253,15 @@ export const addOrUpdateProductoCarrito = async (
     if (carrito.length === 0) {
       const [result] = await connection.query(
         "INSERT INTO pedidos (id_usuario, id_estado, total_pedido, metodo_pago, id_mesa) VALUES (?, 1, 0, 'efectivo', ?)",
-        [userId, mesa],
+        [userId, mesaNormalizada],
       );
       id_pedido = result.insertId;
     } else {
       id_pedido = carrito[0].id_pedido;
-      if (mesa) {
+      if (mesaNormalizada !== null) {
         await connection.query(
           "UPDATE pedidos SET id_mesa = ? WHERE id_pedido = ?",
-          [mesa, id_pedido],
+          [mesaNormalizada, id_pedido],
         );
       }
     }

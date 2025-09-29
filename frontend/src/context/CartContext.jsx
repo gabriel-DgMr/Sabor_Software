@@ -75,12 +75,19 @@ export const CartProvider = ({ children }) => {
         body: JSON.stringify({
           id_producto: product.id || product.id_producto,
           cantidad: product.cantidad || 1,
-          id_mesa: product.id_mesa ?? mesa ?? localStorage.getItem('mesa') ?? null,
+          id_mesa:
+            product.id_mesa !== undefined && product.id_mesa !== null
+              ? Number(product.id_mesa)
+              : mesa
+                ? Number(mesa)
+                : localStorage.getItem('mesa')
+                  ? Number(localStorage.getItem('mesa'))
+                  : null,
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.mensaje || 'Error al agregar producto al carrito');
       }
 
@@ -120,7 +127,7 @@ export const CartProvider = ({ children }) => {
       }
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.mensaje || 'Error al eliminar producto del carrito');
       }
 
@@ -160,7 +167,7 @@ export const CartProvider = ({ children }) => {
       }
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.mensaje || 'Error al actualizar cantidad');
       }
 
@@ -197,7 +204,7 @@ export const CartProvider = ({ children }) => {
       }
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.mensaje || 'Error al vaciar el carrito');
       }
 
@@ -268,7 +275,14 @@ export const CartProvider = ({ children }) => {
           referencia_pago, // referencia de PayU o otra plataforma de pago
           estado_pago, // estado del pago (2: pendiente, 3: pagado, 4: cancelado)
           recomendaciones, // recomendaciones del cliente
-          id_mesa: mesaSeleccionada || mesa || localStorage.getItem('mesa') || null,
+          id_mesa:
+            mesaSeleccionada !== undefined && mesaSeleccionada !== null && mesaSeleccionada !== ''
+              ? Number(mesaSeleccionada)
+              : mesa
+                ? Number(mesa)
+                : localStorage.getItem('mesa')
+                  ? Number(localStorage.getItem('mesa'))
+                  : null,
         }),
       });
 
