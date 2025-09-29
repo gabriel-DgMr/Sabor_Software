@@ -16,6 +16,16 @@ const UsuariosAdministrador = () => {
   const [busqueda, setBusqueda] = useState('');
   const [confirmacion, setConfirmacion] = useState(null);
 
+  const normalizarRol = rol => rol?.toLowerCase().trim() || 'cliente';
+  const esAdministrador = rol => normalizarRol(rol) === 'administrador';
+  const esEmpleado = rol => normalizarRol(rol) === 'empleado';
+  const esCliente = rol => !esAdministrador(rol) && !esEmpleado(rol);
+  const obtenerEtiquetaRol = nombreRol => {
+    if (esAdministrador(nombreRol)) return 'Administrador';
+    if (esEmpleado(nombreRol)) return 'Empleado';
+    return 'Cliente';
+  };
+
   // Cargar datos iniciales
   useEffect(() => {
     const cargarDatos = async () => {
@@ -39,7 +49,11 @@ const UsuariosAdministrador = () => {
         ]);
 
         setUsuarios(usuariosData);
-        setRoles(rolesData);
+        const rolesNormalizados = (rolesData || []).map(rol => ({
+          ...rol,
+          nombre_rol: obtenerEtiquetaRol(rol.nombre_rol),
+        }));
+        setRoles(rolesNormalizados);
       } catch (err) {
         console.error('Error al cargar datos:', err);
         setError('Error al cargar los datos. Por favor, intenta de nuevo.');
@@ -75,7 +89,12 @@ const UsuariosAdministrador = () => {
   // Iniciar edición de rol
   const iniciarEdicionRol = usuario => {
     setUsuarioEditando(usuario.id_usuario);
-    setNuevoRol(usuario.id_rol);
+    const rolCorrespondiente = roles.find(
+      r => r.nombre_rol === obtenerEtiquetaRol(usuario.nombre_rol)
+    );
+    setNuevoRol(
+      rolCorrespondiente?.id_rol || roles.find(r => r.nombre_rol === 'Cliente')?.id_rol || ''
+    );
   };
 
   // Cancelar edición
