@@ -1,5 +1,6 @@
 import mysql from "mysql2/promise";
 import { dbConfig } from "../config/dbconfig.js";
+import { normalizeImagePath } from "./productoModel.js";
 
 const pool = mysql.createPool(dbConfig);
 
@@ -150,7 +151,7 @@ export const getProductosParaCalificar = async (userId) => {
       pedidosMap.get(row.id_pedido).productos.push({
         id_producto: row.id_producto,
         nombre_producto: row.nombre_producto,
-        imagen_producto: row.imagen_producto,
+        imagen_producto: normalizeImagePath(row.imagen_producto),
         cantidad: row.cantidad,
         precio_unitario: row.precio_unitario,
         calificacion_actual: row.calificacion_actual,
@@ -202,7 +203,7 @@ export const getProductosParaCalificarPorPedido = async (userId, pedidoId) => {
       fecha_pedido: row.fecha_pedido,
       id_producto: row.id_producto,
       nombre_producto: row.nombre_producto,
-      imagen_producto: row.imagen_producto,
+      imagen_producto: normalizeImagePath(row.imagen_producto),
       cantidad: row.cantidad,
       precio_unitario: row.precio_unitario,
       calificacion_actual: row.calificacion_actual,
