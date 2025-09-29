@@ -111,7 +111,17 @@ export default function Carrito() {
 
         // Procesar como exitoso con referencia temporal
         setTimeout(() => {
-          procesarPedidoExitoso(`PAYU_RETURN_${Date.now()}`, '4');
+          const storedTipo = localStorage.getItem('payuTipoServicio') || 'mesa';
+          const storedDireccion = localStorage.getItem('payuDireccionEntrega');
+          const storedDetalle = localStorage.getItem('payuDetalleDireccion');
+
+          procesarPedidoExitoso(
+            `PAYU_RETURN_${Date.now()}`,
+            '4',
+            storedTipo,
+            storedDireccion,
+            storedDetalle
+          );
         }, 1500);
 
         return; // Salir temprano para evitar el procesamiento normal
@@ -261,7 +271,17 @@ export default function Carrito() {
 
         // Procesar el pedido automáticamente
         setTimeout(() => {
-          procesarPedidoExitoso(referenceCode || reference_pol, finalTransactionState);
+          const storedTipo = localStorage.getItem('payuTipoServicio') || 'mesa';
+          const storedDireccion = localStorage.getItem('payuDireccionEntrega');
+          const storedDetalle = localStorage.getItem('payuDetalleDireccion');
+
+          procesarPedidoExitoso(
+            referenceCode || reference_pol,
+            finalTransactionState,
+            storedTipo,
+            storedDireccion,
+            storedDetalle
+          );
         }, 1000);
 
         return; // Salir para no mostrar el modal normal
@@ -313,7 +333,13 @@ export default function Carrito() {
   }, [cartItems]);
 
   // Función para procesar pedido exitoso después del pago con PayU
-  const procesarPedidoExitoso = async (transactionReference, transactionState) => {
+  const procesarPedidoExitoso = async (
+    transactionReference,
+    transactionState,
+    tipoServicioSeleccionado = 'mesa',
+    direccionServicio = '',
+    detalleDireccionServicio = ''
+  ) => {
     try {
       console.log('🔄 ===== INICIANDO PROCESAMIENTO DE PEDIDO EXITOSO =====');
       console.log('📋 Datos de entrada:', {
@@ -337,23 +363,24 @@ export default function Carrito() {
         estadoPedido = 2; // PENDIENTE
       }
 
-      console.log('📝 Creando pedido con datos:', {
+      const payloadPedido = {
         metodo_pago: 'payu',
-        tipo_servicio: 'mesa',
+        tipo_servicio: tipoServicioSeleccionado || 'mesa',
         referencia_pago: transactionReference,
         estado_pago: estadoPedido,
         recomendaciones: recomendaciones,
-      });
+      };
+
+      if (tipoServicioSeleccionado === 'domicilio') {
+        payloadPedido.direccion_entrega = direccionServicio || '';
+        payloadPedido.detalle_direccion = detalleDireccionServicio || '';
+      }
+
+      console.log('📝 Creando pedido con datos:', payloadPedido);
 
       // Crear el pedido con PayU
       console.log('🚀 Llamando a confirmarPedido...');
-      const result = await confirmarPedido({
-        metodo_pago: 'payu',
-        tipo_servicio: 'mesa', // Por defecto mesa, puedes ajustar según necesites
-        referencia_pago: transactionReference,
-        estado_pago: estadoPedido,
-        recomendaciones: recomendaciones,
-      });
+      const result = await confirmarPedido(payloadPedido);
 
       console.log('✅ Pedido confirmado exitosamente:', result);
 
@@ -407,6 +434,88 @@ export default function Carrito() {
     }
   };
 
+  const iniciarPagoPayU = async ({
+    tipoServicioSeleccionado,
+    direccionEntrega = '',
+    detalleDireccion = '',
+  }) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const payload = {
+        items: cartItems.map(item => ({
+          id_producto: item.id_producto,
+          cantidad: item.cantidad || 1,
+          precio_unitario: item.precio_unitario,
+          precio: item.precio_unitario,
+          nombre_producto: item.nombre_producto,
+        })),
+        tipo_servicio: tipoServicioSeleccionado,
+        currency: 'COP',
+        description: 'Pedido Sabor',
+        recomendaciones,
+      };
+
+      if (tipoServicioSeleccionado === 'domicilio') {
+        payload.direccion_entrega = direccionEntrega;
+        payload.detalle_direccion = detalleDireccion || '';
+      }
+
+      const response = await fetch(`${API_URL}/payu/formulario`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'Error al generar formulario de PayU');
+      }
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = data.actionUrl;
+      form.style.display = 'none';
+
+      Object.entries(data.formData).forEach(([key, value]) => {
+        if (value === undefined || value === null) return;
+        if (typeof value === 'object') return;
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+
+      localStorage.setItem('payuProcessing', 'true');
+      localStorage.setItem('payuTimestamp', Date.now().toString());
+      localStorage.setItem('payuTipoServicio', tipoServicioSeleccionado);
+
+      if (tipoServicioSeleccionado === 'domicilio') {
+        localStorage.setItem('payuDireccionEntrega', direccionEntrega);
+        localStorage.setItem('payuDetalleDireccion', detalleDireccion || '');
+      } else {
+        localStorage.removeItem('payuDireccionEntrega');
+        localStorage.removeItem('payuDetalleDireccion');
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+    } catch (err) {
+      console.error('Error al iniciar pago PayU:', err);
+      setModal({
+        open: true,
+        message: err.message || 'Error al iniciar el pago con PayU. Intenta nuevamente.',
+        icon: <GoX className="GoX" />,
+        onConfirm: () => setModal({ ...modal, open: false }),
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const procesarPago = async () => {
     if (cartItems.length === 0) {
       setModal({
@@ -418,53 +527,65 @@ export default function Carrito() {
       return;
     }
 
-    try {
-      setLoading(true);
-      setError(null);
+    setModal({
+      open: true,
+      message: '¿Deseas tu pedido para Mesa o Domicilio?',
+      icon: (
+        <GoCreditCard className="GoCreditCard" style={{ color: '#007bff', fontSize: '2.5rem' }} />
+      ),
+      confirmText: 'Mesa',
+      cancelText: 'Domicilio',
+      onConfirm: async () => {
+        setModal(prev => ({ ...prev, open: false }));
+        await iniciarPagoPayU({ tipoServicioSeleccionado: 'mesa' });
+      },
+      onCancel: () => {
+        setModal({
+          open: true,
+          message: (
+            <div>
+              <h3 style={{ marginBottom: '10px' }}>Datos para el domicilio</h3>
+              <input
+                type="text"
+                placeholder="Dirección"
+                id="direccion-payu"
+                className="input-modal"
+                style={{ width: '100%', marginBottom: '8px', padding: '6px' }}
+              />
+              <input
+                type="text"
+                placeholder="Apartamento / Piso / Habitación"
+                id="apartamento-payu"
+                className="input-modal"
+                style={{ width: '100%', marginBottom: '8px', padding: '6px' }}
+              />
+            </div>
+          ),
+          icon: <BsHouse className="BsHouse" style={{ color: '#ff5722', fontSize: '2.5rem' }} />,
+          confirmText: 'Confirmar domicilio',
+          cancelText: 'Cancelar',
+          onConfirm: async () => {
+            const direccionInput = document.getElementById('direccion-payu');
+            const apartamentoInput = document.getElementById('apartamento-payu');
+            const direccion = direccionInput ? direccionInput.value.trim() : '';
+            const detalle = apartamentoInput ? apartamentoInput.value.trim() : '';
 
-      // Llama al backend para generar el formulario de PayU
-      const response = await fetch(`${API_URL}/payu/formulario`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: cartItems }),
-      });
+            if (!direccion) {
+              alert('⚠️ Por favor ingresa la dirección');
+              return;
+            }
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Error al procesar pago');
-
-      // Crear formulario dinámico para PayU
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = data.actionUrl;
-      form.style.display = 'none';
-
-      // Agregar campos del formulario
-      Object.entries(data.formData).forEach(([key, value]) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = value;
-        form.appendChild(input);
-      });
-
-      // Marcar que estamos procesando un pago
-      localStorage.setItem('payuProcessing', 'true');
-      localStorage.setItem('payuTimestamp', Date.now().toString());
-
-      // Agregar formulario al DOM y enviarlo
-      document.body.appendChild(form);
-      form.submit();
-    } catch (error) {
-      console.error('Error al procesar pago con PayU:', error);
-      setModal({
-        open: true,
-        message: 'Error al procesar el pago con PayU. Intenta nuevamente.',
-        icon: <GoX className="GoX" />,
-        onConfirm: () => setModal({ ...modal, open: false }),
-      });
-    } finally {
-      setLoading(false);
-    }
+            setModal(prev => ({ ...prev, open: false }));
+            await iniciarPagoPayU({
+              tipoServicioSeleccionado: 'domicilio',
+              direccionEntrega: direccion,
+              detalleDireccion: detalle,
+            });
+          },
+          onCancel: () => setModal(m => ({ ...m, open: false })),
+        });
+      },
+    });
   };
 
   const handleEliminarCarrito = () => {
