@@ -64,12 +64,6 @@ const UsuariosAdministrador = () => {
 
     cargarDatos();
   }, [isAuthenticated, authLoading]);
-
-  const normalizarRol = rol => rol?.toLowerCase().trim() || 'cliente';
-  const esAdministrador = rol => normalizarRol(rol) === 'administrador';
-  const esEmpleado = rol => normalizarRol(rol) === 'empleado';
-  const esCliente = rol => !esAdministrador(rol) && !esEmpleado(rol);
-
   // Filtrar usuarios
   const usuariosFiltrados = usuarios.filter(usuario => {
     const coincideBusqueda =
@@ -195,12 +189,6 @@ const UsuariosAdministrador = () => {
     if (esAdministrador(nombreRol)) return '#dc2626';
     if (esEmpleado(nombreRol)) return '#2563eb';
     return '#16a34a';
-  };
-
-  const obtenerEtiquetaRol = nombreRol => {
-    if (esAdministrador(nombreRol)) return 'Administrador';
-    if (esEmpleado(nombreRol)) return 'Empleado';
-    return 'Cliente';
   };
 
   // Renderizar estado de carga
