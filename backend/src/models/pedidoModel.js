@@ -12,6 +12,7 @@ export const updatePedidoEstadoPorPago = async (id_pedido, nuevoEstado) => {
   }
 };
 import { dbConfig } from "../config/dbconfig.js";
+import { normalizeImagePath } from "./productoModel.js";
 import mysql from "mysql2/promise";
 
 const pool = mysql.createPool(dbConfig);
@@ -178,13 +179,19 @@ export const getCarritoByUser = async (userId) => {
     );
     if (carrito.length === 0) return null;
     const pedido = carrito[0];
-    const [items] = await pool.query(
+    const [itemsRaw] = await pool.query(
       `SELECT dp.id_detalle, dp.id_producto, p.nombre_producto, dp.cantidad, dp.precio_unitario, (dp.cantidad * dp.precio_unitario) as subtotal, p.imagen_producto
        FROM detalle_pedidos dp
        JOIN productos p ON dp.id_producto = p.id_producto
        WHERE dp.id_pedido = ?`,
       [pedido.id_pedido],
     );
+
+    const items = itemsRaw.map((item) => ({
+      ...item,
+      imagen_producto: normalizeImagePath(item.imagen_producto),
+    }));
+
     return { ...pedido, items };
   } catch (error) {
     console.error("Error al obtener el carrito:", error);
