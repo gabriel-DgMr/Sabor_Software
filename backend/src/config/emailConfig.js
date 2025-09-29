@@ -1,102 +1,82 @@
-import nodemailer from "nodemailer";
 import { config } from "./config.js";
 
 /**
- * Crea un transporter de nodemailer configurado para producción
- * con configuraciones optimizadas para Railway y Gmail
+ * Cliente simple de Brevo usando fetch
+ * Más confiable y directo que el SDK
  */
 export const createEmailTransporter = () => {
-  return nodemailer.createTransport({
-    service: "gmail",
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // STARTTLS en puerto 587
-    auth: {
-      user: config.email.user,
-      pass: config.email.password,
+  // Retornar objeto con método sendTransacEmail
+  return {
+    async sendTransacEmail(emailData) {
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "api-key": config.email.password,
+        },
+        body: JSON.stringify(emailData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
     },
-    // Configuración TLS corregida para Railway y Gmail
-    tls: {
-      rejectUnauthorized: false, // Necesario para Railway
-      ciphers: "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
-      minVersion: "TLSv1.2",
-      maxVersion: "TLSv1.3",
-    },
-    // Timeouts optimizados para Railway
-    connectionTimeout: 60000, // 60 segundos - Gmail necesita más tiempo
-    greetingTimeout: 30000, // 30 segundos
-    socketTimeout: 60000, // 60 segundos
-    // Configuración de pool optimizada
-    pool: true, // Habilitar pool para mejor rendimiento
-    maxConnections: 2, // Máximo 2 conexiones simultáneas
-    maxMessages: 5, // 5 mensajes por conexión
-    rateDelta: 2000, // 2 segundos entre lotes
-    rateLimit: 3, // 3 emails por lote
-    // Configuraciones específicas para Gmail y Railway
-    ignoreTLS: false,
-    requireTLS: true,
-    // Debug solo en desarrollo
-    debug: process.env.NODE_ENV === "development",
-    logger: process.env.NODE_ENV === "development",
-    // Configuraciones adicionales para estabilidad
-    name: "sabor-production.up.railway.app", // Identificación del servidor
-    localAddress: undefined, // Permitir que el sistema elija la IP local
-  });
+  };
 };
 
 /**
  * Función para determinar si un error es recuperable
+ * Adaptada para Brevo API
  */
 export const shouldRetryError = (error) => {
   const retryableErrors = [
-    "ETIMEDOUT", // Timeout de conexión
-    "ECONNRESET", // Conexión reseteada
-    "ECONNREFUSED", // Conexión rechazada
-    "ENOTFOUND", // Host no encontrado
-    "EAI_AGAIN", // Error de DNS temporal
-    "ESOCKETTIMEDOUT", // Timeout de socket
-    "CONN", // Error de conexión SMTP
-    "TIMEOUT", // Timeout general
+    "TIMEOUT", // Timeout de conexión
+    "NETWORK_ERROR", // Error de red
+    "RATE_LIMIT", // Límite de velocidad
+    "SERVER_ERROR", // Error del servidor
+    "SERVICE_UNAVAILABLE", // Servicio no disponible
   ];
 
   const nonRetryableErrors = [
-    "EAUTH", // Error de autenticación
-    "EMESSAGE", // Error de mensaje
-    "EENVELOPE", // Error de envelope
+    "UNAUTHORIZED", // Error de autenticación
+    "FORBIDDEN", // Acceso denegado
+    "BAD_REQUEST", // Solicitud malformada
+    "NOT_API_KEY", // API key inválida
+    "INVALID_EMAIL", // Email inválido
   ];
 
-  // Si es un error de autenticación, no reintentar
-  if (
-    nonRetryableErrors.some(
-      (code) => error.code === code || error.message?.includes(code),
-    )
-  ) {
+  // Si es un error de autenticación o datos, no reintentar
+  if (nonRetryableErrors.some((code) => error.message?.includes(code))) {
     return false;
   }
 
-  // Si es un error de timeout o conexión, reintentar
-  if (
-    retryableErrors.some(
-      (code) => error.code === code || error.message?.includes(code),
-    )
-  ) {
+  // Si es un error de red o servidor, reintentar
+  if (retryableErrors.some((code) => error.message?.includes(code))) {
     return true;
   }
 
-  // Por defecto, reintentar para errores desconocidos
-  return true;
+  // Para errores HTTP, solo reintentar 5xx
+  if (error.status >= 500) {
+    return true;
+  }
+
+  // Por defecto, no reintentar para errores 4xx
+  return false;
 };
 
 /**
- * Envía un email con sistema de reintentos inteligente
+ * Envía un email con sistema de reintentos inteligente usando Brevo
  */
 export const sendWithRetry = async (
   transporter,
   mailOptions,
-  maxRetries = 5,
+  maxRetries = 3,
 ) => {
   console.log(
-    `📧 [${new Date().toISOString()}] Iniciando envío de email con ${maxRetries} reintentos`,
+    `📧 [${new Date().toISOString()}] ===== INICIANDO ENVÍO DE EMAIL CON BREVO =====`,
   );
   console.log(`📧 Destinatario: ${mailOptions.to}`);
   console.log(`📧 Asunto: ${mailOptions.subject}`);
@@ -104,47 +84,31 @@ export const sendWithRetry = async (
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       console.log(
-        `📧 [${new Date().toISOString()}] Intento ${attempt}/${maxRetries} - Enviando email...`,
+        `📧 [${new Date().toISOString()}] Intento ${attempt}/${maxRetries} - Enviando email con Brevo...`,
       );
 
-      // Solo verificar conexión en el primer intento para evitar delays adicionales
-      if (attempt === 1) {
-        console.log(
-          `📧 [${new Date().toISOString()}] Verificando conexión SMTP...`,
-        );
-        try {
-          await transporter.verify();
-          console.log(
-            `✅ [${new Date().toISOString()}] Conexión SMTP verificada exitosamente`,
-          );
-        } catch (verifyError) {
-          console.log(
-            `⚠️ [${new Date().toISOString()}] Verificación falló, continuando con envío directo:`,
-            verifyError.message,
-          );
-          // Continuar con el envío aunque la verificación falle
-        }
-      }
+      // Crear el objeto de email para Brevo
+      const emailData = {
+        subject: mailOptions.subject,
+        htmlContent: mailOptions.html,
+        sender: { email: config.email.user },
+        to: [{ email: mailOptions.to }],
+      };
 
-      const result = await transporter.sendMail(mailOptions);
+      // Enviar email usando Brevo API
+      const result = await transporter.sendTransacEmail(emailData);
+
       console.log(
-        `✅ [${new Date().toISOString()}] Email enviado exitosamente (intento ${attempt})`,
+        `✅ [${new Date().toISOString()}] Email enviado exitosamente con Brevo (intento ${attempt})`,
       );
-      console.log(`📧 Message ID: ${result.messageId}`);
-      console.log(`📧 Response: ${result.response}`);
+      console.log(`📧 Message ID: ${result.messageId || "N/A"}`);
       return result;
     } catch (error) {
       console.error(
         `❌ [${new Date().toISOString()}] Error en intento ${attempt}:`,
         {
           message: error.message,
-          code: error.code,
-          command: error.command,
-          response: error.response,
-          errno: error.errno,
-          syscall: error.syscall,
-          hostname: error.hostname,
-          port: error.port,
+          status: error.status,
           stack: error.stack,
         },
       );
@@ -167,9 +131,9 @@ export const sendWithRetry = async (
         throw error;
       }
 
-      // Calcular delay progresivo más agresivo para Railway
-      const baseDelay = error.code === "ETIMEDOUT" ? 5000 : 2000; // Delay más largo para timeouts
-      const delay = Math.min(baseDelay * Math.pow(1.5, attempt - 1), 15000); // Max 15 segundos
+      // Calcular delay progresivo
+      const baseDelay = 2000; // 2 segundos base
+      const delay = Math.min(baseDelay * Math.pow(2, attempt - 1), 10000); // Max 10 segundos
 
       console.log(
         `⏳ [${new Date().toISOString()}] Esperando ${delay}ms antes del siguiente intento...`,
@@ -181,17 +145,13 @@ export const sendWithRetry = async (
 
 /**
  * Crea opciones de email estándar para la aplicación
+ * Adaptado para Brevo
  */
 export const createMailOptions = (to, subject, html, from = null) => {
   return {
-    from: from || `"Sabor App" <${config.email.user}>`,
+    from: from || config.email.user,
     to,
     subject,
     html,
-    headers: {
-      "X-Mailer": "Sabor App",
-      "X-Priority": "3",
-      "X-MSMail-Priority": "Normal",
-    },
   };
 };
