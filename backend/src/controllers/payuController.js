@@ -234,9 +234,18 @@ export const generarFormularioPago = async (req, res) => {
     }
 
     // Calcular el total
-    const totalAmount = items.reduce((sum, item) => {
-      return sum + Number(item.precio_unitario) * Number(item.cantidad);
+    const totalAmount = items.reduce((sum, item, index) => {
+      const precio = Number(item.precio_unitario ?? item.precio ?? 0);
+      const cantidad = Number(item.cantidad ?? item.qty ?? 1);
+
+      if (Number.isNaN(precio) || Number.isNaN(cantidad)) {
+        throw new Error(`Precio o cantidad inválidos en el item ${index + 1}`);
+      }
+
+      return sum + precio * cantidad;
     }, 0);
+
+    const formattedAmount = Number(totalAmount).toFixed(2);
 
     // Generar referencia única
     const referenceCode = `SABOR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
