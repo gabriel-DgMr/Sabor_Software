@@ -81,12 +81,16 @@ export const productoController = {
       }
 
       // Crear el producto con el nombre temporal de la imagen
+      const imagenProductoPath = req.file
+        ? `productos/${req.file.filename}`
+        : null;
+
       const productoData = {
         nombre_producto,
         descripcion_producto,
         precio_producto,
         id_categoria_producto,
-        imagen_producto: req.file.filename,
+        imagen_producto: imagenProductoPath,
         calificacion: parseFloat(calificacion),
         ventas: parseInt(ventas),
       };
@@ -159,7 +163,7 @@ export const productoController = {
 
       // Si se subió una nueva imagen, actualizar el nombre del archivo
       if (req.file) {
-        productoData.imagen_producto = req.file.filename;
+        productoData.imagen_producto = `productos/${req.file.filename}`;
       }
 
       const success = await productoModel.updateProducto(

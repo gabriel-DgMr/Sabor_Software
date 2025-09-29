@@ -91,7 +91,7 @@ export const productoModel = {
         return {
           ...resto,
           imagen_producto: resto.imagen_producto
-            ? `/uploads/productos/${resto.imagen_producto}`
+            ? `/uploads/${resto.imagen_producto}`
             : null,
           calificacion: promedioValido,
           calificacion_promedio: promedioValido,
@@ -160,7 +160,7 @@ export const productoModel = {
       return {
         ...resto,
         imagen_producto: resto.imagen_producto
-          ? `/uploads/productos/${resto.imagen_producto}`
+          ? `/uploads/${resto.imagen_producto}`
           : null,
         calificacion: promedioValido,
         calificacion_promedio: promedioValido,
