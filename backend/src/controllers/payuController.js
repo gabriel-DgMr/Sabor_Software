@@ -20,7 +20,10 @@ const PAYU_CONFIG = {
   ACCOUNT_ID: process.env.PAYU_ACCOUNT_ID || "512321",
 
   // URL del frontend
-  FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",
+  FRONTEND_URL:
+    process.env.PAYU_RETURN_URL_OVERRIDE?.trim() ||
+    process.env.FRONTEND_URL ||
+    "http://localhost:5173",
 
   // Modo de prueba
   TEST_MODE: process.env.PAYU_TEST_MODE === "true",
@@ -95,7 +98,7 @@ export const crearOrdenPago = async (req, res) => {
           description: description.substring(0, 255), // PayU limita a 255 caracteres
           language: "es",
           signature: signature,
-          notifyUrl: `${PAYU_CONFIG.FRONTEND_URL}/api/webhook/payu`,
+          notifyUrl: `${PAYU_CONFIG.FRONTEND_URL.replace(/\/$/, "")}/api/webhook/payu`,
           additionalValues: {
             TX_VALUE: {
               value: totalAmount,
@@ -259,7 +262,7 @@ export const generarFormularioPago = async (req, res) => {
       test: PAYU_CONFIG.TEST_MODE ? 1 : 0,
       buyerEmail: "cliente@sabor.com",
       responseUrl: `${PAYU_CONFIG.FRONTEND_URL}/carrito`,
-      confirmationUrl: `http://localhost:3000/api/webhook/payu`,
+      confirmationUrl: `${PAYU_CONFIG.FRONTEND_URL.replace(/\/$/, "")}/api/webhook/payu`,
     };
 
     res.json({
