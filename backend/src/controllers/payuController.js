@@ -43,7 +43,7 @@ const generateSignature = (
   const formattedAmount = parseFloat(amount).toFixed(2);
   const signature = `${apiKey}~${merchantId}~${referenceCode}~${formattedAmount}~${currency}`;
   console.log("Cadena para firma:", signature);
-  const hash = crypto.MD5(signature).toString();
+  const hash = crypto.MD5(signature).toString().toUpperCase();
   console.log("Firma generada:", hash);
   return hash;
 };
@@ -62,7 +62,7 @@ export const crearOrdenPago = async (req, res) => {
     }
 
     // Calcular el total
-    const totalAmount = items.reduce((sum, item, index) => {
+    const totalAmountRaw = items.reduce((sum, item, index) => {
       const precio = Number(item.precio_unitario ?? item.precio ?? 0);
       const cantidad = Number(item.cantidad ?? item.qty ?? 1);
 
@@ -72,6 +72,9 @@ export const crearOrdenPago = async (req, res) => {
 
       return sum + precio * cantidad;
     }, 0);
+
+    const totalAmount = Number(totalAmountRaw.toFixed(2));
+    const formattedAmount = totalAmount.toFixed(2);
 
     // Generar referencia única
     const referenceCode = `SABOR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -89,6 +92,14 @@ export const crearOrdenPago = async (req, res) => {
     const description = items
       .map((item) => `${item.nombre_producto} x${item.cantidad}`)
       .join(", ");
+
+    console.log("[PayU] Datos calculados para formulario:", {
+      totalAmountRaw,
+      totalAmount,
+      formattedAmount,
+      referenceCode,
+      signature,
+    });
 
     // Datos para PayU
     const payuData = {
@@ -108,7 +119,15 @@ export const crearOrdenPago = async (req, res) => {
           notifyUrl: `${PAYU_CONFIG.FRONTEND_URL.replace(/\/$/, "")}/api/webhook/payu`,
           additionalValues: {
             TX_VALUE: {
-              value: parseFloat(formattedAmount),
+              value: formattedAmount,
+              currency: "COP",
+            },
+            TX_TAX: {
+              value: "0.00",
+              currency: "COP",
+            },
+            TX_TAX_RETURN_BASE: {
+              value: "0.00",
               currency: "COP",
             },
           },
