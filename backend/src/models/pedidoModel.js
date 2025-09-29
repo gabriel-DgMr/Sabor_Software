@@ -227,6 +227,13 @@ export const addOrUpdateProductoCarrito = async (
     if (mesa !== undefined && mesa !== null) {
       const mesaNumero = Number(mesa);
       if (!Number.isNaN(mesaNumero) && mesaNumero > 0) {
+        const [mesaExiste] = await connection.query(
+          "SELECT id_mesa FROM mesas WHERE id_mesa = ?",
+          [mesaNumero],
+        );
+        if (mesaExiste.length === 0) {
+          throw new Error("La mesa indicada no existe");
+        }
         mesaNormalizada = mesaNumero;
       }
     }
@@ -493,6 +500,18 @@ export const confirmarPedido = async (
       throw new Error("No hay carrito");
     }
     const id_pedido = carrito[0].id_pedido;
+    if (id_mesa !== null && id_mesa !== undefined) {
+      if (Number.isNaN(Number(id_mesa))) {
+        throw new Error("El número de mesa es inválido");
+      }
+      const [mesaExiste] = await connection.query(
+        "SELECT id_mesa FROM mesas WHERE id_mesa = ?",
+        [Number(id_mesa)],
+      );
+      if (mesaExiste.length === 0) {
+        throw new Error("La mesa indicada no existe");
+      }
+    }
     console.log("🆔 ID del pedido a confirmar:", id_pedido);
 
     // Revalidar stock y precio de todos los productos antes de confirmar

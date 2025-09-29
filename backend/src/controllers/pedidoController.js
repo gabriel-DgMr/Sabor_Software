@@ -356,6 +356,13 @@ export const confirmar = async (req, res) => {
           .status(400)
           .json({ mensaje: "id_mesa debe ser un número positivo" });
       }
+      const [mesaExiste] = await pool.query(
+        "SELECT id_mesa FROM mesas WHERE id_mesa = ?",
+        [mesaNormalizada],
+      );
+      if (mesaExiste.length === 0) {
+        return res.status(400).json({ mensaje: "La mesa indicada no existe" });
+      }
     }
 
     if (tipo_servicio === "mesa" && !mesaNormalizada) {
