@@ -73,14 +73,10 @@ export const crearOrdenPago = async (req, res) => {
       return sum + precio * cantidad;
     }, 0);
 
-    const formattedAmount = Number(totalAmount).toFixed(2);
-
     // Generar referencia única
     const referenceCode = `SABOR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Generar firma
-    const formattedAmount = Number(totalAmount).toFixed(2);
-
     const signature = generateSignature(
       PAYU_CONFIG.API_KEY,
       PAYU_CONFIG.MERCHANT_ID,
