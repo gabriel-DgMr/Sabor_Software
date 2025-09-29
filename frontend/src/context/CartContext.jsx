@@ -19,6 +19,18 @@ export const CartProvider = ({ children }) => {
     }
   }, [mesa]);
 
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('mesa');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
   // Cargar carrito desde la base de datos
   const loadCart = useCallback(async () => {
     try {
@@ -218,6 +230,11 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const clearMesa = useCallback(() => {
+    setMesa('');
+    localStorage.removeItem('mesa');
+  }, []);
+
   // CartContext.jsx
   const confirmarPedido = async ({
     metodo_pago,
@@ -340,6 +357,7 @@ export const CartProvider = ({ children }) => {
         loadCart,
         mesa,
         setMesa,
+        clearMesa,
       }}
     >
       {children}

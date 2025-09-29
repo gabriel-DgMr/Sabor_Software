@@ -245,6 +245,10 @@
   "carrito_mesa_guardar": "Guardar mesa",
   "carrito_mesa_error": "Debes ingresar un número de mesa válido",
   "carrito_mesa_confirmada": "Mesa {{mesa}} asignada correctamente",
+  "carrito_mesa_eliminada": "La mesa fue eliminada del pedido",
+  "carrito_mesa_cambiar": "Cambiar mesa",
+  "carrito_mesa_eliminar": "Eliminar mesa",
+  "carrito_mesa_sin_asignar": "Sin asignar",
   "carrito_mesa_requerida": "Asigna una mesa antes de continuar",
   "carrito_mesa_cancelar": "Cerrar"
 }

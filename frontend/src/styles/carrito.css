@@ -93,6 +93,57 @@
 }
 
 
+.carrito_mesa_resumen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+}
+
+.carrito_mesa_resumen__label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.carrito_mesa_resumen__valor {
+  font-size: 1.6rem;
+  color: #111827;
+}
+
+.carrito_mesa_resumen__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.carrito_btn.mesa {
+  background: var(--primary-500);
+  color: #fff;
+}
+
+.carrito_btn.mesa:hover {
+  background: var(--primary-600);
+}
+
+.carrito_btn.eliminar-mesa {
+  background: #f87171;
+  color: #fff;
+}
+
+.carrito_btn.eliminar-mesa:hover:not(:disabled) {
+  background: #ef4444;
+}
+
+.carrito_btn.eliminar-mesa:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
 .carrito_titulo {
   text-align: center;
   color: var(--neutral-900);

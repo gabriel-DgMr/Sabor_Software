@@ -44,6 +44,7 @@ export default function Carrito() {
     removeItemFromCart,
     mesa: mesaCart,
     setMesa: setMesaCart,
+    clearMesa,
   } = useCart();
   const [recomendaciones, setRecomendaciones] = useState('');
   const [modal, setModal] = useState({
@@ -58,14 +59,17 @@ export default function Carrito() {
   const [mesaModal, setMesaModal] = useState({ open: false, onConfirm: null });
   const [mesaError, setMesaError] = useState('');
 
-  const obtenerMesaActual = () => mesaCart || mesaContext || localStorage.getItem('mesa') || '';
+  const obtenerMesaActual = useCallback(
+    () => mesaCart || mesaContext || localStorage.getItem('mesa') || '',
+    [mesaCart, mesaContext]
+  );
 
   useEffect(() => {
     const actual = obtenerMesaActual();
     if (actual) {
       setMesaInput(actual);
     }
-  }, [mesaCart, mesaContext]);
+  }, [obtenerMesaActual]);
 
   const cerrarMesaModal = () => {
     setMesaModal({ open: false, onConfirm: null });
@@ -99,18 +103,31 @@ export default function Carrito() {
   };
 
   const solicitarMesa = useCallback(
-    onReady => {
+    (onReady, { forcePrompt = false } = {}) => {
       const mesaActual = obtenerMesaActual();
-      if (mesaActual) {
+      if (mesaActual && !forcePrompt) {
         onReady?.(mesaActual);
         return;
       }
-      setMesaInput('');
+      setMesaInput(forcePrompt ? mesaActual || '' : '');
       setMesaError('');
       setMesaModal({ open: true, onConfirm: onReady });
     },
-    [mesaCart, mesaContext]
+    [obtenerMesaActual]
   );
+
+  const limpiarMesa = useCallback(() => {
+    clearMesa?.();
+    setMesaContext('');
+    setMesaInput('');
+    setModal(prev => ({
+      ...prev,
+      open: true,
+      message: t('carrito_mesa_eliminada'),
+      icon: <GoCheck className="GoCheck" />,
+      onConfirm: () => setModal(m => ({ ...m, open: false })),
+    }));
+  }, [clearMesa, setMesaContext, t]);
 
   useEffect(() => {
     document.title = 'Sabor: Carrito';
@@ -958,6 +975,27 @@ export default function Carrito() {
                       <p>{recomendaciones}</p>
                     </div>
                   )}
+                </div>
+                <div className="carrito_mesa_resumen">
+                  <div className="carrito_mesa_resumen__label">{t('carrito_mesa_label')}</div>
+                  <div className="carrito_mesa_resumen__valor">
+                    {obtenerMesaActual() || t('carrito_mesa_sin_asignar')}
+                  </div>
+                  <div className="carrito_mesa_resumen__acciones">
+                    <button
+                      className="carrito_btn mesa"
+                      onClick={() => solicitarMesa(null, { forcePrompt: true })}
+                    >
+                      {t('carrito_mesa_cambiar')}
+                    </button>
+                    <button
+                      className="carrito_btn eliminar-mesa"
+                      onClick={limpiarMesa}
+                      disabled={!obtenerMesaActual()}
+                    >
+                      {t('carrito_mesa_eliminar')}
+                    </button>
+                  </div>
                 </div>
                 <div className="carrito_pedido_acciones">
                   <button className="carrito_btn eliminar" onClick={handleEliminarCarrito}>

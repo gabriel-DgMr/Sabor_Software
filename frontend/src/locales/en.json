@@ -245,6 +245,10 @@
   "carrito_mesa_guardar": "Save table",
   "carrito_mesa_error": "You must enter a valid table number",
   "carrito_mesa_confirmada": "Table {{mesa}} assigned successfully",
+  "carrito_mesa_eliminada": "Table removed from the order",
+  "carrito_mesa_cambiar": "Change table",
+  "carrito_mesa_eliminar": "Remove table",
+  "carrito_mesa_sin_asignar": "Unassigned",
   "carrito_mesa_requerida": "Assign a table before continuing",
   "carrito_mesa_cancelar": "Close"
 }
