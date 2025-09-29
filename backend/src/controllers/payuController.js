@@ -62,9 +62,18 @@ export const crearOrdenPago = async (req, res) => {
     }
 
     // Calcular el total
-    const totalAmount = items.reduce((sum, item) => {
-      return sum + Number(item.precio_unitario) * Number(item.cantidad);
+    const totalAmount = items.reduce((sum, item, index) => {
+      const precio = Number(item.precio_unitario ?? item.precio ?? 0);
+      const cantidad = Number(item.cantidad ?? item.qty ?? 1);
+
+      if (Number.isNaN(precio) || Number.isNaN(cantidad)) {
+        throw new Error(`Precio o cantidad inválidos en el item ${index + 1}`);
+      }
+
+      return sum + precio * cantidad;
     }, 0);
+
+    const formattedAmount = Number(totalAmount).toFixed(2);
 
     // Generar referencia única
     const referenceCode = `SABOR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -241,7 +250,7 @@ export const generarFormularioPago = async (req, res) => {
       PAYU_CONFIG.API_KEY,
       PAYU_CONFIG.MERCHANT_ID,
       referenceCode,
-      totalAmount,
+      formattedAmount,
       "COP",
     );
 
@@ -263,7 +272,7 @@ export const generarFormularioPago = async (req, res) => {
       signature: signature,
       test: PAYU_CONFIG.TEST_MODE ? "1" : "0",
       buyerEmail: "cliente@sabor.com",
-      responseUrl: `${PAYU_CONFIG.FRONTEND_URL}/carrito`,
+      responseUrl: `${PAYU_CONFIG.FRONTEND_URL.replace(/\/$/, "")}/carrito`,
       confirmationUrl: `${PAYU_CONFIG.FRONTEND_URL.replace(/\/$/, "")}/api/webhook/payu`,
     };
 
