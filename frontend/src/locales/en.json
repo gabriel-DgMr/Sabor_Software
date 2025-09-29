@@ -245,5 +245,6 @@
   "carrito_mesa_guardar": "Save table",
   "carrito_mesa_error": "You must enter a valid table number",
   "carrito_mesa_confirmada": "Table {{mesa}} assigned successfully",
-  "carrito_mesa_requerida": "Assign a table before continuing"
+  "carrito_mesa_requerida": "Assign a table before continuing",
+  "carrito_mesa_actual": "Current assigned table: {{mesa}}"
 }

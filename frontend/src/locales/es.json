@@ -245,5 +245,6 @@
   "carrito_mesa_guardar": "Guardar mesa",
   "carrito_mesa_error": "Debes ingresar un número de mesa válido",
   "carrito_mesa_confirmada": "Mesa {{mesa}} asignada correctamente",
-  "carrito_mesa_requerida": "Asigna una mesa antes de continuar"
+  "carrito_mesa_requerida": "Asigna una mesa antes de continuar",
+  "carrito_mesa_actual": "Mesa asignada actualmente: {{mesa}}"
 }

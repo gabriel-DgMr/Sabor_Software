@@ -27,6 +27,7 @@ export const CartProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (!token) {
         setCartItems([]);
+        setMesa('');
         return;
       }
 
@@ -37,9 +38,15 @@ export const CartProvider = ({ children }) => {
       if (response.ok) {
         const carrito = await response.json();
         setCartItems(carrito.items || []);
+        if (carrito.id_mesa) {
+          const mesaStr = String(carrito.id_mesa);
+          setMesa(mesaStr);
+          localStorage.setItem('mesa', mesaStr);
+        }
       } else if (response.status === 404) {
         // No hay carrito, crear uno vacío
         setCartItems([]);
+        setMesa('');
       } else {
         throw new Error('Error al cargar el carrito');
       }
@@ -47,6 +54,7 @@ export const CartProvider = ({ children }) => {
       console.error('Error al cargar carrito:', error);
       setError(error.message);
       setCartItems([]);
+      setMesa('');
     } finally {
       setLoading(false);
     }
@@ -182,6 +190,7 @@ export const CartProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (!token) {
         setCartItems([]);
+        setMesa('');
         return;
       }
 
@@ -193,6 +202,7 @@ export const CartProvider = ({ children }) => {
       if (response.status === 404) {
         setCartItems([]);
         setError('Carrito vacío o no hay un pedido activo');
+        setMesa('');
         return;
       }
 
@@ -202,6 +212,7 @@ export const CartProvider = ({ children }) => {
       }
 
       setCartItems([]);
+      setMesa('');
     } catch (error) {
       console.error('Error al vaciar carrito:', error);
       setError(error.message);

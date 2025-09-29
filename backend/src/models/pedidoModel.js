@@ -250,7 +250,8 @@ export const addOrUpdateProductoCarrito = async (
       id_pedido = result.insertId;
     } else {
       id_pedido = carrito[0].id_pedido;
-      if (mesa) {
+      const mesaActual = carrito[0].id_mesa;
+      if (mesa && mesa !== mesaActual) {
         await connection.query(
           "UPDATE pedidos SET id_mesa = ? WHERE id_pedido = ?",
           [mesa, id_pedido],

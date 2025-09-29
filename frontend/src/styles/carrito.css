@@ -14,10 +14,6 @@
   padding: 20px;
 }
 
-.carrito_mesa {
-  margin-bottom: 2rem;
-}
-
 .carrito_mesa_contenedor {
   background: #fff;
   border-radius: 1.5rem;
@@ -31,6 +27,12 @@
 .carrito_mesa_desc {
   color: #6b7280;
   font-size: 1.4rem;
+}
+
+.carrito_mesa_actual {
+  color: #2563eb;
+  font-size: 1.3rem;
+  margin-top: 0.5rem;
 }
 
 .carrito_mesa_form {
