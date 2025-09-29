@@ -468,6 +468,19 @@ const ProductosAdministrar = () => {
                 />
               </div>
               <div className="descripcion__campo">
+                <label className="campo_p">Stock:</label>
+                <input
+                  className={`campo__input ${errors.stock ? 'input--error' : ''}`}
+                  name="stock"
+                  type="text"
+                  value={formData.stock}
+                  onChange={handleInputChange}
+                />
+                {errors.stock && (
+                  <small className="formulario__mensaje-error">{errors.stock}</small>
+                )}
+              </div>
+              <div className="descripcion__campo">
                 <label className="campo_p">Imagen: </label>
                 <input
                   accept="image/*"
@@ -487,19 +500,6 @@ const ProductosAdministrar = () => {
                       Eliminar imagen
                     </button>
                   </div>
-                )}
-              </div>
-              <div className="descripcion__campo">
-                <label className="campo_p">Stock:</label>
-                <input
-                  className={`campo__input ${errors.stock ? 'input--error' : ''}`}
-                  name="stock"
-                  type="text"
-                  value={formData.stock}
-                  onChange={handleInputChange}
-                />
-                {errors.stock && (
-                  <small className="formulario__mensaje-error">{errors.stock}</small>
                 )}
               </div>
               <div className="editor__botones">
