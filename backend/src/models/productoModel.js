@@ -3,44 +3,7 @@ import mysql from "mysql2/promise";
 
 const pool = mysql.createPool(dbConfig);
 
-const normalizeImagePath = (imagen) => {
-  if (!imagen) return null;
-
-  if (typeof imagen !== "string") {
-    try {
-      imagen = String(imagen);
-    } catch {
-      return null;
-    }
-  }
-
-  let trimmed = imagen.trim();
-
-  if (!trimmed) return null;
-
-  // Normalizar separadores de ruta
-  trimmed = trimmed.replace(/\\/g, "/");
-
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-    return trimmed;
-  }
-
-  if (trimmed.startsWith("/uploads/")) {
-    return trimmed;
-  }
-
-  if (trimmed.startsWith("uploads/")) {
-    return `/${trimmed}`;
-  }
-
-  if (trimmed.startsWith("productos/")) {
-    return `/uploads/${trimmed}`;
-  }
-
-  return `/uploads/productos/${trimmed.replace(/^\/+/g, "")}`;
-};
-
-const normalizeImagePath = (imagen) => {
+export const normalizeImagePath = (imagen) => {
   if (!imagen) return null;
 
   if (typeof imagen !== "string") {
@@ -382,5 +345,3 @@ const upsertProductoTraduccion = async (producto_id, idioma, descripcion) => {
 export const productoTraduccionModel = {
   upsertProductoTraduccion,
 };
-
-export { normalizeImagePath };
