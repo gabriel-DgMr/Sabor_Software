@@ -177,7 +177,7 @@ const Home = () => {
           <FaCartShopping className="carrito" size={30} />
           {cartCount > 0 && (
             <span
-              aria-label={`Productos en el carrito: ${cartCount}`}
+              aria-label={t('carrito_burbuja_label', { count: cartCount })}
               className="carrito-burbuja-cantidad"
             >
               {cartCount}

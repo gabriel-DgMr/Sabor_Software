@@ -1583,14 +1583,30 @@ hr {
 }
 
 .productos__descripcion {
-  height: 72px; 
+  height: auto;
+  max-height: 7.5rem;
   overflow: hidden;
-  transition: height 0.3s ease;
+  transition: max-height 0.3s ease;
   text-align: justify;
 }
 
 .productos__descripcion.expandida {
-  height: auto;
+  max-height: none;
+}
+
+.productos__toggle-boton {
+  background: none;
+  border: none;
+  color: var(--primary-500);
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  align-self: flex-start;
+}
+
+.productos__toggle-boton:hover {
+  text-decoration: underline;
 }
 
 .productos__footer {

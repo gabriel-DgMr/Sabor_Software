@@ -23,19 +23,17 @@ const ProductoCard = React.memo(({ producto }) => {
   const [cantidad, setCantidad] = useState(1);
   const [peticion, setPeticion] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const handleMouseEnter = useCallback(() => {
-    setProductoExpandido(true);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setProductoExpandido(false);
-  }, []);
+  const descripcionId = `descripcion-producto-${producto.id_producto}`;
+  const descripcionLarga = (producto.descripcion_producto || '').length > 140;
 
   const handleAgregar = useCallback(() => {
     setDialogoAgregar(true);
     setCantidad(1);
     setPeticion('');
+  }, []);
+
+  const toggleDescripcion = useCallback(() => {
+    setProductoExpandido(prev => !prev);
   }, []);
 
   const handleConfirmarAgregar = async () => {
@@ -71,11 +69,7 @@ const ProductoCard = React.memo(({ producto }) => {
 
   return (
     <>
-      <div
-        className="productos__card-producto"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
+      <div className="productos__card-producto">
         <img
           alt={producto.nombre_producto}
           className="productos__imagen"
@@ -120,9 +114,23 @@ const ProductoCard = React.memo(({ producto }) => {
                 : '0.0'}
             </span>
           </div>
-          <p className={`productos__descripcion${productoExpandido ? ' expandida' : ''}`}>
+          <p
+            id={descripcionId}
+            className={`productos__descripcion${productoExpandido ? ' expandida' : ''}`}
+          >
             {producto.descripcion_producto}
           </p>
+          {descripcionLarga && (
+            <button
+              className="productos__toggle-boton"
+              type="button"
+              onClick={toggleDescripcion}
+              aria-expanded={productoExpandido}
+              aria-controls={descripcionId}
+            >
+              {productoExpandido ? t('ver_menos') : t('ver_mas')}
+            </button>
+          )}
           <div className="productos__footer">
             <p className="productos__precio">{FormatPriceCOP(producto.precio_producto)}</p>
             <button className="btn-agregarpr" onClick={handleAgregar} disabled={loading}>

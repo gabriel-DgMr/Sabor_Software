@@ -292,7 +292,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const cartCount = cartItems.reduce((sum, item) => sum + (item.cantidad || 1), 0);
+  const cartCount = cartItems.length;
   const cartTotal = cartItems.reduce(
     (sum, item) => sum + item.precio_unitario * (item.cantidad || 1),
     0
