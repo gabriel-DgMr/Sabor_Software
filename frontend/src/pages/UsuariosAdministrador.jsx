@@ -51,6 +51,11 @@ const UsuariosAdministrador = () => {
     cargarDatos();
   }, [isAuthenticated, authLoading]);
 
+  const normalizarRol = rol => rol?.toLowerCase().trim() || 'cliente';
+  const esAdministrador = rol => normalizarRol(rol) === 'administrador';
+  const esEmpleado = rol => normalizarRol(rol) === 'empleado';
+  const esCliente = rol => !esAdministrador(rol) && !esEmpleado(rol);
+
   // Filtrar usuarios
   const usuariosFiltrados = usuarios.filter(usuario => {
     const coincideBusqueda =
@@ -59,10 +64,10 @@ const UsuariosAdministrador = () => {
       usuario.telefono_usuario?.includes(busqueda);
 
     if (filtro === 'todos') return coincideBusqueda;
-    if (filtro === 'clientes') return coincideBusqueda && usuario.nombre_rol === 'Cliente';
-    if (filtro === 'empleados') return coincideBusqueda && usuario.nombre_rol === 'Empleado';
+    if (filtro === 'clientes') return coincideBusqueda && esCliente(usuario.nombre_rol);
+    if (filtro === 'empleados') return coincideBusqueda && esEmpleado(usuario.nombre_rol);
     if (filtro === 'administradores')
-      return coincideBusqueda && usuario.nombre_rol === 'Administrador';
+      return coincideBusqueda && esAdministrador(usuario.nombre_rol);
 
     return coincideBusqueda;
   });
@@ -168,16 +173,15 @@ const UsuariosAdministrador = () => {
 
   // Obtener color del rol
   const obtenerColorRol = nombreRol => {
-    switch (nombreRol) {
-      case 'Administrador':
-        return '#dc2626'; // rojo
-      case 'Empleado':
-        return '#2563eb'; // azul
-      case 'Cliente':
-        return '#16a34a'; // verde
-      default:
-        return '#6b7280'; // gris
-    }
+    if (esAdministrador(nombreRol)) return '#dc2626';
+    if (esEmpleado(nombreRol)) return '#2563eb';
+    return '#16a34a';
+  };
+
+  const obtenerEtiquetaRol = nombreRol => {
+    if (esAdministrador(nombreRol)) return 'Administrador';
+    if (esEmpleado(nombreRol)) return 'Empleado';
+    return 'Cliente';
   };
 
   // Renderizar estado de carga
@@ -237,19 +241,19 @@ const UsuariosAdministrador = () => {
               className={`usuarios__filtro ${filtro === 'clientes' ? 'usuarios__filtro--activo' : ''}`}
               onClick={() => setFiltro('clientes')}
             >
-              Clientes ({usuarios.filter(u => u.nombre_rol === 'Cliente').length})
+              Clientes ({usuarios.filter(u => esCliente(u.nombre_rol)).length})
             </button>
             <button
               className={`usuarios__filtro ${filtro === 'empleados' ? 'usuarios__filtro--activo' : ''}`}
               onClick={() => setFiltro('empleados')}
             >
-              Empleados ({usuarios.filter(u => u.nombre_rol === 'Empleado').length})
+              Empleados ({usuarios.filter(u => esEmpleado(u.nombre_rol)).length})
             </button>
             <button
               className={`usuarios__filtro ${filtro === 'administradores' ? 'usuarios__filtro--activo' : ''}`}
               onClick={() => setFiltro('administradores')}
             >
-              Administradores ({usuarios.filter(u => u.nombre_rol === 'Administrador').length})
+              Administradores ({usuarios.filter(u => esAdministrador(u.nombre_rol)).length})
             </button>
           </div>
 
@@ -333,7 +337,7 @@ const UsuariosAdministrador = () => {
                             color: 'white',
                           }}
                         >
-                          {usuario.nombre_rol}
+                          {obtenerEtiquetaRol(usuario.nombre_rol)}
                         </span>
                         <button
                           onClick={() => iniciarEdicionRol(usuario)}
