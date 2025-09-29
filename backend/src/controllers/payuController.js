@@ -70,11 +70,13 @@ export const crearOrdenPago = async (req, res) => {
     const referenceCode = `SABOR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Generar firma
+    const formattedAmount = Number(totalAmount).toFixed(2);
+
     const signature = generateSignature(
       PAYU_CONFIG.API_KEY,
       PAYU_CONFIG.MERCHANT_ID,
       referenceCode,
-      totalAmount,
+      formattedAmount,
       "COP",
     );
 
@@ -101,7 +103,7 @@ export const crearOrdenPago = async (req, res) => {
           notifyUrl: `${PAYU_CONFIG.FRONTEND_URL.replace(/\/$/, "")}/api/webhook/payu`,
           additionalValues: {
             TX_VALUE: {
-              value: totalAmount,
+              value: parseFloat(formattedAmount),
               currency: "COP",
             },
           },
@@ -254,12 +256,12 @@ export const generarFormularioPago = async (req, res) => {
       accountId: PAYU_CONFIG.ACCOUNT_ID,
       description: description.substring(0, 255),
       referenceCode: referenceCode,
-      amount: parseFloat(totalAmount).toFixed(2), // Formatear con 2 decimales
+      amount: formattedAmount,
       tax: "0.00",
       taxReturnBase: "0.00",
       currency: "COP",
       signature: signature,
-      test: PAYU_CONFIG.TEST_MODE ? 1 : 0,
+      test: PAYU_CONFIG.TEST_MODE ? "1" : "0",
       buyerEmail: "cliente@sabor.com",
       responseUrl: `${PAYU_CONFIG.FRONTEND_URL}/carrito`,
       confirmationUrl: `${PAYU_CONFIG.FRONTEND_URL.replace(/\/$/, "")}/api/webhook/payu`,
