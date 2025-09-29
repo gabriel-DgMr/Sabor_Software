@@ -29,7 +29,7 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
     setSuccess('');
 
     try {
-      const response = await fetch('/api/auth/verify-email', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/auth/verify-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,15 +73,18 @@ const EmailVerification = ({ email, onVerificationSuccess, onBackToLogin }) => {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/resend-verification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          correo_usuario: email,
-        }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || '/api'}/auth/resend-verification`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            correo_usuario: email,
+          }),
+        }
+      );
 
       const data = await response.json();
 

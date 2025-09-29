@@ -121,7 +121,7 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
       setShowVerification(false);
       localStorage.removeItem('pendingVerificationEmail');
       if (_onRegisterSuccess) {
-        _onRegisterSuccess();
+        _onRegisterSuccess(true);
       } else {
         navigate('/');
       }
@@ -132,7 +132,7 @@ const Register = ({ onShowMessage: _onShowMessage, onRegisterSuccess: _onRegiste
     setShowVerification(false);
     localStorage.removeItem('pendingVerificationEmail');
     if (_onRegisterSuccess) {
-      _onRegisterSuccess();
+      _onRegisterSuccess(false);
     }
   };
 
