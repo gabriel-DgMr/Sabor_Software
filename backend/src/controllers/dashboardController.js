@@ -1,8 +1,5 @@
 // src/controllers/dashboardController.js
-import mysql from "mysql2/promise";
-import { dbConfig } from "../config/dbconfig.js";
-
-const pool = mysql.createPool(dbConfig);
+import { pool } from "../config/dbconfig.js";
 
 export const dashboardController = {
   // ==============================
@@ -294,6 +291,73 @@ export const dashboardController = {
       );
       return res.status(500).json({
         error: "Error obteniendo métricas de empleados",
+        details:
+          process.env.NODE_ENV === "development" ? err.message : undefined,
+      });
+    }
+  },
+
+  // ==============================
+  // MÉTRICAS DE INVENTARIO
+  // ==============================
+  async getInventoryMetrics(req, res) {
+    try {
+      console.log("Iniciando consulta de métricas de inventario...");
+
+      const [productosStock] = await pool.query(`
+        SELECT 
+          p.id_producto,
+          p.nombre_producto,
+          COALESCE(p.stock, 0) AS stock,
+          COALESCE(p.precio_producto, 0) AS precio_producto,
+          p.imagen_producto,
+          COALESCE(p.stock_minimo, 5) AS stock_minimo,
+          COALESCE(p.stock_maximo, 0) AS stock_maximo,
+          c.nombre_categoria AS categoria
+        FROM productos p
+        LEFT JOIN categorias c ON p.id_categoria_producto = c.id_categoria
+        ORDER BY p.stock ASC
+      `);
+
+      const [resumen] = await pool.query(`
+        SELECT
+          COUNT(*) AS total_productos,
+          SUM(CASE WHEN COALESCE(p.stock, 0) <= COALESCE(p.stock_minimo, 5) THEN 1 ELSE 0 END) AS productos_bajos,
+          SUM(CASE WHEN COALESCE(p.stock, 0) = 0 THEN 1 ELSE 0 END) AS productos_agotados,
+          SUM(COALESCE(p.stock, 0)) AS unidades_en_inventario,
+          SUM(COALESCE(p.stock, 0) * COALESCE(p.precio_producto, 0)) AS valor_estimado
+        FROM productos p
+      `);
+
+      const [stockPorCategoria] = await pool.query(`
+        SELECT 
+          COALESCE(c.nombre_categoria, 'Sin categoría') AS categoria,
+          SUM(COALESCE(p.stock, 0)) AS total_stock,
+          COUNT(*) AS productos
+        FROM productos p
+        LEFT JOIN categorias c ON p.id_categoria_producto = c.id_categoria
+        GROUP BY c.nombre_categoria
+        ORDER BY total_stock ASC
+      `);
+
+      return res.json({
+        resumen: resumen[0] || {},
+        productosStock: productosStock || [],
+        stockPorCategoria: stockPorCategoria || [],
+      });
+    } catch (err) {
+      console.error(
+        "Error detallado en dashboardController.getInventoryMetrics:",
+        {
+          message: err.message,
+          stack: err.stack,
+          sqlState: err.sqlState,
+          sqlMessage: err.sqlMessage,
+          code: err.code,
+        },
+      );
+      return res.status(500).json({
+        error: "Error obteniendo métricas de inventario",
         details:
           process.env.NODE_ENV === "development" ? err.message : undefined,
       });

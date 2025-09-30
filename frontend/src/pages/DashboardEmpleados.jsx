@@ -283,7 +283,7 @@ const DashboardEmpleados = () => {
           </div>
 
           {/* Gráficas */}
-          <div className="charts-container">
+          <div className="charts-container charts-container--employees">
             <div className="chart-container chart-container--large line-chart">
               <div className="chart-title">Actividad de Trabajadores</div>
               <div className="chart-wrapper chart-wrapper--large">

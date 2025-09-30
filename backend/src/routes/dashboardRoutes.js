@@ -27,4 +27,12 @@ router.get(
   dashboardController.getEmployeeMetrics,
 );
 
+// Dashboard de inventario (protegido solo para admin)
+router.get(
+  "/inventory",
+  authenticateToken,
+  checkRole(["Administrador"]),
+  dashboardController.getInventoryMetrics,
+);
+
 export default router;

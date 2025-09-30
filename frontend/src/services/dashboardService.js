@@ -30,6 +30,16 @@ const dashboardService = {
     });
     return res.data;
   },
+
+  getInventoryMetrics: async () => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const res = await api.get('/dashboard/inventory', {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : undefined,
+      },
+    });
+    return res.data;
+  },
 };
 
 export default dashboardService;

@@ -9,6 +9,18 @@
 .charts-container--sales .chart-container--small {
   grid-column: 2 / span 1;
 }
+
+.charts-container--employees {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+}
+
+.charts-container--employees .chart-container--large {
+  grid-column: 1 / span 1;
+}
+
+.charts-container--employees .chart-container--small {
+  grid-column: 2 / span 1;
+}
 .charts-container--clients {
   grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
 }
@@ -18,6 +30,18 @@
 }
 
 .charts-container--clients .chart-container--small {
+  grid-column: 2 / span 1;
+}
+
+.charts-container--inventory {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+}
+
+.charts-container--inventory .chart-container--large {
+  grid-column: 1 / span 1;
+}
+
+.charts-container--inventory .chart-container--small {
   grid-column: 2 / span 1;
 }
 
@@ -55,12 +79,16 @@
   }
 
   .charts-container--clients,
-  .charts-container--sales {
+  .charts-container--sales,
+  .charts-container--employees,
+  .charts-container--inventory {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .charts-container--clients .chart-container--small,
-  .charts-container--sales .chart-container--small {
+  .charts-container--sales .chart-container--small,
+  .charts-container--employees .chart-container--small,
+  .charts-container--inventory .chart-container--small {
     grid-column: 1 / span 1;
   }
 }
@@ -152,6 +180,10 @@
 
 .metric-card--employees {
   background: linear-gradient(135deg, #2196F3, #1976D2);
+}
+
+.metric-card--inventory {
+  background: linear-gradient(135deg, #FF9800, #F57C00);
 }
 
 /* Contenedor de gráficas */

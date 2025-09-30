@@ -21,6 +21,8 @@ import Dashboard from './pages/Dashboard.jsx';
 import DashboardVentas from './pages/DashboardVentas.jsx';
 import DashboardClientes from './pages/DashboardClientes.jsx';
 import DashboardEmpleados from './pages/DashboardEmpleados.jsx';
+import DashboardInventario from './pages/DashboardInventario.jsx';
+import DashboardInventario from './pages/DashboardInventario.jsx';
 import HomeAdministrador from './pages/HomeAdministrador.jsx';
 import EscanearQR from './pages/EscanearQR.jsx';
 import HistorialPedidos from './pages/HistorialPedidos.jsx';
@@ -121,6 +123,16 @@ function App() {
                     </ProtectedRoute>
                   }
                   path="/administrar/panel/trabajadores"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <DashboardInventario />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/administrar/panel/inventario"
                 />
                 <Route
                   element={
