@@ -76,7 +76,9 @@ const Home = () => {
     () =>
       state.productos.map(p => ({
         src: getImageUrl(p.imagen_producto),
-        alt: p.nombre_producto,
+        alt: `${p.nombre_producto} (${Number(
+          p.calificacion_promedio ?? p.calificacion ?? 0
+        ).toFixed(1)} ⭐)`,
       })),
     [state.productos]
   );
@@ -175,7 +177,7 @@ const Home = () => {
           <FaCartShopping className="carrito" size={30} />
           {cartCount > 0 && (
             <span
-              aria-label={`Productos en el carrito: ${cartCount}`}
+              aria-label={t('carrito_burbuja_label', { count: cartCount })}
               className="carrito-burbuja-cantidad"
             >
               {cartCount}

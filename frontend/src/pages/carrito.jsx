@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { GoX, GoCheck, GoAlert, GoTrash, GoCreditCard } from 'react-icons/go';
 import { BsCash, BsHouse } from 'react-icons/bs';
 import { IoCart } from 'react-icons/io5';
 import { getImageUrl } from '../utils/imageUtils.js';
+import { useMesa } from '../hooks/useMesa.js';
 
 import DialogoModal from '../components/DialogoExito.jsx';
 import Footer from '../components/Footer.jsx';
@@ -43,6 +44,9 @@ export default function Carrito() {
     confirmarPedido,
     updateItemQuantity,
     removeItemFromCart,
+    mesa: mesaCart,
+    setMesa: setMesaCart,
+    clearMesa,
   } = useCart();
   const [recomendaciones, setRecomendaciones] = useState('');
   const [modal, setModal] = useState({
@@ -52,6 +56,80 @@ export default function Carrito() {
     onConfirm: null,
   });
   const { t } = useTranslation();
+  const [mesaContext, setMesaContext] = useMesa();
+  const [mesaInput, setMesaInput] = useState(mesaContext || '');
+  const [mesaModal, setMesaModal] = useState({ open: false, onConfirm: null });
+  const [mesaError, setMesaError] = useState('');
+
+  const obtenerMesaActual = useCallback(
+    () => mesaCart || mesaContext || localStorage.getItem('mesa') || '',
+    [mesaCart, mesaContext]
+  );
+
+  useEffect(() => {
+    const actual = obtenerMesaActual();
+    if (actual) {
+      setMesaInput(actual);
+    }
+  }, [obtenerMesaActual]);
+
+  const cerrarMesaModal = () => {
+    setMesaModal({ open: false, onConfirm: null });
+    setMesaError('');
+  };
+
+  const confirmarMesaModal = () => {
+    const mesaValue = (mesaInput || '').trim();
+    if (!mesaValue) {
+      setMesaError(t('carrito_mesa_error'));
+      return;
+    }
+
+    localStorage.setItem('mesa', mesaValue);
+    setMesaContext(mesaValue);
+    setMesaCart(mesaValue);
+
+    const callback = mesaModal.onConfirm;
+    cerrarMesaModal();
+
+    setModal({
+      open: true,
+      message: t('carrito_mesa_confirmada', { mesa: mesaValue }),
+      icon: <GoCheck className="GoCheck" />,
+      onConfirm: () => setModal(prev => ({ ...prev, open: false })),
+    });
+
+    if (typeof callback === 'function') {
+      callback(mesaValue);
+    }
+  };
+
+  const solicitarMesa = useCallback(
+    (onReady, { forcePrompt = false } = {}) => {
+      const mesaActual = obtenerMesaActual();
+      if (mesaActual && !forcePrompt) {
+        onReady?.(mesaActual);
+        return;
+      }
+      setMesaInput(forcePrompt ? mesaActual || '' : '');
+      setMesaError('');
+      setMesaModal({ open: true, onConfirm: onReady });
+    },
+    [obtenerMesaActual]
+  );
+
+  const limpiarMesa = useCallback(() => {
+    clearMesa?.();
+    setMesaContext('');
+    setMesaInput('');
+    setModal(prev => ({
+      ...prev,
+      open: true,
+      message: t('carrito_mesa_eliminada'),
+      icon: <GoCheck className="GoCheck" />,
+      onConfirm: () => setModal(m => ({ ...m, open: false })),
+    }));
+  }, [clearMesa, setMesaContext, t]);
 
   useEffect(() => {
     document.title = 'Sabor: Carrito';
@@ -60,6 +138,13 @@ export default function Carrito() {
     const recomendacionesGuardadas = localStorage.getItem('recomendacionesPedido');
     if (recomendacionesGuardadas) {
       setRecomendaciones(recomendacionesGuardadas);
+    }
+
+    const storedMesa = localStorage.getItem('mesa');
+    if (storedMesa) {
+      setMesaContext(storedMesa);
+      setMesaCart(storedMesa);
+      setMesaInput(storedMesa);
     }
 
     // Verificar si el usuario acaba de regresar de PayU
@@ -113,7 +198,17 @@ export default function Carrito() {
 
         // Procesar como exitoso con referencia temporal
         setTimeout(() => {
-          procesarPedidoExitoso(`PAYU_RETURN_${Date.now()}`, '4');
+          const storedTipo = localStorage.getItem('payuTipoServicio') || 'mesa';
+          const storedDireccion = localStorage.getItem('payuDireccionEntrega');
+          const storedDetalle = localStorage.getItem('payuDetalleDireccion');
+
+          procesarPedidoExitoso(
+            `PAYU_RETURN_${Date.now()}`,
+            '4',
+            storedTipo,
+            storedDireccion,
+            storedDetalle
+          );
         }, 1500);
 
         return; // Salir temprano para evitar el procesamiento normal
@@ -263,7 +358,17 @@ export default function Carrito() {
 
         // Procesar el pedido automáticamente
         setTimeout(() => {
-          procesarPedidoExitoso(referenceCode || reference_pol, finalTransactionState);
+          const storedTipo = localStorage.getItem('payuTipoServicio') || 'mesa';
+          const storedDireccion = localStorage.getItem('payuDireccionEntrega');
+          const storedDetalle = localStorage.getItem('payuDetalleDireccion');
+
+          procesarPedidoExitoso(
+            referenceCode || reference_pol,
+            finalTransactionState,
+            storedTipo,
+            storedDireccion,
+            storedDetalle
+          );
         }, 1000);
 
         return; // Salir para no mostrar el modal normal
@@ -315,7 +420,13 @@ export default function Carrito() {
   }, [cartItems]);
 
   // Función para procesar pedido exitoso después del pago con PayU
-  const procesarPedidoExitoso = async (transactionReference, transactionState) => {
+  const procesarPedidoExitoso = async (
+    transactionReference,
+    transactionState,
+    tipoServicioSeleccionado = 'mesa',
+    direccionServicio = '',
+    detalleDireccionServicio = ''
+  ) => {
     try {
       console.log('🔄 ===== INICIANDO PROCESAMIENTO DE PEDIDO EXITOSO =====');
       console.log('📋 Datos de entrada:', {
@@ -339,23 +450,24 @@ export default function Carrito() {
         estadoPedido = 2; // PENDIENTE
       }
 
-      console.log('📝 Creando pedido con datos:', {
+      const payloadPedido = {
         metodo_pago: 'payu',
-        tipo_servicio: 'mesa',
+        tipo_servicio: tipoServicioSeleccionado || 'mesa',
         referencia_pago: transactionReference,
         estado_pago: estadoPedido,
         recomendaciones: recomendaciones,
-      });
+      };
+
+      if (tipoServicioSeleccionado === 'domicilio') {
+        payloadPedido.direccion_entrega = direccionServicio || '';
+        payloadPedido.detalle_direccion = detalleDireccionServicio || '';
+      }
+
+      console.log('📝 Creando pedido con datos:', payloadPedido);
 
       // Crear el pedido con PayU
       console.log('🚀 Llamando a confirmarPedido...');
-      const result = await confirmarPedido({
-        metodo_pago: 'payu',
-        tipo_servicio: 'mesa', // Por defecto mesa, puedes ajustar según necesites
-        referencia_pago: transactionReference,
-        estado_pago: estadoPedido,
-        recomendaciones: recomendaciones,
-      });
+      const result = await confirmarPedido(payloadPedido);
 
       console.log('✅ Pedido confirmado exitosamente:', result);
 
@@ -409,6 +521,88 @@ export default function Carrito() {
     }
   };
 
+  const iniciarPagoPayU = async ({
+    tipoServicioSeleccionado,
+    direccionEntrega = '',
+    detalleDireccion = '',
+  }) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const payload = {
+        items: cartItems.map(item => ({
+          id_producto: item.id_producto,
+          cantidad: item.cantidad || 1,
+          precio_unitario: item.precio_unitario,
+          precio: item.precio_unitario,
+          nombre_producto: item.nombre_producto,
+        })),
+        tipo_servicio: tipoServicioSeleccionado,
+        currency: 'COP',
+        description: 'Pedido Sabor',
+        recomendaciones,
+      };
+
+      if (tipoServicioSeleccionado === 'domicilio') {
+        payload.direccion_entrega = direccionEntrega;
+        payload.detalle_direccion = detalleDireccion || '';
+      }
+
+      const response = await fetch(`${API_URL}/payu/formulario`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'Error al generar formulario de PayU');
+      }
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = data.actionUrl;
+      form.style.display = 'none';
+
+      Object.entries(data.formData).forEach(([key, value]) => {
+        if (value === undefined || value === null) return;
+        if (typeof value === 'object') return;
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+
+      localStorage.setItem('payuProcessing', 'true');
+      localStorage.setItem('payuTimestamp', Date.now().toString());
+      localStorage.setItem('payuTipoServicio', tipoServicioSeleccionado);
+
+      if (tipoServicioSeleccionado === 'domicilio') {
+        localStorage.setItem('payuDireccionEntrega', direccionEntrega);
+        localStorage.setItem('payuDetalleDireccion', detalleDireccion || '');
+      } else {
+        localStorage.removeItem('payuDireccionEntrega');
+        localStorage.removeItem('payuDetalleDireccion');
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+    } catch (err) {
+      console.error('Error al iniciar pago PayU:', err);
+      setModal({
+        open: true,
+        message: err.message || 'Error al iniciar el pago con PayU. Intenta nuevamente.',
+        icon: <GoX className="GoX" />,
+        onConfirm: () => setModal({ ...modal, open: false }),
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const procesarPago = async () => {
     if (cartItems.length === 0) {
       setModal({
@@ -431,117 +625,67 @@ export default function Carrito() {
       return;
     }
 
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Llama al backend para generar el formulario de PayU
-      const response = await fetch(`${API_URL}/payu/formulario`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: cartItems,
-          buyerEmail: user.correo_usuario,
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Error al procesar pago');
-
-      // Verificar si está en modo sandbox
-      if (data.sandbox) {
-        console.log('🧪 Modo sandbox detectado:', data.message);
-
-        // Mostrar mensaje informativo de sandbox
+    setModal({
+      open: true,
+      message: '¿Deseas tu pedido para Mesa o Domicilio?',
+      icon: (
+        <GoCreditCard className="GoCreditCard" style={{ color: '#007bff', fontSize: '2.5rem' }} />
+      ),
+      confirmText: 'Mesa',
+      cancelText: 'Domicilio',
+      onConfirm: async () => {
+        setModal(prev => ({ ...prev, open: false }));
+        solicitarMesa(async () => {
+          await iniciarPagoPayU({ tipoServicioSeleccionado: 'mesa' });
+        });
+      },
+      onCancel: () => {
         setModal({
           open: true,
           message: (
             <div>
-              <h3 style={{ marginBottom: '10px' }}>🧪 Modo Prueba (Sandbox)</h3>
-              <p>Puedes probar el flujo completo de pago con tarjetas de prueba.</p>
-              <p>
-                <strong>Tarjetas de prueba:</strong>
-              </p>
-              <ul style={{ textAlign: 'left', marginTop: '10px' }}>
-                <li>
-                  ✅ <strong>Aprobada:</strong> 4097440000000004
-                </li>
-                <li>
-                  ❌ <strong>Rechazada:</strong> 4097440000000008
-                </li>
-                <li>
-                  ⏳ <strong>Pendiente:</strong> 4097440000000007
-                </li>
-              </ul>
-              <p style={{ marginTop: '10px', fontSize: '0.9em', color: '#666' }}>
-                CVV: 123 | Fecha: Cualquier fecha futura
-              </p>
+              <h3 style={{ marginBottom: '10px' }}>Datos para el domicilio</h3>
+              <input
+                type="text"
+                placeholder="Dirección"
+                id="direccion-payu"
+                className="input-modal"
+                style={{ width: '100%', marginBottom: '8px', padding: '6px' }}
+              />
+              <input
+                type="text"
+                placeholder="Apartamento / Piso / Habitación"
+                id="apartamento-payu"
+                className="input-modal"
+                style={{ width: '100%', marginBottom: '8px', padding: '6px' }}
+              />
             </div>
           ),
-          icon: <GoAlert className="GoAlert" style={{ fontSize: '2.5rem', color: '#2196f3' }} />,
-          onConfirm: () => {
-            setModal(m => ({ ...m, open: false }));
+          icon: <BsHouse className="BsHouse" style={{ color: '#ff5722', fontSize: '2.5rem' }} />,
+          confirmText: 'Confirmar domicilio',
+          cancelText: 'Cancelar',
+          onConfirm: async () => {
+            const direccionInput = document.getElementById('direccion-payu');
+            const apartamentoInput = document.getElementById('apartamento-payu');
+            const direccion = direccionInput ? direccionInput.value.trim() : '';
+            const detalle = apartamentoInput ? apartamentoInput.value.trim() : '';
 
-            // Marcar que estamos procesando un pago
-            localStorage.setItem('payuProcessing', 'true');
-            localStorage.setItem('payuTimestamp', Date.now().toString());
+            if (!direccion) {
+              alert('⚠️ Por favor ingresa la dirección');
+              return;
+            }
 
-            // Crear formulario y redirigir a PayU sandbox
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = data.actionUrl;
-            form.style.display = 'none';
-
-            // Agregar campos del formulario
-            Object.entries(data.formData).forEach(([key, value]) => {
-              const input = document.createElement('input');
-              input.type = 'hidden';
-              input.name = key;
-              input.value = value;
-              form.appendChild(input);
+            setModal(prev => ({ ...prev, open: false }));
+            await iniciarPagoPayU({
+              tipoServicioSeleccionado: 'domicilio',
+              direccionEntrega: direccion,
+              detalleDireccion: detalle,
             });
-
-            // Agregar formulario al DOM y enviarlo
-            document.body.appendChild(form);
-            form.submit();
           },
+          onCancel: () => setModal(m => ({ ...m, open: false })),
         });
-        return;
-      }
-
-      // Crear formulario dinámico para PayU real
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = data.actionUrl;
-      form.style.display = 'none';
-
-      // Agregar campos del formulario
-      Object.entries(data.formData).forEach(([key, value]) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = value;
-        form.appendChild(input);
-      });
-
-      // Marcar que estamos procesando un pago
-      localStorage.setItem('payuProcessing', 'true');
-      localStorage.setItem('payuTimestamp', Date.now().toString());
-
-      // Agregar formulario al DOM y enviarlo
-      document.body.appendChild(form);
-      form.submit();
-    } catch (error) {
-      console.error('Error al procesar pago con PayU:', error);
-      setModal({
-        open: true,
-        message: 'Error al procesar el pago con PayU. Intenta nuevamente.',
-        icon: <GoX className="GoX" />,
-        onConfirm: () => setModal({ ...modal, open: false }),
-      });
-    } finally {
-      setLoading(false);
-    }
+      },
+    });
   };
 
   const handleEliminarCarrito = () => {
@@ -580,27 +724,33 @@ export default function Carrito() {
 
       // Caso Mesa
       onConfirm: async () => {
-        try {
-          await confirmarPedido({
-            metodo_pago: 'efectivo',
-            tipo_servicio: 'mesa',
-          });
+        setModal(prev => ({ ...prev, open: false }));
+        solicitarMesa(async mesaAsignada => {
+          try {
+            await confirmarPedido({
+              metodo_pago: 'efectivo',
+              tipo_servicio: 'mesa',
+              id_mesa: mesaAsignada,
+            });
 
-          localStorage.removeItem('recomendacionesPedido');
-          setModal({
-            open: true,
-            message: '¡Pedido confirmado para Mesa y pago en efectivo!',
-            icon: <GoCheck className="GoCheck" style={{ color: '#00a600', fontSize: '2.5rem' }} />,
-            onConfirm: () => setModal(m => ({ ...m, open: false })),
-          });
-        } catch (error) {
-          setModal({
-            open: true,
-            message: `Error al confirmar el pedido en Mesa`,
-            icon: <GoX className="GoX" style={{ color: '#e53935', fontSize: '2.5rem' }} />,
-            onConfirm: () => setModal(m => ({ ...m, open: false })),
-          });
-        }
+            localStorage.removeItem('recomendacionesPedido');
+            setModal({
+              open: true,
+              message: '¡Pedido confirmado para Mesa y pago en efectivo!',
+              icon: (
+                <GoCheck className="GoCheck" style={{ color: '#00a600', fontSize: '2.5rem' }} />
+              ),
+              onConfirm: () => setModal(m => ({ ...m, open: false })),
+            });
+          } catch (error) {
+            setModal({
+              open: true,
+              message: `Error al confirmar el pedido en Mesa`,
+              icon: <GoX className="GoX" style={{ color: '#e53935', fontSize: '2.5rem' }} />,
+              onConfirm: () => setModal(m => ({ ...m, open: false })),
+            });
+          }
+        });
       },
 
       // Caso Domicilio
@@ -839,6 +989,27 @@ export default function Carrito() {
                     </div>
                   )}
                 </div>
+                <div className="carrito_mesa_resumen">
+                  <div className="carrito_mesa_resumen__label">{t('carrito_mesa_label')}</div>
+                  <div className="carrito_mesa_resumen__valor">
+                    {obtenerMesaActual() || t('carrito_mesa_sin_asignar')}
+                  </div>
+                  <div className="carrito_mesa_resumen__acciones">
+                    <button
+                      className="carrito_btn mesa"
+                      onClick={() => solicitarMesa(null, { forcePrompt: true })}
+                    >
+                      {t('carrito_mesa_cambiar')}
+                    </button>
+                    <button
+                      className="carrito_btn eliminar-mesa"
+                      onClick={limpiarMesa}
+                      disabled={!obtenerMesaActual()}
+                    >
+                      {t('carrito_mesa_eliminar')}
+                    </button>
+                  </div>
+                </div>
                 <div className="carrito_pedido_acciones">
                   <button className="carrito_btn eliminar" onClick={handleEliminarCarrito}>
                     <span className="text">{t('carrito_eliminar')}</span>
@@ -899,7 +1070,39 @@ export default function Carrito() {
         </div>
       </main>
       <Footer />
-      <DialogoModal {...modal} onClose={() => setModal(m => ({ ...m, open: false }))} />
+      <DialogoModal {...modal} onClose={() => setModal(m => ({ ...m, open: false }))}>
+        {modal.children || modal.message}
+      </DialogoModal>
+      <DialogoModal
+        open={mesaModal.open}
+        onClose={cerrarMesaModal}
+        icon={<IoCart />}
+        message={null}
+      >
+        <div className="carrito_mesa_modal">
+          <h3>{t('carrito_mesa_titulo')}</h3>
+          <p className="carrito_mesa_desc">{t('carrito_mesa_desc')}</p>
+          <input
+            type="number"
+            min="1"
+            placeholder={t('carrito_mesa_placeholder')}
+            value={mesaInput}
+            onChange={e => {
+              setMesaInput(e.target.value.replace(/[^0-9]/g, ''));
+              setMesaError('');
+            }}
+          />
+          {mesaError && <span className="carrito_mesa_error">{mesaError}</span>}
+          <div className="carrito_mesa_modal__acciones">
+            <button className="carrito_btn confirmar" onClick={confirmarMesaModal}>
+              {t('carrito_mesa_guardar')}
+            </button>
+            <button className="carrito_btn eliminar" onClick={cerrarMesaModal}>
+              {t('carrito_mesa_cancelar')}
+            </button>
+          </div>
+        </div>
+      </DialogoModal>
 
       {/* Estilos para animación de carga */}
       <style jsx>{`

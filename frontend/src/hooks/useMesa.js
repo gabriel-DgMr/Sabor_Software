@@ -14,5 +14,5 @@ export function useMesa() {
     }
   }, [location]);
 
-  return mesa;
+  return [mesa, setMesa];
 }

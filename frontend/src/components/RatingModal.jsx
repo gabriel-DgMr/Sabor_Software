@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaTimes, FaCheck, FaSpinner } from 'react-icons/fa';
 import StarRating from './StarRating';
 import PropTypes from 'prop-types';
+import { getImageUrl } from '../utils/imageUtils.js';
 
 const RatingModal = ({
   isOpen,

@@ -3,6 +3,43 @@ import mysql from "mysql2/promise";
 
 const pool = mysql.createPool(dbConfig);
 
+export const normalizeImagePath = (imagen) => {
+  if (!imagen) return null;
+
+  if (typeof imagen !== "string") {
+    try {
+      imagen = String(imagen);
+    } catch {
+      return null;
+    }
+  }
+
+  let trimmed = imagen.trim();
+
+  if (!trimmed) return null;
+
+  // Normalizar separadores de ruta
+  trimmed = trimmed.replace(/\\/g, "/");
+
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith("/uploads/")) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith("uploads/")) {
+    return `/${trimmed}`;
+  }
+
+  if (trimmed.startsWith("productos/")) {
+    return `/uploads/${trimmed}`;
+  }
+
+  return `/uploads/productos/${trimmed.replace(/^\/+/g, "")}`;
+};
+
 export const productoModel = {
   // Obtener todos los productos con filtros
   getAllProductos: async (filtros = {}) => {
@@ -18,11 +55,14 @@ export const productoModel = {
                     p.id_categoria AS id_categoria_producto,
                     c.nombre_categoria,
                     p.activo,
-                    p.calificacion,
-                    p.ventas
+                    p.calificacion AS calificacion_base,
+                    p.ventas,
+                    COALESCE(AVG(cp.calificacion), 0) AS calificacion_promedio,
+                    COUNT(cp.id_calificacion) AS total_calificaciones
                 FROM productos p 
                 LEFT JOIN categorias c ON p.id_categoria = c.id_categoria 
                 LEFT JOIN producto_traducciones pt ON pt.producto_id = p.id_producto AND pt.idioma = ?
+                LEFT JOIN calificaciones_productos cp ON cp.id_producto = p.id_producto
                 WHERE p.activo = 1
             `;
       const params = [idioma];
@@ -42,26 +82,57 @@ export const productoModel = {
         );
       }
       // Ordenamiento
+      sql += `
+        GROUP BY 
+          p.id_producto,
+          p.nombre_producto,
+          p.descripcion_producto,
+          pt.descripcion,
+          p.precio_producto,
+          p.imagen_producto,
+          p.id_categoria,
+          c.nombre_categoria,
+          p.activo,
+          p.calificacion,
+          p.ventas
+      `;
+
       if (filtros.orden === "precio_asc") {
         sql += " ORDER BY p.precio_producto ASC";
       } else if (filtros.orden === "precio_desc") {
         sql += " ORDER BY p.precio_producto DESC";
       } else if (filtros.orden === "calificacion") {
-        sql += " ORDER BY p.calificacion DESC";
+        sql += " ORDER BY calificacion_promedio DESC";
       } else if (filtros.orden === "ventas") {
         sql += " ORDER BY p.ventas DESC";
       } else {
         sql += " ORDER BY p.id_producto DESC";
       }
+
       const [rows] = await pool.query(sql, params);
 
       // Agregar la ruta base a la imagen
-      const productos = rows.map((producto) => ({
-        ...producto,
-        imagen_producto: producto.imagen_producto
-          ? `/uploads/productos/${producto.imagen_producto}`
-          : null,
-      }));
+      const productos = rows.map((producto) => {
+        const {
+          calificacion_base,
+          calificacion_promedio,
+          total_calificaciones,
+          ...resto
+        } = producto;
+
+        const promedio = Number(
+          calificacion_promedio ?? calificacion_base ?? 0,
+        );
+        const promedioValido = Number.isFinite(promedio) ? promedio : 0;
+
+        return {
+          ...resto,
+          imagen_producto: normalizeImagePath(resto.imagen_producto),
+          calificacion: promedioValido,
+          calificacion_promedio: promedioValido,
+          total_calificaciones: Number(total_calificaciones ?? 0),
+        };
+      });
 
       return productos;
     } catch (error) {
@@ -71,18 +142,63 @@ export const productoModel = {
   },
 
   // Obtener producto por ID
-  getProductoById: async (id) => {
+  getProductoById: async (id, idioma = "es") => {
     try {
       const [rows] = await pool.query(
-        "SELECT *, id_categoria AS id_categoria_producto FROM productos WHERE id_producto = ? AND activo = 1",
-        [id],
+        `
+        SELECT 
+          p.id_producto,
+          p.nombre_producto,
+          COALESCE(pt.descripcion, p.descripcion_producto) AS descripcion_producto,
+          p.precio_producto,
+          p.imagen_producto,
+          p.id_categoria AS id_categoria_producto,
+          c.nombre_categoria,
+          p.activo,
+          p.calificacion AS calificacion_base,
+          p.ventas,
+          COALESCE(AVG(cp.calificacion), 0) AS calificacion_promedio,
+          COUNT(cp.id_calificacion) AS total_calificaciones
+        FROM productos p
+        LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
+        LEFT JOIN producto_traducciones pt ON pt.producto_id = p.id_producto AND pt.idioma = ?
+        LEFT JOIN calificaciones_productos cp ON cp.id_producto = p.id_producto
+        WHERE p.id_producto = ? AND p.activo = 1
+        GROUP BY 
+          p.id_producto,
+          p.nombre_producto,
+          p.descripcion_producto,
+          pt.descripcion,
+          p.precio_producto,
+          p.imagen_producto,
+          p.id_categoria,
+          c.nombre_categoria,
+          p.activo,
+          p.calificacion,
+          p.ventas
+      `,
+        [idioma, id]
       );
+
       if (!rows[0]) return null;
-      const producto = rows[0];
-      producto.imagen_producto = producto.imagen_producto
-        ? `/uploads/productos/${producto.imagen_producto}`
-        : null;
-      return producto;
+
+      const {
+        calificacion_base,
+        calificacion_promedio,
+        total_calificaciones,
+        ...resto
+      } = rows[0];
+
+      const promedio = Number(calificacion_promedio ?? calificacion_base ?? 0);
+      const promedioValido = Number.isFinite(promedio) ? promedio : 0;
+
+      return {
+        ...resto,
+        imagen_producto: normalizeImagePath(resto.imagen_producto),
+        calificacion: promedioValido,
+        calificacion_promedio: promedioValido,
+        total_calificaciones: Number(total_calificaciones ?? 0),
+      };
     } catch (error) {
       throw new Error("Error al obtener producto: " + error.message);
     }

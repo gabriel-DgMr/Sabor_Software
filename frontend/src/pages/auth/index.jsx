@@ -129,8 +129,9 @@ const AuthPage = ({ isOpen, onClose }) => {
         return (
           <Register
             onRegisterSuccess={() => {
-              setPendingVerificationEmail(localStorage.getItem('pendingVerificationEmail') || '');
-              setView('verify-email');
+              const email = localStorage.getItem('pendingVerificationEmail') || '';
+              setPendingVerificationEmail(email);
+              setView(email ? 'verify-email' : 'login');
             }}
             onShowMessage={handleShowMessage}
           />

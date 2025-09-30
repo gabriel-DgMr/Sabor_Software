@@ -2,50 +2,17 @@ import * as authModel from "../models/authModel.js";
 import jwt from "jsonwebtoken";
 import validator from "validator";
 import { config } from "../config/config.js";
-import nodemailer from "nodemailer";
+import {
+  createEmailTransporter,
+  sendWithRetry,
+  createMailOptions,
+  shouldRetryError,
+} from "../config/emailConfig.js";
 
-// Configurar el transporter de nodemailer con configuración mejorada para producción
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // true para 465, false para otros puertos
-  auth: {
-    user: config.email.user,
-    pass: config.email.password,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-  connectionTimeout: 60000, // 60 segundos
-  greetingTimeout: 30000, // 30 segundos
-  socketTimeout: 60000, // 60 segundos
-  pool: true, // Usar pool de conexiones
-  maxConnections: 5, // Máximo 5 conexiones
-  maxMessages: 100, // Máximo 100 mensajes por conexión
-  rateDelta: 20000, // 20 segundos entre lotes
-  rateLimit: 5, // Máximo 5 emails por lote
-});
+// Usar la configuración centralizada de email optimizada para Railway
+const transporter = createEmailTransporter();
 
-// Función para enviar email con reintentos
-const sendWithRetry = async (mailOptions, maxRetries = 3) => {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const result = await transporter.sendMail(mailOptions);
-      console.log(`✅ Email enviado exitosamente (intento ${attempt})`);
-      return result;
-    } catch (error) {
-      console.error(`❌ Error en intento ${attempt}:`, error.message);
-
-      if (attempt === maxRetries) {
-        throw error;
-      }
-
-      // Esperar antes del siguiente intento
-      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-    }
-  }
-};
+// Las funciones sendWithRetry y shouldRetryError se importan desde emailConfig.js
 
 // Función para enviar email de verificación
 const sendVerificationEmail = async (
@@ -55,13 +22,41 @@ const sendVerificationEmail = async (
 ) => {
   try {
     console.log(
-      `📧 [${new Date().toISOString()}] Iniciando envío a: ${correo_usuario}`,
+      `📧 [${new Date().toISOString()}] ===== INICIANDO ENVÍO DE EMAIL DE VERIFICACIÓN =====`,
     );
+    console.log(`📧 Destinatario: ${correo_usuario}`);
+    console.log(`📧 Nombre usuario: ${nombre_usuario}`);
+    console.log(`📧 Código de verificación: ${codigo}`);
     console.log(`📧 Configuración email user: ${config.email.user}`);
+    console.log(
+      `📧 Configuración email password: ${config.email.password ? "***CONFIGURADO***" : "NO CONFIGURADO"}`,
+    );
+    console.log(`📧 NODE_ENV: ${process.env.NODE_ENV}`);
 
+    // Validar configuración de email
     if (!config.email.user || !config.email.password) {
+      console.error(
+        `❌ [${new Date().toISOString()}] ERROR: Configuración de email incompleta`,
+      );
+      console.error(`❌ EMAIL_USER: ${config.email.user || "NO CONFIGURADO"}`);
+      console.error(
+        `❌ EMAIL_PASSWORD: ${config.email.password ? "CONFIGURADO" : "NO CONFIGURADO"}`,
+      );
       throw new Error("Configuración de email no encontrada");
     }
+
+    // Validar formato de email
+    if (!correo_usuario || typeof correo_usuario !== "string") {
+      console.error(
+        `❌ [${new Date().toISOString()}] ERROR: Email destinatario inválido:`,
+        correo_usuario,
+      );
+      throw new Error("Email destinatario inválido");
+    }
+
+    console.log(
+      `✅ [${new Date().toISOString()}] Validaciones de configuración exitosas`,
+    );
 
     const mailOptions = {
       from: `"Sabor App" <${config.email.user}>`,
@@ -96,25 +91,44 @@ const sendVerificationEmail = async (
       },
     };
 
-    const result = await sendWithRetry(mailOptions);
+    console.log(
+      `📧 [${new Date().toISOString()}] Preparando envío con sendWithRetry...`,
+    );
+    const result = await sendWithRetry(transporter, mailOptions, 5);
 
     console.log(
-      `✅ [${new Date().toISOString()}] Email enviado exitosamente:`,
-      {
-        to: correo_usuario,
-        messageId: result.messageId,
-        response: result.response,
-      },
+      `✅ [${new Date().toISOString()}] ===== EMAIL ENVIADO EXITOSAMENTE =====`,
     );
+    console.log(`📧 Destinatario: ${correo_usuario}`);
+    console.log(`📧 Message ID: ${result.messageId}`);
+    console.log(`📧 Response: ${result.response}`);
+    console.log(`📧 Accepted: ${result.accepted}`);
+    console.log(`📧 Rejected: ${result.rejected}`);
+    console.log(`📧 Pending: ${result.pending}`);
 
     return result;
   } catch (error) {
-    console.error(`❌ [${new Date().toISOString()}] Error enviando email:`, {
-      to: correo_usuario,
-      error: error.message,
-      code: error.code,
-      response: error.response,
-    });
+    console.error(
+      `❌ [${new Date().toISOString()}] ===== ERROR ENVIANDO EMAIL =====`,
+    );
+    console.error(`❌ Destinatario: ${correo_usuario}`);
+    console.error(`❌ Error message: ${error.message}`);
+    console.error(`❌ Error code: ${error.code}`);
+    console.error(`❌ Error command: ${error.command}`);
+    console.error(`❌ Error response: ${error.response}`);
+    console.error(`❌ Error errno: ${error.errno}`);
+    console.error(`❌ Error syscall: ${error.syscall}`);
+    console.error(`❌ Error hostname: ${error.hostname}`);
+    console.error(`❌ Error port: ${error.port}`);
+    console.error(`❌ Stack trace:`, error.stack);
+
+    // Información adicional para diagnóstico
+    console.error(`❌ [${new Date().toISOString()}] Información del entorno:`);
+    console.error(`❌ NODE_ENV: ${process.env.NODE_ENV}`);
+    console.error(`❌ EMAIL_USER configurado: ${!!config.email.user}`);
+    console.error(`❌ EMAIL_PASSWORD configurado: ${!!config.email.password}`);
+    console.error(`❌ Transporter configurado: ${!!transporter}`);
+
     throw error;
   }
 };
@@ -183,13 +197,35 @@ export const registerUser = async (req, res) => {
     const codigo = await authModel.generateVerificationCode(userId);
 
     // Enviar email de verificación
+    console.log(
+      `📧 [${new Date().toISOString()}] ===== INICIANDO ENVÍO DE EMAIL DESPUÉS DEL REGISTRO =====`,
+    );
+    console.log(`📧 Usuario ID: ${userId}`);
+    console.log(`📧 Código generado: ${codigo}`);
+
     try {
       await sendVerificationEmail(correo_usuario, nombre_usuario, codigo);
-      console.log(`✅ Usuario ${nombre_usuario} registrado exitosamente`);
+      console.log(
+        `✅ [${new Date().toISOString()}] Usuario ${nombre_usuario} registrado exitosamente y email enviado`,
+      );
     } catch (emailError) {
-      console.error("❌ Error enviando email de verificación:", emailError);
-      // No fallar el registro si el email falla, pero logear el error
+      console.error(
+        `❌ [${new Date().toISOString()}] ERROR ENVIANDO EMAIL DE VERIFICACIÓN:`,
+        {
+          usuario: nombre_usuario,
+          email: correo_usuario,
+          userId: userId,
+          codigo: codigo,
+          error: emailError.message,
+          stack: emailError.stack,
+        },
+      );
+
+      // No fallar el registro si el email falla, pero logear el error detallado
       // El usuario puede solicitar reenvío de código después
+      console.log(
+        `⚠️ [${new Date().toISOString()}] El usuario fue registrado pero el email no se pudo enviar`,
+      );
     }
 
     res.status(201).json({
@@ -354,10 +390,8 @@ export const loginUser = async (req, res) => {
     let imagenUrl = null;
     if (user.imagen_usuario) {
       const baseUrl =
-        process.env.NODE_ENV === "production"
-          ? "https://sabor-production.up.railway.app"
-          : "http://localhost:3000";
-      imagenUrl = `${baseUrl}/api/auth/imagen-perfil/${user.imagen_usuario}`;
+        process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get("host")}`;
+      imagenUrl = `${baseUrl.replace(/\/$/, "")}/api/auth/imagen-perfil/${user.imagen_usuario}`;
     }
 
     const userWithImageUrl = {
@@ -411,10 +445,8 @@ export const getUserProfile = async (req, res) => {
     let imagenUrl = null;
     if (user.imagen_usuario) {
       const baseUrl =
-        process.env.NODE_ENV === "production"
-          ? "https://sabor-production.up.railway.app"
-          : "http://localhost:3000";
-      imagenUrl = `${baseUrl}/api/auth/imagen-perfil/${user.imagen_usuario}`;
+        process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get("host")}`;
+      imagenUrl = `${baseUrl.replace(/\/$/, "")}/api/auth/imagen-perfil/${user.imagen_usuario}`;
     }
 
     const userWithImageUrl = {

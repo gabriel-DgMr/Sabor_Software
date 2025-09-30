@@ -31,6 +31,8 @@
   "filtrar": "Filtrar",
   "buscar": "Buscar",
   "agregar": "Agregar",
+  "ver_mas": "Ver más",
+  "ver_menos": "Ver menos",
   "error_cargar_productos": "Error al cargar productos: {{error}}",
   "producto_agregado": "¡{{nombre}} agregado al carrito!",
   "crear_cuenta": "Crear Cuenta",
@@ -107,6 +109,7 @@
   "carrito_detalles_compra": "Detalles de compra",
   "carrito_detalles_compra_desc": "Aquí se mostrarán los detalles del pedido que usted seleccione (o del carrito actual).",
   "carrito_resumen": "Resumen del Carrito",
+  "carrito_burbuja_label": "Productos distintos en el carrito: {{count}}",
   "carrito_reintentar": "Reintentar",
   "carrito_confirmar_eliminar": "¿Estás seguro de que deseas eliminar todo el carrito?",
   "carrito_confirmar_cerrar": "¿Estás seguro de que deseas cerrar este pedido y crear uno nuevo?",
@@ -234,5 +237,18 @@
     "adding": "Agregando...",
     "add": "Agregar",
     "cancel": "Cancelar"
-  }
+  },
+  "carrito_mesa_titulo": "Mesa asignada",
+  "carrito_mesa_desc": "Ingresa el número de mesa donde recibirán el pedido. Si escaneaste un código QR, la mesa se llena automáticamente.",
+  "carrito_mesa_label": "Número de mesa",
+  "carrito_mesa_placeholder": "Ej. 12",
+  "carrito_mesa_guardar": "Guardar mesa",
+  "carrito_mesa_error": "Debes ingresar un número de mesa válido",
+  "carrito_mesa_confirmada": "Mesa {{mesa}} asignada correctamente",
+  "carrito_mesa_eliminada": "La mesa fue eliminada del pedido",
+  "carrito_mesa_cambiar": "Cambiar mesa",
+  "carrito_mesa_eliminar": "Eliminar mesa",
+  "carrito_mesa_sin_asignar": "Sin asignar",
+  "carrito_mesa_requerida": "Asigna una mesa antes de continuar",
+  "carrito_mesa_cancelar": "Cerrar"
 }

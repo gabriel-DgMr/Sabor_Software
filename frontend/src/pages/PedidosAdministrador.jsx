@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import MenuLateral from '../components/MenuLateralAdministrador';
+import { FiRefreshCcw, FiLoader, FiArrowRight } from 'react-icons/fi';
+import { GoCheck } from 'react-icons/go';
+import { TbPackage } from 'react-icons/tb';
 
 import {
   obtenerPedidos,
@@ -129,7 +132,7 @@ const PedidosAdministrador = () => {
               onClick={refrescarPedidos}
               title="Refrescar pedidos"
             >
-              Refrescar
+              <FiRefreshCcw className="icono" /> Refrescar
             </button>
           </div>
         </header>
@@ -179,13 +182,27 @@ const PedidosAdministrador = () => {
                       pedido.cambiandoEstado
                     }
                   >
-                    {pedido.cambiandoEstado
-                      ? '🔄 Actualizando...'
-                      : pedido.estado === 'completado'
-                        ? '✅ Completado'
-                        : pedido.estado === 'recibido'
-                          ? '📦 Recibido'
-                          : `➡️ Cambiar a ${mapearEstado(obtenerSiguienteEstado(pedido.estado))}`}
+                    {pedido.cambiandoEstado ? (
+                      <>
+                        <FiLoader className="icono icono-spin" />
+                        Actualizando...
+                      </>
+                    ) : pedido.estado === 'completado' ? (
+                      <>
+                        <GoCheck className="icono" />
+                        Completado
+                      </>
+                    ) : pedido.estado === 'recibido' ? (
+                      <>
+                        <TbPackage className="icono" />
+                        Recibido
+                      </>
+                    ) : (
+                      <>
+                        <FiArrowRight className="icono" />
+                        {`Cambiar a ${mapearEstado(obtenerSiguienteEstado(pedido.estado))}`}
+                      </>
+                    )}
                   </button>
                 </div>
                 <div className="pedido__info">

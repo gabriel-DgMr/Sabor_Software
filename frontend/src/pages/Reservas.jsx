@@ -108,7 +108,33 @@ const Reservas = () => {
     try {
       const response = await fetch(`/api/horarios/disponibles?fecha=${fecha}`);
       const data = await response.json();
-      setHorariosDisponibles(data.horariosDisponibles);
+      const ahora = new Date();
+
+      const horariosFiltrados = data.horariosDisponibles.map(horario => {
+        const horarioDate = new Date(`${fecha}T${horario.hora}`);
+
+        let disponible = horario.disponible;
+
+        if (!Number.isNaN(horarioDate.getTime())) {
+          disponible = disponible && horarioDate.getTime() > ahora.getTime();
+        }
+
+        return {
+          ...horario,
+          disponible,
+        };
+      });
+
+      setHorariosDisponibles(horariosFiltrados);
+
+      const horarioSeleccionadoEsValido = horariosFiltrados.some(
+        h => h.hora === selectedTime && h.disponible
+      );
+
+      if (!horarioSeleccionadoEsValido) {
+        setSelectedTime(null);
+        setFormData(prev => ({ ...prev, hora: '' }));
+      }
     } catch (error) {
       console.error('Error al cargar horarios disponibles:', error);
     }

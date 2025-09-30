@@ -1,16 +1,14 @@
 import { reservaModel } from "../models/reservaModel.js"; // Importar el nuevo modelo de reserva
 import * as authModel from "../models/authModel.js"; // Importar authModel para manejar clientes
-import nodemailer from "nodemailer";
+import {
+  createEmailTransporter,
+  sendWithRetry,
+  createMailOptions,
+} from "../config/emailConfig.js";
 import { config } from "../config/config.js";
 
-// Configurar el transporter de nodemailer
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: config.email.user,
-    pass: config.email.password,
-  },
-});
+// Usar la configuración centralizada de email optimizada para Railway
+const transporter = createEmailTransporter();
 
 /**
  * Maneja la solicitud para crear una nueva reserva.
@@ -219,7 +217,7 @@ export const hacerReserva = async (req, res) => {
   `,
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendWithRetry(transporter, mailOptions, 3);
 
     res
       .status(201)

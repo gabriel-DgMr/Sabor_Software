@@ -24,10 +24,10 @@ NODE_ENV=production
 # DB_PORT=3306
 
 # ============================================
-# CONFIGURACIÓN DE EMAIL (configurar manualmente)
+# CONFIGURACIÓN DE EMAIL CON BREVO (configurar manualmente)
 # ============================================
 EMAIL_USER=tu_email@gmail.com
-EMAIL_PASSWORD=tu_contraseña_de_aplicacion_gmail
+EMAIL_PASSWORD=tu_api_key_de_brevo
 
 # ============================================
 # CONFIGURACIÓN DE URLS (configurar con tu dominio de Railway)

@@ -370,6 +370,20 @@
     gap: 0.5rem;
 }
 
+.icono {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.icono-spin {
+    animation: rotate360 1s linear infinite;
+}
+
+@keyframes rotate360 {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 .pedidos__boton-refrescar:hover {
     background-color: var(--primary-600);
     transform: translateY(-2px);
@@ -3004,16 +3018,7 @@
   to { opacity: 1; }
 }
 
-.modal {
-  background-color: white;
-  border-radius: 1.2rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  max-width: 500px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  animation: slideIn 0.3s ease;
-}
+
 
 @keyframes slideIn {
   from { 
@@ -3214,10 +3219,7 @@
     font-size: 1.2rem;
   }
   
-  .modal {
-    margin: 1rem;
-    width: calc(100% - 2rem);
-  }
+  
   
   .modal__header {
     padding: 1.5rem;

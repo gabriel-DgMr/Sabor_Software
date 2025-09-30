@@ -7,55 +7,87 @@
  * @param {string} imagePath - Ruta de la imagen (ej: "/uploads/productos/imagen.png")
  * @returns {string} URL completa de la imagen
  */
+const stripTrailingSlash = value => value.replace(/\/?$/, '');
+
+const normalizarBaseUrl = rawUrl => {
+  if (!rawUrl) return '';
+
+  try {
+    // Segundo parámetro asegura compatibilidad con URLs relativas
+    const parsed = new URL(
+      rawUrl,
+      typeof window !== 'undefined' ? window.location.origin : 'http://localhost'
+    );
+    if (parsed.pathname.endsWith('/api')) {
+      parsed.pathname = parsed.pathname.replace(/\/api\/?$/, '');
+    }
+    return stripTrailingSlash(`${parsed.origin}${parsed.pathname}`);
+  } catch (error) {
+    console.warn('🖼️ getImageUrl: URL inválida en configuración', rawUrl, error);
+    return rawUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
+  }
+};
+
+const resolverBaseUrl = () => {
+  const envAssetUrl = normalizarBaseUrl(import.meta.env.VITE_ASSETS_BASE_URL);
+  if (envAssetUrl) return envAssetUrl;
+
+  const envApiUrl = normalizarBaseUrl(import.meta.env.VITE_API_URL);
+  if (envApiUrl) return envApiUrl;
+
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname } = window.location;
+    const puertoConfigurado = import.meta.env.VITE_BACKEND_PORT;
+
+    if (import.meta.env.DEV) {
+      // Cuando se expone el frontend via LAN, usar el hostname actual con el puerto de la API (por defecto 3000)
+      const puerto = puertoConfigurado || '3000';
+      return `${protocol}//${hostname}:${puerto}`;
+    }
+
+    const port = puertoConfigurado || window.location.port;
+    return port ? `${protocol}//${hostname}:${port}` : `${protocol}//${hostname}`;
+  }
+
+  // Fallback final: dominio público conocido
+  return 'https://sabor-production.up.railway.app';
+};
+
 export const getImageUrl = imagePath => {
   if (!imagePath) {
     console.log('🖼️ getImageUrl: imagePath vacío');
     return '';
   }
 
-  // Si la imagen ya tiene protocolo, devolverla tal como está
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    console.log('🖼️ getImageUrl: URL completa detectada:', imagePath);
+  if (/^https?:\/\//i.test(imagePath)) {
     return imagePath;
   }
 
-  // Obtener la URL base según el entorno
-  const getBaseUrl = () => {
-    // Usar variable de entorno si está disponible
-    if (import.meta.env.VITE_API_URL) {
-      // Remover '/api' del final si está presente para obtener la URL base
-      return import.meta.env.VITE_API_URL.replace('/api', '');
-    }
-
-    // En desarrollo, usar localhost
-    if (import.meta.env.DEV) {
-      return 'http://localhost:3000';
-    }
-
-    // En producción, usar Railway como fallback
-    return 'https://sabor-production.up.railway.app';
-  };
-
-  const baseUrl = getBaseUrl();
-
-  let finalUrl;
-  // Si la imagen empieza con /, usar la URL base directamente
-  if (imagePath.startsWith('/')) {
-    finalUrl = `${baseUrl}${imagePath}`;
-  } else {
-    // Si no empieza con /, agregar la ruta de uploads
-    finalUrl = `${baseUrl}/uploads/${imagePath}`;
+  const baseUrl = resolverBaseUrl();
+  if (!baseUrl) {
+    console.warn('🖼️ getImageUrl: baseUrl vacío, devolviendo ruta original');
+    return imagePath;
   }
+
+  const rutaNormalizada = imagePath.startsWith('/uploads/')
+    ? imagePath
+    : imagePath.startsWith('/productos/')
+      ? `/uploads${imagePath}`
+      : imagePath.startsWith('/')
+        ? imagePath
+        : `/uploads/${imagePath}`;
+
+  const urlFinal = `${baseUrl}${rutaNormalizada}`;
 
   console.log('🖼️ getImageUrl:', {
     input: imagePath,
     baseUrl,
-    output: finalUrl,
+    output: urlFinal,
     env: import.meta.env.DEV ? 'development' : 'production',
     viteApiUrl: import.meta.env.VITE_API_URL || 'no definida',
   });
 
-  return finalUrl;
+  return urlFinal;
 };
 
 /**

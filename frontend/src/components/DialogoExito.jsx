@@ -12,6 +12,7 @@ const DialogoModal = ({
   onConfirm = null,
   onCancel = null,
   duration = null,
+  children,
 }) => {
   if (!open) return null;
 
@@ -23,11 +24,10 @@ const DialogoModal = ({
           ×
         </button>
 
-        <span aria-label="icono" className="dialogo-modal__icon" role="img">
-          {icon}
-        </span>
-
-        <div className="dialogo-modal__message">{message}</div>
+        <div className="dialogo_exito__cuerpo">
+          {icon && <div className="dialogo_exito__icono">{icon}</div>}
+          {children ? children : <p>{message}</p>}
+        </div>
 
         {(confirmText || cancelText) && (
           <div className="dialogo-modal__actions">
@@ -51,13 +51,14 @@ const DialogoModal = ({
 DialogoModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func,
-  message: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
+  message: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   icon: PropTypes.node,
   confirmText: PropTypes.string,
   cancelText: PropTypes.string,
   onConfirm: PropTypes.func,
   onCancel: PropTypes.func,
   duration: PropTypes.number,
+  children: PropTypes.node,
 };
 
 export default DialogoModal;

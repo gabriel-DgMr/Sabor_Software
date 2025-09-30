@@ -23,19 +23,17 @@ const ProductoCard = React.memo(({ producto }) => {
   const [cantidad, setCantidad] = useState(1);
   const [peticion, setPeticion] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const handleMouseEnter = useCallback(() => {
-    setProductoExpandido(true);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setProductoExpandido(false);
-  }, []);
+  const descripcionId = `descripcion-producto-${producto.id_producto}`;
+  const descripcionLarga = (producto.descripcion_producto || '').length > 140;
 
   const handleAgregar = useCallback(() => {
     setDialogoAgregar(true);
     setCantidad(1);
     setPeticion('');
+  }, []);
+
+  const toggleDescripcion = useCallback(() => {
+    setProductoExpandido(prev => !prev);
   }, []);
 
   const handleConfirmarAgregar = async () => {
@@ -71,11 +69,7 @@ const ProductoCard = React.memo(({ producto }) => {
 
   return (
     <>
-      <div
-        className="productos__card-producto"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
+      <div className="productos__card-producto">
         <img
           alt={producto.nombre_producto}
           className="productos__imagen"
@@ -84,10 +78,16 @@ const ProductoCard = React.memo(({ producto }) => {
         <div className="productos__info">
           <h4 className="productos__nombre">{producto.nombre_producto}</h4>
           {/* Calificación en estrellas */}
-          <div className="productos__calificacion">
+          <div
+            className="productos__calificacion"
+            title={`Calificación promedio: ${Number(
+              producto.calificacion_promedio ?? producto.calificacion ?? 0
+            ).toFixed(1)} (${Number(producto.total_calificaciones ?? 0)} opiniones)`}
+          >
             {(() => {
               const estrellas = [];
-              const calificacion = Number(producto.calificacion) || 0;
+              const calificacion =
+                Number(producto.calificacion_promedio ?? producto.calificacion) || 0;
               for (let i = 1; i <= 5; i++) {
                 if (calificacion >= i) {
                   estrellas.push(
@@ -109,14 +109,28 @@ const ProductoCard = React.memo(({ producto }) => {
               return estrellas;
             })()}
             <span className="productos__calificacion-num">
-              {!isNaN(Number(producto.calificacion))
-                ? Number(producto.calificacion).toFixed(1)
+              {Number.isFinite(Number(producto.calificacion_promedio ?? producto.calificacion))
+                ? Number(producto.calificacion_promedio ?? producto.calificacion ?? 0).toFixed(1)
                 : '0.0'}
             </span>
           </div>
-          <p className={`productos__descripcion${productoExpandido ? ' expandida' : ''}`}>
+          <p
+            id={descripcionId}
+            className={`productos__descripcion${productoExpandido ? ' expandida' : ''}`}
+          >
             {producto.descripcion_producto}
           </p>
+          {descripcionLarga && (
+            <button
+              className="productos__toggle-boton"
+              type="button"
+              onClick={toggleDescripcion}
+              aria-expanded={productoExpandido}
+              aria-controls={descripcionId}
+            >
+              {productoExpandido ? t('ver_menos') : t('ver_mas')}
+            </button>
+          )}
           <div className="productos__footer">
             <p className="productos__precio">{FormatPriceCOP(producto.precio_producto)}</p>
             <button className="btn-agregarpr" onClick={handleAgregar} disabled={loading}>
