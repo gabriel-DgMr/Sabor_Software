@@ -288,7 +288,7 @@ const DashboardVentas = () => {
           </div>
 
           {/* Gráficas */}
-          <div className="charts-container">
+          <div className="charts-container charts-container--sales">
             <div className="chart-container chart-container--large line-chart">
               <div className="chart-title">Ventas por Día</div>
               <div className="chart-wrapper chart-wrapper--large">

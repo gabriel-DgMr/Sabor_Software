@@ -1,3 +1,35 @@
+.charts-container--sales {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+}
+
+.charts-container--sales .chart-container--large {
+  grid-column: 1 / span 1;
+}
+
+.charts-container--sales .chart-container--small {
+  grid-column: 2 / span 1;
+}
+.charts-container--clients {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+}
+
+.charts-container--clients .chart-container--large {
+  grid-column: 1 / span 1;
+}
+
+.charts-container--clients .chart-container--small {
+  grid-column: 2 / span 1;
+}
+
+@media (max-width: 1199px) {
+  .charts-container--clients {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .charts-container--clients .chart-container--small {
+    grid-column: 1 / span 1;
+  }
+}
 @media (min-width: 1200px) {
   .charts-container {
     grid-template-columns: 2fr 1fr;
@@ -16,6 +48,20 @@
 @media (max-width: 1199px) {
   .charts-container {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .chart-container--small {
+    grid-column: 1 / span 1;
+  }
+
+  .charts-container--clients,
+  .charts-container--sales {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .charts-container--clients .chart-container--small,
+  .charts-container--sales .chart-container--small {
+    grid-column: 1 / span 1;
   }
 }
 
@@ -111,9 +157,10 @@
 /* Contenedor de gráficas */
 .charts-container {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
   gap: 24px;
   margin-bottom: 32px;
+  align-items: stretch;
 }
 
 .chart-container {
@@ -125,9 +172,12 @@
   box-sizing: border-box;
 }
 
-.chart-container--large,
+.chart-container--large {
+  grid-column: 1 / span 1;
+}
+
 .chart-container--small {
-  width: 100%;
+  grid-column: 2 / span 1;
 }
 
 .chart-title {
