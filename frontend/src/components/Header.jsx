@@ -149,13 +149,6 @@ const Header = () => {
                       </Link>
                       <Link
                         className="menu-perfil__opcion"
-                        to="/mis-calificaciones"
-                        onClick={closeMobileMenu}
-                      >
-                        Mis Calificaciones
-                      </Link>
-                      <Link
-                        className="menu-perfil__opcion"
                         to="/actualizar-datos"
                         onClick={closeMobileMenu}
                       >
@@ -260,9 +253,6 @@ const Header = () => {
                     </Link>
                     <Link className="menu-perfil__opcion" to="/historial-reservas">
                       {t('ver_historial_reservas')}
-                    </Link>
-                    <Link className="menu-perfil__opcion" to="/mis-calificaciones">
-                      {t('mis_calificaciones')}
                     </Link>
                     {/* NUEVO: Botón historial de domicilios (escritorio) */}
                     <Link className="menu-perfil__opcion" to="/historial-domicilios">

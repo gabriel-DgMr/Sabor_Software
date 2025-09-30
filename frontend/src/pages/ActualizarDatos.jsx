@@ -170,7 +170,6 @@ const ActualizarDatos = () => {
       // Crear FormData para enviar datos con imagen
       const formData = new FormData();
       formData.append('nombre_usuario', nombre.trim());
-      formData.append('correo_usuario', correo.trim());
       formData.append('telefono_usuario', telefono.trim());
 
       // Si hay una nueva imagen, agregarla al FormData
@@ -320,7 +319,7 @@ const ActualizarDatos = () => {
                 placeholder="tucorreo@ejemplo.com"
                 type="email"
                 value={correo}
-                onChange={e => setCorreo(e.target.value)}
+                readOnly
               />
               {errors.correo && <p className="actualizar-datos__mensaje-error">{errors.correo}</p>}
             </div>

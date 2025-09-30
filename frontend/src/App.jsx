@@ -20,11 +20,12 @@ import CheckoutPayU from './pages/CheckoutPayU.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import DashboardVentas from './pages/DashboardVentas.jsx';
 import DashboardClientes from './pages/DashboardClientes.jsx';
+import DashboardEmpleados from './pages/DashboardEmpleados.jsx';
+import DashboardInventario from './pages/DashboardInventario.jsx';
 import HomeAdministrador from './pages/HomeAdministrador.jsx';
 import EscanearQR from './pages/EscanearQR.jsx';
 import HistorialPedidos from './pages/HistorialPedidos.jsx';
 import HistorialReservas from './pages/HistorialReservas.jsx';
-import MisCalificaciones from './pages/MisCalificaciones.jsx';
 import HistorialDomicilios from './pages/HistorialDomicilios.jsx';
 import Home from './pages/Home.jsx';
 import ModificarPedido from './pages/ModificarPedido.jsx';
@@ -109,7 +110,16 @@ function App() {
                   }
                   path="/administrar/panel/usuarios"
                 />
-                º
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <DashboardInventario />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/administrar/panel/inventario"
+                />
                 <Route
                   element={
                     <ProtectedRoute>
@@ -235,14 +245,6 @@ function App() {
                     </ProtectedRoute>
                   }
                   path="/historial-reservas"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <MisCalificaciones />
-                    </ProtectedRoute>
-                  }
-                  path="/mis-calificaciones"
                 />
                 <Route
                   element={

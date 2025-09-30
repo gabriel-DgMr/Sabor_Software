@@ -252,6 +252,7 @@ export const validarProducto = datos => {
     'descripcion_producto',
     'precio_producto',
     'id_categoria_producto',
+    'stock',
   ];
   camposRequeridos.forEach(campo => {
     const error = validarCampoRequerido(datos[campo], campo.replace('_producto', ''));
@@ -268,6 +269,11 @@ export const validarProducto = datos => {
 
   const precioError = validarPrecio(datos.precio_producto);
   if (precioError) errores.precio_producto = precioError;
+
+  const stockNumero = parseInt(datos.stock, 10);
+  if (isNaN(stockNumero) || stockNumero < 0) {
+    errores.stock = 'El stock debe ser un número entero mayor o igual a 0';
+  }
 
   const caracteresError = validarCaracteresEspeciales(datos.nombre_producto, 'nombre del producto');
   if (caracteresError) errores.nombre_producto = caracteresError;

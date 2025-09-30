@@ -296,6 +296,108 @@ export const usePDFGenerator = () => {
     return analysis;
   };
 
+  // Función para generar análisis textual de inventario
+  const generateInventoryAnalysis = metrics => {
+    if (!metrics) return '';
+
+    const { resumen = {}, productosStock = [], stockPorCategoria = [] } = metrics;
+
+    const {
+      total_productos = 0,
+      productos_bajos = 0,
+      productos_agotados = 0,
+      unidades_en_inventario = 0,
+      valor_estimado = 0,
+    } = resumen;
+
+    const productos_saludables = Math.max(
+      total_productos - productos_bajos - productos_agotados,
+      0
+    );
+
+    const formatCurrency = amount =>
+      new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0,
+      }).format(amount || 0);
+
+    const formatNumber = value =>
+      new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(value || 0);
+
+    let analysis = 'ANÁLISIS DE INVENTARIO\n\n';
+
+    analysis += 'RESUMEN EJECUTIVO:\n';
+    analysis += `• Total de productos en catálogo: ${formatNumber(total_productos)}\n`;
+    analysis += `• Unidades disponibles en inventario: ${formatNumber(unidades_en_inventario)}\n`;
+    analysis += `• Valor estimado del inventario: ${formatCurrency(valor_estimado)}\n`;
+    analysis += `• Productos con stock suficiente: ${formatNumber(productos_saludables)}\n`;
+    analysis += `• Productos con stock bajo: ${formatNumber(productos_bajos)}\n`;
+    analysis += `• Productos agotados: ${formatNumber(productos_agotados)}\n\n`;
+
+    if (productosStock && productosStock.length > 0) {
+      const agotados = productosStock.filter(p => (p.stock ?? 0) === 0).length;
+      const criticos = productosStock.filter(
+        p => (p.stock ?? 0) > 0 && (p.stock ?? 0) <= (p.stock_minimo ?? 5)
+      ).length;
+
+      analysis += 'ESTADO DE STOCK:\n';
+      analysis += `• Productos agotados: ${formatNumber(agotados)}\n`;
+      analysis += `• Productos en nivel crítico: ${formatNumber(criticos)}\n`;
+
+      const topCriticos = productosStock
+        .filter(p => (p.stock ?? 0) <= (p.stock_minimo ?? 5))
+        .slice(0, 5);
+
+      if (topCriticos.length > 0) {
+        analysis += '• Productos a reabastecer de forma prioritaria:\n';
+        topCriticos.forEach((producto, index) => {
+          analysis += `  ${index + 1}. ${producto.nombre_producto} - Stock actual: ${formatNumber(
+            producto.stock ?? 0
+          )} (mínimo recomendado: ${formatNumber(producto.stock_minimo ?? 5)})\n`;
+        });
+      }
+      analysis += '\n';
+    }
+
+    if (stockPorCategoria && stockPorCategoria.length > 0) {
+      const categoriaMayor = stockPorCategoria.reduce((acc, item) =>
+        (item.total_stock || 0) > (acc.total_stock || 0) ? item : acc
+      );
+      const categoriaMenor = stockPorCategoria.reduce((acc, item) =>
+        (item.total_stock || 0) < (acc.total_stock || 0) ? item : acc
+      );
+
+      analysis += 'DISTRIBUCIÓN POR CATEGORÍAS:\n';
+      analysis += `• Mayor concentración de inventario: ${categoriaMayor.categoria} (${formatNumber(
+        categoriaMayor.total_stock || 0
+      )} unidades)\n`;
+      analysis += `• Menor inventario disponible: ${categoriaMenor.categoria} (${formatNumber(
+        categoriaMenor.total_stock || 0
+      )} unidades)\n`;
+      analysis += '\n';
+    }
+
+    analysis += 'RECOMENDACIONES:\n';
+    if (productos_bajos > 0 || productos_agotados > 0) {
+      analysis += '• Priorizar pedidos de reposición para los productos en nivel crítico\n';
+    } else {
+      analysis +=
+        '• Mantener el monitoreo constante del inventario para evitar quiebres de stock\n';
+    }
+
+    if (valor_estimado > 0 && unidades_en_inventario > 0) {
+      const valorPromedio = valor_estimado / unidades_en_inventario;
+      analysis += `• Valor promedio por unidad: ${formatCurrency(valorPromedio)}\n`;
+    }
+
+    if (stockPorCategoria && stockPorCategoria.length > 0) {
+      analysis += '• Evaluar rotación de categorías con menor volumen para evitar inmovilización\n';
+    }
+
+    return analysis;
+  };
+
   const generatePDF = async (
     filename = 'dashboard-report.pdf',
     title = 'Reporte del Dashboard',
@@ -433,6 +535,9 @@ export const usePDFGenerator = () => {
             break;
           case 'employees':
             analysisText = generateEmployeesAnalysis(metrics);
+            break;
+          case 'inventory':
+            analysisText = generateInventoryAnalysis(metrics);
             break;
           default:
             analysisText = 'Análisis no disponible para este tipo de dashboard.';

@@ -35,6 +35,9 @@ export const productoService = {
       formData.append('descripcion_producto', producto.descripcion_producto);
       formData.append('precio_producto', producto.precio_producto);
       formData.append('id_categoria_producto', producto.id_categoria_producto);
+      if (producto.stock !== undefined) {
+        formData.append('stock', producto.stock);
+      }
 
       if (!producto.imagen_producto) {
         throw new Error('La imagen es obligatoria');
@@ -75,6 +78,9 @@ export const productoService = {
       formData.append('descripcion_producto', producto.descripcion_producto);
       formData.append('precio_producto', producto.precio_producto);
       formData.append('id_categoria_producto', producto.id_categoria_producto);
+      if (producto.stock !== undefined) {
+        formData.append('stock', producto.stock);
+      }
       if (producto.imagen_producto) {
         formData.append('imagen_producto', producto.imagen_producto);
       }
