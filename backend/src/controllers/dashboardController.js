@@ -340,7 +340,7 @@ export const dashboardController = {
            ${stockMaxSelect},
            c.nombre_categoria AS categoria
          FROM productos p
-         LEFT JOIN categorias c ON p.id_categoria_producto = c.id_categoria
+         LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
          ORDER BY stock ASC`,
       );
 
@@ -360,7 +360,7 @@ export const dashboardController = {
            SUM(COALESCE(p.stock, 0)) AS total_stock,
            COUNT(*) AS productos
          FROM productos p
-         LEFT JOIN categorias c ON p.id_categoria_producto = c.id_categoria
+         LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
          GROUP BY c.nombre_categoria
          ORDER BY total_stock ASC`,
       );
