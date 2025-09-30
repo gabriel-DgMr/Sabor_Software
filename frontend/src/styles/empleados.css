@@ -1086,10 +1086,9 @@
 .productos__layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
-    align-items: start;
     gap: 3rem;
     margin: 3rem auto;
-    width: min(1100px, 100%);
+    width: min(1200px, 100%);
     padding: 0 2rem;
     box-sizing: border-box;
 }
@@ -1659,23 +1658,23 @@
 .contenedor__productos-vista {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     width: 100%;
-    margin: 2rem;
+    gap: 2.5rem;
 }
 
 .productos__vista {
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    margin-bottom: 2rem;
+    align-items: stretch;
+    gap: 2rem;
 }
 
 .productos__vista-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
     width: 100%;
 }
 
@@ -1689,8 +1688,8 @@
 /* Responsive para tablets */
 @media screen and (max-width: 1024px) {
     .productos__vista-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.25rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.5rem;
     }
 }
 
@@ -1698,14 +1697,14 @@
 @media screen and (max-width: 768px) {
     .productos__vista-grid {
         grid-template-columns: 1fr;
-        gap: 1rem;
+        gap: 1.2rem;
     }
 }
 
 /* Ajustes para pantallas muy pequeñas */
 @media screen and (max-width: 480px) {
     .productos__vista-grid {
-        gap: 0.75rem;
+        gap: 1rem;
     }
 }
 
