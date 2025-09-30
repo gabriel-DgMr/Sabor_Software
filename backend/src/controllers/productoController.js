@@ -45,6 +45,7 @@ export const productoController = {
     try {
       console.log("Body recibido:", req.body);
       console.log("Archivo recibido:", req.file);
+      console.log("Headers recibidos:", req.headers);
 
       const {
         nombre_producto,
@@ -53,8 +54,17 @@ export const productoController = {
         id_categoria_producto,
         calificacion = 0,
         ventas = 0,
-        stock = 0,
       } = req.body;
+
+      // Validaciones adicionales de datos
+      console.log("Datos extra├¡dos:", {
+        nombre_producto,
+        descripcion_producto,
+        precio_producto,
+        id_categoria_producto,
+        calificacion,
+        ventas,
+      });
 
       // Validaciones
       if (!nombre_producto || !precio_producto || !id_categoria_producto) {
@@ -73,28 +83,23 @@ export const productoController = {
         return res.status(400).json({ message: "La imagen es obligatoria" });
       }
 
-      // Obtener el nombre de la categoría
+      // Obtener el nombre de la categor├¡a
       const categoria = await categoriaModel.getCategoriaById(
         id_categoria_producto,
       );
       if (!categoria) {
-        return res.status(400).json({ message: "Categoría no encontrada" });
+        return res.status(400).json({ message: "Categor├¡a no encontrada" });
       }
 
       // Crear el producto con el nombre temporal de la imagen
-      const imagenProductoPath = req.file
-        ? `productos/${req.file.filename}`
-        : null;
-
       const productoData = {
         nombre_producto,
         descripcion_producto,
         precio_producto,
         id_categoria_producto,
-        imagen_producto: imagenProductoPath,
+        imagen_producto: req.file.filename,
         calificacion: parseFloat(calificacion),
-        ventas: parseInt(ventas, 10),
-        stock: parseInt(stock, 10) || 0,
+        ventas: parseInt(ventas),
       };
 
       console.log("Nombre del archivo guardado en BD:", req.file.filename);
@@ -105,14 +110,24 @@ export const productoController = {
       // Crear el producto en la base de datos
       const nuevoProductoId = await productoModel.createProducto(productoData);
 
-      // Guardar traducción en inglés si viene en el body
+      // El uploadMiddleware ya proces├│ y renombr├│ la imagen
+      // No necesitamos renombrar nuevamente
+      console.log("Imagen procesada por uploadMiddleware:", req.file.filename);
+
+      // Guardar traducci├│n en ingl├®s si viene en el body
       const { descripcion_en } = req.body;
-      if (descripcion_en) {
-        await productoTraduccionModel.upsertProductoTraduccion(
-          nuevoProductoId,
-          "en",
-          descripcion_en,
-        );
+      if (descripcion_en && descripcion_en.trim() !== "") {
+        try {
+          await productoTraduccionModel.upsertProductoTraduccion(
+            nuevoProductoId,
+            "en",
+            descripcion_en,
+          );
+          console.log("Traducci├│n guardada exitosamente");
+        } catch (traduccionError) {
+          console.error("Error guardando traducci├│n:", traduccionError);
+          // No fallar la creaci├│n del producto por error en traducci├│n
+        }
       }
 
       // Enviar respuesta exitosa
@@ -122,9 +137,27 @@ export const productoController = {
       });
     } catch (error) {
       console.error("Error en createProducto:", error);
+      console.error("Stack trace:", error.stack);
+
+      // Limpiar archivo subido en caso de error
+      if (req.file && req.file.path) {
+        try {
+          const fs = await import("fs/promises");
+          await fs.unlink(req.file.path);
+          console.log("Archivo limpiado despu├®s del error:", req.file.path);
+        } catch (cleanupError) {
+          console.error("Error limpiando archivo:", cleanupError);
+        }
+      }
+
       res.status(500).json({
         message: "Error interno del servidor",
-        error: error.message,
+        error:
+          process.env.NODE_ENV === "development"
+            ? error.message
+            : "Error al crear el producto",
+        details:
+          process.env.NODE_ENV === "development" ? error.stack : undefined,
       });
     }
   },
@@ -139,7 +172,6 @@ export const productoController = {
         id_categoria_producto,
         calificacion,
         ventas,
-        stock,
       } = req.body;
 
       // Validaciones
@@ -151,7 +183,7 @@ export const productoController = {
 
       if (isNaN(precio_producto) || precio_producto <= 0) {
         return res.status(400).json({
-          error: "El precio debe ser un número positivo",
+          error: "El precio debe ser un n├║mero positivo",
         });
       }
 
@@ -161,13 +193,12 @@ export const productoController = {
         precio_producto,
         id_categoria_producto,
         calificacion: calificacion ? parseFloat(calificacion) : undefined,
-        ventas: ventas ? parseInt(ventas, 10) : undefined,
-        stock: stock !== undefined ? parseInt(stock, 10) : undefined,
+        ventas: ventas ? parseInt(ventas) : undefined,
       };
 
-      // Si se subió una nueva imagen, actualizar el nombre del archivo
+      // Si se subi├│ una nueva imagen, actualizar el nombre del archivo
       if (req.file) {
-        productoData.imagen_producto = `productos/${req.file.filename}`;
+        productoData.imagen_producto = req.file.filename;
       }
 
       const success = await productoModel.updateProducto(
@@ -179,7 +210,7 @@ export const productoController = {
         return res.status(404).json({ message: "Producto no encontrado" });
       }
 
-      // Guardar traducción en inglés si viene en el body
+      // Guardar traducci├│n en ingl├®s si viene en el body
       const { descripcion_en } = req.body;
       if (descripcion_en) {
         await productoTraduccionModel.upsertProductoTraduccion(
@@ -210,13 +241,24 @@ export const productoController = {
     }
   },
 
-  // Obtener productos por categoría
+  // Obtener productos por categor├¡a
   getProductosByCategoria: async (req, res) => {
     try {
       const productos = await productoModel.getProductosByCategoria(
         req.params.categoriaId,
       );
       res.json(productos);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // Obtener traducciones de un producto
+  getProductoTraducciones: async (req, res) => {
+    try {
+      const traducciones =
+        await productoTraduccionModel.getProductoTraducciones(req.params.id);
+      res.json(traducciones);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

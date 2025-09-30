@@ -15,6 +15,7 @@ import Footer from '../components/Footer.jsx';
 import Header from '../components/Header.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import { useCart } from '../context/useCart.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const API_URL = `${import.meta.env.VITE_API_URL || '/api'}`;
 
@@ -34,6 +35,7 @@ export default function Carrito() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const {
     cartItems,
     clearCart,
@@ -606,6 +608,17 @@ export default function Carrito() {
       setModal({
         open: true,
         message: 'El carrito está vacío.',
+        icon: <GoAlert className="GoAlert" />,
+        onConfirm: () => setModal({ ...modal, open: false }),
+      });
+      return;
+    }
+
+    // Verificar si el usuario está autenticado
+    if (!isAuthenticated || !user) {
+      setModal({
+        open: true,
+        message: 'Debes iniciar sesión para procesar el pago.',
         icon: <GoAlert className="GoAlert" />,
         onConfirm: () => setModal({ ...modal, open: false }),
       });

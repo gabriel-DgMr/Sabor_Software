@@ -63,7 +63,8 @@ const ProductosAdministrar = () => {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
 
-        const productos = await productoService.obtenerTodos();
+        // Usar getProductos con parámetro de idioma para consistencia
+        const productos = await productoService.getProductos({}, 'es');
 
         dispatch({ type: 'SET_PRODUCTOS', payload: productos });
       } catch (error) {
@@ -134,13 +135,31 @@ const ProductosAdministrar = () => {
     }));
   };
 
-  const handleEditProduct = producto => {
+  const handleEditProduct = async producto => {
     setIsEditing(true);
     setEditingProductId(producto.id_producto);
+
+    // Obtener traducciones existentes
+    let descripcion_en = '';
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || '/api'}/productos/${producto.id_producto}/traducciones`
+      );
+      if (response.ok) {
+        const traducciones = await response.json();
+        const traduccionEn = traducciones.find(t => t.idioma === 'en');
+        if (traduccionEn) {
+          descripcion_en = traduccionEn.descripcion;
+        }
+      }
+    } catch (error) {
+      console.error('Error al obtener traducciones:', error);
+    }
+
     setFormData({
       nombre_producto: producto.nombre_producto,
       descripcion_producto: producto.descripcion_producto,
-      descripcion_en: producto.descripcion_en || '',
+      descripcion_en: descripcion_en,
       precio_producto: producto.precio_producto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'),
       id_categoria_producto: producto.id_categoria_producto,
       imagen_producto: null,

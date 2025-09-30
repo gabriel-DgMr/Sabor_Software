@@ -422,3 +422,89 @@
     padding: 6px 4px;
   }
 }
+
+/* Mejoras adicionales para responsive */
+@media (max-width: 1200px) {
+  .dashboard-container {
+    padding: 20px;
+  }
+  
+  .metrics-grid {
+    gap: 20px;
+  }
+  
+  .charts-container {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboard-container {
+    padding: 16px;
+  }
+  
+  .dashboard-title {
+    font-size: 26px;
+  }
+  
+  .metrics-grid {
+    gap: 16px;
+  }
+  
+  .metric-card {
+    padding: 20px;
+    min-width: calc(50% - 8px);
+  }
+  
+  .charts-container {
+    gap: 16px;
+  }
+  
+  .chart-container {
+    min-width: 100%;
+    padding: 20px;
+  }
+}
+
+/* Mejoras específicas para orientación landscape en móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+  .metrics-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .metric-card {
+    flex: 1;
+    min-width: calc(50% - 6px);
+  }
+}
+
+/* Mejoras para accesibilidad en pantallas pequeñas */
+@media (max-width: 480px) {
+  .dashboard-header {
+    text-align: center;
+  }
+  
+  .metric-card {
+    text-align: center;
+  }
+  
+  .chart-title {
+    text-align: center;
+    font-size: 16px;
+  }
+  
+  .table-title {
+    text-align: center;
+    font-size: 16px;
+  }
+  
+  /* Mejoras para botones y elementos interactivos */
+  .status-badge,
+  .role-badge {
+    display: inline-block;
+    margin: 2px;
+    min-height: 24px;
+    line-height: 20px;
+  }
+}

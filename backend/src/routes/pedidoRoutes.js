@@ -1,28 +1,29 @@
 import express from "express";
 import {
+  // Funciones de pedidos
   getPedidos,
   deletePedido,
-  createPedido,
   updatePedido,
   updateEstadoPedido,
-} from "../controllers/pedidoController.js";
-import { authenticateToken, checkPermission } from "../middleware/auth.js";
-import { validatePedido } from "../middleware/validateRequest.js";
-
-const router = express.Router();
-
-// === RUTAS DE CARRITO ===
-import {
+  getPedidoById,
+  recibirPedido,
+  // Funciones de carrito
   getCarrito,
   addProductoCarrito,
   updateCantidadCarrito,
   removeProducto,
   vaciar,
   confirmar,
-  getPedidoById,
 } from "../controllers/pedidoController.js";
 
-// Carrito: todas protegidas
+import { authenticateToken, checkPermission } from "../middleware/auth.js";
+import { validatePedido } from "../middleware/validateRequest.js";
+
+const router = express.Router();
+
+//
+// === RUTAS DE CARRITO ===
+//
 router.get("/carrito", authenticateToken, getCarrito);
 router.post("/carrito/add", authenticateToken, addProductoCarrito);
 router.put("/carrito/update", authenticateToken, updateCantidadCarrito);
@@ -30,22 +31,20 @@ router.delete("/carrito/remove", authenticateToken, removeProducto);
 router.delete("/carrito/vaciar", authenticateToken, vaciar);
 router.post("/carrito/confirmar", authenticateToken, confirmar);
 
-// Rutas protegidas con validaciones
-router.post("/", authenticateToken, validatePedido, createPedido);
+//
+// === RUTAS DE PEDIDOS ===
+//
 
-// Permitir a admin ver todos los pedidos y a usuarios ver los suyos propios
+
+
+// Ver todos los pedidos (admin) o solo los propios (usuario)
 router.get(
   "/",
   authenticateToken,
   (req, res, next) => {
-    // Si el usuario tiene 'manage_orders', permitir
-    // Si tiene 'read_own', permitir pero solo sus pedidos
     const userPermissions = req.user?.permisos || req.user?.permissions || [];
-    if (userPermissions.includes("manage_orders")) {
-      return next();
-    }
+    if (userPermissions.includes("manage_orders")) return next();
     if (userPermissions.includes("read_own")) {
-      // Forzar filtro por usuario en el controlador
       req.onlyOwn = true;
       return next();
     }
@@ -59,9 +58,10 @@ router.get(
   getPedidos,
 );
 
-// Usar el controlador real para obtener pedido por id
+// Obtener pedido por ID
 router.get("/:id", authenticateToken, checkPermission("read"), getPedidoById);
 
+// Actualizar pedido
 router.put(
   "/:id",
   authenticateToken,
@@ -70,6 +70,7 @@ router.put(
   updatePedido,
 );
 
+// Eliminar pedido
 router.delete(
   "/:id",
   authenticateToken,
@@ -77,12 +78,15 @@ router.delete(
   deletePedido,
 );
 
-// Ruta para actualizar estado de pedido (solo administradores)
+// Actualizar estado del pedido
 router.patch(
   "/:id/estado",
   authenticateToken,
   checkPermission("manage_orders"),
   updateEstadoPedido,
 );
+
+// Marcar pedido como recibido
+router.patch("/recibir/:id", authenticateToken, recibirPedido);
 
 export default router;

@@ -50,9 +50,10 @@ export const productoModel = {
                     p.id_producto,
                     p.nombre_producto,
                     COALESCE(pt.descripcion, p.descripcion_producto) AS descripcion_producto,
+                    p.descripcion_producto AS descripcion_original,
                     p.precio_producto,
                     p.imagen_producto,
-                    p.id_categoria,
+                    p.id_categoria AS id_categoria_producto,
                     c.nombre_categoria,
                     p.activo,
                     p.calificacion AS calificacion_base,
@@ -152,7 +153,7 @@ export const productoModel = {
           COALESCE(pt.descripcion, p.descripcion_producto) AS descripcion_producto,
           p.precio_producto,
           p.imagen_producto,
-          p.id_categoria,
+          p.id_categoria AS id_categoria_producto,
           c.nombre_categoria,
           p.activo,
           p.calificacion AS calificacion_base,
@@ -288,49 +289,22 @@ export const productoModel = {
   getProductosByCategoria: async (categoriaId) => {
     try {
       const [rows] = await pool.query(
-        "SELECT * FROM productos WHERE id_categoria = ? AND activo = 1",
+        "SELECT *, id_categoria AS id_categoria_producto FROM productos WHERE id_categoria = ? AND activo = 1",
         [categoriaId],
       );
-      return rows;
+      const productos = rows.map((producto) => ({
+        ...producto,
+        imagen_producto: producto.imagen_producto
+          ? `/uploads/productos/${producto.imagen_producto}`
+          : null,
+      }));
+      return productos;
     } catch (error) {
       throw new Error(
         "Error al obtener productos por categoría: " + error.message,
       );
     }
   },
-};
-
-// Get Productos by Categoria
-
-export const getProductosByCategoria = async (categoria) => {
-  const pool = mysql.createPool(dbConfig);
-  const [rows] = await pool.query(
-    "SELECT * FROM productos WHERE categoria = ?",
-    [categoria],
-  );
-  return rows;
-};
-
-// Search Productos
-
-export const searchProductos = async (searchTerm) => {
-  const pool = mysql.createPool(dbConfig);
-  const [rows] = await pool.query(
-    "SELECT * FROM productos WHERE nombre LIKE ? OR descripcion LIKE ? OR ingredientes LIKE ?",
-    [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`],
-  );
-  return rows;
-};
-
-// Update Producto Stock
-
-export const updateProductoStock = async (id, cantidad) => {
-  const pool = mysql.createPool(dbConfig);
-  const [result] = await pool.query(
-    "UPDATE productos SET cantidad = cantidad + ? WHERE id = ?",
-    [cantidad, id],
-  );
-  return result.affectedRows;
 };
 
 // Funciones para traducciones de productos
@@ -346,6 +320,20 @@ const upsertProductoTraduccion = async (producto_id, idioma, descripcion) => {
   return result;
 };
 
+// Obtener todas las traducciones de un producto
+const getProductoTraducciones = async (producto_id) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT idioma, descripcion FROM producto_traducciones WHERE producto_id = ?`,
+      [producto_id],
+    );
+    return rows;
+  } catch (error) {
+    throw new Error("Error al obtener traducciones: " + error.message);
+  }
+};
+
 export const productoTraduccionModel = {
   upsertProductoTraduccion,
+  getProductoTraducciones,
 };

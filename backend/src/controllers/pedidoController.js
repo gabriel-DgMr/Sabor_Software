@@ -1,17 +1,28 @@
 import {
   getPedidos as getPedidosFromModel,
-  deletePedido as deletePedidoFromModel,
-  createPedido as createPedidoFromModel,
-  updatePedido as updatePedidoFromModel,
   getAllPedidosForAdmin,
+  getPedidoById as getPedidoByIdFromModel,
   updatePedidoEstado,
+  updatePedidoById,
+  deletePedidoById,
+  marcarPedidoRecibido,
+  getCarritoByUser,
+  createCarrito,
+  addOrUpdateProducto,
+  updateCantidadProducto,
+  removeProducto as removeProductoFromModel,
+  vaciar as vaciarFromModel,
+  confirmarPedido,
 } from "../models/pedidoModel.js";
 import { dbConfig } from "../config/dbconfig.js";
 import mysql from "mysql2/promise";
 
 const pool = mysql.createPool(dbConfig);
 
-// Obtener todos los pedidos
+// =====================
+// PEDIDOS
+// =====================
+
 export const getPedidos = async (req, res) => {
   try {
     let pedidos;
@@ -33,219 +44,91 @@ export const getPedidos = async (req, res) => {
   }
 };
 
-// Eliminar un pedido
-export const deletePedido = async (req, res) => {
+export const getPedidoById = async (req, res) => {
   try {
     const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({ mensaje: "ID de pedido no proporcionado" });
-    }
-
-    const pedido = await deletePedidoFromModel(id);
-
+    const userId = req.user.id;
+    const pedido = await getPedidoByIdFromModel(userId, id);
     if (!pedido) {
       return res.status(404).json({ mensaje: "Pedido no encontrado" });
     }
-
-    res.json({
-      mensaje: "Pedido cancelado exitosamente",
-      pedido,
-    });
+    res.json(pedido);
   } catch (error) {
-    console.error("Error en deletePedido:", error);
-    res.status(500).json({
-      mensaje: "Error al cancelar el pedido",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    console.error("Error en getPedidoById:", error);
+    res.status(500).json({ 
+      mensaje: "Error al obtener el pedido", 
+      error: process.env.NODE_ENV === "development" ? error.message : undefined 
     });
   }
 };
 
-// Crear un nuevo pedido (desde el carrito)
-export const createPedido = async (req, res) => {
-  try {
-    const { items, total, recomendaciones } = req.body;
-    const userId = req.user.id; // Asumiendo que el middleware de autenticación añade el ID del cliente
-
-    // Validaciones
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({
-        mensaje: "La lista de items es requerida y debe ser un array no vacío",
-      });
-    }
-
-    // Validar cada item en el array
-    for (const item of items) {
-      if (!item.id_producto || typeof item.id_producto !== "number") {
-        return res.status(400).json({
-          mensaje: "Cada item debe tener un id_producto numérico válido",
-        });
-      }
-      if (
-        !item.cantidad ||
-        typeof item.cantidad !== "number" ||
-        item.cantidad <= 0
-      ) {
-        return res.status(400).json({
-          mensaje: "Cada item debe tener una cantidad numérica positiva",
-        });
-      }
-      if (
-        !item.precio_unitario ||
-        typeof item.precio_unitario !== "number" ||
-        item.precio_unitario < 0
-      ) {
-        return res.status(400).json({
-          mensaje:
-            "Cada item debe tener un precio_unitario numérico no negativo",
-        });
-      }
-    }
-
-    if (!total || typeof total !== "number" || total <= 0) {
-      return res.status(400).json({
-        mensaje: "El total es requerido y debe ser un número positivo",
-      });
-    }
-
-    // Validar recomendaciones (opcional, puede ser un string vacío)
-    if (recomendaciones !== undefined && typeof recomendaciones !== "string") {
-      return res
-        .status(400)
-        .json({ mensaje: "Las recomendaciones deben ser un string" });
-    }
-
-    const pedidoGuardado = await createPedidoFromModel({
-      userId,
-      items,
-      total,
-      recomendaciones,
-    });
-
-    res.status(201).json(pedidoGuardado);
-  } catch (error) {
-    console.error("Error en createPedido:", error);
-    res.status(400).json({
-      mensaje: error.message || "Error al crear el pedido",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
-    });
-  }
-};
-
-// Actualizar un pedido
 export const updatePedido = async (req, res) => {
   try {
     const { id } = req.params;
-    const { items, total } = req.body;
+    const actualizado = await updatePedidoById(id, req.body);
+    if (!actualizado) return res.status(404).json({ mensaje: "Pedido no encontrado" });
+    res.json({ mensaje: "Pedido actualizado", pedido: actualizado });
+  } catch (error) {
+    console.error("Error en updatePedido:", error);
+    res.status(500).json({ 
+      mensaje: "Error al actualizar el pedido", 
+      error: process.env.NODE_ENV === "development" ? error.message : undefined 
+    });
+  }
+};
 
+export const deletePedido = async (req, res) => {
+  try {
+    const { id } = req.params;
     if (!id) {
       return res.status(400).json({ mensaje: "ID de pedido no proporcionado" });
     }
-
-    // Validaciones
-    if (items && (!Array.isArray(items) || items.length === 0)) {
-      return res
-        .status(400)
-        .json({ mensaje: "La lista de items debe ser un array no vacío" });
-    }
-
-    if (total && (typeof total !== "number" || total <= 0)) {
-      return res
-        .status(400)
-        .json({ mensaje: "El total debe ser un número positivo" });
-    }
-
-    const pedido = await updatePedidoFromModel(id, { items, total });
-
-    if (!pedido) {
-      return res.status(404).json({ mensaje: "Pedido no encontrado" });
-    }
-
-    res.json(pedido);
+    const eliminado = await deletePedidoById(id);
+    if (!eliminado) return res.status(404).json({ mensaje: "Pedido no encontrado" });
+    res.json({ mensaje: "Pedido eliminado correctamente" });
   } catch (error) {
-    console.error("Error en updatePedido:", error);
-    res.status(400).json({
-      mensaje: "Error al actualizar el pedido",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    console.error("Error en deletePedido:", error);
+    res.status(500).json({ 
+      mensaje: "Error al eliminar el pedido", 
+      error: process.env.NODE_ENV === "development" ? error.message : undefined 
     });
   }
 };
 
-// === CONTROLADORES DE CARRITO ===
-import {
-  getCarritoByUser,
-  createCarrito,
-  addOrUpdateProductoCarrito,
-  updateCantidadProductoCarrito,
-  removeProductoCarrito,
-  vaciarCarrito,
-  confirmarPedido,
-} from "../models/pedidoModel.js";
+export const recibirPedido = async (req, res) => {
+  try {
+    const recibido = await marcarPedidoRecibido(req.user.id, req.params.id);
+    if (!recibido) return res.status(404).json({ mensaje: "Pedido no encontrado o no autorizado" });
+    res.json({ mensaje: "Pedido marcado como recibido", pedidoId: req.params.id });
+  } catch (error) {
+    console.error("Error en recibirPedido:", error);
+    res.status(500).json({ 
+      mensaje: "Error al marcar como recibido", 
+      error: process.env.NODE_ENV === "development" ? error.message : undefined 
+    });
+  }
+};
 
-// Obtener el carrito actual del cliente
+// =====================
+// CARRITO
+// =====================
+
 export const getCarrito = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const carrito = await getCarritoByUser(userId);
+    let carrito = await getCarritoByUser(req.user.id);
     if (!carrito) {
-      // Si no hay carrito, crear uno vacío
-      const id_pedido = await createCarrito(userId);
-      return res.json({ id_pedido, items: [] });
+      const id_pedido = await createCarrito(req.user.id);
+      carrito = { id_pedido, items: [] };
     }
-    // Asegurar que siempre haya una propiedad 'items' (aunque esté vacía)
-    if (!carrito.items) {
-      carrito.items = [];
-    }
+    if (!carrito.items) carrito.items = [];
     res.json(carrito);
   } catch (error) {
     console.error("Error en getCarrito:", error);
-    res
-      .status(500)
-      .json({ mensaje: "Error al obtener el carrito", error: error.message });
+    res.status(500).json({ mensaje: "Error al obtener el carrito", error: error.message });
   }
 };
 
-// Agregar producto al carrito
 export const addProductoCarrito = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { id_producto, cantidad, id_mesa } = req.body;
-    if (!id_producto || !cantidad || cantidad <= 0) {
-      return res.status(400).json({
-        mensaje:
-          "id_producto y cantidad son requeridos y cantidad debe ser mayor a 0",
-      });
-    }
-    let mesaNormalizada = null;
-    if (id_mesa !== undefined && id_mesa !== null && id_mesa !== "") {
-      mesaNormalizada = Number(id_mesa);
-      if (Number.isNaN(mesaNormalizada) || mesaNormalizada <= 0) {
-        return res
-          .status(400)
-          .json({ mensaje: "id_mesa debe ser un número positivo" });
-      }
-    }
-    const id_pedido = await addOrUpdateProductoCarrito(
-      userId,
-      id_producto,
-      cantidad,
-      mesaNormalizada,
-    );
-    res.json({
-      mensaje: "Producto agregado/actualizado en el carrito",
-      id_pedido,
-    });
-  } catch (error) {
-    console.error("Error en addProductoCarrito:", error);
-    res.status(500).json({
-      mensaje: error.message || "Error al agregar producto al carrito",
-      error: error.message,
-    });
-  }
-};
-
-// Modificar cantidad de un producto en el carrito
-export const updateCantidadCarrito = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id_producto, cantidad } = req.body;
@@ -255,60 +138,65 @@ export const updateCantidadCarrito = async (req, res) => {
           "id_producto y cantidad son requeridos y cantidad debe ser mayor a 0",
       });
     }
-    const id_pedido = await updateCantidadProductoCarrito(
+
+    const id_pedido = await addOrUpdateProducto(
       userId,
       id_producto,
-      cantidad,
+      cantidad
     );
+    res.json({
+      mensaje: "Producto agregado/actualizado en el carrito",
+      id_pedido,
+    });
+  } catch (error) {
+    console.error("Error en addProductoCarrito:", error);
+    res.status(500).json({ mensaje: error.message });
+  }
+};
+
+export const updateCantidadCarrito = async (req, res) => {
+  try {
+    const { id_producto, cantidad } = req.body;
+    if (!id_producto || !cantidad || cantidad <= 0)
+      return res.status(400).json({ mensaje: "id_producto y cantidad son requeridos" });
+
+    const id_pedido = await updateCantidadProducto(req.user.id, id_producto, cantidad);
     res.json({ mensaje: "Cantidad actualizada", id_pedido });
   } catch (error) {
     console.error("Error en updateCantidadCarrito:", error);
-    res.status(500).json({
-      mensaje: error.message || "Error al actualizar cantidad",
-      error: error.message,
-    });
+    res.status(500).json({ mensaje: error.message });
   }
 };
 
-// Eliminar producto del carrito
 export const removeProducto = async (req, res) => {
   try {
-    const userId = req.user.id;
     const { id_producto } = req.body;
-    if (!id_producto) {
-      return res.status(400).json({ mensaje: "id_producto es requerido" });
-    }
-    const id_pedido = await removeProductoCarrito(userId, id_producto);
+    if (!id_producto) return res.status(400).json({ mensaje: "id_producto es requerido" });
+
+    const id_pedido = await removeProductoFromModel(req.user.id, id_producto);
     res.json({ mensaje: "Producto eliminado del carrito", id_pedido });
   } catch (error) {
     console.error("Error en removeProducto:", error);
-    res
-      .status(500)
-      .json({ mensaje: "Error al eliminar producto", error: error.message });
+    res.status(500).json({ mensaje: error.message });
   }
 };
 
-// Vaciar carrito
 export const vaciar = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const id_pedido = await vaciarCarrito(userId);
+    const id_pedido = await vaciarFromModel(req.user.id);
     res.json({ mensaje: "Carrito vaciado", id_pedido });
   } catch (error) {
     console.error("Error en vaciar:", error);
-    res
-      .status(500)
-      .json({ mensaje: "Error al vaciar carrito", error: error.message });
+    res.status(500).json({ mensaje: error.message });
   }
 };
 
-// Confirmar pedido (finalizar carrito)
+// =====================
+// CONFIRMAR PEDIDO
+// =====================
+
 export const confirmar = async (req, res) => {
   try {
-    console.log("🔄 ===== CONFIRMANDO PEDIDO EN BACKEND =====");
-    const userId = req.user?.id;
-    console.log("👤 Usuario ID:", userId);
-
     const {
       metodo_pago,
       tipo_servicio,
@@ -328,15 +216,14 @@ export const confirmar = async (req, res) => {
       referencia_pago,
       estado_pago,
       recomendaciones,
-      id_mesa,
-      userId,
+      userId: req.user.id,
     });
 
     // Validaciones
     if (!metodo_pago) {
       return res.status(400).json({ mensaje: "metodo_pago es requerido" });
     }
-    if (!userId) {
+    if (!req.user.id) {
       return res.status(401).json({ mensaje: "Usuario no autenticado" });
     }
     if (!tipo_servicio || !["mesa", "domicilio"].includes(tipo_servicio)) {
@@ -348,43 +235,18 @@ export const confirmar = async (req, res) => {
         .json({ mensaje: "direccion_entrega es requerida para domicilio" });
     }
 
-    let mesaNormalizada = null;
-    if (id_mesa !== undefined && id_mesa !== null && id_mesa !== "") {
-      mesaNormalizada = Number(id_mesa);
-      if (Number.isNaN(mesaNormalizada) || mesaNormalizada <= 0) {
-        return res
-          .status(400)
-          .json({ mensaje: "id_mesa debe ser un número positivo" });
-      }
-      const [mesaExiste] = await pool.query(
-        "SELECT id_mesa FROM mesas WHERE id_mesa = ?",
-        [mesaNormalizada],
-      );
-      if (mesaExiste.length === 0) {
-        return res.status(400).json({ mensaje: "La mesa indicada no existe" });
-      }
-    }
-
-    if (tipo_servicio === "mesa" && !mesaNormalizada) {
-      return res
-        .status(400)
-        .json({ mensaje: "id_mesa es requerido para pedidos en mesa" });
-    }
-
     console.log("🚀 Llamando a confirmarPedido del modelo...");
     const id_pedido = await confirmarPedido(
-      userId,
+      req.user.id,
       metodo_pago,
       tipo_servicio,
       direccion_entrega,
       detalle_direccion,
       referencia_pago,
       estado_pago,
-      recomendaciones,
-      mesaNormalizada,
+      recomendaciones
     );
 
-    console.log("✅ Pedido confirmado con ID:", id_pedido);
     res.json({ mensaje: "Pedido confirmado", id_pedido });
   } catch (error) {
     console.error("[Pedido][Confirmar] Error:", {
@@ -396,27 +258,6 @@ export const confirmar = async (req, res) => {
     res
       .status(500)
       .json({ mensaje: "Error al confirmar pedido", error: error.message });
-  }
-};
-
-// Obtener un pedido por ID
-export const getPedidoById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user.id;
-    // Buscar el pedido por id y cliente
-    const [pedidos] = await import("../models/pedidoModel.js").then((m) =>
-      m.getPedidoById(userId, id),
-    );
-    if (!pedidos) {
-      return res.status(404).json({ mensaje: "Pedido no encontrado" });
-    }
-    res.json(pedidos);
-  } catch (error) {
-    console.error("Error en getPedidoById:", error);
-    res
-      .status(500)
-      .json({ mensaje: "Error al obtener el pedido", error: error.message });
   }
 };
 

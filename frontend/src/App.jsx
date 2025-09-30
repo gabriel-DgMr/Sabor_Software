@@ -57,7 +57,6 @@ function App() {
                 <Route element={<Login />} path="/login" />
                 <Route element={<Register />} path="/register" />
                 <Route element={<ResetPasswordContainer />} path="/reset-password/:token" />
-
                 {/* Ruta de redirección automática basada en roles */}
                 <Route element={<RoleBasedRedirect />} path="/redirect" />
                 <Route element={<Reservas />} path="/reservas" />
@@ -69,9 +68,7 @@ function App() {
                 <Route element={<SobreNosotros />} path="/sobre-nosotros" />
                 <Route element={<EscanearQR />} path="/escanear-qr" />
                 <Route element={<LoadingScreen />} path="/loading-screen" />
-
                 {/* ------------------- Rutas protegidas ------------------- */}
-
                 {/* Administrador */}
                 <Route
                   element={
@@ -112,16 +109,6 @@ function App() {
                     </ProtectedRoute>
                   }
                   path="/administrar/panel/usuarios"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <DashboardEmpleados />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrar/panel/trabajadores"
                 />
                 <Route
                   element={
@@ -183,7 +170,6 @@ function App() {
                   }
                   path="/administrador/domicilios"
                 />
-
                 {/* Empleados */}
                 <Route
                   element={
@@ -235,7 +221,6 @@ function App() {
                   }
                   path="/empleado/reservaciones"
                 />
-
                 {/* Usuario autenticado */}
                 <Route
                   element={
@@ -269,7 +254,6 @@ function App() {
                   }
                   path="/historial-domicilios"
                 />
-
                 {/* Ruta 404 */}
                 <Route element={<PaginaNoEncontrada />} path="*" />
               </Routes>

@@ -17,6 +17,7 @@ router.get("/", productoController.getAllProductos);
 
 // Rutas protegidas / acceso público a producto individual
 router.get("/:id", productoController.getProductoById);
+router.get("/:id/traducciones", productoController.getProductoTraducciones);
 router.get(
   "/categoria/:categoriaId",
   authenticateToken,
