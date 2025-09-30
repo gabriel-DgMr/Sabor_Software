@@ -50,6 +50,7 @@ export const productoModel = {
                     p.id_producto,
                     p.nombre_producto,
                     COALESCE(pt.descripcion, p.descripcion_producto) AS descripcion_producto,
+                    p.descripcion_producto AS descripcion_original,
                     p.precio_producto,
                     p.imagen_producto,
                     p.id_categoria AS id_categoria_producto,
@@ -306,39 +307,6 @@ export const productoModel = {
   },
 };
 
-// Get Productos by Categoria
-
-export const getProductosByCategoria = async (categoria) => {
-  const pool = mysql.createPool(dbConfig);
-  const [rows] = await pool.query(
-    "SELECT * FROM productos WHERE categoria = ?",
-    [categoria],
-  );
-  return rows;
-};
-
-// Search Productos
-
-export const searchProductos = async (searchTerm) => {
-  const pool = mysql.createPool(dbConfig);
-  const [rows] = await pool.query(
-    "SELECT * FROM productos WHERE nombre LIKE ? OR descripcion LIKE ? OR ingredientes LIKE ?",
-    [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`],
-  );
-  return rows;
-};
-
-// Update Producto Stock
-
-export const updateProductoStock = async (id, cantidad) => {
-  const pool = mysql.createPool(dbConfig);
-  const [result] = await pool.query(
-    "UPDATE productos SET cantidad = cantidad + ? WHERE id = ?",
-    [cantidad, id],
-  );
-  return result.affectedRows;
-};
-
 // Funciones para traducciones de productos
 const upsertProductoTraduccion = async (producto_id, idioma, descripcion) => {
   if (!descripcion) return;
@@ -352,6 +320,20 @@ const upsertProductoTraduccion = async (producto_id, idioma, descripcion) => {
   return result;
 };
 
+// Obtener todas las traducciones de un producto
+const getProductoTraducciones = async (producto_id) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT idioma, descripcion FROM producto_traducciones WHERE producto_id = ?`,
+      [producto_id],
+    );
+    return rows;
+  } catch (error) {
+    throw new Error("Error al obtener traducciones: " + error.message);
+  }
+};
+
 export const productoTraduccionModel = {
   upsertProductoTraduccion,
+  getProductoTraducciones,
 };
