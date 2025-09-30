@@ -304,9 +304,8 @@ export const dashboardController = {
     try {
       console.log("Iniciando consulta de métricas de inventario...");
 
-      const [[{ database }]] = await pool.query(
-        "SELECT DATABASE() AS database",
-      );
+      const [[currentDb]] = await pool.query("SELECT DATABASE() AS db_name");
+      const database = currentDb?.db_name;
 
       const [stockMinColumn] = await pool.query(
         "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'productos' AND COLUMN_NAME = 'stock_minimo'",
