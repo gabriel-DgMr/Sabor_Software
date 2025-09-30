@@ -1082,19 +1082,28 @@
     display: block;
 }
 
-.productos__grid {
-    text-align: center;
+
+.productos__layout {
     display: grid;
-    grid-template-columns: 60% 35%;
-    gap: 4rem;
-    margin: 3rem;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+    align-items: start;
+    gap: 3rem;
+    margin: 3rem auto;
+    width: min(1100px, 100%);
+    padding: 0 2rem;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+    .productos__layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
-    .productos__grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-        margin: 2rem 1rem;
+    .productos__layout {
+        margin: 2rem auto;
+        padding: 0 1.5rem;
     }
 
     .pedidos {
@@ -1137,9 +1146,9 @@
 }
 
 @media (max-width: 480px) {
-    .productos__grid {
-        margin: 1rem 0.5rem;
-        gap: 1rem;
+    .productos__layout {
+        margin: 1.5rem 0.5rem;
+        padding: 0 1rem;
     }
 
     .titulos__empleados {
@@ -1663,7 +1672,7 @@
     margin-bottom: 2rem;
 }
 
-.productos__vista .productos__grid {
+.productos__vista-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
@@ -1679,7 +1688,7 @@
 
 /* Responsive para tablets */
 @media screen and (max-width: 1024px) {
-    .productos__vista .productos__grid {
+    .productos__vista-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 1.25rem;
     }
@@ -1687,7 +1696,7 @@
 
 /* Responsive para móviles */
 @media screen and (max-width: 768px) {
-    .productos__vista .productos__grid {
+    .productos__vista-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
@@ -1695,7 +1704,7 @@
 
 /* Ajustes para pantallas muy pequeñas */
 @media screen and (max-width: 480px) {
-    .productos__vista .productos__grid {
+    .productos__vista-grid {
         gap: 0.75rem;
     }
 }

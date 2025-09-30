@@ -312,12 +312,12 @@ const ProductosAdministrar = () => {
       <MenuLateral />
       <main className="productos__administrar">
         <h1 className="titulos__empleados">Productos</h1>
-        <section className="productos__grid">
+        <section className="productos__layout">
           <div className="contenedor__productos-vista">
             {Object.entries(productosPorCategoria).map(([categoria, productosCategoria]) => (
               <article key={categoria} className="productos__vista">
                 <h2 className="vista__titulo--primera">Categoria: {categoria}</h2>
-                <div className="productos__grid">
+                <div className="productos__vista-grid">
                   {productosCategoria.map(producto => (
                     <div key={producto.id_producto} className="productos__card-producto">
                       <img

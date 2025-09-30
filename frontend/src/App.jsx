@@ -25,7 +25,6 @@ import HomeAdministrador from './pages/HomeAdministrador.jsx';
 import EscanearQR from './pages/EscanearQR.jsx';
 import HistorialPedidos from './pages/HistorialPedidos.jsx';
 import HistorialReservas from './pages/HistorialReservas.jsx';
-import MisCalificaciones from './pages/MisCalificaciones.jsx';
 import HistorialDomicilios from './pages/HistorialDomicilios.jsx';
 import Home from './pages/Home.jsx';
 import ModificarPedido from './pages/ModificarPedido.jsx';
@@ -250,14 +249,6 @@ function App() {
                     </ProtectedRoute>
                   }
                   path="/historial-reservas"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <MisCalificaciones />
-                    </ProtectedRoute>
-                  }
-                  path="/mis-calificaciones"
                 />
                 <Route
                   element={
