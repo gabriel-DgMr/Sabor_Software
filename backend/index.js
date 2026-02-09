@@ -27,7 +27,6 @@ import payuRoutes from "./src/routes/payuRoutes.js";
 import calificacionRoutes from "./src/routes/calificacionRoutes.js";
 import healthRoutes from "./src/routes/healthRoutes.js";
 import domicilioRoutes from "./src/routes/domicilioRoutes.js";
-import emailTestRoutes from "./src/routes/emailTestRoutes.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -142,7 +141,6 @@ app.use("/api/calificaciones", calificacionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/domicilios", domicilioRoutes);
 app.use("/api", healthRoutes);
-app.use("/api/email", emailTestRoutes);
 
 // ============================
 // Archivos estáticos seguros
