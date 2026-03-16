@@ -46,9 +46,6 @@ class RailwayInitializer {
           database: config.db.database,
           // Configuraciones mejoradas para producción
           connectTimeout: 30000,
-          acquireTimeout: 60000,
-          timeout: 60000,
-          reconnect: true,
           ssl:
             process.env.NODE_ENV === "production"
               ? { rejectUnauthorized: false }
@@ -177,9 +174,6 @@ class RailwayInitializer {
           port: config.db.port,
           // Configuraciones mejoradas para producción
           connectTimeout: 30000,
-          acquireTimeout: 60000,
-          timeout: 60000,
-          reconnect: true,
           ssl:
             process.env.NODE_ENV === "production"
               ? { rejectUnauthorized: false }

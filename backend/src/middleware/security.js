@@ -75,12 +75,12 @@ export const contactoRateLimiter = rateLimit({
 export const helmetConfig = helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["self"],
-      styleSrc: ["self", "unsafe-inline"],
-      scriptSrc: ["self"],
-      imgSrc: ["self", "data:", "blob:", "https:"],
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "blob:", "https:"],
       formAction: [
-        "self",
+        "'self'",
         "https://checkout.payulatam.com",
         "https://sandbox.checkout.payulatam.com",
       ],

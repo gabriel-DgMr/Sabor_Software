@@ -82,23 +82,40 @@ app.use(
 // ============================
 // Configuración de CORS
 // ============================
+const normalizeOrigin = (value = "") => value.trim().replace(/\/+$/, "");
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
   "http://localhost:4173",
   "https://sabor-production.up.railway.app",
-];
+  "https://saborsoftware-production.up.railway.app",
+].map(normalizeOrigin);
 
 if (process.env.NODE_ENV === "production") {
-  if (process.env.RAILWAY_STATIC_URL) allowedOrigins.push(process.env.RAILWAY_STATIC_URL);
-  if (process.env.CORS_ORIGIN) allowedOrigins.push(process.env.CORS_ORIGIN);
-  if (process.env.FRONTEND_URL) allowedOrigins.push(process.env.FRONTEND_URL);
+  const envOrigins = [
+    process.env.RAILWAY_STATIC_URL,
+    process.env.CORS_ORIGIN,
+    process.env.FRONTEND_URL,
+  ]
+    .filter(Boolean)
+    .flatMap((value) => value.split(","))
+    .map(normalizeOrigin)
+    .filter(Boolean);
+
+  allowedOrigins.push(...envOrigins);
 }
+
+const allowedOriginsSet = new Set(allowedOrigins);
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error("Not allowed by CORS"));
+    if (!origin) return callback(null, true);
+
+    const normalizedOrigin = normalizeOrigin(origin);
+    if (allowedOriginsSet.has(normalizedOrigin)) return callback(null, true);
+
+    callback(new Error(`Not allowed by CORS: ${normalizedOrigin}`));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
