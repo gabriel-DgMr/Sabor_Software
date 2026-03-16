@@ -133,11 +133,11 @@ export const updatePedidoEstado = async (pedidoId, nuevoEstado) => {
 export const getCarritoByUser = async (userId) => {
   try {
     const [rows] = await pool.query(
-      "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 2 LIMIT 1",
+      "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 1 LIMIT 1",
       [userId]
     );
-    if (carrito.length === 0) return null;
-    const pedido = carrito[0];
+    if (rows.length === 0) return null;
+    const pedido = rows[0];
     const [items] = await pool.query(
       `SELECT dp.id_detalle, dp.id_producto, p.nombre_producto, dp.cantidad, dp.precio_unitario, (dp.cantidad * dp.precio_unitario) as subtotal, p.imagen_producto
        FROM detalle_pedidos dp
@@ -186,8 +186,6 @@ export const addOrUpdateProductoCarrito = async (
     if (stockResult[0].stock < cantidad) {
       throw new Error("Stock insuficiente");
     }
-    const precio_unitario = stockResult[0].precio_producto;
-
     // Buscar o crear carrito persistente
     const [carrito] = await connection.query(
       "SELECT * FROM pedidos WHERE id_usuario = ? AND id_estado = 1 LIMIT 1",
@@ -207,25 +205,29 @@ export const addOrUpdateProductoCarrito = async (
     // Agregar o actualizar producto en el carrito
     const [detalle] = await connection.query(
       "SELECT * FROM detalle_pedidos WHERE id_pedido = ? AND id_producto = ?",
-      [carrito.id_pedido, id_producto]
+      [id_pedido, id_producto]
     );
 
-    if (existing.length) {
-      await pool.query(
+    if (detalle.length) {
+      await connection.query(
         "UPDATE detalle_pedidos SET cantidad = cantidad + ? WHERE id_pedido = ? AND id_producto = ?",
-        [cantidad, carrito.id_pedido, id_producto]
+        [cantidad, id_pedido, id_producto]
       );
     } else {
-      await pool.query(
+      await connection.query(
         "INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad, precio_unitario) VALUES (?, ?, ?, (SELECT precio_producto FROM productos WHERE id_producto = ?))",
-        [carrito.id_pedido, id_producto, cantidad, id_producto]
+        [id_pedido, id_producto, cantidad, id_producto]
       );
     }
 
-    return carrito.id_pedido;
+    await connection.commit();
+    return id_pedido;
   } catch (error) {
+    if (connection) await connection.rollback();
     console.error("Error addOrUpdateProducto:", error);
     throw error;
+  } finally {
+    if (connection) connection.release();
   }
 };
 
@@ -366,6 +368,56 @@ export const confirmarPedido = async (
         estadoFinal,
         id_pedido,
       ],
+    );
+
+    if (!updateResult.affectedRows) {
+      throw new Error("No se pudo confirmar el pedido");
+    }
+
+    await connection.commit();
+    return id_pedido;
+  } catch (error) {
+    if (connection) await connection.rollback();
+    console.error("Error confirmarPedido:", error);
+    throw error;
+  } finally {
+    if (connection) connection.release();
+  }
+};
+
+// =====================
+// ACTUALIZAR PEDIDO
+// =====================
+export const updatePedidoById = async (pedidoId, data = {}) => {
+  try {
+    const allowedFields = [
+      "metodo_pago",
+      "tipo_servicio",
+      "direccion_entrega",
+      "detalle_direccion",
+      "referencia_pago",
+      "recomendaciones",
+      "id_estado",
+      "total_pedido",
+      "estado_pago",
+    ];
+
+    const updates = [];
+    const values = [];
+
+    for (const field of allowedFields) {
+      if (Object.prototype.hasOwnProperty.call(data, field)) {
+        updates.push(`${field} = ?`);
+        values.push(data[field]);
+      }
+    }
+
+    if (!updates.length) return false;
+
+    values.push(pedidoId);
+    const [result] = await pool.query(
+      `UPDATE pedidos SET ${updates.join(", ")} WHERE id_pedido = ?`,
+      values,
     );
 
     return result.affectedRows > 0;

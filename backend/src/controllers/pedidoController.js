@@ -8,7 +8,7 @@ import {
   marcarPedidoRecibido,
   getCarritoByUser,
   createCarrito,
-  addOrUpdateProducto,
+  addOrUpdateProductoCarrito as addOrUpdateProducto,
   updateCantidadProducto,
   removeProducto as removeProductoFromModel,
   vaciar as vaciarFromModel,
