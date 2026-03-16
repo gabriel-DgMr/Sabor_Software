@@ -3,6 +3,150 @@ import mysql from "mysql2/promise";
 
 const pool = mysql.createPool(dbConfig);
 
+const buildProductosQuery = (filtros = {}, includeRatings = true) => {
+  const idioma = filtros.idioma || "es";
+  let sql = `
+                SELECT 
+                    p.id_producto,
+                    p.nombre_producto,
+                    COALESCE(pt.descripcion, p.descripcion_producto) AS descripcion_producto,
+                    p.descripcion_producto AS descripcion_original,
+                    p.precio_producto,
+                    p.imagen_producto,
+                    p.id_categoria AS id_categoria_producto,
+                    c.nombre_categoria,
+                    p.activo,
+                    p.calificacion AS calificacion_base,
+                    p.ventas,
+            `;
+
+  if (includeRatings) {
+    sql += `
+                    COALESCE(AVG(cp.calificacion), 0) AS calificacion_promedio,
+                    COUNT(cp.id_calificacion) AS total_calificaciones
+    `;
+  } else {
+    sql += `
+                    p.calificacion AS calificacion_promedio,
+                    0 AS total_calificaciones
+    `;
+  }
+
+  sql += `
+                FROM productos p 
+                LEFT JOIN categorias c ON p.id_categoria = c.id_categoria 
+                LEFT JOIN producto_traducciones pt ON pt.producto_id = p.id_producto AND pt.idioma = ?
+  `;
+
+  if (includeRatings) {
+    sql += " LEFT JOIN calificaciones_productos cp ON cp.id_producto = p.id_producto ";
+  }
+
+  sql += " WHERE p.activo = 1 ";
+
+  const params = [idioma];
+
+  if (filtros.categoria) {
+    sql += " AND c.nombre_categoria = ?";
+    params.push(filtros.categoria);
+  }
+
+  if (filtros.busqueda) {
+    sql +=
+      " AND (p.nombre_producto LIKE ? OR p.descripcion_producto LIKE ? OR pt.descripcion LIKE ?)";
+    params.push(
+      `%${filtros.busqueda}%`,
+      `%${filtros.busqueda}%`,
+      `%${filtros.busqueda}%`,
+    );
+  }
+
+  sql += `
+        GROUP BY 
+          p.id_producto,
+          p.nombre_producto,
+          p.descripcion_producto,
+          pt.descripcion,
+          p.precio_producto,
+          p.imagen_producto,
+          p.id_categoria,
+          c.nombre_categoria,
+          p.activo,
+          p.calificacion,
+          p.ventas
+      `;
+
+  if (filtros.orden === "precio_asc") {
+    sql += " ORDER BY p.precio_producto ASC";
+  } else if (filtros.orden === "precio_desc") {
+    sql += " ORDER BY p.precio_producto DESC";
+  } else if (filtros.orden === "calificacion") {
+    sql += " ORDER BY calificacion_promedio DESC";
+  } else if (filtros.orden === "ventas") {
+    sql += " ORDER BY p.ventas DESC";
+  } else {
+    sql += " ORDER BY p.id_producto DESC";
+  }
+
+  return { sql, params };
+};
+
+const buildProductoByIdQuery = (includeRatings = true) => {
+  let sql = `
+        SELECT 
+          p.id_producto,
+          p.nombre_producto,
+          COALESCE(pt.descripcion, p.descripcion_producto) AS descripcion_producto,
+          p.precio_producto,
+          p.imagen_producto,
+          p.id_categoria AS id_categoria_producto,
+          c.nombre_categoria,
+          p.activo,
+          p.calificacion AS calificacion_base,
+          p.ventas,
+  `;
+
+  if (includeRatings) {
+    sql += `
+          COALESCE(AVG(cp.calificacion), 0) AS calificacion_promedio,
+          COUNT(cp.id_calificacion) AS total_calificaciones
+    `;
+  } else {
+    sql += `
+          p.calificacion AS calificacion_promedio,
+          0 AS total_calificaciones
+    `;
+  }
+
+  sql += `
+        FROM productos p
+        LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
+        LEFT JOIN producto_traducciones pt ON pt.producto_id = p.id_producto AND pt.idioma = ?
+  `;
+
+  if (includeRatings) {
+    sql += " LEFT JOIN calificaciones_productos cp ON cp.id_producto = p.id_producto ";
+  }
+
+  sql += `
+        WHERE p.id_producto = ? AND p.activo = 1
+        GROUP BY 
+          p.id_producto,
+          p.nombre_producto,
+          p.descripcion_producto,
+          pt.descripcion,
+          p.precio_producto,
+          p.imagen_producto,
+          p.id_categoria,
+          c.nombre_categoria,
+          p.activo,
+          p.calificacion,
+          p.ventas
+      `;
+
+  return sql;
+};
+
 export const normalizeImagePath = (imagen) => {
   if (!imagen) return null;
 
@@ -44,73 +188,22 @@ export const productoModel = {
   // Obtener todos los productos con filtros
   getAllProductos: async (filtros = {}) => {
     try {
-      const idioma = filtros.idioma || "es";
-      let sql = `
-                SELECT 
-                    p.id_producto,
-                    p.nombre_producto,
-                    COALESCE(pt.descripcion, p.descripcion_producto) AS descripcion_producto,
-                    p.descripcion_producto AS descripcion_original,
-                    p.precio_producto,
-                    p.imagen_producto,
-                    p.id_categoria AS id_categoria_producto,
-                    c.nombre_categoria,
-                    p.activo,
-                    p.calificacion AS calificacion_base,
-                    p.ventas,
-                    COALESCE(AVG(cp.calificacion), 0) AS calificacion_promedio,
-                    COUNT(cp.id_calificacion) AS total_calificaciones
-                FROM productos p 
-                LEFT JOIN categorias c ON p.id_categoria = c.id_categoria 
-                LEFT JOIN producto_traducciones pt ON pt.producto_id = p.id_producto AND pt.idioma = ?
-                LEFT JOIN calificaciones_productos cp ON cp.id_producto = p.id_producto
-                WHERE p.activo = 1
-            `;
-      const params = [idioma];
-      // Filtro por categoría
-      if (filtros.categoria) {
-        sql += " AND c.nombre_categoria = ?";
-        params.push(filtros.categoria);
-      }
-      // Filtro por búsqueda
-      if (filtros.busqueda) {
-        sql +=
-          " AND (p.nombre_producto LIKE ? OR p.descripcion_producto LIKE ? OR pt.descripcion LIKE ?)";
-        params.push(
-          `%${filtros.busqueda}%`,
-          `%${filtros.busqueda}%`,
-          `%${filtros.busqueda}%`,
-        );
-      }
-      // Ordenamiento
-      sql += `
-        GROUP BY 
-          p.id_producto,
-          p.nombre_producto,
-          p.descripcion_producto,
-          pt.descripcion,
-          p.precio_producto,
-          p.imagen_producto,
-          p.id_categoria,
-          c.nombre_categoria,
-          p.activo,
-          p.calificacion,
-          p.ventas
-      `;
+      const { sql, params } = buildProductosQuery(filtros, true);
+      let rows;
 
-      if (filtros.orden === "precio_asc") {
-        sql += " ORDER BY p.precio_producto ASC";
-      } else if (filtros.orden === "precio_desc") {
-        sql += " ORDER BY p.precio_producto DESC";
-      } else if (filtros.orden === "calificacion") {
-        sql += " ORDER BY calificacion_promedio DESC";
-      } else if (filtros.orden === "ventas") {
-        sql += " ORDER BY p.ventas DESC";
-      } else {
-        sql += " ORDER BY p.id_producto DESC";
+      try {
+        [rows] = await pool.query(sql, params);
+      } catch (error) {
+        if (
+          error?.code === "ER_NO_SUCH_TABLE" &&
+          String(error?.sqlMessage || "").includes("calificaciones_productos")
+        ) {
+          const fallback = buildProductosQuery(filtros, false);
+          [rows] = await pool.query(fallback.sql, fallback.params);
+        } else {
+          throw error;
+        }
       }
-
-      const [rows] = await pool.query(sql, params);
 
       // Agregar la ruta base a la imagen
       const productos = rows.map((producto) => {
@@ -145,41 +238,22 @@ export const productoModel = {
   // Obtener producto por ID
   getProductoById: async (id, idioma = "es") => {
     try {
-      const [rows] = await pool.query(
-        `
-        SELECT 
-          p.id_producto,
-          p.nombre_producto,
-          COALESCE(pt.descripcion, p.descripcion_producto) AS descripcion_producto,
-          p.precio_producto,
-          p.imagen_producto,
-          p.id_categoria AS id_categoria_producto,
-          c.nombre_categoria,
-          p.activo,
-          p.calificacion AS calificacion_base,
-          p.ventas,
-          COALESCE(AVG(cp.calificacion), 0) AS calificacion_promedio,
-          COUNT(cp.id_calificacion) AS total_calificaciones
-        FROM productos p
-        LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
-        LEFT JOIN producto_traducciones pt ON pt.producto_id = p.id_producto AND pt.idioma = ?
-        LEFT JOIN calificaciones_productos cp ON cp.id_producto = p.id_producto
-        WHERE p.id_producto = ? AND p.activo = 1
-        GROUP BY 
-          p.id_producto,
-          p.nombre_producto,
-          p.descripcion_producto,
-          pt.descripcion,
-          p.precio_producto,
-          p.imagen_producto,
-          p.id_categoria,
-          c.nombre_categoria,
-          p.activo,
-          p.calificacion,
-          p.ventas
-      `,
-        [idioma, id],
-      );
+      const sql = buildProductoByIdQuery(true);
+      let rows;
+
+      try {
+        [rows] = await pool.query(sql, [idioma, id]);
+      } catch (error) {
+        if (
+          error?.code === "ER_NO_SUCH_TABLE" &&
+          String(error?.sqlMessage || "").includes("calificaciones_productos")
+        ) {
+          const fallback = buildProductoByIdQuery(false);
+          [rows] = await pool.query(fallback, [idioma, id]);
+        } else {
+          throw error;
+        }
+      }
 
       if (!rows[0]) return null;
 
