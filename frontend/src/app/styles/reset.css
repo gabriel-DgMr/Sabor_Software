@@ -1,0 +1,15 @@
+/* reset.css - Global reset for box model and basic styles */
+
+/* 
+  Screaming Architecture: Global Reset
+  Este archivo asegura que todos los elementos usen border-box para evitar errores de diseño.
+*/
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Opcionalmente podemos añadir un reset básico aquí si normalize.css no es suficiente, 
+   pero por ahora nos enfocamos en el requerimiento del usuario. */

@@ -118,14 +118,23 @@ docker-compose*.yml
 backup/
 *.backup
 
-# Uploads (will be mounted as volume)
+# Uploads (volúmenes en Docker)
 uploads/
-backend/public/uploads/
+backend/public/uploads/*
+!backend/public/uploads/.gitkeep
 
-# Allow product images to be copied to Docker
-!public/uploads/productos/
+# Archivos de Agente e IA
+.agent/
+.agents/
+skills-lock.json
 
-# SSL certificates (will be mounted separately)
+# Temporales y logs adicionales
+tmp/
+schema_output.txt
+status.txt
+status_short.txt
+
+# SSL certificates
 ssl/
 *.pem
 *.key

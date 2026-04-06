@@ -1,0 +1,266 @@
+/* home-secciones.css - Estilos Premium para nuevas secciones del Home */
+
+/* Sección de Productos Destacados */
+.seccion-destacados {
+  padding: 6rem 4rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.seccion-destacados__titulo {
+  font-size: 3.6rem;
+  font-weight: 800;
+  color: var(--neutral-900);
+  margin-bottom: 1.5rem;
+  letter-spacing: -1px;
+}
+
+.seccion-destacados__subtitulo {
+  font-size: 1.8rem;
+  color: var(--neutral-500);
+  margin-bottom: 4rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.seccion-destacados__ver-mas {
+  margin-top: 4rem;
+  display: flex;
+  justify-content: center;
+}
+
+.boton-ver-mas {
+  background: var(--naranja-sabor);
+  color: #fff;
+  padding: 1.5rem 4rem;
+  border-radius: 1.5rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 20px rgba(255, 90, 31, 0.2);
+  border: none;
+  cursor: pointer;
+}
+
+.boton-ver-mas:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(255, 90, 31, 0.3);
+  filter: brightness(1.1);
+}
+
+/* Sección de Reservas */
+.seccion-reservas {
+  padding: 8rem 4rem;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/reserva-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #fff;
+  text-align: center;
+  border-radius: 4rem;
+  margin: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rem;
+  min-height: 500px;
+  position: relative;
+  overflow: hidden;
+  width: 90vw;
+  max-width: 1440px;
+  margin: 0 auto;
+  margin-bottom: 15rem;
+}
+
+.seccion-reservas::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 111, 0, 0.1), transparent 70%);
+  pointer-events: none;
+}
+
+.seccion-reservas__contenido {
+  max-width: 700px;
+}
+
+.seccion-reservas__titulo {
+  font-size: 4.2rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  letter-spacing: -1.5px;
+}
+
+.seccion-reservas__texto {
+  font-size: 2rem;
+  line-height: 1.6;
+  opacity: 0.9;
+  margin-bottom: 4rem;
+  font-weight: 400;
+}
+
+.seccion-reservas__boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  background: var(--naranja-sabor);
+  color: #fff;
+  padding: 1.8rem 4.5rem;
+  border-radius: 100px; /* Estilo cápsula premium */
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow: 0 10px 25px rgba(255, 111, 0, 0.3);
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.seccion-reservas__boton:hover {
+  transform: translateY(-5px);
+  background: var(--naranja-sabor-light);
+  box-shadow: 0 20px 40px rgba(255, 111, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.seccion-reservas__boton:active {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(255, 111, 0, 0.3);
+}
+
+.seccion-reservas__icono {
+  font-size: 2.2rem;
+  transition: transform 0.3s ease;
+}
+
+.seccion-reservas__boton:hover .seccion-reservas__icono {
+  transform: rotate(-15deg) scale(1.2);
+}
+
+/* Sección de Ubicación */
+.seccion-ubicacion {
+  width: 90vw;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.tarjeta-ubicacion {
+  position: relative;
+  height: 500px;
+  border-radius: 3rem;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  transition: transform 0.5s ease;
+}
+
+.tarjeta-ubicacion:hover {
+  transform: scale(1.01);
+}
+
+.tarjeta-ubicacion__imagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s ease;
+}
+
+.tarjeta-ubicacion:hover .tarjeta-ubicacion__imagen {
+  transform: scale(1.05);
+}
+
+.tarjeta-ubicacion__capa {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.2) 60%,
+    transparent 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 5rem;
+}
+
+.tarjeta-ubicacion__info {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 3rem;
+  border-radius: 2.5rem;
+  max-width: 500px;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.tarjeta-ubicacion:hover .tarjeta-ubicacion__info {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-10px);
+}
+
+.tarjeta-ubicacion__titulo {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.tarjeta-ubicacion__direccion {
+  font-size: 1.8rem;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tarjeta-ubicacion__link {
+  color: var(--naranja-sabor);
+  font-weight: 700;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .seccion-destacados,
+  .seccion-ubicacion {
+    padding: 4rem 2rem;
+  }
+
+  .seccion-reservas {
+    margin: 2rem;
+    padding: 5rem 2rem;
+    border-radius: 2.5rem;
+  }
+
+  .seccion-reservas__titulo {
+    font-size: 3rem;
+  }
+
+  .tarjeta-ubicacion {
+    height: 400px;
+  }
+
+  .tarjeta-ubicacion__capa {
+    padding: 2rem;
+  }
+
+  .tarjeta-ubicacion__info {
+    padding: 2rem;
+  }
+
+  .tarjeta-ubicacion__titulo {
+    font-size: 2.2rem;
+  }
+}

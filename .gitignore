@@ -32,3 +32,21 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Uploads y Binarios
+backend/public/uploads/*
+!backend/public/uploads/.gitkeep
+frontend/public/images/auth-bg.png
+frontend/public/images/hero-bg.png
+frontend/public/images/hero-home-premium.png
+frontend/public/images/reserva-bg.png
+frontend/public/images/ubicacion-premium.png
+
+# Archivos temporales y de agente
+tmp/
+.agent/
+.agents/
+skills-lock.json
+schema_output.txt
+status.txt
+status_short.txt

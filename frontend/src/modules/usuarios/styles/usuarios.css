@@ -1,0 +1,180 @@
+/* usuarios.css - Metodología BEM en Español */
+
+.gestion-usuarios {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+/* Filtros y Búsqueda */
+.usuarios-controles {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.usuarios-filtros {
+  display: flex;
+  gap: 1rem;
+}
+
+.usuarios-filtros__boton {
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--neutral-200);
+  background: var(--neutral-50);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.usuarios-filtros__boton--activo {
+  background: var(--primary-500);
+  color: white;
+  border-color: var(--primary-600);
+}
+
+.usuarios-busqueda {
+  flex: 1;
+  max-width: 400px;
+}
+
+.usuarios-busqueda__input {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border: 2px solid var(--neutral-100);
+  border-radius: 10px;
+  background: var(--neutral-50);
+}
+
+/* Lista de Usuarios */
+.usuarios-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+/* Tarjeta de Usuario */
+.tarjeta-usuario {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--neutral-100);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tarjeta-usuario__encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.tarjeta-usuario__nombre {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+}
+
+.tarjeta-usuario__rol {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tarjeta-usuario__cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tarjeta-usuario__dato {
+  font-size: 1.4rem;
+  color: var(--neutral-600);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.tarjeta-usuario__acciones {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--neutral-50);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Perfil / Actualizar Datos */
+.formulario-perfil {
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.formulario-perfil__imagen-seccion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.formulario-perfil__avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--primary-100);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .usuarios-controles {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* --- Estados de Error Perfil --- */
+.formulario-perfil__error {
+  color: #ef4444;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  display: block;
+  animation: error-entrada-perfil 0.3s ease;
+}
+
+.formulario-perfil__input--error {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+.formulario-perfil__input--error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+}
+
+@keyframes error-entrada-perfil {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

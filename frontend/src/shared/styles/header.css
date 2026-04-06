@@ -1,0 +1,412 @@
+/* header.css - Metodología BEM en Español */
+/* Diseño Moderno y Minimalista estilo "Floating Bar" */
+
+:root {
+  --header-height: 80px;
+  --header-bg: rgba(255, 255, 255, 0.85);
+  --header-blur: 12px;
+  --header-border: rgba(255, 255, 255, 0.3);
+  --header-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  --header-radius: 20px;
+}
+
+.encabezado {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 0 2rem;
+  pointer-events: none; /* Dejar pasar clicks al fondo si no es la barra */
+}
+
+.encabezado__barra {
+  width: 100%;
+  max-width: 1200px;
+  height: 60px;
+  background: var(--header-bg);
+  backdrop-filter: blur(var(--header-blur));
+  -webkit-backdrop-filter: blur(var(--header-blur));
+  border: 1px solid var(--header-border);
+  box-shadow: var(--header-shadow);
+  border-radius: var(--header-radius);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 2rem;
+  pointer-events: auto; /* Reactivar clicks en la barra */
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.encabezado__barra:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* Secciones */
+.encabezado__seccion {
+  display: flex;
+  align-items: center;
+}
+
+.encabezado__seccion--izquierda {
+  justify-content: flex-start;
+}
+
+.encabezado__seccion--centro {
+  justify-content: center;
+}
+
+.encabezado__seccion--derecha {
+  justify-content: flex-end;
+  gap: 1.5rem;
+}
+
+/* Logo */
+.encabezado__logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  text-decoration: none;
+}
+
+.encabezado__logo-icono {
+  width: 32px;
+  height: 32px;
+  background: #ffe8d6;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+}
+
+.encabezado__logo-imagen {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.encabezado__logo-texto {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: #1a1a1a;
+  letter-spacing: 1px;
+}
+
+/* Navegación */
+.encabezado__nav {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.encabezado__nav-enlace {
+  text-decoration: none;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #666;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
+  position: relative;
+}
+
+.encabezado__nav-enlace:hover {
+  color: #1a1a1a;
+  transform: translateY(-1px);
+}
+
+.encabezado__nav-enlace--activo {
+  color: #1a1a1a;
+  font-weight: 700;
+}
+
+.encabezado__nav-enlace--activo::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: #ff6b35;
+  border-radius: 50%;
+}
+
+/* Acciones */
+.encabezado__accion {
+  background: #f8f9fa;
+  border: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #444;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  text-decoration: none;
+}
+
+.encabezado__accion:hover {
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  color: #1a1a1a;
+  transform: translateY(-2px);
+}
+
+.encabezado__accion--carrito {
+  background: #ff6b35;
+  color: #fff;
+}
+
+.encabezado__accion--carrito:hover {
+  background: #ff8552;
+  color: #fff;
+}
+
+.encabezado__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
+
+/* Contenedor del perfil */
+.encabezado__perfil-contenedor {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Menú Perfil - Premium Glassmorphism */
+.menu-perfil {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: -10px;
+  min-width: 240px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 20px;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  padding: 0.6rem;
+  z-index: 1100;
+  transform-origin: top right;
+  animation: entradaMenu 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes entradaMenu {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Flecha de indicador — alineada exactamente al centro del botón de perfil */
+/* El botón tiene 38px. El menú está a right: -10px. */
+/* Centro del botón: 19px desde su derecha. */
+/* En el menú: 19px + 10px (offset de right) = 29px desde la derecha del menú. */
+/* La flecha tiene 14px (centro en 7px). right: 29px - 7px = 22px. */
+.menu-perfil::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  right: 22px;
+  width: 14px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  transform: rotate(45deg);
+  border-left: 1px solid rgba(255, 255, 255, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.6);
+  z-index: -1;
+  border-radius: 3px 0 0 0;
+}
+
+.menu-perfil__usuario {
+  padding: 0.5rem 0.8rem 1rem 0.8rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menu-perfil__nombre {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1a1a1a;
+  display: block;
+}
+
+.menu-perfil__correo {
+  font-size: 0.75rem;
+  color: #777;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+.menu-perfil__opcion {
+  padding: 0.65rem 0.9rem;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  margin-bottom: 1px;
+  position: relative;
+}
+
+.menu-perfil__opcion svg {
+  color: #aaa;
+  flex-shrink: 0;
+  transition:
+    color 0.2s ease,
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.menu-perfil__opcion:hover {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.08), rgba(255, 140, 82, 0.04));
+  color: #ff6b35;
+}
+
+.menu-perfil__opcion:hover svg {
+  color: #ff6b35;
+  transform: scale(1.15);
+}
+
+.menu-perfil__opcion:active {
+  transform: scale(0.98);
+}
+
+.menu-perfil__opcion--cerrar-sesion {
+  color: #dc3545;
+  margin-top: 0.5rem;
+}
+
+.menu-perfil__opcion--cerrar-sesion svg {
+  color: #dc3545;
+}
+
+.menu-perfil__opcion--cerrar-sesion:hover {
+  background: rgba(220, 53, 69, 0.08);
+  color: #dc3545;
+}
+
+.menu-perfil__opcion--idioma {
+  justify-content: space-between;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  margin-top: 0.8rem;
+  padding-top: 1.2rem;
+  cursor: default;
+}
+
+.menu-perfil__opcion--idioma:hover {
+  background: transparent;
+  transform: none;
+}
+
+.menu-perfil__idiomas-grid {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.menu-perfil__idioma-boton {
+  background: #f0f2f5;
+  border: 1px solid transparent;
+  width: 32px;
+  height: 24px;
+  border-radius: 6px;
+  opacity: 0.4;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  padding: 0;
+}
+
+.menu-perfil__idioma-boton:hover {
+  opacity: 0.7;
+}
+
+.menu-perfil__idioma-boton--activo {
+  opacity: 1;
+  background: #fff;
+  border-color: #ff6b35;
+  box-shadow: 0 4px 10px rgba(255, 107, 53, 0.2);
+}
+
+.encabezado__icono-cliente--foto {
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.encabezado__accion:hover .encabezado__icono-cliente--foto {
+  transform: scale(1.1);
+  border-color: #ff6b35;
+}
+
+/* Responsividad */
+@media (max-width: 992px) {
+  .encabezado__nav {
+    display: none;
+  }
+  .encabezado__seccion--centro {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .encabezado {
+    padding: 0 1rem;
+  }
+  .encabezado__barra {
+    padding: 0 1rem;
+    grid-template-columns: 1fr auto;
+  }
+  .encabezado__logo-texto {
+    display: none;
+  }
+}

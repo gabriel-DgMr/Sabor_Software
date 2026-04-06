@@ -84,5 +84,17 @@ ssl/
 *.crt
 
 # Uploads locales (usar storage externo en producción)
-backend/public/uploads/
+backend/public/uploads/*
+!backend/public/uploads/.gitkeep
 uploads/
+
+# Archivos de Agente e IA
+.agents/
+.agent/
+skills-lock.json
+
+# Otros temporales
+tmp/
+schema_output.txt
+status.txt
+status_short.txt

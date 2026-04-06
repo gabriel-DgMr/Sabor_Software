@@ -1,0 +1,335 @@
+/* marketing.css - BEM en Español */
+
+/* Quienes Somos */
+.quienes-somos__main {
+  padding: 2rem 0;
+  background-color: var(--color-fondo, #f9f9f9);
+}
+
+.quienes-somos__encabezado {
+  text-align: center;
+  margin-bottom: 3rem;
+  background: linear-gradient(
+    135deg,
+    var(--color-primario, #d4a373),
+    var(--color-secundario, #faedcd)
+  );
+  color: white;
+  padding: 4rem 1rem;
+}
+
+.quienes-somos__container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.quienes-somos__titulo {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-family: 'Outfit', sans-serif;
+}
+
+.quienes-somos__descripcion {
+  font-size: 1.2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  opacity: 0.9;
+}
+
+.quienes-somos__desarrolladores {
+  max-width: 1200px;
+  margin: 0 auto 4rem;
+  padding: 0 1rem;
+}
+
+.quienes-somos__subtitulo {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: var(--color-texto, #333);
+}
+
+.quienes-somos__burbujas {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.quienes-somos__burbuja {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  width: 200px;
+  text-align: center;
+}
+
+.quienes-somos__burbuja:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.quienes-somos__burbuja--activa {
+  border: 2px solid var(--color-primario, #d4a373);
+  background-color: var(--color-primario-claro, #fff9f0);
+}
+
+.quienes-somos__icono-burbuja {
+  font-size: 3rem;
+  color: var(--color-primario, #d4a373);
+  margin-bottom: 1rem;
+}
+
+.quienes-somos__nombre-burbuja {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.quienes-somos__rol-burbuja {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.quienes-somos__detalle {
+  max-width: 900px;
+  margin: 0 auto 4rem;
+  padding: 0 1rem;
+}
+
+.quienes-somos__dev-detalle {
+  display: flex;
+  gap: 3rem;
+  background: white;
+  padding: 3rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  align-items: center;
+  animation: slideUp 0.5s ease-out;
+}
+
+.quienes-somos__dev-foto {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid var(--color-primario-luz, #faedcd);
+}
+
+.quienes-somos__dev-info {
+  flex: 1;
+}
+
+.quienes-somos__dev-nombre {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-primario, #d4a373);
+}
+
+.quienes-somos__dev-rol {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #888;
+  margin-bottom: 1.5rem;
+}
+
+.quienes-somos__dev-descripcion {
+  line-height: 1.6;
+  color: #555;
+  font-size: 1.1rem;
+}
+
+.quienes-somos__tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.tarjeta-info {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.tarjeta-info:hover {
+  transform: scale(1.02);
+}
+
+.tarjeta-info__titulo {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--color-primario, #d4a373);
+}
+
+.tarjeta-info__contenido p {
+  line-height: 1.7;
+  color: #444;
+}
+
+.quienes-somos__valores-lista {
+  list-style: none;
+  padding: 0;
+}
+
+.quienes-somos__valor {
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #eee;
+  font-weight: 500;
+}
+
+.quienes-somos__valor:last-child {
+  border-bottom: none;
+}
+
+/* Sobre Nosotros */
+.sobre-nosotros__hero {
+  position: relative;
+  height: 60vh;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #333;
+}
+
+.sobre-nosotros__hero-capa {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7));
+  z-index: 1;
+}
+
+.sobre-nosotros__hero-contenido {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: white;
+}
+
+.sobre-nosotros__titulo-principal {
+  font-size: 4rem;
+  font-family: 'Outfit', sans-serif;
+}
+
+.sobre-nosotros__titulo-resalte {
+  color: var(--color-primario, #d4a373);
+}
+
+.sobre-nosotros__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 3rem;
+  max-width: 1200px;
+  margin: -50px auto 4rem;
+  position: relative;
+  z-index: 3;
+  padding: 0 1rem;
+}
+
+.sobre-nosotros__tarjeta {
+  background: white;
+  padding: 3rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.sobre-nosotros__tarjeta-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sobre-nosotros__icono {
+  font-size: 2rem;
+}
+
+.sobre-nosotros__tarjeta-titulo {
+  font-size: 1.8rem;
+  color: var(--color-primario, #d4a373);
+}
+
+.sobre-nosotros__texto {
+  line-height: 1.8;
+  color: #555;
+}
+
+.sobre-nosotros__lista-contacto {
+  list-style: none;
+  padding: 0;
+  margin-top: 2rem;
+}
+
+.sobre-nosotros__item-contacto {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sobre-nosotros__etiqueta {
+  font-weight: bold;
+}
+
+.sobre-nosotros__enlace {
+  color: var(--color-primario, #d4a373);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.sobre-nosotros__enlace:hover {
+  color: var(--color-primario-oscuro, #a67c52);
+}
+
+/* Animaciones */
+.animacion-revelar {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.8s ease-out,
+    transform 0.8s ease-out;
+}
+
+.animacion-revelar--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .quienes-somos__dev-detalle {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .sobre-nosotros__titulo-principal {
+    font-size: 2.5rem;
+  }
+}

@@ -2,47 +2,51 @@ import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 
-import ProtectedRoute from './components/ProtectedRoute';
-import RoleProtectedRoute from './components/RoleProtectedRoute';
-import RoleBasedRedirect from './components/RoleBasedRedirect';
-import { AuthProvider } from './context/AuthContext.jsx';
-import { CartProvider } from './context/CartContext.jsx';
-import { CategoriaProvider } from './context/CategoriaContext.jsx';
-import { ProductoProvider } from './context/ProductoContext.jsx';
+import ProtectedRoute from './shared/components/ProtectedRoute';
+import RoleProtectedRoute from './shared/components/RoleProtectedRoute';
+import RoleBasedRedirect from './shared/components/RoleBasedRedirect';
+import { AuthProvider } from './app/context/AuthContext.jsx';
+import { CartProvider } from './modules/pedidos/context/CartContext.jsx';
+import { CategoriaProvider } from './shared/context/CategoriaContext.jsx';
+import { ProductoProvider } from './shared/context/ProductoContext.jsx';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-import ActualizarDatos from './pages/ActualizarDatos.jsx';
-import Login from './pages/auth/Login.jsx';
-import Register from './pages/auth/Register.jsx';
-import ResetPasswordContainer from './pages/auth/ResetPasswordContainer.jsx';
-import Carrito from './pages/carrito.jsx';
-import CheckoutPayU from './pages/CheckoutPayU.jsx';
+import ActualizarDatos from './modules/usuarios/pages/ActualizarDatos.jsx';
+import Login from './modules/auth/pages/Login.jsx';
+import Register from './modules/auth/pages/Register.jsx';
+import ResetPasswordContainer from './modules/auth/pages/ResetPasswordContainer.jsx';
+import Carrito from './modules/pedidos/pages/Carrito.jsx';
+import CheckoutPayU from './modules/pedidos/pages/CheckoutPayU.jsx';
 // import Checkout from './pages/Checkout.jsx';
-import Dashboard from './pages/Dashboard.jsx';
-import DashboardVentas from './pages/DashboardVentas.jsx';
-import DashboardClientes from './pages/DashboardClientes.jsx';
-import DashboardEmpleados from './pages/DashboardEmpleados.jsx';
-import DashboardInventario from './pages/DashboardInventario.jsx';
-import HomeAdministrador from './pages/HomeAdministrador.jsx';
-import EscanearQR from './pages/EscanearQR.jsx';
-import HistorialPedidos from './pages/HistorialPedidos.jsx';
-import HistorialReservas from './pages/HistorialReservas.jsx';
-import HistorialDomicilios from './pages/HistorialDomicilios.jsx';
-import Home from './pages/Home.jsx';
-import ModificarPedido from './pages/ModificarPedido.jsx';
-import PaginaNoEncontrada from './pages/PaginaNoEncontrada.jsx';
-import PedidosAdministrar from './pages/PedidosAdministrador.jsx';
-import ProductosAdministrar from './pages/ProductosAdministrador.jsx';
-import QuienesSomos from './pages/QuienesSomos.jsx';
-import ReservasAdministrar from './pages/ReservacionesAdministrador.jsx';
-import UsuariosAdministrador from './pages/UsuariosAdministrador.jsx';
-import Reservas from './pages/Reservas.jsx';
-import SobreNosotros from './pages/SobreNosotros.jsx';
-import HomeEmpleados from './pages/HomeEmpleados.jsx';
-import LoadingScreen from './components/LoadingScreen.jsx';
-import ProductosEmpleados from './pages/ProductosEmpleados.jsx';
-import DomiciliosEmpleados from './pages/DomiciliosEmpleados.jsx';
-import PedidosEmpleados from './pages/PedidosEmpleados.jsx';
-import ReservacionesEmpleados from './pages/ReservacionesEmpleados.jsx';
+import Dashboard from './modules/dashboard/pages/Dashboard.jsx';
+import DashboardVentas from './modules/dashboard/pages/DashboardVentas.jsx';
+import DashboardClientes from './modules/dashboard/pages/DashboardClientes.jsx';
+import DashboardEmpleados from './modules/dashboard/pages/DashboardEmpleados.jsx';
+import DashboardInventario from './modules/dashboard/pages/DashboardInventario.jsx';
+import HomeAdministrador from './modules/dashboard/pages/HomeAdministrador.jsx';
+import EscanearQR from './modules/pedidos/pages/EscanearQR.jsx';
+import HistorialPedidos from './modules/pedidos/pages/HistorialPedidos.jsx';
+import HistorialReservas from './modules/reservas/pages/HistorialReservas.jsx';
+import HistorialDomicilios from './modules/pedidos/pages/HistorialDomicilios.jsx';
+import Home from './modules/home/pages/Home.jsx';
+import ModificarPedido from './modules/pedidos/pages/ModificarPedido.jsx';
+import PaginaNoEncontrada from './shared/components/PaginaNoEncontrada.jsx';
+import PedidosAdministrar from './modules/pedidos/pages/PedidosAdministrador.jsx';
+import ProductosAdministrar from './modules/productos/pages/ProductosAdministrador.jsx';
+import QuienesSomos from './modules/marketing/pages/QuienesSomos.jsx';
+import ReservasAdministrar from './modules/reservas/pages/ReservacionesAdministrador.jsx';
+import UsuariosAdministrador from './modules/usuarios/pages/UsuariosAdministrador.jsx';
+import Reservas from './modules/reservas/pages/Reservas.jsx';
+import SobreNosotros from './modules/marketing/pages/SobreNosotros.jsx';
+import HomeEmpleados from './modules/dashboard/pages/HomeEmpleados.jsx';
+import LoadingScreen from './shared/components/LoadingScreen.jsx';
+import ProductosEmpleados from './modules/productos/pages/ProductosEmpleados.jsx';
+import DomiciliosEmpleados from './modules/pedidos/pages/DomiciliosEmpleados.jsx';
+import PedidosEmpleados from './modules/pedidos/pages/PedidosEmpleados.jsx';
+import ReservacionesEmpleados from './modules/reservas/pages/ReservacionesEmpleados.jsx';
+import GestionBanners from './modules/dashboard/pages/GestionBanners.jsx';
+import Productos from './modules/productos/pages/Productos.jsx';
 
 function App() {
   return (
@@ -51,12 +55,26 @@ function App() {
         <ProductoProvider>
           <CategoriaProvider>
             <CartProvider>
+              <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                limit={4}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+              />
               <Routes>
                 {/* Rutas públicas */}
                 <Route element={<Home />} path="/" />
                 <Route element={<Login />} path="/login" />
                 <Route element={<Register />} path="/register" />
                 <Route element={<ResetPasswordContainer />} path="/reset-password/:token" />
+                <Route element={<Productos />} path="/productos" />
                 {/* Ruta de redirección automática basada en roles */}
                 <Route element={<RoleBasedRedirect />} path="/redirect" />
                 <Route element={<Reservas />} path="/reservas" />
@@ -169,6 +187,16 @@ function App() {
                     </ProtectedRoute>
                   }
                   path="/administrador/domicilios"
+                />
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <RoleProtectedRoute allowedRoles={['Administrador']}>
+                        <GestionBanners />
+                      </RoleProtectedRoute>
+                    </ProtectedRoute>
+                  }
+                  path="/administrador/banners"
                 />
                 {/* Empleados */}
                 <Route

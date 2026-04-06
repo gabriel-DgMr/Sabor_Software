@@ -1,0 +1,247 @@
+/* --- Módulo de Autenticación (BEM en Español) --- */
+
+.autenticacion {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 37, 38, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.autenticacion--pagina {
+  position: relative;
+  min-height: calc(100vh - 80px); /* Ajuste según altura del header */
+  background: url('/images/Hamburguesa-fondo.jpeg') center/cover no-repeat fixed;
+  padding: 4rem 2rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+}
+
+.autenticacion--pagina::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(18, 37, 38, 0.85) 0%, rgba(18, 37, 38, 0.6) 100%);
+  z-index: -1;
+}
+
+.autenticacion__contenedor {
+  display: flex;
+  width: 100%;
+  max-width: 1000px;
+  min-height: 600px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 3.2rem;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  position: relative;
+  animation: entrada-suave 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.autenticacion__visual {
+  flex: 1;
+  position: relative;
+  background: url('/images/Hamburguesa-fondo.jpeg') center/cover no-repeat;
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .autenticacion__visual {
+    display: block;
+  }
+}
+
+.autenticacion__visual-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 111, 0, 0.8), rgba(18, 37, 38, 0.8));
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 4rem;
+  color: #fff;
+}
+
+.autenticacion__visual-texto {
+  font-size: 3.2rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.autenticacion__formulario-seccion {
+  flex: 1;
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: transparent;
+}
+
+.autenticacion__cerrar {
+  position: absolute;
+  top: 2.4rem;
+  right: 2.4rem;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--neutral-100);
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.autenticacion__cerrar:hover {
+  background: var(--naranja-sabor);
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+.autenticacion__titulo {
+  font-size: 3.2rem;
+  font-weight: 800;
+  color: var(--azul-sabor);
+  margin-bottom: 0.8rem;
+}
+
+.autenticacion__subtitulo {
+  font-size: 1.6rem;
+  color: var(--neutral-600);
+  margin-bottom: 3.2rem;
+}
+
+/* Campos de Formulario */
+.autenticacion__campo {
+  margin-bottom: 2rem;
+}
+
+.autenticacion__label {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  color: var(--azul-sabor);
+}
+
+.autenticacion__input {
+  width: 100%;
+  padding: 1.6rem;
+  border-radius: 1.6rem;
+  border: 2px solid var(--neutral-100);
+  background: rgba(248, 249, 250, 0.7);
+  font-size: 1.6rem;
+  transition: all 0.3s ease;
+}
+
+.autenticacion__input:focus {
+  outline: none;
+  border-color: var(--naranja-sabor);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 4px rgba(255, 111, 0, 0.1);
+}
+
+.autenticacion__input--error {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+.autenticacion__input--error:focus {
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+}
+
+.autenticacion__error {
+  color: #ef4444;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 0.6rem;
+  display: block;
+  animation: error-entrada-auth 0.3s ease;
+}
+
+@keyframes error-entrada-auth {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.autenticacion__boton {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+/* Social Logins */
+.autenticacion__social {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.6rem;
+  margin-top: 2.4rem;
+}
+
+.autenticacion__social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.2rem;
+  border-radius: 1.2rem;
+  border: 1px solid var(--neutral-200);
+  background: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.autenticacion__social-btn:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--azul-sabor);
+  transform: translateY(-2px);
+}
+
+.autenticacion__social-btn--google {
+  color: #db4437;
+}
+.autenticacion__social-btn--apple {
+  color: #000;
+}
+
+@keyframes entrada-suave {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .autenticacion {
+    padding: 0;
+  }
+  .autenticacion__contenedor {
+    border-radius: 0;
+    min-height: 100vh;
+  }
+  .autenticacion__formulario-seccion {
+    padding: 6rem 2.4rem 4rem;
+  }
+}

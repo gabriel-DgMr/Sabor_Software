@@ -4,9 +4,10 @@ import { BrowserRouter } from 'react-router-dom';
 
 import App from './App.jsx';
 import 'normalize.css';
+import './app/styles/reset.css';
 import './index.css';
 import './i18n';
-import { AuthProvider } from './context/AuthContext.jsx';
+import { AuthProvider } from './app/context/AuthContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

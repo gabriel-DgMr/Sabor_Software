@@ -9,7 +9,7 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
-    'prettier'
+    'prettier',
   ],
   parserOptions: {
     ecmaFeatures: {
@@ -18,12 +18,7 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: [
-    'react',
-    'react-hooks',
-    'jsx-a11y',
-    'import'
-  ],
+  plugins: ['react', 'react-hooks', 'jsx-a11y', 'import'],
   settings: {
     react: {
       version: 'detect',

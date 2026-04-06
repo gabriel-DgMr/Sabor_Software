@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Variables de entorno
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+railway-production.env
+
+# Imágenes premium (grandes/temporales)
+public/images/auth-bg.png
+public/images/hero-bg.png
+public/images/hero-home-premium.png
+public/images/reserva-bg.png
+public/images/ubicacion-premium.png

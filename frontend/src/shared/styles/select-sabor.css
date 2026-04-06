@@ -1,0 +1,121 @@
+.seleccionar-sabor {
+  position: relative;
+  width: 100%;
+}
+
+.seleccionar-sabor__disparador {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--neutral-100);
+  border-radius: 1.5rem;
+  padding: 0 2rem;
+  height: 5.5rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+}
+
+.seleccionar-sabor--abierto .seleccionar-sabor__disparador {
+  background: #fff;
+  border-color: var(--naranja-sabor);
+  box-shadow: 0 10px 25px rgba(255, 90, 31, 0.1);
+}
+
+.seleccionar-sabor__info-seleccionada {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.seleccionar-sabor__icono-principal {
+  font-size: 2rem;
+  color: var(--naranja-sabor);
+  display: flex;
+}
+
+.seleccionar-sabor__texto-seleccionado {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--neutral-800);
+}
+
+.seleccionar-sabor__flecha {
+  font-size: 1.4rem;
+  color: var(--neutral-400);
+  transition: transform 0.3s ease;
+}
+
+.seleccionar-sabor__flecha--girada {
+  transform: rotate(180deg);
+  color: var(--naranja-sabor);
+}
+
+.seleccionar-sabor__opciones {
+  position: absolute;
+  top: calc(100% + 1rem);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 2rem;
+  padding: 1rem;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  max-height: 350px;
+  overflow-y: auto;
+  border: 1px solid var(--neutral-100);
+  animation: dropdownFadeIn 0.3s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.seleccionar-sabor__opcion {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.2rem 1.5rem;
+  border-radius: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.seleccionar-sabor__opcion:hover {
+  background: var(--neutral-50);
+  transform: translateX(5px);
+}
+
+.seleccionar-sabor__opcion--seleccionada {
+  background: rgba(255, 90, 31, 0.08);
+  color: var(--naranja-sabor);
+}
+
+.seleccionar-sabor__opcion-icono {
+  font-size: 1.8rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 1rem;
+  background: var(--neutral-100);
+  color: var(--neutral-600);
+  transition: all 0.2s ease;
+}
+
+.seleccionar-sabor__opcion--seleccionada .seleccionar-sabor__opcion-icono {
+  background: var(--naranja-sabor);
+  color: #fff;
+}
+
+.seleccionar-sabor__opcion-texto {
+  font-size: 1.4rem;
+  font-weight: 600;
+}

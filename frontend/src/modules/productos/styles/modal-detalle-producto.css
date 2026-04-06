@@ -1,0 +1,260 @@
+/* --- Modal Detalle Producto (BEM en Español e Identidad SABOR) --- */
+
+.modal-detalle {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  opacity: 0; /* Controlado por GSAP */
+  visibility: hidden; /* Controlado por GSAP */
+}
+
+.modal-detalle__capa {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.modal-detalle__tarjeta {
+  position: relative;
+  width: 100%;
+  max-width: 90rem;
+  max-height: 90vh;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 3.2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 2001;
+  transform: scale(0.9); /* Controlado por GSAP */
+}
+
+.modal-detalle__cerrar {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.4rem;
+  color: var(--azul-sabor);
+  border: 1px solid var(--glass-border);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.modal-detalle__cerrar:hover {
+  background: var(--naranja-sabor);
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+.modal-detalle__cuerpo {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--naranja-sabor) transparent;
+}
+
+.modal-detalle__cuerpo::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-detalle__cuerpo::-webkit-scrollbar-thumb {
+  background-color: var(--naranja-sabor);
+  border-radius: 10px;
+}
+
+/* Columna Izquierda: Imagen */
+.modal-detalle__imagen-lado {
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  position: relative;
+}
+
+.modal-detalle__imagen {
+  width: 100%;
+  max-width: 35rem;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.15));
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-detalle__imagen:hover {
+  transform: scale(1.05) rotate(2deg);
+}
+
+/* Columna Derecha: Información */
+.modal-detalle__info-lado {
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.modal-detalle__nombre {
+  font-size: 3.2rem;
+  font-weight: 800;
+  color: var(--azul-sabor);
+  line-height: 1.1;
+}
+
+.modal-detalle__precio {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: var(--naranja-sabor);
+}
+
+.modal-detalle__calificacion {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.8rem;
+}
+
+.modal-detalle__descripcion {
+  font-size: 1.6rem;
+  color: var(--neutral-600);
+  line-height: 1.6;
+  margin: 1rem 0;
+}
+
+/* Footer: Acciones */
+.modal-detalle__footer {
+  margin-top: auto;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.modal-detalle__controles {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.modal-detalle__selector-cantidad {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--neutral-200);
+  border-radius: 1.2rem;
+  padding: 0.5rem;
+  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.modal-detalle__boton-cantidad {
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--azul-sabor);
+}
+
+.modal-detalle__boton-cantidad:hover {
+  background: var(--neutral-100);
+}
+
+.modal-detalle__input-cantidad {
+  width: 5rem;
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  color: var(--azul-sabor);
+}
+
+.modal-detalle__peticion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.modal-detalle__label {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--azul-sabor);
+}
+
+.modal-detalle__textarea {
+  width: 100%;
+  min-height: 8rem;
+  padding: 1.2rem;
+  border-radius: 1.2rem;
+  border: 1px solid var(--neutral-200);
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 1.4rem;
+  resize: vertical;
+  transition: all 0.3s ease;
+}
+
+.modal-detalle__textarea:focus {
+  outline: none;
+  border-color: var(--naranja-sabor);
+  box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.1);
+}
+
+.modal-detalle__boton-agregar {
+  width: 100%;
+  padding: 1.6rem;
+  font-size: 1.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .modal-detalle__cuerpo {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-detalle__imagen-lado {
+    padding: 2rem;
+  }
+
+  .modal-detalle__imagen {
+    max-width: 25rem;
+  }
+
+  .modal-detalle__info-lado {
+    padding: 2rem;
+  }
+
+  .modal-detalle__nombre {
+    font-size: 2.4rem;
+  }
+
+  .modal-detalle__tarjeta {
+    max-height: 95vh;
+  }
+}

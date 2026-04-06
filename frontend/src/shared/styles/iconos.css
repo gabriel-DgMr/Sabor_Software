@@ -1,0 +1,42 @@
+/* iconos.css - Estilos base para iconos y estados */
+
+.icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.icono--grande {
+  font-size: 3rem;
+}
+
+.icono--exito {
+  color: var(--color-exito, #4caf50);
+}
+
+.icono--error {
+  color: var(--color-error, #f44336);
+}
+
+.icono--advertencia {
+  color: var(--color-advertencia, #ff9800);
+}
+
+.spinner-mini {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--color-primario, #d4a373);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,170 @@
+/* Estilos mejorados para las gráficas */
+.chart-wrapper {
+  position: relative;
+  height: 300px;
+  margin: 16px 0;
+}
+
+.chart-wrapper--large {
+  height: 400px;
+}
+
+.chart-wrapper--small {
+  height: 250px;
+}
+
+/* Mejoras para Chart.js */
+.chart-container canvas {
+  border-radius: 8px;
+}
+
+/* Estilos para tooltips personalizados */
+.chart-tooltip {
+  background: rgba(0, 0, 0, 0.8) !important;
+  border-radius: 8px !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.chart-tooltip .tooltip-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.chart-tooltip .tooltip-body {
+  font-size: 14px;
+}
+
+/* Leyendas mejoradas */
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Animaciones para las gráficas */
+@keyframes chartFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-container {
+  animation: chartFadeIn 0.6s ease-out;
+}
+
+/* Efectos hover para gráficas */
+.chart-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+/* Estilos para gráficas de línea */
+.line-chart {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(33, 150, 243, 0.05));
+  border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+/* Estilos para gráficas de dona */
+.doughnut-chart {
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 152, 0, 0.05));
+  border: 1px solid rgba(255, 152, 0, 0.2);
+}
+
+/* Estilos para gráficas de barras */
+.bar-chart {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.05));
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+/* Indicadores de carga para gráficas */
+.chart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #666;
+  font-style: italic;
+}
+
+.chart-loading::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e0e0e0;
+  border-top: 2px solid #2196f3;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 12px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mensaje cuando no hay datos */
+.chart-no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #999;
+  font-style: italic;
+}
+
+.chart-no-data-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+/* Mejoras para gráficas responsivas */
+@media (max-width: 768px) {
+  .chart-wrapper {
+    height: 250px;
+  }
+
+  .chart-wrapper--large {
+    height: 300px;
+  }
+
+  .chart-wrapper--small {
+    height: 200px;
+  }
+
+  .chart-legend {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

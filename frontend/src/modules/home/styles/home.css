@@ -1,0 +1,210 @@
+/* home.css - Estilos específicos para el módulo Home */
+
+.home {
+  background-color: var(--neutral-50);
+  min-height: 100vh;
+}
+
+.hero-principal {
+  position: relative;
+  height: 65vh;
+  min-height: 450px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  background-image: url('/images/hero-home-premium.png');
+  background-size: cover;
+  background-position: center;
+  margin: 9rem 2rem 2rem 4rem;
+  border-radius: 4rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.hero-principal__capa {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.1) 100%);
+}
+
+.hero-principal__contenido {
+  position: relative;
+  z-index: 2;
+  text-align: left;
+  max-width: 800px;
+  padding: 6rem;
+  color: #fff;
+}
+
+.hero-principal__titulo {
+  font-size: clamp(3.2rem, 6vw, 7.2rem);
+  font-weight: 800;
+  margin-bottom: 4rem;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.hero-principal__titulo--resalte {
+  color: #ff5a1f; /* Color vibrante para el resalte */
+}
+
+/* Barra de Filtros Unificada */
+.barra-filtros-unificada {
+  padding: 0 4rem;
+  position: relative;
+  z-index: 20;
+}
+
+.barra-filtros-unificada__contenedor {
+  background: #fff;
+  border-radius: 2.5rem;
+  padding: 1.5rem 3rem;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.barra-filtros-unificada__busqueda {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  width: 450px; /* Ancho fijo o máximo para la búsqueda a la derecha */
+  flex-shrink: 0;
+}
+
+.barra-filtros-unificada__input-grupo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  background: var(--neutral-100);
+  padding: 0 1.5rem;
+  border-radius: 1.5rem;
+  height: 5rem;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.barra-filtros-unificada__input-grupo:focus-within {
+  background: #fff;
+  border-color: var(--naranja-sabor);
+}
+
+.barra-filtros-unificada__busqueda-icono {
+  font-size: 1.6rem;
+  color: var(--neutral-400);
+}
+
+.barra-filtros-unificada__search-input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--neutral-800);
+  outline: none;
+}
+
+.barra-filtros-unificada__search-btn {
+  height: 5rem;
+  padding: 0 2.5rem;
+  border-radius: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Categorías en la Barra Unificada - Ahora como Select */
+.barra-filtros-unificada__categorias-select {
+  flex: 1;
+  max-width: 300px;
+}
+
+.barra-filtros-unificada__select {
+  width: 100%;
+}
+
+.barra-filtros-unificada__select .seleccionar-sabor {
+  height: 5rem;
+  border-radius: 1.5rem;
+  background: var(--neutral-100);
+}
+
+/* Icono flotante */
+.hero-principal__icono-flotante {
+  position: absolute;
+  bottom: 3.5rem;
+  right: 3.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 1.8rem;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 2.2rem;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.hero-principal__icono-flotante:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg) scale(1.1);
+}
+
+@media (max-width: 1024px) {
+  .hero-principal {
+    margin: 8rem 1.5rem 2rem 1.5rem;
+    height: 50vh;
+  }
+
+  .barra-filtros-unificada {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-principal {
+    height: 40vh;
+    min-height: 350px;
+    border-radius: 3rem;
+  }
+
+  .hero-principal__contenido {
+    padding: 3rem;
+  }
+
+  .barra-filtros-unificada__contenedor {
+    padding: 1.5rem;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .barra-filtros-unificada__busqueda {
+    width: 100%;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .barra-filtros-unificada__categorias-select {
+    width: 100%;
+    max-width: none;
+  }
+
+  .barra-filtros-unificada__search-btn {
+    width: 100%;
+  }
+
+  .barra-filtros-unificada__item {
+    min-width: 80px;
+    padding: 0.8rem 1.2rem;
+  }
+}
