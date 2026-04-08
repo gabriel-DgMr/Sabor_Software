@@ -3,6 +3,7 @@ import { FaTimes } from 'react-icons/fa';
 import StarRating from '../../../shared/components/StarRating';
 import '../styles/productRatingModal.css';
 import { getImageUrl } from '../../../shared/utils/imageUtils.js';
+import { formatearFecha } from '../../../shared/utils/format.js';
 
 const ProductRatingModal = ({
   isOpen,
@@ -70,9 +71,7 @@ const ProductRatingModal = ({
             />
             <div className="product-details">
               <h4>{producto.nombre_producto}</h4>
-              <p className="pedido-info">
-                Pedido del {new Date(pedido.fecha_pedido).toLocaleDateString('es-CO')}
-              </p>
+              <p className="pedido-info">Pedido del {formatearFecha(pedido.fecha_pedido)}</p>
               <p className="cantidad-info">
                 Cantidad: {producto.cantidad} × ${producto.precio_unitario?.toLocaleString('es-CO')}
               </p>

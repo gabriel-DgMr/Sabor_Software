@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { GoTrash, GoCreditCard } from 'react-icons/go';
+import { GoCreditCard } from 'react-icons/go';
 import { BsCash } from 'react-icons/bs';
 
 /**
@@ -12,7 +12,6 @@ const CarritoResumen = ({
   mesa,
   onSolicitarMesa,
   onLimpiarMesa,
-  onEliminarCarrito,
   onPagoEfectivo,
   onProcesarPago,
   t,
@@ -50,9 +49,6 @@ const CarritoResumen = ({
         <button className="boton-moderno boton-moderno--primario" onClick={onPagoEfectivo}>
           <BsCash /> {t('pago_efectivo', 'Pago en Efectivo')}
         </button>
-        <button className="boton-texto boton-texto--centrado" onClick={onEliminarCarrito}>
-          <GoTrash /> {t('carrito_eliminar')}
-        </button>
       </div>
     </aside>
   );
@@ -63,7 +59,6 @@ CarritoResumen.propTypes = {
   mesa: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onSolicitarMesa: PropTypes.func.isRequired,
   onLimpiarMesa: PropTypes.func.isRequired,
-  onEliminarCarrito: PropTypes.func.isRequired,
   onPagoEfectivo: PropTypes.func.isRequired,
   onProcesarPago: PropTypes.func.isRequired,
   t: PropTypes.func.isRequired,

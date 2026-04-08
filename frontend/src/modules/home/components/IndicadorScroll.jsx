@@ -10,7 +10,7 @@ import '../styles/indicador-scroll.css';
  * Muestra una flecha blanca pequeña dentro de un círculo con blur.
  * Animación: Rebote y rotación.
  */
-const IndicadorScroll = ({ visible }) => {
+const IndicadorScroll = ({ visible, oscuro = false }) => {
   const { t } = useTranslation();
   const indicadorRef = useRef(null);
   const flechaRef = useRef(null);
@@ -50,7 +50,9 @@ const IndicadorScroll = ({ visible }) => {
 
   return (
     <div
-      className={`indicador-scroll ${!visible ? 'indicador-scroll--oculto' : ''}`}
+      className={`indicador-scroll ${!visible ? 'indicador-scroll--oculto' : ''} ${
+        oscuro ? 'indicador-scroll--oscuro' : ''
+      }`}
       ref={indicadorRef}
     >
       <div className="indicador-scroll__circulo">

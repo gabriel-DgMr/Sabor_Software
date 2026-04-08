@@ -136,10 +136,9 @@
 .dialogo-modal--mesa {
   max-width: 480px;
   overflow: visible;
-  padding: 4rem; /* Padding más generoso para un look más premium */
 }
 
-.dialogo-modal--mesa .dialogo_exito__cuerpo {
+.dialogo-modal--mesa .dialogo-modal__cuerpo {
   width: 100%;
 }
 

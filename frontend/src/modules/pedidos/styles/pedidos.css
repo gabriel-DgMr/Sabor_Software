@@ -253,7 +253,48 @@
 .carrito-item__controles {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 2.4rem;
+}
+
+.carrito-item__acciones {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.carrito-item__acciones .boton-moderno {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 1.4rem;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.boton-moderno--peligro {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.boton-moderno--peligro:hover {
+  background: #ef4444;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.boton-moderno--blanco {
+  background: #fff;
+  color: var(--neutral-600);
+  border: 1px solid var(--neutral-200);
+}
+
+.boton-moderno--blanco:hover {
+  background: var(--neutral-50);
+  color: var(--naranja-sabor);
+  border-color: var(--naranja-sabor);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .selector-cantidad {
@@ -415,7 +456,6 @@
 .boton-moderno--blanco {
   background: #fff;
   color: #000;
-  width: 100%;
 }
 
 .boton-moderno--blanco:hover {
@@ -429,24 +469,121 @@
   gap: 1.5rem;
   margin-top: 1rem;
 }
-.estado-vacio {
-  text-align: center;
-  padding: 6rem 2rem;
+/* Estado Vacio Premium */
+.carrito-vacio-premium {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
-  color: var(--neutral-400);
+  justify-content: center;
+  text-align: center;
+  padding: 8rem 4rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 4rem;
+  width: 100%;
+  max-width: 700px;
+  margin: 4rem auto;
+  gap: 2.5rem;
+  position: relative;
+  overflow: hidden;
 }
 
-.estado-vacio__icono {
-  font-size: 8rem;
-  opacity: 0.2;
+.carrito-vacio-premium::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(255, 111, 0, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
-.estado-vacio p {
-  font-size: 2rem;
-  font-weight: 500;
+.carrito-vacio-premium__ilustracion {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.carrito-vacio-premium__icono {
+  font-size: 12rem;
+  color: var(--naranja-sabor);
+  opacity: 0.8;
+  filter: drop-shadow(0 15px 30px rgba(255, 111, 0, 0.2));
+  z-index: 1;
+  position: relative;
+}
+
+.carrito-vacio-premium__decoracion {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18rem;
+  height: 18rem;
+  background: var(--naranja-sabor);
+  opacity: 0.1;
+  border-radius: 50%;
+  filter: blur(40px);
+  z-index: 0;
+}
+
+.carrito-vacio-premium__titulo {
+  font-family: 'Outfit', sans-serif;
+  font-size: 3.6rem;
+  font-weight: 900;
+  color: var(--neutral-900);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.carrito-vacio-premium__texto {
+  font-size: 1.8rem;
+  color: var(--neutral-600);
+  max-width: 45ch;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.carrito-vacio-premium__boton {
+  margin-top: 1rem;
+  padding: 1.8rem 4rem;
+  font-size: 1.8rem;
+  font-weight: 800;
+  border-radius: 2rem;
+  box-shadow: 0 10px 30px rgba(255, 111, 0, 0.3);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.carrito-vacio-premium__boton:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(255, 111, 0, 0.4);
+  background-color: rgba(255, 111, 0);
+}
+
+@media (max-width: 600px) {
+  .carrito-vacio-premium {
+    padding: 6rem 2rem;
+    margin: 2rem auto;
+    border-radius: 3rem;
+  }
+  
+  .carrito-vacio-premium__titulo {
+    font-size: 2.8rem;
+  }
+  
+  .carrito-vacio-premium__texto {
+    font-size: 1.6rem;
+  }
+  
+  .carrito-vacio-premium__icono {
+    font-size: 10rem;
+  }
 }
 
 @media (max-width: 992px) {
@@ -594,5 +731,122 @@
 
   .tarjeta-resultado__acciones {
     flex-direction: column;
+  }
+}
+
+/* --- Estilos para Modales de Selección y Formularios (Premium) --- */
+.modal-opciones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.modal-opcion-tarjeta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 3rem 2rem;
+  background: white;
+  border: 2px solid var(--neutral-100);
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+}
+
+.modal-opcion-tarjeta:hover {
+  border-color: var(--naranja-sabor);
+  background: var(--neutral-50);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(255, 111, 0, 0.1);
+}
+
+.modal-opcion-tarjeta__icono {
+  font-size: 3.6rem;
+  color: var(--neutral-400);
+  transition: all 0.3s ease;
+  width: 7rem;
+  height: 7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--neutral-100);
+  border-radius: 2rem;
+}
+
+.modal-opcion-tarjeta:hover .modal-opcion-tarjeta__icono {
+  color: white;
+  background: var(--naranja-sabor);
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.modal-opcion-tarjeta__titulo {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--neutral-900);
+  margin: 0;
+}
+
+.modal-opcion-tarjeta__descripcion {
+  font-size: 1.4rem;
+  color: var(--neutral-500);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Formulario de Domicilio en Modal */
+.modal-formulario-domicilio {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  width: 100%;
+  text-align: left;
+  margin-top: 1rem;
+}
+
+.modal-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.modal-campo label {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--neutral-600);
+  margin-left: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 600px) {
+  .modal-opciones {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .modal-opcion-tarjeta {
+    padding: 2rem;
+    flex-direction: row;
+    text-align: left;
+    justify-content: flex-start;
+  }
+  
+  .modal-opcion-tarjeta__icono {
+    width: 5rem;
+    height: 5rem;
+    font-size: 2.4rem;
+    flex-shrink: 0;
+  }
+  
+  .modal-opcion-tarjeta__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
   }
 }

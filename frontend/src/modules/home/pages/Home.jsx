@@ -97,7 +97,7 @@ const Home = () => {
 
       <main className="main">
         <HeroCarousel />
-        <IndicadorScroll visible={!isScrolled} />
+        <IndicadorScroll visible={!isScrolled} oscuro={true} />
 
         {/* Sección 1: Productos Destacados */}
         <section className="seccion-destacados">

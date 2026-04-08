@@ -6,8 +6,9 @@ import { useAuth } from '../../../app/context/AuthContext.jsx';
 import { useMesa } from '../../../shared/hooks/useMesa.js';
 import { toast } from 'react-toastify';
 import React from 'react';
-import { GoCheck, GoAlert, GoX, GoCreditCard } from 'react-icons/go';
+import { GoCheck, GoAlert, GoX, GoCreditCard, GoTrash } from 'react-icons/go';
 import { BsCash, BsHouse } from 'react-icons/bs';
+import { FaUtensils } from 'react-icons/fa6';
 import '../../../shared/styles/iconos.css';
 
 const API_URL = `${import.meta.env.VITE_API_URL || '/api'}`;
@@ -35,6 +36,7 @@ export const useCarrito = () => {
     error: cartError,
     confirmarPedido,
     updateItemQuantity,
+    updateItemMessage,
     removeItemFromCart,
     mesa: mesaCart,
     setMesa: setMesaCart,
@@ -399,56 +401,75 @@ export const useCarrito = () => {
 
     setModal({
       open: true,
-      message: '¿Deseas tu pedido para Mesa o Domicilio?',
-      icon: <GoCreditCard className="icono icono--grande" />,
-      confirmText: 'Mesa',
-      cancelText: 'Domicilio',
-      onConfirm: () => {
-        setModal(prev => ({ ...prev, open: false }));
-        solicitarMesa(() => iniciarPagoPayU({ tipoServicioSeleccionado: 'mesa' }));
-      },
-      onCancel: () => {
-        setModal({
-          open: true,
-          message: (
-            <div>
-              <h3 style={{ marginBottom: '10px' }}>Datos para el domicilio</h3>
-              <input
-                type="text"
-                placeholder="Dirección"
-                id="direccion-payu"
-                className="input-modal"
-                style={{ width: '100%', marginBottom: '8px', padding: '6px' }}
-              />
-              <input
-                type="text"
-                placeholder="Apartamento / Piso / Habitación"
-                id="apartamento-payu"
-                className="input-modal"
-                style={{ width: '100%', marginBottom: '8px', padding: '6px' }}
-              />
-            </div>
-          ),
-          icon: <BsHouse className="BsHouse" style={{ color: '#ff5722', fontSize: '2.5rem' }} />,
-          confirmText: 'Confirmar domicilio',
-          cancelText: 'Cancelar',
-          onConfirm: async () => {
-            const direccion = document.getElementById('direccion-payu')?.value.trim();
-            const detalle = document.getElementById('apartamento-payu')?.value.trim();
-            if (!direccion) {
-              alert('⚠️ Por favor ingresa la dirección');
-              return;
-            }
+      className: 'dialogo-modal--seleccion',
+      message: '¿Cómo deseas recibir tu pedido?',
+      icon: <GoCreditCard className="icono-grande" />,
+      // Pasamos opciones estructuradas para que CarritoUI las renderice como tarjetas
+      opciones: [
+        {
+          id: 'mesa',
+          titulo: 'Mesa',
+          descripcion: 'Disfruta tu comida en nuestro local',
+          icono: <FaUtensils />,
+          onClick: () => {
             setModal(prev => ({ ...prev, open: false }));
-            await iniciarPagoPayU({
-              tipoServicioSeleccionado: 'domicilio',
-              direccionEntrega: direccion,
-              detalleDireccion: detalle,
+            solicitarMesa(() => iniciarPagoPayU({ tipoServicioSeleccionado: 'mesa' }));
+          },
+        },
+        {
+          id: 'domicilio',
+          titulo: 'Domicilio',
+          descripcion: 'Llevamos el sabor hasta tu puerta',
+          icono: <BsHouse />,
+          onClick: () => {
+            setModal({
+              open: true,
+              message: 'Datos para el domicilio',
+              icon: <BsHouse className="icono-grande" style={{ color: 'var(--naranja-sabor)' }} />,
+              children: (
+                <div className="modal-formulario-domicilio">
+                  <div className="modal-campo">
+                    <label htmlFor="direccion-payu">Dirección de entrega</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Calle 123 #45-67"
+                      id="direccion-payu"
+                      className="input-modal"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="modal-campo">
+                    <label htmlFor="apartamento-payu">Apartamento / Piso / Local</label>
+                    <input
+                      type="text"
+                      placeholder="Opcional"
+                      id="apartamento-payu"
+                      className="input-modal"
+                    />
+                  </div>
+                </div>
+              ),
+              confirmText: 'Confirmar envío',
+              cancelText: 'Volver',
+              onConfirm: async () => {
+                const direccion = document.getElementById('direccion-payu')?.value.trim();
+                const detalle = document.getElementById('apartamento-payu')?.value.trim();
+                if (!direccion) {
+                  toast.error('⚠️ Por favor ingresa la dirección');
+                  return;
+                }
+                setModal(prev => ({ ...prev, open: false }));
+                await iniciarPagoPayU({
+                  tipoServicioSeleccionado: 'domicilio',
+                  direccionEntrega: direccion,
+                  detalleDireccion: detalle,
+                });
+              },
+              onCancel: () => procesarPago(), // Regresamos al modal de selección
             });
           },
-          onCancel: () => setModal(m => ({ ...m, open: false })),
-        });
-      },
+        },
+      ],
     });
   };
 
@@ -480,94 +501,109 @@ export const useCarrito = () => {
   const handlePagoEfectivo = () => {
     setModal({
       open: true,
-      message: '¿Deseas tu pedido para Mesa o Domicilio?',
-      icon: <BsCash className="icono icono--grande" />,
-      confirmText: 'Mesa',
-      cancelText: 'Domicilio',
-      onConfirm: () => {
-        setModal(prev => ({ ...prev, open: false }));
-        solicitarMesa(async mesaAsignada => {
-          try {
-            await confirmarPedido({
-              metodo_pago: 'efectivo',
-              tipo_servicio: 'mesa',
-              id_mesa: mesaAsignada,
-            });
-            localStorage.removeItem('recomendacionesPedido');
-            setModal({
-              open: true,
-              message: '¡Pedido confirmado para Mesa y pago en efectivo!',
-              icon: <GoCheck className="icono icono--exito icono--grande" />,
-              onConfirm: () => setModal(m => ({ ...m, open: false })),
-            });
-          } catch (error) {
-            setModal({
-              open: true,
-              message: `Error al confirmar el pedido en Mesa`,
-              icon: <GoX className="GoX" style={{ color: '#e53935', fontSize: '2.5rem' }} />,
-              onConfirm: () => setModal(m => ({ ...m, open: false })),
-            });
-          }
-        });
-      },
-      onCancel: () => {
-        setModal({
-          open: true,
-          message: (
-            <div>
-              <h3 style={{ marginBottom: '10px' }}>Datos para el domicilio</h3>
-              <input
-                type="text"
-                placeholder="Dirección"
-                id="direccion"
-                className="input-modal"
-                style={{ width: '100%', marginBottom: '8px', padding: '6px' }}
-              />
-              <input
-                type="text"
-                placeholder="Apartamento / Piso / Habitación"
-                id="apartamento"
-                className="input-modal"
-                style={{ width: '100%', marginBottom: '8px', padding: '6px' }}
-              />
-            </div>
-          ),
-          icon: <BsHouse className="BsHouse" style={{ color: '#ff5722', fontSize: '2.5rem' }} />,
-          confirmText: 'Confirmar domicilio',
-          cancelText: 'Cancelar',
-          onConfirm: async () => {
-            try {
-              const direccion = document.getElementById('direccion')?.value.trim();
-              const apartamento = document.getElementById('apartamento')?.value.trim();
-              if (!direccion) {
-                alert('⚠️ Por favor ingresa la dirección');
-                return;
+      className: 'dialogo-modal--seleccion',
+      message: '¿Cómo deseas recibir tu pedido?',
+      icon: <BsCash className="icono-grande" />,
+      opciones: [
+        {
+          id: 'mesa',
+          titulo: 'Mesa',
+          descripcion: 'Pago en efectivo al finalizar',
+          icono: <FaUtensils />,
+          onClick: () => {
+            setModal(prev => ({ ...prev, open: false }));
+            solicitarMesa(async mesaAsignada => {
+              try {
+                await confirmarPedido({
+                  metodo_pago: 'efectivo',
+                  tipo_servicio: 'mesa',
+                  id_mesa: mesaAsignada,
+                });
+                localStorage.removeItem('recomendacionesPedido');
+                setModal({
+                  open: true,
+                  message: '¡Pedido confirmado!',
+                  icon: (
+                    <GoCheck className="icono-grande" style={{ color: 'var(--exito-sabor)' }} />
+                  ),
+                  children: <p>Tu pedido para la Mesa {mesaAsignada} ha sido registrado.</p>,
+                  confirmText: 'Aceptar',
+                  onConfirm: () => setModal(m => ({ ...m, open: false })),
+                });
+              } catch (error) {
+                toast.error('Error al confirmar el pedido');
               }
-              await confirmarPedido({
-                metodo_pago: 'efectivo',
-                tipo_servicio: 'domicilio',
-                direccion_entrega: direccion,
-                detalle_direccion: apartamento,
-              });
-              localStorage.removeItem('recomendacionesPedido');
-              setModal({
-                open: true,
-                message: '¡Pedido confirmado para Domicilio y pago en efectivo!',
-                icon: <GoCheck className="icono icono--exito icono--grande" />,
-                onConfirm: () => setModal(m => ({ ...m, open: false })),
-              });
-            } catch (error) {
-              setModal({
-                open: true,
-                message: `Error al confirmar el pedido en Domicilio`,
-                icon: <GoX className="GoX" style={{ color: '#e53935', fontSize: '2.5rem' }} />,
-                onConfirm: () => setModal(m => ({ ...m, open: false })),
-              });
-            }
+            });
           },
-          onCancel: () => setModal(m => ({ ...m, open: false })),
-        });
-      },
+        },
+        {
+          id: 'domicilio',
+          titulo: 'Domicilio',
+          descripcion: 'Paga en efectivo al repartidor',
+          icono: <BsHouse />,
+          onClick: () => {
+            setModal({
+              open: true,
+              message: 'Datos para el domicilio',
+              icon: <BsHouse className="icono-grande" style={{ color: 'var(--naranja-sabor)' }} />,
+              children: (
+                <div className="modal-formulario-domicilio">
+                  <div className="modal-campo">
+                    <label htmlFor="direccion">Dirección de entrega</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Calle 123 #45-67"
+                      id="direccion"
+                      className="input-modal"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="modal-campo">
+                    <label htmlFor="apartamento">Apartamento / Piso / Local</label>
+                    <input
+                      type="text"
+                      placeholder="Opcional"
+                      id="apartamento"
+                      className="input-modal"
+                    />
+                  </div>
+                </div>
+              ),
+              confirmText: 'Confirmar domicilio',
+              cancelText: 'Volver',
+              onConfirm: async () => {
+                try {
+                  const direccion = document.getElementById('direccion')?.value.trim();
+                  const apartamento = document.getElementById('apartamento')?.value.trim();
+                  if (!direccion) {
+                    toast.error('⚠️ Por favor ingresa la dirección');
+                    return;
+                  }
+                  await confirmarPedido({
+                    metodo_pago: 'efectivo',
+                    tipo_servicio: 'domicilio',
+                    direccion_entrega: direccion,
+                    detalle_direccion: apartamento,
+                  });
+                  localStorage.removeItem('recomendacionesPedido');
+                  setModal({
+                    open: true,
+                    message: '¡Pedido recibido!',
+                    icon: (
+                      <GoCheck className="icono-grande" style={{ color: 'var(--exito-sabor)' }} />
+                    ),
+                    confirmText: 'Aceptar',
+                    onConfirm: () => setModal(m => ({ ...m, open: false })),
+                  });
+                } catch (error) {
+                  toast.error('Error al confirmar el pedido');
+                }
+              },
+              onCancel: () => handlePagoEfectivo(),
+            });
+          },
+        },
+      ],
     });
   };
 
@@ -591,6 +627,19 @@ export const useCarrito = () => {
       setModal({
         open: true,
         message: `Error al eliminar producto: ${error.message}`,
+        icon: <GoX className="GoX" />,
+        onConfirm: () => setModal(prev => ({ ...prev, open: false })),
+      });
+    }
+  };
+
+  const handleUpdateMessage = async (id_producto, nuevoMensaje) => {
+    try {
+      await updateItemMessage(id_producto, nuevoMensaje);
+    } catch (error) {
+      setModal({
+        open: true,
+        message: `Error al actualizar mensaje`,
         icon: <GoX className="GoX" />,
         onConfirm: () => setModal(prev => ({ ...prev, open: false })),
       });
@@ -621,6 +670,7 @@ export const useCarrito = () => {
     handlePagoEfectivo,
     handleUpdateQuantity,
     handleRemoveItem,
+    handleUpdateMessage,
     t,
   };
 };

@@ -34,9 +34,9 @@ const CarritoUI = ({
   solicitarMesa,
   limpiarMesa,
   procesarPago,
-  handleEliminarCarrito,
   handlePagoEfectivo,
   handleUpdateQuantity,
+  handleUpdateMessage,
   handleRemoveItem,
   t,
 }) => {
@@ -44,18 +44,8 @@ const CarritoUI = ({
     if (mesaModal.open) {
       gsap.fromTo(
         '.modal-mesa-contenedor',
-        {
-          y: 30,
-          opacity: 0,
-          scale: 0.95,
-        },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.6,
-          ease: 'expo.out',
-        }
+        { y: 30, opacity: 0, scale: 0.95 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'expo.out' }
       );
 
       gsap.fromTo(
@@ -64,7 +54,22 @@ const CarritoUI = ({
         { scale: 1, rotation: 0, duration: 0.8, delay: 0.2, ease: 'back.out(1.7)' }
       );
     }
-  }, [mesaModal.open]);
+
+    if (modal.open && modal.opciones) {
+      gsap.fromTo(
+        '.modal-opcion-tarjeta',
+        { y: 20, opacity: 0, scale: 0.9 },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.5,
+          stagger: 0.1,
+          ease: 'back.out(1.4)',
+        }
+      );
+    }
+  }, [mesaModal.open, modal.open, modal.opciones]);
 
   if (loading) {
     return (
@@ -114,11 +119,14 @@ const CarritoUI = ({
       <Header />
 
       <main className="seccion-carrito">
-        <div className="contenedor-carrito">
+        <div
+          className={`contenedor-carrito ${cartItems.length === 0 ? 'contenedor-carrito--unico' : ''}`}
+        >
           <CarritoLista
             items={cartItems}
             onRemoveItem={handleRemoveItem}
             onUpdateQuantity={handleUpdateQuantity}
+            onUpdateMessage={handleUpdateMessage}
             t={t}
           />
 
@@ -126,7 +134,6 @@ const CarritoUI = ({
             <CarritoResumen
               mesa={obtenerMesaActual()}
               total={totalCarrito}
-              onEliminarCarrito={handleEliminarCarrito}
               onLimpiarMesa={limpiarMesa}
               onPagoEfectivo={handlePagoEfectivo}
               onProcesarPago={procesarPago}
@@ -141,7 +148,21 @@ const CarritoUI = ({
 
       {/* Modales - Podrían ser atomizados en el futuro si crecen más */}
       <DialogoModal {...modal} onClose={() => setModal(m => ({ ...m, open: false }))}>
-        {modal.children || modal.message}
+        {modal.opciones ? (
+          <div className="modal-opciones">
+            {modal.opciones.map(opcion => (
+              <div key={opcion.id} className="modal-opcion-tarjeta" onClick={opcion.onClick}>
+                <div className="modal-opcion-tarjeta__icono">{opcion.icono}</div>
+                <div className="modal-opcion-tarjeta__info">
+                  <h4 className="modal-opcion-tarjeta__titulo">{opcion.titulo}</h4>
+                  <p className="modal-opcion-tarjeta__descripcion">{opcion.descripcion}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          modal.children || modal.message
+        )}
       </DialogoModal>
 
       <DialogoModal open={mesaModal.open} onClose={cerrarMesaModal} className="dialogo-modal--mesa">
@@ -205,9 +226,9 @@ CarritoUI.propTypes = {
   solicitarMesa: PropTypes.func.isRequired,
   limpiarMesa: PropTypes.func.isRequired,
   procesarPago: PropTypes.func.isRequired,
-  handleEliminarCarrito: PropTypes.func.isRequired,
   handlePagoEfectivo: PropTypes.func.isRequired,
   handleUpdateQuantity: PropTypes.func.isRequired,
+  handleUpdateMessage: PropTypes.func.isRequired,
   handleRemoveItem: PropTypes.func.isRequired,
   t: PropTypes.func.isRequired,
 };

@@ -103,8 +103,9 @@ export const getOrCreateUserService = async (userData) => {
         correo_usuario: email,
         telefono_usuario: telefono,
         contraseña_usuario:
-          "temporal_password_for_reservation_" +
-          Math.random().toString(36).slice(-8),
+          "TempPassword123!" +
+          Math.random().toString(36).slice(-4).toUpperCase() +
+          Math.random().toString(36).slice(-4),
       });
       user = await queries.getUserByEmailIncludingUnverified(email);
     } catch (error) {

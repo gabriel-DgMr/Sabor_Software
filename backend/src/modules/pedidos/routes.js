@@ -18,6 +18,11 @@ pedidoRoutes.post("/carrito/add", authenticateToken, C.addProductoCarrito);
 pedidoRoutes.put("/carrito/update", authenticateToken, C.updateCantidadCarrito);
 pedidoRoutes.delete("/carrito/remove", authenticateToken, C.removeProducto);
 pedidoRoutes.delete("/carrito/vaciar", authenticateToken, C.vaciar);
+pedidoRoutes.patch(
+  "/carrito/mensaje",
+  authenticateToken,
+  C.updateMensajeCarrito,
+);
 pedidoRoutes.post("/carrito/confirmar", authenticateToken, C.confirmar);
 
 // --- Pedidos ---

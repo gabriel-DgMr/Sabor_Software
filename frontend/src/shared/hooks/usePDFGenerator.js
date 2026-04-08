@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { formatearFecha, formatearFechaHora } from '../utils/format.js';
 
 export const usePDFGenerator = () => {
   const contentRef = useRef(null);
@@ -257,7 +258,7 @@ export const usePDFGenerator = () => {
       analysis += `• Promedio de empleados activos por día: ${promedioActividad.toFixed(1)}\n`;
       analysis += '• Actividad por día (últimos 7 días):\n';
       actividadEmpleados.forEach(actividad => {
-        const fecha = new Date(actividad.fecha).toLocaleDateString('es-CO');
+        const fecha = formatearFecha(actividad.fecha);
         analysis += `  - ${fecha}: ${actividad.empleados_activos} empleados activos\n`;
       });
       analysis += '\n';
@@ -506,13 +507,7 @@ export const usePDFGenerator = () => {
       // Agregar fecha
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
-      const currentDate = new Date().toLocaleDateString('es-CO', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      const currentDate = formatearFechaHora(new Date());
       pdf.text(`Generado el: ${currentDate}`, 20, 30);
 
       // Agregar imagen del dashboard

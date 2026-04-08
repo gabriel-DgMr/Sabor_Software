@@ -147,7 +147,14 @@ export const reservaController = {
           : `<h2>Tu reserva ha sido confirmada</h2><p>Número de mesa: ${reservaDetails.id_mesa}</p>`,
       };
 
-      await sendWithRetry(transporter, mailOptions, 3);
+      try {
+        await sendWithRetry(transporter, mailOptions, 3);
+      } catch (mailError) {
+        console.error(
+          "⚠️ La reserva se creó pero falló el envío del email:",
+          mailError.message,
+        );
+      }
       res
         .status(201)
         .json({ message: "Reserva creada con éxito!", reservaId: reservaId });

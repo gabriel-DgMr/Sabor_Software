@@ -55,7 +55,8 @@ export const CartProvider = ({ children }) => {
       await PedidosService.agregarAlCarrito(
         product.id || product.id_producto,
         product.cantidad || 1,
-        idMesa
+        idMesa,
+        product.peticion || product.mensaje
       );
       await loadCart(true); // Sync silencioso
       toast.success('Producto agregado al carrito');
@@ -98,6 +99,25 @@ export const CartProvider = ({ children }) => {
     try {
       await PedidosService.actualizarCantidadCarrito(id_producto, cantidad);
       await loadCart(true); // Sync silencioso en background
+    } catch (err) {
+      setCartItems(previousItems);
+      setError(err.message);
+      toast.error(err.message);
+      throw err;
+    }
+  };
+
+  const updateItemMessage = async (id_producto, mensaje) => {
+    const previousItems = [...cartItems];
+
+    // Update optimista
+    setCartItems(current =>
+      current.map(item => (item.id_producto === id_producto ? { ...item, mensaje } : item))
+    );
+
+    try {
+      await PedidosService.actualizarMensajeCarrito(id_producto, mensaje);
+      await loadCart(true);
     } catch (err) {
       setCartItems(previousItems);
       setError(err.message);
@@ -162,6 +182,7 @@ export const CartProvider = ({ children }) => {
         addItemToCart,
         removeItemFromCart,
         updateItemQuantity,
+        updateItemMessage,
         clearCart,
         confirmarPedido,
         loadCart,

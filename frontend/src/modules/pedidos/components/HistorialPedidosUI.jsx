@@ -6,6 +6,7 @@ import Header from '../../../shared/components/Header.jsx';
 import StarRating from '../../../shared/components/StarRating.jsx';
 import RatingModal from '../../productos/components/RatingModal.jsx';
 import { getImageUrl } from '../../../shared/utils/imageUtils.js';
+import { formatearFecha, formatearHora } from '../../../shared/utils/format.js';
 
 const HistorialPedidosUI = ({
   pedidos,
@@ -20,18 +21,11 @@ const HistorialPedidosUI = ({
 }) => {
   if (loading) {
     return (
-      <div>
+      <div className="historial-pedidos">
         <Header />
-        <div className="historial-pedidos-bg">
-          <div className="historial-pedidos-titulo">
-            <h2>Historial de Pedidos</h2>
-          </div>
-          <div className="historial-pedidos-lista">
-            <div className="pedido-tarjeta">
-              <div className="pedido-tarjeta-header">
-                <span>Cargando...</span>
-              </div>
-            </div>
+        <div className="historial-pedidos__contenedor">
+          <div className="historial-pedidos__titulo">
+            <h2>Cargando historial...</h2>
           </div>
         </div>
         <Footer />
@@ -41,18 +35,15 @@ const HistorialPedidosUI = ({
 
   if (error) {
     return (
-      <div>
+      <div className="historial-pedidos">
         <Header />
-        <div className="historial-pedidos-bg">
-          <div className="historial-pedidos-titulo">
-            <h2>Historial de Pedidos</h2>
+        <div className="historial-pedidos__contenedor">
+          <div className="historial-pedidos__titulo">
+            <h2>Error al cargar</h2>
           </div>
-          <div className="historial-pedidos-lista">
-            <div className="pedido-tarjeta error">
-              <div className="pedido-tarjeta-header">
-                <span className="error-message">{error}</span>
-              </div>
-            </div>
+          <div className="historial-vacio">
+            <div className="historial-vacio__icono">⚠️</div>
+            <p className="historial-vacio__texto">{error}</p>
           </div>
         </div>
         <Footer />
@@ -61,182 +52,135 @@ const HistorialPedidosUI = ({
   }
 
   return (
-    <div>
+    <div className="historial-pedidos">
       <Header />
-      <div className="historial-pedidos-bg">
-        <div className="historial-pedidos-titulo">
-          <h2>Historial de Pedidos</h2>
+      <div className="historial-pedidos__contenedor">
+        <div className="historial-pedidos__titulo">
+          <h2>Mi Historial de Pedidos</h2>
         </div>
-        <div className="historial-pedidos-lista">
-          {pedidos.length === 0 ? (
-            <div className="pedido-tarjeta">
-              <div className="pedido-tarjeta-header">
-                <span>No tienes pedidos registrados</span>
-              </div>
-              <div className="pedido-productos">
-                <p>¡Haz tu primer pedido y aparecerá aquí!</p>
-              </div>
-            </div>
-          ) : (
-            pedidos.map(pedido => (
-              <div className="pedido-tarjeta" key={pedido._id}>
-                <div className="pedido-tarjeta-header">
-                  <span className="pedido-fecha">
-                    {new Date(pedido.createdAt).toLocaleString('es-CO', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+
+        {pedidos.length === 0 ? (
+          <div className="historial-vacio">
+            <div className="historial-vacio__icono">🍽️</div>
+            <p className="historial-vacio__texto">No tienes pedidos registrados todavía.</p>
+            <p className="historial-vacio__subtexto">¡Haz tu primer pedido y aparecerá aquí!</p>
+          </div>
+        ) : (
+          pedidos.map(pedido => (
+            <article className="pedido-tarjeta" key={pedido.id}>
+              <header className="pedido-tarjeta__cabecera">
+                <div className="pedido-tarjeta__fecha">
+                  <span className="pedido-tarjeta__fecha-texto">
+                    {formatearFecha(pedido.createdAt)}
                   </span>
-                  <span className={`pedido-estado ${pedido.estado?.toLowerCase() || 'pendiente'}`}>
-                    {pedido.estado || 'Pendiente'}
+                  <span className="pedido-tarjeta__fecha-subtexto">
+                    {formatearHora(pedido.createdAt)}
                   </span>
                 </div>
-                <div className="pedido-productos">
-                  <h4>Productos:</h4>
-                  <ul>
+                <div
+                  className={`pedido-tarjeta__estado pedido-tarjeta__estado--${pedido.estado?.toLowerCase() || 'pendiente'}`}
+                >
+                  {pedido.estado || 'Pendiente'}
+                </div>
+              </header>
+
+              <div className="pedido-tarjeta__cuerpo">
+                <section className="pedido-tarjeta__productos">
+                  <h4 className="pedido-tarjeta__subtitle">Productos</h4>
+                  <ul className="pedido-tarjeta__lista">
                     {(pedido.items || []).map((item, idx) => (
-                      <li key={idx}>
-                        <span className="producto-nombre">{item}</span>
+                      <li key={idx} className="pedido-tarjeta__item">
+                        {item}
                       </li>
                     ))}
                   </ul>
-                </div>
-                <div className="pedido-total">
-                  <span>Total:</span>
-                  <span className="pedido-total-monto">
-                    ${pedido.total?.toLocaleString('es-CO') || '0'}
-                  </span>
-                </div>
-                {pedido.recomendaciones && (
-                  <div className="pedido-recomendaciones">
-                    <span>Recomendaciones:</span>
-                    <em>{pedido.recomendaciones}</em>
+                </section>
+
+                <aside className="pedido-tarjeta__resumen">
+                  <div className="pedido-tarjeta__total-line">
+                    <span className="pedido-tarjeta__total-label">Inversión total</span>
+                    <span className="pedido-tarjeta__total-valor">
+                      ${pedido.total?.toLocaleString('es-CO') || '0'}
+                    </span>
                   </div>
-                )}
+                </aside>
+              </div>
 
-                {pedido.estado?.toLowerCase() === 'completado' && (
-                  <div className="pedido-calificaciones">
-                    <button
-                      className="btn-calificar"
-                      onClick={() => toggleProductosCalificables(pedido._id)}
-                      style={{
-                        backgroundColor: '#007bff',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 16px',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '0.9rem',
-                        marginTop: '12px',
-                      }}
-                    >
-                      ⭐ Calificar Productos
-                    </button>
+              {pedido.recomendaciones && (
+                <div className="pedido-tarjeta__recomendaciones">
+                  <strong>Nota:</strong> {pedido.recomendaciones}
+                </div>
+              )}
 
-                    {productosParaCalificar[pedido._id] && (
-                      <div className="productos-calificables" style={{ marginTop: '16px' }}>
-                        <h5 style={{ margin: '0 0 12px 0', color: '#333' }}>
-                          Productos de este pedido:
-                        </h5>
-                        <div
-                          className="productos-grid"
-                          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
-                        >
-                          {productosParaCalificar[pedido._id].map(producto => (
-                            <div
-                              key={producto.id_producto}
-                              className="producto-calificable"
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                padding: '12px',
-                                backgroundColor: '#f8f9fa',
-                                borderRadius: '6px',
-                                border: '1px solid #e9ecef',
-                              }}
-                            >
-                              <div
-                                className="producto-info"
-                                style={{ display: 'flex', alignItems: 'center', gap: '12px' }}
-                              >
-                                {producto.imagen_producto && (
-                                  <img
-                                    src={getImageUrl(producto.imagen_producto)}
-                                    alt={producto.nombre_producto}
-                                    style={{
-                                      width: '40px',
-                                      height: '40px',
-                                      objectFit: 'cover',
-                                      borderRadius: '4px',
-                                    }}
-                                  />
-                                )}
-                                <div>
-                                  <strong style={{ fontSize: '0.95rem' }}>
-                                    {producto.nombre_producto}
-                                  </strong>
-                                  <div style={{ fontSize: '0.85rem', color: '#666' }}>
-                                    Cantidad: {producto.cantidad}
-                                  </div>
-                                </div>
-                              </div>
+              {pedido.estado?.toLowerCase() === 'completado' && (
+                <div className="pedido-tarjeta__calificaciones">
+                  <button
+                    className="pedido-tarjeta__btn-calificar"
+                    onClick={() => toggleProductosCalificables(pedido.id)}
+                  >
+                    ⭐ Calificar experiencia con estos productos
+                  </button>
 
-                              <div
-                                className="producto-rating"
-                                style={{ display: 'flex', alignItems: 'center', gap: '12px' }}
-                              >
-                                {producto.ya_calificado ? (
-                                  <div
-                                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-                                  >
-                                    <StarRating rating={producto.calificacion_actual} size={16} />
-                                    <button
-                                      onClick={() => openRatingModal(producto, pedido._id)}
-                                      style={{
-                                        backgroundColor: 'transparent',
-                                        border: '1px solid #007bff',
-                                        color: '#007bff',
-                                        padding: '4px 8px',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer',
-                                        fontSize: '0.8rem',
-                                      }}
-                                    >
-                                      Editar
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <button
-                                    onClick={() => openRatingModal(producto, pedido._id)}
-                                    style={{
-                                      backgroundColor: '#28a745',
-                                      color: 'white',
-                                      border: 'none',
-                                      padding: '6px 12px',
-                                      borderRadius: '4px',
-                                      cursor: 'pointer',
-                                      fontSize: '0.85rem',
-                                    }}
-                                  >
-                                    Calificar
-                                  </button>
-                                )}
+                  {productosParaCalificar[pedido.id] && (
+                    <div className="productos-calificar">
+                      <h5 className="pedido-tarjeta__subtitle">¿Qué te parecieron?</h5>
+                      <div className="productos-calificar__grid">
+                        {productosParaCalificar[pedido.id].map(producto => (
+                          <div key={producto.id_producto} className="producto-fila">
+                            <div className="producto-fila__info">
+                              {producto.imagen_producto && (
+                                <img
+                                  src={getImageUrl(producto.imagen_producto)}
+                                  alt={producto.nombre_producto}
+                                  className="producto-fila__image"
+                                  style={{
+                                    width: '50px',
+                                    height: '50px',
+                                    borderRadius: '8px',
+                                    objectFit: 'cover',
+                                  }}
+                                />
+                              )}
+                              <div className="producto-fila__detalles">
+                                <span className="producto-fila__nombre">
+                                  {producto.nombre_producto}
+                                </span>
+                                <span className="producto-fila__meta">
+                                  Cantidad: {producto.cantidad}
+                                </span>
                               </div>
                             </div>
-                          ))}
-                        </div>
+
+                            <div className="producto-fila__acciones">
+                              {producto.ya_calificado ? (
+                                <>
+                                  <StarRating rating={producto.calificacion_actual} size={16} />
+                                  <button
+                                    className="btn-calificar-p btn-calificar-p--editar"
+                                    onClick={() => openRatingModal(producto, pedido.id)}
+                                  >
+                                    Editar
+                                  </button>
+                                </>
+                              ) : (
+                                <button
+                                  className="btn-calificar-p btn-calificar-p--nuevo"
+                                  onClick={() => openRatingModal(producto, pedido.id)}
+                                >
+                                  Calificar
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </article>
+          ))
+        )}
       </div>
 
       <RatingModal

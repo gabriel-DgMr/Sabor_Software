@@ -62,7 +62,7 @@ const reservasService = {
    */
   crear: async datosReserva => {
     try {
-      const response = await api.post('/reservas', datosReserva);
+      const response = await api.post('/reservas/hacerReserva', datosReserva);
       return response.data;
     } catch (error) {
       console.error('Error al crear reserva:', error);
@@ -75,7 +75,7 @@ const reservasService = {
    */
   getMiHistorial: async () => {
     try {
-      const response = await api.get('/reservas/mi-historial');
+      const response = await api.get('/reservas/historial');
       return response.data;
     } catch (error) {
       console.error('Error al obtener historial de reservas:', error);

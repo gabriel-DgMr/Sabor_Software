@@ -1,6 +1,7 @@
 import React from 'react';
 import MenuLateral from './MenuLateralAdministrador';
 import PDFDownloadButton from '../../../shared/components/PDFDownloadButton';
+import { formatearFechaHora } from '../../../shared/utils/format.js';
 import '../styles/dashboard-ui.css';
 import '../styles/dashboard.css';
 import '../styles/charts.css';
@@ -34,14 +35,7 @@ ChartJS.register(
 
 const formatDate = dateString => {
   if (!dateString) return 'Nunca';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('es-CO', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return formatearFechaHora(dateString);
 };
 
 const getActivityColor = estado => {

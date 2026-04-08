@@ -103,7 +103,7 @@ export const obtenerCarrito = async () => {
 };
 
 // Agregar producto al carrito
-export const agregarAlCarrito = async (id_producto, cantidad, id_mesa) => {
+export const agregarAlCarrito = async (id_producto, cantidad, id_mesa, mensaje = null) => {
   const token = localStorage.getItem('token');
   if (!token) throw new Error('Debes iniciar sesión para agregar productos');
 
@@ -117,6 +117,7 @@ export const agregarAlCarrito = async (id_producto, cantidad, id_mesa) => {
       id_producto,
       cantidad,
       id_mesa: id_mesa ? Number(id_mesa) : null,
+      mensaje,
     }),
   });
 
@@ -160,6 +161,24 @@ export const actualizarCantidadCarrito = async (id_producto, cantidad) => {
 
   if (response.status === 404) return { items: [] };
   if (!response.ok) throw new Error('Error al actualizar cantidad');
+
+  return await response.json();
+};
+
+// Actualizar mensaje de un producto en el carrito
+export const actualizarMensajeCarrito = async (id_producto, mensaje) => {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_BASE_URL}/pedidos/carrito/mensaje`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ id_producto, mensaje }),
+  });
+
+  if (response.status === 404) return { items: [] };
+  if (!response.ok) throw new Error('Error al actualizar el mensaje');
 
   return await response.json();
 };

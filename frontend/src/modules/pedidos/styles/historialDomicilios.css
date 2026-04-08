@@ -1,0 +1,244 @@
+/* ============================================================
+   HISTORIAL DE DOMICILIOS - Estética Premium (BEM en español)
+   ============================================================ */
+
+.historial-domicilios {
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--neutral-50);
+  padding: 12rem 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.historial-domicilios__contenedor {
+  width: 100%;
+  max-width: 100rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  padding: 0 2rem 6rem;
+  flex: 1;
+}
+
+.historial-domicilios__titulo {
+  text-align: center;
+}
+
+.historial-domicilios__titulo h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(3rem, 5vw, 4.5rem);
+  font-weight: 900;
+  color: var(--azul-sabor);
+  margin: 0;
+  background: linear-gradient(135deg, var(--azul-sabor), var(--naranja-sabor));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Tarjeta de Domicilio */
+.domicilio-tarjeta {
+  background: #ffffff;
+  border-radius: 2.4rem;
+  padding: 3rem;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.domicilio-tarjeta:hover {
+  transform: translateY(-0.5rem);
+  box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.08);
+  border-color: var(--naranja-sabor-light);
+}
+
+.domicilio-tarjeta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.6rem;
+  height: 100%;
+  background: var(--naranja-sabor);
+  opacity: 0.8;
+}
+
+.domicilio-tarjeta__cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--neutral-100);
+}
+
+.domicilio-tarjeta__fecha {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.domicilio-tarjeta__fecha-texto {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--azul-sabor);
+}
+
+.domicilio-tarjeta__estado {
+  padding: 0.8rem 1.6rem;
+  border-radius: 50rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+}
+
+.domicilio-tarjeta__estado--pendiente {
+  background-color: #fff9db;
+  color: #f08c00;
+}
+
+.domicilio-tarjeta__estado--recibido {
+  background-color: #ebfbee;
+  color: #37b24d;
+}
+
+.domicilio-tarjeta__cuerpo {
+  display: grid;
+  grid-template-columns: 1fr 20rem;
+  gap: 3rem;
+}
+
+@media (max-width: 768px) {
+  .domicilio-tarjeta__cuerpo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.domicilio-tarjeta__info-seccion {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.domicilio-tarjeta__subtitulo {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  margin: 0;
+}
+
+.domicilio-tarjeta__texto {
+  font-size: 1.5rem;
+  color: var(--azul-sabor);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.domicilio-tarjeta__resumen {
+  background: var(--neutral-50);
+  padding: 2rem;
+  border-radius: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.domicilio-tarjeta__total-label {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.domicilio-tarjeta__total-valor {
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: var(--naranja-sabor);
+}
+
+/* Acciones */
+.domicilio-tarjeta__acciones {
+  margin-top: 1rem;
+}
+
+.btn-recibido-premium {
+  width: 100%;
+  padding: 1.4rem;
+  background: var(--azul-sabor);
+  color: #fff;
+  border-radius: 1.2rem;
+  font-weight: 700;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-recibido-premium:hover:not(:disabled) {
+  background: var(--naranja-sabor);
+  transform: scale(1.02);
+}
+
+.btn-recibido-premium:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.domicilio-recibido-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: #37b24d;
+  font-weight: 700;
+  font-size: 1.6rem;
+  padding: 1rem;
+  background: #ebfbee;
+  border-radius: 1.2rem;
+}
+
+/* Mensajes cuando está vacío */
+.domicilios-vacio {
+  text-align: center;
+  padding: 6rem;
+  background: #fff;
+  border-radius: 3rem;
+  box-shadow: 0 1rem 3rem rgba(0,0,0,0.05);
+}
+
+.domicilios-vacio__icono {
+  font-size: 6rem;
+  margin-bottom: 2rem;
+}
+
+.domicilios-vacio__texto {
+  font-size: 1.8rem;
+  color: #666;
+}
+
+/* Spinner */
+.spinner-sabor {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

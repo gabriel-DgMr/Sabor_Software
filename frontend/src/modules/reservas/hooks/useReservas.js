@@ -141,7 +141,7 @@ export const useReservas = () => {
       if (resp) errors.email = resp;
     }
 
-    manejarErroresDeCampo(errors);
+    setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
@@ -154,7 +154,7 @@ export const useReservas = () => {
         validarEspaciosInicioFinal(formData.peticiones, 'peticiones');
       if (resp) errors.peticiones = resp;
     }
-    manejarErroresDeCampo(errors);
+    setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
@@ -165,7 +165,11 @@ export const useReservas = () => {
       [name]: name === 'personas' ? (value === '' ? '' : parseInt(value, 10)) : value,
     }));
     if (formErrors[name]) {
-      setFormErrors(prevErrors => ({ ...prevErrors, [name]: null }));
+      setFormErrors(prevErrors => {
+        const newErrors = { ...prevErrors };
+        delete newErrors[name];
+        return newErrors;
+      });
     }
   };
 
@@ -174,10 +178,10 @@ export const useReservas = () => {
     if (step === 1) {
       if (validateStep1()) setStep(2);
     } else if (step === 2) {
-      if (validateStep2()) setStep(3);
+      const isStep2Valid = validateStep2();
+      const isStep3Valid = validateStep3();
+      if (isStep2Valid && isStep3Valid) setStep(3);
     } else if (step === 3) {
-      if (validateStep3()) setStep(4);
-    } else if (step === 4) {
       try {
         setIsLoading(true);
         const requestData = {

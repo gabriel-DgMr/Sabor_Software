@@ -10,10 +10,19 @@ import { pool } from "../../core/config/dbconfig.js";
  * Obtener pedidos (Admin ve todos, Usuario solo los propios)
  */
 export const getPedidosService = async (userId, isAdmin = false) => {
+  let pedidos;
   if (isAdmin) {
-    return await pedidosQueries.getAllPedidosQuery();
+    pedidos = await pedidosQueries.getAllPedidosQuery();
+  } else {
+    pedidos = await pedidosQueries.getPedidosByUserIdQuery(userId);
   }
-  return await pedidosQueries.getPedidosByUserIdQuery(userId);
+
+  // Normalizar items: convertir items_str (CSV) en un arreglo 'items'
+  return pedidos.map((p) => ({
+    ...p,
+    items: p.items_str ? p.items_str.split(", ") : [],
+    productos: p.items_str || "", // Para compatibilidad con Admin View
+  }));
 };
 
 /**
@@ -24,7 +33,12 @@ export const getPedidoByIdService = async (userId, pedidoId) => {
   if (!pedido) {
     throw new Error("Pedido no encontrado o no autorizado");
   }
-  return pedido;
+
+  return {
+    ...pedido,
+    items: pedido.items_str ? pedido.items_str.split(", ") : [],
+    productos: pedido.items_str || "",
+  };
 };
 
 /**
@@ -112,6 +126,7 @@ export const addProductoCarritoService = async (
   userId,
   productoId,
   cantidad,
+  mensaje = null,
 ) => {
   const conn = await pool.getConnection();
   try {
@@ -148,12 +163,22 @@ export const addProductoCarritoService = async (
         true,
         conn,
       );
+      // Opcional: Actualizar el mensaje si se envía uno nuevo al re-agregar
+      if (mensaje !== null) {
+        await pedidosQueries.updateDetallePedidoMensajeQuery(
+          pedidoId,
+          productoId,
+          mensaje,
+          conn,
+        );
+      }
     } else {
       await pedidosQueries.insertDetallePedidoQuery(
         pedidoId,
         productoId,
         cantidad,
         infoProducto.precio_producto,
+        mensaje,
         conn,
       );
     }
@@ -184,6 +209,25 @@ export const updateCantidadCarritoService = async (
     productoId,
     cantidad,
     false,
+  );
+  return { pedidoId: carrito.id_pedido };
+};
+
+/**
+ * Actualizar el mensaje de un producto en el carrito
+ */
+export const updateMensajeCarritoService = async (
+  userId,
+  productoId,
+  mensaje,
+) => {
+  const carrito = await pedidosQueries.getCarritoQuery(userId);
+  if (!carrito) throw new Error("No tienes un carrito activo");
+
+  await pedidosQueries.updateDetallePedidoMensajeQuery(
+    carrito.id_pedido,
+    productoId,
+    mensaje,
   );
   return { pedidoId: carrito.id_pedido };
 };

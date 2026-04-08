@@ -5,6 +5,7 @@ import LoadingScreen from '../../../shared/components/LoadingScreen';
 import TarjetaReservacion from './TarjetaReservacion';
 import EstadisticasReservas from './EstadisticasReservas';
 import FiltrosReservas from './FiltrosReservas';
+import { formatearFecha } from '../../../shared/utils/format.js';
 import '../styles/reservas.css';
 
 const BLOQUES = [
@@ -52,13 +53,7 @@ const ReservacionesEmpleadosUI = ({
   ];
 
   const formatearFechaString = fechaString => {
-    const fecha = new Date(fechaString);
-    return fecha.toLocaleDateString(t('locale_code', 'es-ES'), {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
+    return formatearFecha(fechaString, { weekday: 'long' });
   };
 
   const obtenerColorEstado = estado => {

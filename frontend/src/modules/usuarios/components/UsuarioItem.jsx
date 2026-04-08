@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { formatearFecha } from '../../../shared/utils/format.js';
 
 /**
  * UsuarioItem - Representación individual de un usuario en la lista de gestión.
@@ -52,7 +53,7 @@ const UsuarioItem = ({
           <p className="tarjeta-usuario__dato">📧 {usuario.correo_usuario}</p>
           <p className="tarjeta-usuario__dato">📞 {usuario.telefono_usuario || 'Sin teléfono'}</p>
           <p className="tarjeta-usuario__dato tarjeta-usuario__dato--secundario">
-            📅 Registro: {new Date(usuario.fecha_registro).toLocaleDateString()}
+            📅 Registro: {formatearFecha(usuario.fecha_registro)}
           </p>
         </div>
 

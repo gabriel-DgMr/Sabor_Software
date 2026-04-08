@@ -18,27 +18,38 @@ const DialogoModal = ({
   if (!open) return null;
 
   return (
-    <div className="dialogo-modal__overlay">
+    <div
+      className="dialogo-modal__overlay"
+      onClick={e => {
+        if (e.target.classList.contains('dialogo-modal__overlay')) onClose?.();
+      }}
+    >
       <div className={`dialogo-modal ${className}`}>
         {/* Botón de cierre (X) */}
         <button className="dialogo-modal__close" aria-label="Cerrar" onClick={onClose}>
           ×
         </button>
 
-        <div className="dialogo_exito__cuerpo">
-          {icon && <div className="dialogo_exito__icono">{icon}</div>}
-          {children ? children : <p>{message}</p>}
+        <div className="dialogo-modal__cuerpo">
+          {icon && <div className="dialogo-modal__icono">{icon}</div>}
+          {children ? children : <p className="dialogo-modal__mensaje">{message}</p>}
         </div>
 
         {(confirmText || cancelText) && (
-          <div className="dialogo-modal__actions">
+          <div className="dialogo-modal__acciones">
             {confirmText && (
-              <button className="dialogo-modal__btn" onClick={onConfirm}>
+              <button
+                className="dialogo-modal__btn dialogo-modal__btn--confirmar"
+                onClick={onConfirm}
+              >
                 {confirmText}
               </button>
             )}
             {cancelText && (
-              <button className="dialogo-modal__btn" onClick={onCancel}>
+              <button
+                className="dialogo-modal__btn dialogo-modal__btn--cancelar"
+                onClick={onCancel}
+              >
                 {cancelText}
               </button>
             )}

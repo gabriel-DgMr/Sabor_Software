@@ -27,17 +27,22 @@ const ActualizarPerfilForm = ({
     <form className="formulario-perfil" onSubmit={handleSubmit}>
       <header className="formulario-perfil__encabezado">
         <h2 className="formulario-perfil__titulo">{t('actualizar_perfil.titulo')}</h2>
+        <p className="formulario-perfil__subtitulo">{t('actualizar_perfil.subtitulo')}</p>
       </header>
 
-      {mensaje && (
-        <div className="notificacion notificacion--exito" id="mensaje-exito-actualizar">
-          {mensaje}
-        </div>
-      )}
+      {(mensaje || globalError) && (
+        <div className="formulario-perfil__notificaciones">
+          {mensaje && (
+            <div className="notificacion notificacion--exito" id="mensaje-exito-actualizar">
+              <i className="fas fa-check-circle"></i> {mensaje}
+            </div>
+          )}
 
-      {globalError && (
-        <div className="notificacion notificacion--error" id="mensaje-error-actualizar">
-          {globalError}
+          {globalError && (
+            <div className="notificacion notificacion--error" id="mensaje-error-actualizar">
+              <i className="fas fa-exclamation-circle"></i> {globalError}
+            </div>
+          )}
         </div>
       )}
 
@@ -46,7 +51,9 @@ const ActualizarPerfilForm = ({
           {imagenPreview ? (
             <img alt="Avatar" className="formulario-perfil__avatar" src={imagenPreview} />
           ) : (
-            <div className="formulario-perfil__avatar-vacio">👤</div>
+            <div className="formulario-perfil__avatar-vacio">
+              <i className="fas fa-user-circle"></i>
+            </div>
           )}
         </div>
 
@@ -60,19 +67,20 @@ const ActualizarPerfilForm = ({
 
         <div className="formulario-perfil__imagen-botones">
           <button
-            className="boton boton--secundario boton--pequeno"
+            className="boton-moderno boton-moderno--secundario"
             type="button"
             onClick={() => fileInputRef.current.click()}
           >
-            {t('actualizar_perfil.cambiar_imagen')}
+            <i className="fas fa-camera"></i> {t('actualizar_perfil.cambiar_foto')}
           </button>
           {imagenPreview && (
             <button
-              className="boton boton--peligro boton--pequeno"
+              className="boton-moderno boton-moderno--peligro"
+              style={{ background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }}
               type="button"
               onClick={removeImage}
             >
-              {t('actualizar_perfil.eliminar_imagen')}
+              <i className="fas fa-trash-alt"></i>
             </button>
           )}
         </div>
@@ -80,9 +88,10 @@ const ActualizarPerfilForm = ({
 
       <div className="formulario-perfil__campos">
         <div className="formulario-perfil__campo">
-          <label className="formulario-perfil__label">{t('actualizar_perfil.nombre')}:</label>
+          <label className="formulario-perfil__label">{t('actualizar_perfil.nombre')}</label>
           <input
             className={`formulario-perfil__input ${errors.nombre ? 'formulario-perfil__input--error' : ''}`}
+            placeholder={t('actualizar_perfil.placeholder_nombre')}
             type="text"
             value={nombre}
             onChange={e => handleInputChange('nombre', e.target.value)}
@@ -91,9 +100,10 @@ const ActualizarPerfilForm = ({
         </div>
 
         <div className="formulario-perfil__campo">
-          <label className="formulario-perfil__label">{t('actualizar_perfil.correo')}:</label>
+          <label className="formulario-perfil__label">{t('actualizar_perfil.correo')}</label>
           <input
             className={`formulario-perfil__input ${errors.correo ? 'formulario-perfil__input--error' : ''}`}
+            placeholder={t('actualizar_perfil.placeholder_correo')}
             type="email"
             value={correo}
             onChange={e => handleInputChange('correo', e.target.value)}
@@ -102,9 +112,10 @@ const ActualizarPerfilForm = ({
         </div>
 
         <div className="formulario-perfil__campo">
-          <label className="formulario-perfil__label">{t('actualizar_perfil.telefono')}:</label>
+          <label className="formulario-perfil__label">{t('actualizar_perfil.telefono')}</label>
           <input
             className={`formulario-perfil__input ${errors.telefono ? 'formulario-perfil__input--error' : ''}`}
+            placeholder={t('actualizar_perfil.placeholder_telefono')}
             type="tel"
             value={telefono}
             onChange={e => handleInputChange('telefono', e.target.value)}
@@ -114,8 +125,21 @@ const ActualizarPerfilForm = ({
       </div>
 
       <footer className="formulario-perfil__pie">
-        <button className="boton boton--primario boton--ancho" disabled={cargando} type="submit">
-          {cargando ? t('comun.cargando') : t('actualizar_perfil.boton_guardar')}
+        <button
+          className="boton-moderno boton-moderno--primario"
+          style={{ width: '100%' }}
+          disabled={cargando}
+          type="submit"
+        >
+          {cargando ? (
+            <>
+              <i className="fas fa-spinner fa-spin"></i> {t('cargando')}
+            </>
+          ) : (
+            <>
+              <i className="fas fa-save"></i> {t('actualizar_perfil.guardar')}
+            </>
+          )}
         </button>
       </footer>
     </form>

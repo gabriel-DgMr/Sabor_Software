@@ -95,7 +95,7 @@ export const getCarrito = async (req, res) => {
 export const addProductoCarrito = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { id_producto, cantidad } = req.body;
+    const { id_producto, cantidad, mensaje } = req.body;
 
     if (!id_producto || !cantidad || cantidad <= 0) {
       return res
@@ -107,6 +107,7 @@ export const addProductoCarrito = async (req, res) => {
       userId,
       id_producto,
       cantidad,
+      mensaje,
     );
     res.json({
       mensaje: "Producto agregado/actualizado en el carrito",
@@ -140,6 +141,30 @@ export const updateCantidadCarrito = async (req, res) => {
     res.json({ mensaje: "Cantidad del producto actualizada", ...resultado });
   } catch (error) {
     console.error("Error en updateCantidadCarrito:", error);
+    res.status(400).json({ mensaje: error.message });
+  }
+};
+
+/**
+ * Actualizar mensaje de producto en carrito
+ */
+export const updateMensajeCarrito = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id_producto, mensaje } = req.body;
+
+    if (!id_producto) {
+      return res.status(400).json({ mensaje: "ID de producto es requerido" });
+    }
+
+    const resultado = await pedidosServices.updateMensajeCarritoService(
+      userId,
+      id_producto,
+      mensaje,
+    );
+    res.json({ mensaje: "Mensaje del producto actualizado", ...resultado });
+  } catch (error) {
+    console.error("Error en updateMensajeCarrito:", error);
     res.status(400).json({ mensaje: error.message });
   }
 };

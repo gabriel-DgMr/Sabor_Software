@@ -21,8 +21,8 @@ export const getPedidosByUserIdQuery = async (userId) => {
       e.nombre_estado AS estado,
       GROUP_CONCAT(CONCAT(dp.cantidad, ' x ', pr.nombre_producto) SEPARATOR ', ') AS items_str
     FROM pedidos p
-    JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
-    JOIN productos pr ON dp.id_producto = pr.id_producto
+    LEFT JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
+    LEFT JOIN productos pr ON dp.id_producto = pr.id_producto
     JOIN estados e ON p.id_estado = e.id_estado
     WHERE p.id_usuario = ? AND p.id_estado != 1
     GROUP BY p.id_pedido
@@ -47,10 +47,13 @@ export const getAllPedidosQuery = async () => {
       p.tipo_servicio,
       p.direccion_entrega,
       p.detalle_direccion,
-      p.id_mesa AS mesa
+      p.id_mesa AS mesa,
+      GROUP_CONCAT(CONCAT(dp.cantidad, ' x ', pr.nombre_producto) SEPARATOR ', ') AS items_str
     FROM pedidos p
     JOIN usuarios u ON p.id_usuario = u.id_usuario
     JOIN estados e ON p.id_estado = e.id_estado
+    LEFT JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
+    LEFT JOIN productos pr ON dp.id_producto = pr.id_producto
     WHERE p.tipo_servicio = 'mesa' AND p.id_estado != 1
     ORDER BY p.fecha_pedido DESC
   `;
@@ -133,7 +136,7 @@ export const getCarritoQuery = async (userId) => {
 
   const pedido = rows[0];
   const [items] = await pool.query(
-    `SELECT dp.id_detalle, dp.id_producto, p.nombre_producto, dp.cantidad, dp.precio_unitario, (dp.cantidad * dp.precio_unitario) as subtotal, p.imagen_producto
+    `SELECT dp.id_detalle, dp.id_producto, p.nombre_producto, dp.cantidad, dp.precio_unitario, (dp.cantidad * dp.precio_unitario) as subtotal, p.imagen_producto, dp.mensaje
      FROM detalle_pedidos dp
      JOIN productos p ON dp.id_producto = p.id_producto
      WHERE dp.id_pedido = ?`,
@@ -174,19 +177,20 @@ export const insertDetallePedidoQuery = async (
   productoId,
   cantidad,
   precio = null,
+  mensaje = null,
   conn = pool,
 ) => {
   if (precio !== null) {
     await conn.query(
-      "INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad, precio_unitario) VALUES (?, ?, ?, ?)",
-      [pedidoId, productoId, cantidad, precio],
+      "INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad, precio_unitario, mensaje) VALUES (?, ?, ?, ?, ?)",
+      [pedidoId, productoId, cantidad, precio, mensaje],
     );
   } else {
     // Si no se pasa precio, el trigger before_detalle_pedido_insert en la BD se encargará de buscarlo.
     // Evitamos la subconsulta directa para prevenir errores de bloqueo de tabla en triggers (Error 1442).
     await conn.query(
-      "INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad) VALUES (?, ?, ?)",
-      [pedidoId, productoId, cantidad],
+      "INSERT INTO detalle_pedidos (id_pedido, id_producto, cantidad, mensaje) VALUES (?, ?, ?, ?)",
+      [pedidoId, productoId, cantidad, mensaje],
     );
   }
 };
@@ -202,6 +206,21 @@ export const updateDetallePedidoCantidadQuery = async (
     ? "UPDATE detalle_pedidos SET cantidad = cantidad + ? WHERE id_pedido = ? AND id_producto = ?"
     : "UPDATE detalle_pedidos SET cantidad = ? WHERE id_pedido = ? AND id_producto = ?";
   await conn.query(sql, [cantidad, pedidoId, productoId]);
+};
+
+/**
+ * Actualizar el mensaje/nota de un producto en el carrito
+ */
+export const updateDetallePedidoMensajeQuery = async (
+  pedidoId,
+  productoId,
+  mensaje,
+  conn = pool,
+) => {
+  await conn.query(
+    "UPDATE detalle_pedidos SET mensaje = ? WHERE id_pedido = ? AND id_producto = ?",
+    [mensaje, pedidoId, productoId],
+  );
 };
 
 export const deleteDetallePedidoQuery = async (

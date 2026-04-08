@@ -2,7 +2,7 @@
 /* Diseño Moderno y Minimalista estilo "Floating Bar" */
 
 :root {
-  --header-height: 80px;
+  --header-height: 90px; /* Incrementado de 80px */
   --header-bg: rgba(255, 255, 255, 0.85);
   --header-blur: 12px;
   --header-border: rgba(255, 255, 255, 0.3);
@@ -27,7 +27,7 @@
 .encabezado__barra {
   width: 100%;
   max-width: 1200px;
-  height: 60px;
+  height: 70px; /* Incrementado de 60px */
   background: var(--header-bg);
   backdrop-filter: blur(var(--header-blur));
   -webkit-backdrop-filter: blur(var(--header-blur));
@@ -95,7 +95,7 @@
 .encabezado__logo-texto {
   font-family: 'Outfit', sans-serif;
   font-weight: 800;
-  font-size: 1.5rem;
+  font-size: 1.8rem; /* Incrementado de 1.5rem */
   color: #1a1a1a;
   letter-spacing: 1px;
 }
@@ -103,14 +103,14 @@
 /* Navegación */
 .encabezado__nav {
   display: flex;
-  gap: 2.5rem;
+  gap: 3rem; /* Incrementado de 2.5rem */
 }
 
 .encabezado__nav-enlace {
   text-decoration: none;
   font-family: 'Inter', sans-serif;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 1.15rem; /* Incrementado de 0.95rem */
   color: #666;
   transition:
     color 0.3s ease,
@@ -180,7 +180,7 @@
   right: -6px;
   background: #1a1a1a;
   color: #fff;
-  font-size: 0.7rem;
+  font-size: 0.85rem; /* Incrementado de 0.7rem */
   font-weight: 800;
   width: 18px;
   height: 18px;
@@ -260,13 +260,13 @@
 .menu-perfil__nombre {
   font-family: 'Outfit', sans-serif;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.2rem; /* Incrementado de 1rem */
   color: #1a1a1a;
   display: block;
 }
 
 .menu-perfil__correo {
-  font-size: 0.75rem;
+  font-size: 0.9rem; /* Incrementado de 0.75rem */
   color: #777;
   font-weight: 400;
   letter-spacing: 0.2px;
@@ -276,7 +276,7 @@
   padding: 0.65rem 0.9rem;
   border-radius: 10px;
   font-weight: 500;
-  font-size: 0.85rem;
+  font-size: 1.0rem; /* Incrementado de 0.85rem */
   color: #555;
   display: flex;
   align-items: center;

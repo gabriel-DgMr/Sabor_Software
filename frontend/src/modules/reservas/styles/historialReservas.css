@@ -1,173 +1,193 @@
-/* Fondo y centrado */
+/* ============================================================
+   HISTORIAL DE RESERVAS - Estética Premium (BEM en español)
+   ============================================================ */
+
 .historial-reservas {
-  min-height: 90vh;
-  width: 100vw;
-  background: var(--neutral-50);
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--neutral-50);
+  padding: 12rem 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding: 0;
 }
 
-.historial-reservas h2 {
-  margin-top: 32px;
-  margin-bottom: 24px;
-  color: var(--primary-700);
-  font-size: 3rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+.historial-reservas__contenedor {
+  width: 100%;
+  max-width: 120rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  padding: 0 2rem 6rem;
+  flex: 1;
+}
+
+.historial-reservas__titulo {
   text-align: center;
 }
 
-/* Tabla de reservas */
-.historial-reservas table {
+.historial-reservas__titulo h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(3rem, 5vw, 4.5rem);
+  font-weight: 900;
+  color: var(--azul-sabor);
+  margin: 0;
+  background: linear-gradient(135deg, var(--azul-sabor), var(--naranja-sabor));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Tabla de Reservas */
+.historial-reservas__tabla-wrapper {
+  background: #ffffff;
+  border-radius: 2.4rem;
+  padding: 1.5rem;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.06);
+  overflow-x: auto;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.tabla-reservas {
   width: 100%;
-  max-width: 1300px;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
-  border-collapse: collapse;
-  overflow: hidden;
-  margin-bottom: 40px;
+  border-collapse: separate;
+  border-spacing: 0 1rem;
 }
 
-.historial-reservas thead {
-  background: var(--primary-700);
-  color: #fff;
-}
-
-.historial-reservas th {
-  padding: 24px 20px;
+.tabla-reservas__cabecera th {
+  padding: 2rem;
   text-align: left;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  border: none;
+}
+
+.tabla-reservas__fila {
+  transition: all 0.3s ease;
+}
+
+.tabla-reservas__fila:hover {
+  transform: scale(1.005);
+}
+
+.tabla-reservas__celda {
+  padding: 2rem;
+  background: #fff;
+  font-size: 1.5rem;
+  color: var(--azul-sabor);
+  border-top: 1px solid var(--neutral-100);
+  border-bottom: 1px solid var(--neutral-100);
+}
+
+.tabla-reservas__celda:first-child {
+  border-left: 1px solid var(--neutral-100);
+  border-top-left-radius: 1.6rem;
+  border-bottom-left-radius: 1.6rem;
+}
+
+.tabla-reservas__celda:last-child {
+  border-right: 1px solid var(--neutral-100);
+  border-top-right-radius: 1.6rem;
+  border-bottom-right-radius: 1.6rem;
+}
+
+.tabla-reservas__fecha {
+  display: flex;
+  flex-direction: column;
+}
+
+.tabla-reservas__fecha-dia {
+  font-weight: 800;
+  color: var(--naranja-sabor);
+}
+
+.tabla-reservas__fecha-hora {
+  font-size: 1.2rem;
+  color: #999;
+}
+
+.tabla-reservas__usuario {
   font-weight: 700;
-  font-size: 1.25rem;
-  letter-spacing: 0.5px;
 }
 
-.historial-reservas tbody tr {
-  transition: background-color 0.2s;
-}
-
-.historial-reservas tbody tr:hover {
-  background-color: var(--secondary-50);
-}
-
-.historial-reservas tbody tr:nth-child(even) {
-  background-color: var(--neutral-100);
-}
-
-.historial-reservas tbody tr:nth-child(even):hover {
-  background-color: var(--secondary-50);
-}
-
-.historial-reservas td {
-  padding: 20px;
-  border-bottom: 1px solid var(--neutral-200);
-  color: var(--neutral-900);
-  font-size: 1.1rem;
-}
-
-/* Estados de reserva */
-.estado-reserva {
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-size: 0.9rem;
+.tabla-reservas__personas {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.6rem 1.2rem;
+  background: var(--neutral-100);
+  border-radius: 0.8rem;
   font-weight: 600;
-  text-transform: capitalize;
+}
+
+/* Badges de Estado Reserva */
+.badge-estado {
+  padding: 0.8rem 1.4rem;
+  border-radius: 50rem;
+  font-size: 1.2rem;
+  font-weight: 700;
   text-align: center;
   display: inline-block;
-  min-width: 80px;
 }
 
-.estado-reserva.activa {
-  background: var(--success-50);
-  color: var(--success-700);
+.badge-estado--activa {
+  background: #ebfbee;
+  color: #2f9e44;
 }
 
-.estado-reserva.finalizada {
-  background: var(--error-50);
-  color: var(--error-700);
+.badge-estado--finalizada {
+  background: var(--neutral-100);
+  color: #495057;
 }
 
-.estado-reserva.pendiente {
-  background: var(--warning-50);
-  color: var(--warning-700);
+.badge-estado--pendiente {
+  background: #fff9db;
+  color: #f08c00;
 }
 
-.estado-reserva.cancelada {
-  background: var(--neutral-200);
-  color: var(--neutral-700);
+.badge-estado--cancelada {
+  background: #fff5f5;
+  color: #e03131;
 }
 
-/* Mensaje cuando no hay reservas */
-.historial-reservas p {
-  color: var(--secondary-800);
-  font-size: 1.1rem;
-  margin: 20px 0;
-  font-style: italic;
+/* Estados Vacíos / Mensajes */
+.reservas-vacias {
   text-align: center;
+  padding: 8rem 2rem;
 }
 
-/* Mensajes de error y carga */
-.historial-reservas .error-message {
-  color: var(--error-700);
-  font-size: 1.1rem;
-  text-align: center;
-  margin: 20px 0;
-  padding: 16px;
-  background: var(--error-50);
-  border-radius: 8px;
-  border-left: 4px solid var(--error-500);
+.reservas-vacias__icono {
+  font-size: 6rem;
+  margin-bottom: 2rem;
 }
 
-.historial-reservas .loading-message {
-  color: var(--primary-700);
-  background: var(--primary-50);
-  border-left: 4px solid var(--primary-500);
-  font-size: 1.1rem;
-  text-align: center;
-  margin: 20px 0;
-  padding: 16px;
-  border-radius: 8px;
+.reservas-vacias__texto {
+  font-size: 1.8rem;
+  color: #666;
 }
 
 /* Responsive */
 @media (max-width: 900px) {
-  .historial-reservas table {
-    max-width: 99vw;
-    margin: 0 2vw 40px 2vw;
+  .historial-reservas {
+    padding: 10rem 1.5rem 4rem;
   }
-
-  .historial-reservas th,
-  .historial-reservas td {
-    padding: 12px 8px;
-    font-size: 0.9rem;
+  
+  .tabla-reservas__celda, .tabla-reservas__cabecera th {
+    padding: 1.5rem 1rem;
+    font-size: 1.3rem;
   }
 }
 
 @media (max-width: 600px) {
-  .historial-reservas h2 {
-    font-size: 1.8rem;
-    margin-top: 20px;
-    margin-bottom: 16px;
-  }
-
-  .historial-reservas table {
-    margin: 0 1vw 30px 1vw;
-  }
-
-  .historial-reservas th,
-  .historial-reservas td {
-    padding: 8px 4px;
-    font-size: 0.8rem;
-  }
-
-  /* Ocultar columnas menos importantes en móvil */
-  .historial-reservas th:nth-child(4),
-  .historial-reservas td:nth-child(4),
-  .historial-reservas th:nth-child(5),
-  .historial-reservas td:nth-child(5) {
+  /* En móviles muy pequeños, ocultar columnas menos críticas */
+  .tabla-reservas__cabecera th:nth-child(4),
+  .tabla-reservas__celda:nth-child(4),
+  .tabla-reservas__cabecera th:nth-child(5),
+  .tabla-reservas__celda:nth-child(5) {
     display: none;
   }
 }
+

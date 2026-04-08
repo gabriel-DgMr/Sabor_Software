@@ -4,22 +4,20 @@ import Header from '../../../shared/components/Header.jsx';
 import Footer from '../../../shared/components/Footer.jsx';
 import ActualizarPerfilForm from './ActualizarPerfilForm';
 import { useTranslation } from 'react-i18next';
-import '../styles/usuarios.css';
+import '../styles/actualizar-datos.css';
 
 /**
  * ActualizarDatosUI - Vista de perfil de usuario.
- * Integra el formulario atomizado dentro del layout global.
+ * Integra el formulario atomizado dentro del layout global con diseño premium.
  */
 const ActualizarDatosUI = props => {
   const { t } = useTranslation();
 
   return (
-    <div className="pagina-perfil">
+    <div className="pagina-actualizar-datos">
       <Header />
-      <main className="tablero">
-        <div className="tablero__principal">
-          <ActualizarPerfilForm {...props} t={t} />
-        </div>
+      <main className="pagina-actualizar-datos__contenido">
+        <ActualizarPerfilForm {...props} t={t} />
       </main>
       <Footer />
     </div>

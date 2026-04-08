@@ -14,7 +14,7 @@ footer.pie-pagina {
 }
 
 .pie-pagina__contenedor {
-  max-width: 1200px;
+  max-width: 1080px; /* Reducido de 1200px */
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
@@ -100,7 +100,7 @@ footer.pie-pagina {
 }
 
 .pie-pagina__inferior {
-  max-width: 1200px;
+  max-width: 1080px; /* Reducido de 1200px */
   margin: 4rem auto 0;
 }
 

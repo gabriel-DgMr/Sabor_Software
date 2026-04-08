@@ -6,6 +6,7 @@ import LoadingScreen from '../../../shared/components/LoadingScreen';
 import TarjetaReservacion from './TarjetaReservacion';
 import EstadisticasReservas from './EstadisticasReservas';
 import FiltrosReservas from './FiltrosReservas';
+import { formatearFecha } from '../../../shared/utils/format.js';
 import '../styles/gestion-reservas.css';
 
 const BLOQUES = [
@@ -66,10 +67,8 @@ const ReservacionesAdministradorUI = ({
   }, [isLoading]);
 
   const formatearFechaString = fechaString => {
-    const fecha = new Date(fechaString);
-    return fecha.toLocaleDateString(t('locale_code', 'es-ES'), {
+    return formatearFecha(fechaString, {
       weekday: 'short',
-      day: 'numeric',
       month: 'short',
     });
   };

@@ -48,8 +48,8 @@
   /* Typography */
   --font-main: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* 1rem = 10px */
-  font-size: 62.5%;
+  /* 1rem = 9px (base 16px * 0.5625 = 9px) - Scaled down from 62.5% (10px) */
+  font-size: 56.25%;
   font-family: var(--font-main);
 }
 
@@ -452,7 +452,7 @@ hr {
 }
 
 .sobre-nosotros__contenedor {
-  max-width: 1200px;
+  max-width: 1080px; /* Reducido de 1200px */
   margin: -4rem auto 6rem;
   padding: 0 2rem;
   position: relative;
@@ -2355,75 +2355,168 @@ hr {
   margin-top: 0.5rem;
 }
 
-/* ===== Estilos DialogoExito.jsx ===== */
+/* ===== Estilos Premium DialogoModal.jsx ===== */
 .dialogo-modal__overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 10000;
+  padding: 2rem;
+  animation: aparecerOverlay 0.4s ease-out;
+}
+
+@keyframes aparecerOverlay {
+  from { background: rgba(0, 0, 0, 0); backdrop-filter: blur(0); }
+  to { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); }
 }
 
 .dialogo-modal {
-  background: #fff;
-  border: none;
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.18);
-  border-radius: 16px;
-  min-width: 320px;
-  max-width: 90vw;
+  background: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  border-radius: 2.4rem;
+  width: 100%;
+  max-width: 50rem;
   text-align: center;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 32px 32px 24px 32px;
+  padding: 3.2rem;
   position: relative;
+  overflow: hidden;
+}
+
+/* Modificador para modal tipo selección */
+.dialogo-modal--seleccion {
+  max-width: 60rem;
 }
 
 .dialogo-modal__close {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: transparent;
-  border: none;
-  font-size: 22px;
-  cursor: pointer;
-  color: #888;
-  z-index: 2;
-}
-
-.dialogo-modal__icon {
-  display: block;
-  text-align: center;
-  margin: 0 auto;
-}
-
-.dialogo-modal__message {
-  text-align: center;
-  margin-top: 1rem;
-}
-
-.dialogo-modal__actions {
-  margin-top: 1.5rem;
+  top: 1.6rem;
+  right: 1.6rem;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
   display: flex;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  background: var(--neutral-100);
+  color: var(--neutral-500);
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.dialogo-modal__close:hover {
+  background: var(--neutral-200);
+  color: var(--neutral-900);
+}
+
+.dialogo-modal__cuerpo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6rem;
+  width: 100%;
+}
+
+.dialogo-modal__icono {
+  font-size: 4.8rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
   justify-content: center;
 }
 
-.dialogo-modal__btn {
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  background-color: #007bff;
-  color: white;
-  font-size: 0.9rem;
-  transition: background-color 0.2s ease;
+.dialogo-modal__mensaje {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+  line-height: 1.3;
+  margin: 0;
 }
 
-.dialogo-modal__btn:hover {
-  background-color: #0056b3;
+.dialogo-modal__acciones {
+  margin-top: 2.4rem;
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Botones dentro del modal */
+.dialogo-modal__btn {
+  flex: 1;
+  padding: 1.2rem 2.4rem;
+  border-radius: 1.2rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+/* El primer botón suele ser el confirm (naranja) y el segundo cancel (neutral) */
+.dialogo-modal__btn:first-of-type:not(:only-of-type) {
+  background: var(--naranja-sabor);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 111, 0, 0.2);
+}
+
+.dialogo-modal__btn:first-of-type:not(:only-of-type):hover {
+  background: var(--naranja-sabor-light);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 111, 0, 0.3);
+}
+
+.dialogo-modal__btn:last-of-type:not(:only-of-type) {
+  background: var(--neutral-100);
+  color: var(--neutral-600);
+}
+
+.dialogo-modal__btn:last-of-type:not(:only-of-type):hover {
+  background: var(--neutral-200);
+  color: var(--neutral-900);
+}
+
+/* Cuando solo hay un botón (OK) */
+.dialogo-modal__btn:only-of-type {
+  background: var(--naranja-sabor);
+  color: white;
+  max-width: 20rem;
+}
+
+/* Inputs para el modal */
+.dialogo-modal .input-modal {
+  width: 100%;
+  padding: 1.4rem;
+  border-radius: 1.2rem;
+  border: 2px solid var(--neutral-100);
+  background: var(--neutral-50);
+  font-family: 'Inter', sans-serif;
+  font-size: 1.6rem;
+  transition: all 0.3s ease;
+  margin-top: 0.8rem;
+}
+
+.dialogo-modal .input-modal:focus {
+  outline: none;
+  border-color: var(--naranja-sabor);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(255, 111, 0, 0.1);
 }
 
 /* =====================

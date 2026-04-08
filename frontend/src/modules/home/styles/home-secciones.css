@@ -145,15 +145,15 @@
 
 /* Sección de Ubicación */
 .seccion-ubicacion {
-  width: 90vw;
-  max-width: 1440px;
+  width: 100vw;
+  max-width: 2000px;
   margin: 0 auto;
+  margin-bottom: -5rem;
 }
 
 .tarjeta-ubicacion {
   position: relative;
   height: 500px;
-  border-radius: 3rem;
   overflow: hidden;
   cursor: pointer;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -196,7 +196,6 @@
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 3rem;
-  border-radius: 2.5rem;
   max-width: 500px;
   color: #fff;
   transition: all 0.3s ease;
