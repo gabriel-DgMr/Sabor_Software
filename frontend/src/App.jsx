@@ -4,8 +4,6 @@ import { HelmetProvider } from 'react-helmet-async';
 
 import ProtectedRoute from './shared/components/ProtectedRoute';
 import RoleProtectedRoute from './shared/components/RoleProtectedRoute';
-import RoleBasedRedirect from './shared/components/RoleBasedRedirect';
-import { AuthProvider } from './app/context/AuthContext.jsx';
 import { CartProvider } from './modules/pedidos/context/CartContext.jsx';
 import { CategoriaProvider } from './shared/context/CategoriaContext.jsx';
 import { ProductoProvider } from './shared/context/ProductoContext.jsx';
@@ -51,244 +49,241 @@ import Productos from './modules/productos/pages/Productos.jsx';
 function App() {
   return (
     <HelmetProvider>
-      <AuthProvider>
-        <ProductoProvider>
-          <CategoriaProvider>
-            <CartProvider>
-              <ToastContainer
-                position="top-right"
-                autoClose={3000}
-                limit={4}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="colored"
+      <ProductoProvider>
+        <CategoriaProvider>
+          <CartProvider>
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              limit={4}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+            />
+            <Routes>
+              {/* Rutas públicas */}
+              <Route element={<Home />} path="/" />
+              <Route element={<Login />} path="/login" />
+              <Route element={<Register />} path="/register" />
+              <Route element={<ResetPasswordContainer />} path="/reset-password/:token" />
+              <Route element={<Productos />} path="/productos" />
+
+              <Route element={<Reservas />} path="/reservas" />
+              <Route element={<Carrito />} path="/carrito" />
+              <Route element={<CheckoutPayU />} path="/checkout" />
+              {/* <Route element={<Checkout />} path="/checkout" /> */}
+              <Route element={<ModificarPedido />} path="/carrito/modificar/:id" />
+              <Route element={<QuienesSomos />} path="/quienes-somos" />
+              <Route element={<SobreNosotros />} path="/sobre-nosotros" />
+              <Route element={<EscanearQR />} path="/escanear-qr" />
+              <Route element={<LoadingScreen />} path="/loading-screen" />
+              {/* ------------------- Rutas protegidas ------------------- */}
+              {/* Administrador */}
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Administrador']}>
+                      <HomeAdministrador />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/HomeAdministrador"
               />
-              <Routes>
-                {/* Rutas públicas */}
-                <Route element={<Home />} path="/" />
-                <Route element={<Login />} path="/login" />
-                <Route element={<Register />} path="/register" />
-                <Route element={<ResetPasswordContainer />} path="/reset-password/:token" />
-                <Route element={<Productos />} path="/productos" />
-                {/* Ruta de redirección automática basada en roles */}
-                <Route element={<RoleBasedRedirect />} path="/redirect" />
-                <Route element={<Reservas />} path="/reservas" />
-                <Route element={<Carrito />} path="/carrito" />
-                <Route element={<CheckoutPayU />} path="/checkout" />
-                {/* <Route element={<Checkout />} path="/checkout" /> */}
-                <Route element={<ModificarPedido />} path="/carrito/modificar/:id" />
-                <Route element={<QuienesSomos />} path="/quienes-somos" />
-                <Route element={<SobreNosotros />} path="/sobre-nosotros" />
-                <Route element={<EscanearQR />} path="/escanear-qr" />
-                <Route element={<LoadingScreen />} path="/loading-screen" />
-                {/* ------------------- Rutas protegidas ------------------- */}
-                {/* Administrador */}
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <HomeAdministrador />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/HomeAdministrador"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <Dashboard />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrador/panel"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <DashboardVentas />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrar/panel/ventas"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <DashboardClientes />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrar/panel/usuarios"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <DashboardInventario />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrar/panel/inventario"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <UsuariosAdministrador />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrador/usuarios"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <ProductosAdministrar />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrador/productos"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <PedidosAdministrar />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrador/pedidos"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <ReservasAdministrar />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrador/reservaciones"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <DomiciliosEmpleados />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrador/domicilios"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Administrador']}>
-                        <GestionBanners />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/administrador/banners"
-                />
-                {/* Empleados */}
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Empleado']}>
-                        <HomeEmpleados />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/HomeEmpleados"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Empleado']}>
-                        <ProductosEmpleados />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/empleado/productos"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Empleado']}>
-                        <DomiciliosEmpleados />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/empleado/domicilios"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Empleado']}>
-                        <PedidosEmpleados />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/empleado/pedidos"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <RoleProtectedRoute allowedRoles={['Empleado']}>
-                        <ReservacionesEmpleados />
-                      </RoleProtectedRoute>
-                    </ProtectedRoute>
-                  }
-                  path="/empleado/reservaciones"
-                />
-                {/* Usuario autenticado */}
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <ActualizarDatos />
-                    </ProtectedRoute>
-                  }
-                  path="/actualizar-datos"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <HistorialPedidos />
-                    </ProtectedRoute>
-                  }
-                  path="/historial-pedidos"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <HistorialReservas />
-                    </ProtectedRoute>
-                  }
-                  path="/historial-reservas"
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <HistorialDomicilios />
-                    </ProtectedRoute>
-                  }
-                  path="/historial-domicilios"
-                />
-                {/* Ruta 404 */}
-                <Route element={<PaginaNoEncontrada />} path="*" />
-              </Routes>
-            </CartProvider>
-          </CategoriaProvider>
-        </ProductoProvider>
-      </AuthProvider>
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Administrador']}>
+                      <Dashboard />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/administrador/panel"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Administrador']}>
+                      <DashboardVentas />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/administrar/panel/ventas"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Administrador']}>
+                      <DashboardClientes />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/administrar/panel/usuarios"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Administrador']}>
+                      <DashboardInventario />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/administrar/panel/inventario"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Administrador']}>
+                      <UsuariosAdministrador />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/administrador/usuarios"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Administrador']}>
+                      <ProductosAdministrar />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/administrador/productos"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Administrador']}>
+                      <PedidosAdministrar />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/administrador/pedidos"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Administrador']}>
+                      <ReservasAdministrar />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/administrador/reservaciones"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Administrador']}>
+                      <DomiciliosEmpleados />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/administrador/domicilios"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Administrador']}>
+                      <GestionBanners />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/administrador/banners"
+              />
+              {/* Empleados */}
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Empleado']}>
+                      <HomeEmpleados />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/HomeEmpleados"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Empleado']}>
+                      <ProductosEmpleados />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/empleado/productos"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Empleado']}>
+                      <DomiciliosEmpleados />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/empleado/domicilios"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Empleado']}>
+                      <PedidosEmpleados />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/empleado/pedidos"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <RoleProtectedRoute allowedRoles={['Empleado']}>
+                      <ReservacionesEmpleados />
+                    </RoleProtectedRoute>
+                  </ProtectedRoute>
+                }
+                path="/empleado/reservaciones"
+              />
+              {/* Usuario autenticado */}
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <ActualizarDatos />
+                  </ProtectedRoute>
+                }
+                path="/actualizar-datos"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <HistorialPedidos />
+                  </ProtectedRoute>
+                }
+                path="/historial-pedidos"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <HistorialReservas />
+                  </ProtectedRoute>
+                }
+                path="/historial-reservas"
+              />
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <HistorialDomicilios />
+                  </ProtectedRoute>
+                }
+                path="/historial-domicilios"
+              />
+              {/* Ruta 404 */}
+              <Route element={<PaginaNoEncontrada />} path="*" />
+            </Routes>
+          </CartProvider>
+        </CategoriaProvider>
+      </ProductoProvider>
     </HelmetProvider>
   );
 }

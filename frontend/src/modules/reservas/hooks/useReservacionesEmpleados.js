@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
 
 export const useReservacionesEmpleados = () => {
   const [filtroHora, setFiltroHora] = useState('todos');
   const [reservas, setReservas] = useState([]);
   const [reservasFiltradas, setReservasFiltradas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const { t } = useTranslation();
 
   const [filtros, setFiltros] = useState({
@@ -35,7 +35,6 @@ export const useReservacionesEmpleados = () => {
     estado: 'PENDIENTE',
   });
   const [errors, setErrors] = useState({});
-  const [successMessage, setSuccessMessage] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editingReservaId, setEditingReservaId] = useState(null);
   const [loadingStates, setLoadingStates] = useState({
@@ -49,7 +48,6 @@ export const useReservacionesEmpleados = () => {
   const cargarReservas = useCallback(async () => {
     try {
       setIsLoading(true);
-      setError(null);
       const token = localStorage.getItem('token');
       const url = (import.meta.env.VITE_API_URL || '/api') + '/reservas';
 
@@ -70,7 +68,7 @@ export const useReservacionesEmpleados = () => {
       setReservas(data || []);
     } catch (error) {
       console.error('Error al cargar reservas:', error);
-      setError(`Error al cargar las reservas: ${error.message}`);
+      toast.error(`Error al cargar las reservas: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -271,15 +269,14 @@ export const useReservacionesEmpleados = () => {
       });
       if (!response.ok) throw new Error('Error al actualizar la reserva');
       await cargarReservas();
-      setSuccessMessage(
+      toast.success(
         nuevoEstado === 'COMPLETADO'
           ? t('reservas.tarjeta.confirmar')
           : t('reservas.tarjeta.cancelar')
       );
-      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error al actualizar reserva:', error);
-      setError('Error al actualizar la reserva. Por favor, inténtalo de nuevo.');
+      toast.error('Error al actualizar la reserva. Por favor, inténtalo de nuevo.');
     } finally {
       const actionType = nuevoEstado === 'COMPLETADO' ? 'confirm' : 'cancel';
       setLoadingStates(prev => ({
@@ -289,8 +286,20 @@ export const useReservacionesEmpleados = () => {
     }
   };
 
-  const eliminarReserva = async idReserva => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar esta reserva?')) return;
+  const [confirmEliminar, setConfirmEliminar] = useState(false);
+  const [reservaAEliminar, setReservaAEliminar] = useState(null);
+
+  const eliminarReserva = idReserva => {
+    setReservaAEliminar(idReserva);
+    setConfirmEliminar(true);
+  };
+
+  const confirmarEliminacion = async () => {
+    const idReserva = reservaAEliminar;
+    setConfirmEliminar(false);
+    setReservaAEliminar(null);
+    if (!idReserva) return;
+
     try {
       setLoadingStates(prev => ({ ...prev, delete: { ...prev.delete, [idReserva]: true } }));
       const token = localStorage.getItem('token');
@@ -300,14 +309,18 @@ export const useReservacionesEmpleados = () => {
       });
       if (!response.ok) throw new Error('Error al eliminar la reserva');
       await cargarReservas();
-      setSuccessMessage(t('reservas.tarjeta.eliminar'));
-      setTimeout(() => setSuccessMessage(''), 3000);
+      toast.success(t('reservas.tarjeta.eliminar'));
     } catch (error) {
       console.error('Error al eliminar reserva:', error);
-      setError('Error al eliminar la reserva. Por favor, inténtalo de nuevo.');
+      toast.error('Error al eliminar la reserva. Por favor, inténtalo de nuevo.');
     } finally {
       setLoadingStates(prev => ({ ...prev, delete: { ...prev.delete, [idReserva]: false } }));
     }
+  };
+
+  const cancelarEliminacion = () => {
+    setConfirmEliminar(false);
+    setReservaAEliminar(null);
   };
 
   const handleSubmit = async e => {
@@ -341,14 +354,11 @@ export const useReservacionesEmpleados = () => {
         throw new Error(errorData.message || 'Error al procesar la reserva');
       }
       await cargarReservas();
-      setSuccessMessage(
-        isEditing ? t('reservas.gestion.actualizar') : t('reservas.gestion.guardar')
-      );
+      toast.success(isEditing ? t('reservas.gestion.actualizar') : t('reservas.gestion.guardar'));
       limpiarFormulario();
-      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error al procesar reserva:', error);
-      setError(`Error al ${isEditing ? 'actualizar' : 'crear'} la reserva: ${error.message}`);
+      toast.error(`Error al ${isEditing ? 'actualizar' : 'crear'} la reserva: ${error.message}`);
     } finally {
       setLoadingStates(prev => ({ ...prev, submit: false }));
     }
@@ -373,13 +383,10 @@ export const useReservacionesEmpleados = () => {
     aplicandoFiltros,
     reservasFiltradas,
     isLoading,
-    error,
-    setError,
     formData,
     setFormData,
     errors,
     setErrors,
-    successMessage,
     isEditing,
     loadingStates,
     limpiarFiltros,
@@ -388,6 +395,9 @@ export const useReservacionesEmpleados = () => {
     limpiarFormulario,
     actualizarEstadoReserva,
     eliminarReserva,
+    confirmarEliminacion,
+    cancelarEliminacion,
+    confirmEliminar,
     handleSubmit,
     estadisticas,
     cargarReservas,

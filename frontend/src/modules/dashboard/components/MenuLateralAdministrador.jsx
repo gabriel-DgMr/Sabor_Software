@@ -1,26 +1,33 @@
 import React, { useState } from 'react';
 import { FaUserCircle, FaBars, FaTimes } from 'react-icons/fa';
 import { FiPower } from 'react-icons/fi';
+import ReactCountryFlag from 'react-country-flag';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../../app/context/AuthContext.jsx';
 import '../styles/menu-lateral.css';
 
 const MenuLateral = () => {
+  const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
+  const handleIdioma = lang => {
+    i18n.changeLanguage(lang);
+  };
+
   const opcionesGenerales = [
-    { nombre: 'Inicio', ruta: '/HomeAdministrador' },
-    { nombre: 'Usuarios', ruta: '/administrador/usuarios' },
-    { nombre: 'Reservaciones', ruta: '/administrador/reservaciones' },
-    { nombre: 'Productos', ruta: '/administrador/productos' },
-    { nombre: 'Pedidos', ruta: '/administrador/pedidos' },
-    { nombre: 'Domicilios', ruta: '/administrador/domicilios' },
-    { nombre: 'Banners', ruta: '/administrador/banners' },
-    { nombre: 'Panel de control', ruta: '/administrador/panel' },
+    { nombre: t('admin.menu.inicio'), ruta: '/HomeAdministrador' },
+    { nombre: t('admin.menu.usuarios'), ruta: '/administrador/usuarios' },
+    { nombre: t('admin.menu.reservas'), ruta: '/administrador/reservaciones' },
+    { nombre: t('admin.menu.productos'), ruta: '/administrador/productos' },
+    { nombre: t('admin.menu.pedidos'), ruta: '/administrador/pedidos' },
+    { nombre: t('admin.menu.domicilios'), ruta: '/administrador/domicilios' },
+    { nombre: t('admin.menu.banners'), ruta: '/administrador/banners' },
+    { nombre: t('admin.menu.panel'), ruta: '/administrador/panel' },
   ];
 
   const opcionesPanel = [
@@ -38,7 +45,7 @@ const MenuLateral = () => {
     <>
       {/* Botón hamburguesa para tablet/móvil */}
       <button
-        aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+        aria-label={isOpen ? t('admin.menu.cerrar') : t('admin.menu.abrir')}
         className="menu-lateral__hamburguesa"
         onClick={toggleMenu}
       >
@@ -54,20 +61,40 @@ const MenuLateral = () => {
         <hr className="menu-lateral__separador" />
 
         <div className="menu-lateral__contenedor-cliente">
-          <button aria-label="Cerrar sesión" className="menu-lateral__cliente">
+          <button aria-label={t('admin.menu.usuarios')} className="menu-lateral__cliente">
             <FaUserCircle size={32} />
             <span className="menu-lateral__cliente-nombre">{user?.nombre_usuario}</span>
           </button>
 
-          <button
-            className="menu-lateral-cerrar"
-            onClick={() => {
-              logout();
-              closeMenu();
-            }}
-          >
-            <FiPower size={30} />
-          </button>
+          <div className="menu-lateral__acciones">
+            <div className="menu-lateral__idiomas">
+              <button
+                className={`menu-lateral__idioma-boton ${i18n.language === 'es' ? 'menu-lateral__idioma-boton--activo' : ''}`}
+                onClick={() => handleIdioma('es')}
+                title="Español"
+              >
+                <ReactCountryFlag svg countryCode="ES" />
+              </button>
+              <button
+                className={`menu-lateral__idioma-boton ${i18n.language === 'en' ? 'menu-lateral__idioma-boton--activo' : ''}`}
+                onClick={() => handleIdioma('en')}
+                title="English"
+              >
+                <ReactCountryFlag svg countryCode="US" />
+              </button>
+            </div>
+
+            <button
+              className="menu-lateral-cerrar"
+              onClick={() => {
+                logout();
+                closeMenu();
+              }}
+              title={t('admin.menu.logout', 'Cerrar sesión')}
+            >
+              <FiPower size={30} />
+            </button>
+          </div>
         </div>
 
         <hr className="menu-lateral__separador" />
@@ -80,7 +107,7 @@ const MenuLateral = () => {
                 <button
                   aria-current={location.pathname === ruta ? 'page' : undefined}
                   className={`menu-lateral__link ${
-                    location.pathname === ruta || (nombre === 'Panel de control' && enPanel)
+                    location.pathname === ruta || (nombre === t('admin.menu.panel') && enPanel)
                       ? 'menu-lateral__link--activo'
                       : ''
                   }`}
@@ -114,7 +141,7 @@ const MenuLateral = () => {
                       closeMenu();
                     }}
                   >
-                    {nombre}
+                    {t(nombre.toLowerCase().replace(/ /g, '_'), nombre)}
                   </button>
                 </li>
               ))}

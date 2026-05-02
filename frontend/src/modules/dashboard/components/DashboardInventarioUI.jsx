@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -20,16 +21,19 @@ import '../styles/charts.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
-const formatCurrency = value =>
-  new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    minimumFractionDigits: 0,
-  }).format(value || 0);
-
-const formatNumber = value => new Intl.NumberFormat('es-CO').format(value || 0);
-
 const DashboardInventarioUI = ({ metrics, loading, error, contentRef, handleGeneratePDF }) => {
+  const { t, i18n } = useTranslation();
+
+  const formatCurrency = value =>
+    new Intl.NumberFormat(i18n.language === 'es' ? 'es-CO' : 'en-US', {
+      style: 'currency',
+      currency: i18n.language === 'es' ? 'COP' : 'USD',
+      minimumFractionDigits: 0,
+    }).format(value || 0);
+
+  const formatNumber = value =>
+    new Intl.NumberFormat(i18n.language === 'es' ? 'es-CO' : 'en-US').format(value || 0);
+
   const resumen = metrics?.resumen || {};
   const productosStock = metrics?.productosStock || [];
   const stockPorCategoria = metrics?.stockPorCategoria || [];
@@ -49,7 +53,11 @@ const DashboardInventarioUI = ({ metrics, loading, error, contentRef, handleGene
 
   const doughnutData = useMemo(
     () => ({
-      labels: ['Stock saludable', 'Stock crítico', 'Agotados'],
+      labels: [
+        t('admin.dashboard.inventario_panel.stock_saludable'),
+        t('admin.dashboard.inventario_panel.stock_critico'),
+        t('admin.dashboard.inventario_panel.agotados_titulo'),
+      ],
       datasets: [
         {
           data: [
@@ -63,15 +71,15 @@ const DashboardInventarioUI = ({ metrics, loading, error, contentRef, handleGene
         },
       ],
     }),
-    [resumen.total_productos, lowStockProducts.length, agotados.length]
+    [resumen.total_productos, lowStockProducts.length, agotados.length, t]
   );
 
   const barData = useMemo(
     () => ({
-      labels: stockPorCategoria.map(item => item.categoria || 'Sin categoría'),
+      labels: stockPorCategoria.map(item => item.categoria || t('carrito_vacio')),
       datasets: [
         {
-          label: 'Unidades en inventario',
+          label: t('admin.dashboard.inventario_panel.unidades_inventario'),
           data: stockPorCategoria.map(item => item.total_stock || 0),
           backgroundColor: 'rgba(33, 150, 243, 0.6)',
           borderColor: '#2196F3',
@@ -80,17 +88,17 @@ const DashboardInventarioUI = ({ metrics, loading, error, contentRef, handleGene
         },
       ],
     }),
-    [stockPorCategoria]
+    [stockPorCategoria, t]
   );
 
-  if (loading) return <div>Cargando inventario...</div>;
+  if (loading) return <div>{t('admin.usuarios.cargando')}...</div>;
 
   if (error) {
     return (
       <div className="tablero">
         <MenuLateral />
         <main className="tablero__principal">
-          <h1 className="dashboard-title">Inventario</h1>
+          <h1 className="dashboard-title">{t('admin.dashboard.inventario')}</h1>
           <div
             style={{
               background: '#ffebee',
@@ -100,10 +108,13 @@ const DashboardInventarioUI = ({ metrics, loading, error, contentRef, handleGene
               border: '1px solid #ffcdd2',
             }}
           >
-            <h3>Error al cargar el dashboard de inventario</h3>
+            <h3>
+              {t('admin.dashboard.inventario_panel.error_carga') ||
+                t('admin.dashboard.ventas.error_carga')}
+            </h3>
             <p>{error}</p>
             <p style={{ fontSize: 14, marginTop: 16 }}>
-              Verifica la conexión con el servidor y vuelve a intentar.
+              {t('admin.dashboard.ventas.verificar_db')}
             </p>
           </div>
         </main>
@@ -116,7 +127,7 @@ const DashboardInventarioUI = ({ metrics, loading, error, contentRef, handleGene
       <MenuLateral />
       <main className="tablero__principal">
         <div className="dashboard-header">
-          <h1 className="dashboard-title">Inventario</h1>
+          <h1 className="dashboard-title">{t('admin.dashboard.inventario')}</h1>
           <PDFDownloadButton onGeneratePDF={handleGeneratePDF} disabled={loading || !!error} />
         </div>
 
@@ -124,24 +135,24 @@ const DashboardInventarioUI = ({ metrics, loading, error, contentRef, handleGene
           <div className="metrics-grid">
             {[
               {
-                label: 'Productos en catálogo',
+                label: t('admin.dashboard.inventario_panel.productos_catalogo'),
                 value: formatNumber(resumen.total_productos),
-                description: 'Incluye todas las referencias activas',
+                description: t('admin.dashboard.inventario_panel.incluye_referencias'),
               },
               {
-                label: 'Unidades en inventario',
+                label: t('admin.dashboard.inventario_panel.unidades_inventario'),
                 value: formatNumber(resumen.unidades_en_inventario),
-                description: 'Sumatoria total de existencias',
+                description: t('admin.dashboard.inventario_panel.total_existencias'),
               },
               {
-                label: 'Valor estimado',
+                label: t('admin.dashboard.inventario_panel.valor_estimado'),
                 value: formatCurrency(resumen.valor_estimado),
-                description: 'Inventario valorado a precio de venta',
+                description: t('admin.dashboard.inventario_panel.valorado_precio'),
               },
               {
-                label: 'Stock en riesgo',
-                value: `${formatNumber(resumen.productos_bajos)} críticos / ${formatNumber(resumen.productos_agotados)} agotados`,
-                description: 'Productos que requieren reposición',
+                label: t('admin.dashboard.inventario_panel.stock_riesgo'),
+                value: `${formatNumber(resumen.productos_bajos)} ${t('admin.dashboard.inventario_panel.criticos')} / ${formatNumber(resumen.productos_agotados)} ${t('admin.dashboard.inventario_panel.agotados')}`,
+                description: t('admin.dashboard.inventario_panel.requieren_reposicion'),
               },
             ].map(card => (
               <div key={card.label} className="metric-card metric-card--inventory">
@@ -156,7 +167,9 @@ const DashboardInventarioUI = ({ metrics, loading, error, contentRef, handleGene
 
           <div className="charts-container charts-container--inventory">
             <div className="chart-container chart-container--large bar-chart">
-              <div className="chart-title">Distribución de stock por categoría</div>
+              <div className="chart-title">
+                {t('admin.dashboard.inventario_panel.distribucion_cat')}
+              </div>
               {stockPorCategoria.length > 0 ? (
                 <div className="chart-wrapper chart-wrapper--large">
                   <Bar
@@ -167,7 +180,10 @@ const DashboardInventarioUI = ({ metrics, loading, error, contentRef, handleGene
                       plugins: {
                         legend: { display: false },
                         tooltip: {
-                          callbacks: { label: context => `${formatNumber(context.raw)} unidades` },
+                          callbacks: {
+                            label: context =>
+                              `${formatNumber(context.raw)} ${t('admin.dashboard.inventario_panel.unidades_inventario')}`,
+                          },
                         },
                       },
                       scales: {
@@ -179,13 +195,15 @@ const DashboardInventarioUI = ({ metrics, loading, error, contentRef, handleGene
               ) : (
                 <div className="chart-no-data">
                   <div className="chart-no-data-icon">📦</div>
-                  <div>No hay datos de stock por categoría</div>
+                  <div>{t('admin.dashboard.usuarios.no_datos_pedidos')}</div>
                 </div>
               )}
             </div>
 
             <div className="chart-container chart-container--small doughnut-chart">
-              <div className="chart-title">Estado del inventario</div>
+              <div className="chart-title">
+                {t('admin.dashboard.inventario_panel.estado_inventario')}
+              </div>
               <div className="chart-wrapper chart-wrapper--small">
                 <Doughnut
                   data={doughnutData}
@@ -200,47 +218,57 @@ const DashboardInventarioUI = ({ metrics, loading, error, contentRef, handleGene
                 <div className="legend-item">
                   <div className="legend-color" style={{ backgroundColor: '#4CAF50' }} />
                   <span>
-                    Stock saludable:{' '}
+                    {t('admin.dashboard.inventario_panel.stock_saludable')}:{' '}
                     {formatNumber(
                       Math.max(
                         (resumen.total_productos || 0) - lowStockProducts.length - agotados.length,
                         0
                       )
                     )}{' '}
-                    productos
+                    {t('admin.dashboard.inventario_panel.productos')}
                   </span>
                 </div>
                 <div className="legend-item">
                   <div className="legend-color" style={{ backgroundColor: '#FF9800' }} />
-                  <span>Stock crítico: {formatNumber(lowStockProducts.length)} productos</span>
+                  <span>
+                    {t('admin.dashboard.inventario_panel.stock_critico')}:{' '}
+                    {formatNumber(lowStockProducts.length)}{' '}
+                    {t('admin.dashboard.inventario_panel.productos')}
+                  </span>
                 </div>
                 <div className="legend-item">
                   <div className="legend-color" style={{ backgroundColor: '#E53935' }} />
-                  <span>Agotados: {formatNumber(agotados.length)} productos</span>
+                  <span>
+                    {t('admin.dashboard.inventario_panel.agotados_titulo')}:{' '}
+                    {formatNumber(agotados.length)}{' '}
+                    {t('admin.dashboard.inventario_panel.productos')}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="table-container">
-            <div className="table-title">Productos con stock crítico</div>
+            <div className="table-title">
+              {t('admin.dashboard.inventario_panel.con_stock_critico')}
+            </div>
             {topLowStock.length > 0 ? (
               <div className="table-responsive">
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>Producto</th>
-                      <th>Categoría</th>
-                      <th>Stock actual</th>
-                      <th>Stock mínimo</th>
-                      <th>Precio</th>
+                      <th>{t('admin.productos.nombre')}</th>
+                      <th>{t('admin.productos.categoria')}</th>
+                      <th>Stock</th>
+                      <th>{t('admin.dashboard.inventario_panel.stock_critico')}</th>
+                      <th>{t('admin.productos.precio')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {topLowStock.map(producto => (
                       <tr key={producto.id_producto}>
                         <td>{producto.nombre_producto}</td>
-                        <td>{producto.categoria || 'Sin categoría'}</td>
+                        <td>{producto.categoria || t('carrito_vacio')}</td>
                         <td>{formatNumber(producto.stock ?? 0)}</td>
                         <td>{formatNumber(producto.stock_minimo ?? 5)}</td>
                         <td>{formatCurrency(producto.precio_producto)}</td>
@@ -251,28 +279,30 @@ const DashboardInventarioUI = ({ metrics, loading, error, contentRef, handleGene
               </div>
             ) : (
               <div className="status-message">
-                No hay productos con stock crítico en este momento.
+                {t('admin.dashboard.inventario_panel.sin_criticos')}
               </div>
             )}
           </div>
 
           <div className="table-container">
-            <div className="table-title">Productos agotados</div>
+            <div className="table-title">
+              {t('admin.dashboard.inventario_panel.agotados_titulo')}
+            </div>
             {agotados.length > 0 ? (
               <div className="table-responsive">
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>Producto</th>
-                      <th>Categoría</th>
-                      <th>Stock mínimo</th>
+                      <th>{t('admin.productos.nombre')}</th>
+                      <th>{t('admin.productos.categoria')}</th>
+                      <th>{t('admin.dashboard.inventario_panel.stock_critico')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {agotados.map(producto => (
                       <tr key={producto.id_producto}>
                         <td>{producto.nombre_producto}</td>
-                        <td>{producto.categoria || 'Sin categoría'}</td>
+                        <td>{producto.categoria || t('carrito_vacio')}</td>
                         <td>{formatNumber(producto.stock_minimo ?? 5)}</td>
                       </tr>
                     ))}
@@ -280,7 +310,9 @@ const DashboardInventarioUI = ({ metrics, loading, error, contentRef, handleGene
                 </table>
               </div>
             ) : (
-              <div className="status-message">No hay productos agotados actualmente.</div>
+              <div className="status-message">
+                {t('admin.dashboard.inventario_panel.sin_agotados')}
+              </div>
             )}
           </div>
         </div>

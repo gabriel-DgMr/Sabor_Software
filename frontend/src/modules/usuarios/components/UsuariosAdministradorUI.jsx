@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import MenuLateral from '../../dashboard/components/MenuLateralAdministrador';
 import UsuarioItem from './UsuarioItem';
 import UsuarioFiltros from './UsuarioFiltros';
 import UsuarioModalConfirmacion from './UsuarioModalConfirmacion';
+import UsuarioFormularioModal from './UsuarioFormularioModal';
 import '../styles/usuarios.css';
 
 /**
@@ -17,7 +19,6 @@ const UsuariosAdministradorUI = ({
   usuarios,
   roles,
   cargando,
-  error,
   usuarioEditando,
   nuevoRol,
   setNuevoRol,
@@ -38,7 +39,15 @@ const UsuariosAdministradorUI = ({
   esEmpleado,
   esAdministrador,
   obtenerEtiquetaRol,
+  modalAbierto,
+  usuarioParaEditar,
+  abrirModalCreacion,
+  abrirModalEdicion,
+  cerrarModal,
+  guardarUsuario,
 }) => {
+  const { t } = useTranslation();
+
   const obtenerColorRol = nombreRol => {
     if (esAdministrador(nombreRol)) return '#dc2626'; // Rojo
     if (esEmpleado(nombreRol)) return '#2563eb'; // Azul
@@ -59,7 +68,7 @@ const UsuariosAdministradorUI = ({
         <main className="tablero__principal">
           <div className="cargando">
             <div className="spinner"></div>
-            <p>Cargando gestión de usuarios...</p>
+            <p>{t('admin.usuarios.cargando')}</p>
           </div>
         </main>
       </div>
@@ -71,9 +80,7 @@ const UsuariosAdministradorUI = ({
       <div className="tablero">
         <MenuLateral />
         <main className="tablero__principal">
-          <div className="notificacion notificacion--error">
-            No tienes permisos para acceder a esta sección
-          </div>
+          <div className="notificacion notificacion--error">{t('admin.usuarios.sin_permiso')}</div>
         </main>
       </div>
     );
@@ -85,17 +92,12 @@ const UsuariosAdministradorUI = ({
       <main className="tablero__principal">
         <header className="encabezado-tablero">
           <div className="encabezado-tablero__titulos">
-            <h1 className="encabezado-tablero__titulo">Gestión de Usuarios</h1>
+            <h1 className="encabezado-tablero__titulo">{t('admin.usuarios.titulo')}</h1>
           </div>
+          <button className="boton boton--primario" onClick={abrirModalCreacion}>
+            + {t('admin.usuarios.nuevo')}
+          </button>
         </header>
-
-        {error && (
-          <div
-            className={`notificacion ${error.includes('exitosamente') ? 'notificacion--exito' : 'notificacion--error'}`}
-          >
-            {error}
-          </div>
-        )}
 
         <div className="gestion-usuarios">
           <UsuarioFiltros
@@ -109,7 +111,7 @@ const UsuariosAdministradorUI = ({
           <div className="usuarios-lista">
             {usuariosFiltrados.length === 0 ? (
               <div className="estado-vacio">
-                <p>No se encontraron usuarios con los criterios de búsqueda.</p>
+                <p>{t('admin.usuarios.no_encontrados')}</p>
               </div>
             ) : (
               usuariosFiltrados.map(usuario => (
@@ -140,6 +142,15 @@ const UsuariosAdministradorUI = ({
             confirmacion?.tipo === 'cambioRol' ? ejecutarCambioRol : ejecutarDesactivacion
           }
         />
+
+        <UsuarioFormularioModal
+          isOpen={modalAbierto}
+          onClose={cerrarModal}
+          onSave={guardarUsuario}
+          usuario={usuarioParaEditar}
+          roles={roles}
+          cargando={cargando}
+        />
       </main>
     </div>
   );
@@ -152,7 +163,6 @@ UsuariosAdministradorUI.propTypes = {
   usuarios: PropTypes.array.isRequired,
   roles: PropTypes.array.isRequired,
   cargando: PropTypes.bool.isRequired,
-  error: PropTypes.string,
   usuarioEditando: PropTypes.number,
   nuevoRol: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   setNuevoRol: PropTypes.func.isRequired,

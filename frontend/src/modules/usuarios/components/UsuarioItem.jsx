@@ -16,9 +16,9 @@ const UsuarioItem = ({
   iniciarEdicionRol,
   cancelarEdicion,
   confirmarCambioRol,
-  confirmarDesactivacion,
   obtenerEtiquetaRol,
   obtenerColorRol,
+  abrirModalEdicion,
 }) => {
   const esPropioUsuario = usuario.id_usuario === user?.id_usuario;
 
@@ -94,6 +94,32 @@ const UsuarioItem = ({
             Desactivar Cuenta
           </button>
         </footer>
+
+        <div className="tarjeta-usuario__overlay">
+          <div className="tarjeta-usuario__overlay-botones">
+            <button
+              className="boton-redondo boton-redondo--editar"
+              onClick={() => abrirModalEdicion(usuario)}
+              title={t('admin.usuarios.acciones.editar')}
+            >
+              ✏️
+            </button>
+            <button
+              className="boton-redondo boton-redondo--eliminar"
+              onClick={() => confirmarDesactivacion(usuario)}
+              disabled={esPropioUsuario}
+              title={t('admin.usuarios.acciones.eliminar')}
+            >
+              🗑️
+            </button>
+            <button
+              className="boton-redondo boton-redondo--detalles"
+              title={t('admin.usuarios.acciones.ver')}
+            >
+              👁️
+            </button>
+          </div>
+        </div>
       </article>
     </div>
   );
@@ -109,9 +135,9 @@ UsuarioItem.propTypes = {
   iniciarEdicionRol: PropTypes.func.isRequired,
   cancelarEdicion: PropTypes.func.isRequired,
   confirmarCambioRol: PropTypes.func.isRequired,
-  confirmarDesactivacion: PropTypes.func.isRequired,
   obtenerEtiquetaRol: PropTypes.func.isRequired,
   obtenerColorRol: PropTypes.func.isRequired,
+  abrirModalEdicion: PropTypes.func.isRequired,
 };
 
 export default UsuarioItem;

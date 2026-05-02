@@ -38,8 +38,13 @@ export const getUserById = async (id) => {
  * @returns {Promise<boolean>} TRUE si afectó algún row.
  */
 export const updateUser = async (id, userData) => {
-  const { nombre_usuario, correo_usuario, telefono_usuario, imagen_usuario } =
-    userData;
+  const {
+    nombre_usuario,
+    correo_usuario,
+    telefono_usuario,
+    imagen_usuario,
+    id_rol,
+  } = userData;
   let query = "UPDATE usuarios SET ";
   let values = [];
   let setClauses = [];
@@ -59,6 +64,10 @@ export const updateUser = async (id, userData) => {
   if (imagen_usuario !== undefined) {
     setClauses.push("imagen_usuario = ?");
     values.push(imagen_usuario);
+  }
+  if (id_rol !== undefined) {
+    setClauses.push("id_rol = ?");
+    values.push(id_rol);
   }
 
   setClauses.push("fecha_modificacion = CURRENT_TIMESTAMP");

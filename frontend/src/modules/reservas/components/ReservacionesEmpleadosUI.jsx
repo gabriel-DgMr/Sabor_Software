@@ -28,11 +28,7 @@ const ReservacionesEmpleadosUI = ({
   setMostrarFiltros,
   reservasFiltradas,
   isLoading,
-  error,
-  setError,
-  formData,
   errors,
-  successMessage,
   isEditing,
   loadingStates,
   limpiarFiltros,
@@ -90,18 +86,6 @@ const ReservacionesEmpleadosUI = ({
           </h1>
           <p className="reservas-subtitulo">{t('reservas.gestion.subtitulo_empleado')}</p>
         </header>
-
-        {successMessage && (
-          <div className="alerta-autenticacion alerta-autenticacion--exito">{successMessage}</div>
-        )}
-        {error && (
-          <div className="alerta-autenticacion alerta-autenticacion--error">
-            <span>{error}</span>
-            <button onClick={() => setError(null)} className="boton-cerrar-alerta">
-              ×
-            </button>
-          </div>
-        )}
 
         <EstadisticasReservas estadisticas={estadisticas} />
 
@@ -257,11 +241,7 @@ ReservacionesEmpleadosUI.propTypes = {
   setMostrarFiltros: PropTypes.func.isRequired,
   reservasFiltradas: PropTypes.array.isRequired,
   isLoading: PropTypes.bool.isRequired,
-  error: PropTypes.string,
-  setError: PropTypes.func.isRequired,
-  formData: PropTypes.object.isRequired,
   errors: PropTypes.object.isRequired,
-  successMessage: PropTypes.string,
   isEditing: PropTypes.bool.isRequired,
   loadingStates: PropTypes.object.isRequired,
   limpiarFiltros: PropTypes.func.isRequired,

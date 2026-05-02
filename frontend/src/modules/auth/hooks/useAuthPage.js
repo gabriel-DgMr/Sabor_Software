@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import {
   ANIM_DURATION,
   VISIBLE_DURATION,
@@ -7,6 +8,7 @@ import {
 } from '../../../shared/utils/animationUtils';
 
 export const useAuthPage = ({ isOpen, onClose, isPage = false, initialView = 'login' }) => {
+  const navigate = useNavigate();
   const [view, setView] = useState(() => {
     if (typeof window !== 'undefined' && localStorage.getItem('pendingVerificationEmail')) {
       return 'verify-email';
@@ -70,13 +72,13 @@ export const useAuthPage = ({ isOpen, onClose, isPage = false, initialView = 'lo
     }, VISIBLE_DURATION);
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (destRoute = '/') => {
     setTimeout(
       () => {
         if (onClose) {
           onClose();
         } else if (isPage) {
-          window.location.href = '/redirect'; // Or use navigate if available
+          navigate(destRoute); // Smoother transition without full app reload
         }
       },
       VISIBLE_DURATION + ANIM_DURATION + 50

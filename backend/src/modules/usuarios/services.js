@@ -22,7 +22,7 @@ export const getUserByIdService = async (id) => {
  * y actualiza la fila nueva en la DB.
  *
  * @param {number} id - ID del usuario a modificar
- * @param {Object} updateData - Nombre, Correo, Tel.
+ * @param {Object} updateData - Nombre, Correo, Tel, Rol.
  * @param {Object} file - Archivo Multer.
  */
 export const updateUserService = async (id, updateData, file) => {
@@ -120,4 +120,33 @@ export const getOrCreateUserService = async (userData) => {
   }
 
   return user;
+};
+
+/**
+ * Crea un nuevo usuario con los datos proporcionados, incluyendo rol.
+ * @param {Object} userData - Datos completos del usuario.
+ */
+export const createUserService = async (userData) => {
+  const {
+    nombre_usuario,
+    correo_usuario,
+    telefono_usuario,
+    contraseña_usuario,
+    id_rol,
+  } = userData;
+
+  // Reutilizamos la lógica de registro de authService
+  const newUserId = await authService.registerUserService({
+    nombre_usuario,
+    correo_usuario,
+    telefono_usuario,
+    contraseña_usuario,
+  });
+
+  // Si se especificó un rol distinto al predeterminado (Cliente), lo actualizamos
+  if (id_rol && !isNaN(id_rol)) {
+    await queries.updateUserRole(newUserId, id_rol);
+  }
+
+  return newUserId;
 };

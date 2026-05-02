@@ -6,13 +6,13 @@ import {
   obtenerSiguienteEstado,
   mapearEstadoAId,
 } from '../services/pedidos-service';
+import { toast } from 'react-toastify';
 
 export const usePedidosAdministrador = () => {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [filtroActivo, setFiltroActivo] = useState('todos');
   const [pedidos, setPedidos] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(null);
 
   const cargarPedidos = useCallback(async () => {
     if (!isAuthenticated || authLoading) {
@@ -22,12 +22,11 @@ export const usePedidosAdministrador = () => {
 
     try {
       setCargando(true);
-      setError(null);
       const datosPedidos = await obtenerPedidos();
       setPedidos(datosPedidos);
     } catch (err) {
       console.error('Error al cargar pedidos:', err);
-      setError('Error al cargar los pedidos. Por favor, intenta de nuevo.');
+      toast.error('Error al cargar los pedidos. Por favor, intenta de nuevo.');
     } finally {
       setCargando(false);
     }
@@ -61,13 +60,14 @@ export const usePedidosAdministrador = () => {
         )
       );
 
-      setError(null);
+      toast.success(`Pedido #${pedidoId} actualizado a ${siguienteEstado}`);
     } catch (err) {
       console.error('Error al cambiar estado:', err);
       setPedidos(prevPedidos =>
         prevPedidos.map(p => (p.id === pedidoId ? { ...p, cambiandoEstado: false } : p))
       );
-      setError(`Error al actualizar el pedido ${pedidoId}: ${err.message}`);
+      const mensajeError = `Error al actualizar el pedido ${pedidoId}: ${err.message}`;
+      toast.error(mensajeError);
     }
   };
 
@@ -84,7 +84,6 @@ export const usePedidosAdministrador = () => {
     setFiltroActivo,
     pedidosFiltrados,
     cargando,
-    error,
     authLoading,
     isAuthenticated,
     cambiarEstado,

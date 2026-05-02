@@ -214,18 +214,6 @@
   padding: 0.6rem;
   z-index: 1100;
   transform-origin: top right;
-  animation: entradaMenu 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes entradaMenu {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
 /* Flecha de indicador — alineada exactamente al centro del botón de perfil */
@@ -249,12 +237,49 @@
 }
 
 .menu-perfil__usuario {
-  padding: 0.5rem 0.8rem 1rem 0.8rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  margin-bottom: 0.8rem;
+  padding: 0.5rem 0.6rem 0.5rem 0.6rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.menu-perfil__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border: 2px solid #fff;
+  flex-shrink: 0;
+}
+
+.menu-perfil__avatar-fallback {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffe8d6, #ffcba4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff6b35;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border: 2px solid #fff;
+  flex-shrink: 0;
+}
+
+.menu-perfil__info {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-perfil__divisor {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.06);
+  margin: 0.5rem -0.6rem;
 }
 
 .menu-perfil__nombre {
@@ -270,6 +295,9 @@
   color: #777;
   font-weight: 400;
   letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .menu-perfil__opcion {
@@ -290,8 +318,25 @@
     background 0.2s ease,
     color 0.2s ease,
     transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  margin-bottom: 1px;
   position: relative;
+  overflow: hidden;
+}
+
+.menu-perfil__opcion::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  height: 50%;
+  width: 3px;
+  background: #ff6b35;
+  border-radius: 0 4px 4px 0;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.menu-perfil__opcion:hover::before {
+  transform: translateY(-50%) scaleY(1);
 }
 
 .menu-perfil__opcion svg {
@@ -303,13 +348,13 @@
 }
 
 .menu-perfil__opcion:hover {
-  background: linear-gradient(135deg, rgba(255, 107, 53, 0.08), rgba(255, 140, 82, 0.04));
-  color: #ff6b35;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.06), rgba(255, 140, 82, 0.02));
+  color: #1a1a1a;
 }
 
 .menu-perfil__opcion:hover svg {
   color: #ff6b35;
-  transform: scale(1.15);
+  transform: translateY(-2px) scale(1.1);
 }
 
 .menu-perfil__opcion:active {
@@ -318,7 +363,6 @@
 
 .menu-perfil__opcion--cerrar-sesion {
   color: #dc3545;
-  margin-top: 0.5rem;
 }
 
 .menu-perfil__opcion--cerrar-sesion svg {
@@ -333,8 +377,8 @@
 .menu-perfil__opcion--idioma {
   justify-content: space-between;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
-  margin-top: 0.8rem;
-  padding-top: 1.2rem;
+  margin-top: 0.5rem;
+  padding-top: 0.8rem;
   cursor: default;
 }
 
@@ -343,36 +387,47 @@
   transform: none;
 }
 
+.menu-perfil__opcion--idioma:hover::before {
+  transform: translateY(-50%) scaleY(0);
+}
+
 .menu-perfil__idiomas-grid {
   display: flex;
-  gap: 0.8rem;
+  gap: 0.4rem;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 0.3rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .menu-perfil__idioma-boton {
-  background: #f0f2f5;
-  border: 1px solid transparent;
+  background: transparent;
+  border: none;
   width: 32px;
   height: 24px;
-  border-radius: 6px;
-  opacity: 0.4;
-  transition: all 0.3s;
+  border-radius: 4px;
+  opacity: 0.6;
+  filter: grayscale(80%);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  overflow: hidden;
   padding: 0;
 }
 
 .menu-perfil__idioma-boton:hover {
-  opacity: 0.7;
+  opacity: 0.8;
+  filter: grayscale(40%);
+  transform: scale(1.05);
 }
 
 .menu-perfil__idioma-boton--activo {
   opacity: 1;
   background: #fff;
-  border-color: #ff6b35;
-  box-shadow: 0 4px 10px rgba(255, 107, 53, 0.2);
+  filter: grayscale(0%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transform: scale(1.1);
 }
 
 .encabezado__icono-cliente--foto {

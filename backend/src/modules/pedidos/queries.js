@@ -55,6 +55,7 @@ export const getAllPedidosQuery = async () => {
     LEFT JOIN detalle_pedidos dp ON p.id_pedido = dp.id_pedido
     LEFT JOIN productos pr ON dp.id_producto = pr.id_producto
     WHERE p.tipo_servicio = 'mesa' AND p.id_estado != 1
+    GROUP BY p.id_pedido
     ORDER BY p.fecha_pedido DESC
   `;
   const [rows] = await pool.query(query);

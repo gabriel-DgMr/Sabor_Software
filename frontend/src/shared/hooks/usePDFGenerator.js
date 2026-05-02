@@ -1,10 +1,12 @@
 import { useRef } from 'react';
+import { useAlert } from '../../app/context/AlertContext.jsx';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { formatearFecha, formatearFechaHora } from '../utils/format.js';
 
 export const usePDFGenerator = () => {
   const contentRef = useRef(null);
+  const { showAlert } = useAlert();
 
   // Función para generar análisis textual de ventas
   const generateSalesAnalysis = metrics => {
@@ -645,7 +647,7 @@ export const usePDFGenerator = () => {
       const userMessage = error?.message
         ? `Error al generar el PDF: ${error.message}`
         : 'Error desconocido al generar el PDF. Revisa la consola para más detalles.';
-      alert(userMessage);
+      showAlert({ titulo: 'Error al generar PDF', mensaje: userMessage, variante: 'peligro' });
     }
   };
 

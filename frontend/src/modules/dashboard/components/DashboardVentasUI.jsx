@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import MenuLateral from './MenuLateralAdministrador';
 import PDFDownloadButton from '../../../shared/components/PDFDownloadButton.jsx';
 import '../styles/dashboard-ui.css';
@@ -33,14 +34,16 @@ ChartJS.register(
 );
 
 const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGeneratePDF }) => {
-  if (loading) return <div>Cargando...</div>;
+  const { t, i18n } = useTranslation();
+
+  if (loading) return <div>{t('admin.usuarios.cargando')}</div>;
 
   if (error) {
     return (
       <div className="tablero">
         <MenuLateral />
         <main className="tablero__principal">
-          <h1 className="dashboard-title">Ventas</h1>
+          <h1 className="dashboard-title">{t('admin.dashboard.ventas_hoy')}</h1>
           <div
             style={{
               background: '#ffebee',
@@ -50,20 +53,20 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
               border: '1px solid #ffcdd2',
             }}
           >
-            <h3>Error al cargar el dashboard de ventas</h3>
+            <h3>{t('admin.dashboard.ventas.error_carga')}</h3>
             <p>{error}</p>
             <p style={{ fontSize: 14, marginTop: 16 }}>
               {error.includes('403') || error.includes('No autorizado') ? (
                 <>
-                  <strong>Problema de autorización:</strong> Tu sesión puede haber expirado o no
-                  tienes permisos de administrador.
+                  <strong>{t('admin.dashboard.ventas.prob_autorizacion')}</strong>{' '}
+                  {t('admin.dashboard.ventas.sesion_expirada')}
                   <br />
                   <a href="/login" style={{ color: '#c62828', textDecoration: 'underline' }}>
-                    Haz clic aquí para iniciar sesión nuevamente
+                    {t('admin.dashboard.ventas.relogin')}
                   </a>
                 </>
               ) : (
-                'Verifica que la base de datos esté configurada correctamente y que el servidor esté funcionando.'
+                t('admin.dashboard.ventas.verificar_db')
               )}
             </p>
           </div>
@@ -77,7 +80,7 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
       <div className="tablero">
         <MenuLateral />
         <main className="tablero__principal">
-          <h1 className="dashboard-title">Ventas</h1>
+          <h1 className="dashboard-title">{t('admin.dashboard.ventas_hoy')}</h1>
           <div
             style={{
               background: '#e3f2fd',
@@ -88,10 +91,9 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
               textAlign: 'center',
             }}
           >
-            <h3 style={{ marginBottom: 16 }}>💰 Dashboard de Ventas Vacío</h3>
+            <h3 style={{ marginBottom: 16 }}>{t('admin.dashboard.ventas.vacio_titulo')}</h3>
             <p style={{ fontSize: 16, marginBottom: 16 }}>
-              No hay datos de ventas aún. El dashboard mostrará métricas cuando se realicen pedidos
-              completados.
+              {t('admin.dashboard.ventas.vacio_desc')}
             </p>
             <div
               style={{
@@ -102,11 +104,11 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
                 border: '1px solid #e0e0e0',
               }}
             >
-              <h4 style={{ marginBottom: 12 }}>💡 Próximos pasos:</h4>
+              <h4 style={{ marginBottom: 12 }}>{t('admin.dashboard.ventas.vacio_pasos')}</h4>
               <ul style={{ textAlign: 'left', margin: 0, paddingLeft: 20 }}>
-                <li>Realiza algunos pedidos</li>
-                <li>Completa los pedidos (estado "Completado")</li>
-                <li>Las métricas de ventas aparecerán automáticamente</li>
+                <li>{t('admin.dashboard.ventas.vacio_paso1')}</li>
+                <li>{t('admin.dashboard.ventas.vacio_paso2')}</li>
+                <li>{t('admin.dashboard.ventas.vacio_paso3')}</li>
               </ul>
             </div>
           </div>
@@ -115,7 +117,7 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
     );
   }
 
-  if (!metrics) return <div>Error cargando métricas</div>;
+  if (!metrics) return <div>{t('admin.usuarios.no_encontrados')}</div>;
 
   const {
     ventas_totales,
@@ -128,9 +130,9 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
   } = metrics;
 
   const formatCurrency = amount =>
-    new Intl.NumberFormat('es-CO', {
+    new Intl.NumberFormat(i18n.language === 'es' ? 'es-CO' : 'en-US', {
       style: 'currency',
-      currency: 'COP',
+      currency: i18n.language === 'es' ? 'COP' : 'USD',
       minimumFractionDigits: 0,
     }).format(amount);
 
@@ -141,10 +143,10 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
             const fecha = new Date(d.fecha);
             return `${fecha.getDate()}/${fecha.getMonth() + 1}`;
           })
-        : ['Sin datos'],
+        : [t('carrito_vacio')],
     datasets: [
       {
-        label: 'Ventas diarias',
+        label: t('admin.dashboard.ventas.por_dia'),
         data: ventasPorDia && ventasPorDia.length > 0 ? ventasPorDia.map(d => d.total || 0) : [0],
         fill: true,
         backgroundColor: 'rgba(76, 175, 80, 0.1)',
@@ -162,8 +164,8 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
   const doughnutData = {
     labels:
       ventasPorMetodo && ventasPorMetodo.length > 0
-        ? ventasPorMetodo.map(v => v.metodo_pago || 'Sin método')
-        : ['Sin datos'],
+        ? ventasPorMetodo.map(v => v.metodo_pago || t('carrito_vacio'))
+        : [t('carrito_vacio')],
     datasets: [
       {
         data:
@@ -187,10 +189,10 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
                 ? p.nombre_producto.substring(0, 20) + '...'
                 : p.nombre_producto
             )
-        : ['Sin datos'],
+        : [t('carrito_vacio')],
     datasets: [
       {
-        label: 'Cantidad vendida',
+        label: t('admin.dashboard.ventas.tabla_cantidad'),
         data:
           productosVendidos && productosVendidos.length > 0
             ? productosVendidos.slice(0, 5).map(p => p.cantidad_vendida || 0)
@@ -209,7 +211,7 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
       <MenuLateral />
       <main className="tablero__principal">
         <div className="dashboard-header">
-          <h1 className="dashboard-title">Ventas</h1>
+          <h1 className="dashboard-title">{t('admin.dashboard.ventas.titulo')}</h1>
           <PDFDownloadButton
             onGeneratePDF={handleGeneratePDF}
             disabled={loading || error || !metrics}
@@ -220,24 +222,24 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
           <div className="metrics-grid">
             {[
               {
-                label: 'Ventas Totales',
+                label: t('admin.dashboard.ventas.totales'),
                 value: formatCurrency(ventas_totales || 0),
-                description: 'Historial completo',
+                description: t('admin.dashboard.ventas.historial'),
               },
               {
-                label: 'Ventas Hoy',
+                label: t('admin.dashboard.ventas.hoy'),
                 value: formatCurrency(ventas_hoy || 0),
-                description: 'Día actual',
+                description: t('admin.dashboard.ventas.dia_actual'),
               },
               {
-                label: 'Ventas Semana',
+                label: t('admin.dashboard.ventas.semana'),
                 value: formatCurrency(ventas_semana || 0),
-                description: 'Últimos 7 días',
+                description: t('admin.dashboard.ventas.ultimos_7'),
               },
               {
-                label: 'Ventas Mes',
+                label: t('admin.dashboard.ventas.mes'),
                 value: formatCurrency(ventas_mes || 0),
-                description: 'Últimos 30 días',
+                description: t('admin.dashboard.ventas.ultimos_30'),
               },
             ].map(card => (
               <div key={card.label} className="metric-card metric-card--sales">
@@ -252,7 +254,7 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
 
           <div className="charts-container charts-container--sales">
             <div className="chart-container chart-container--large line-chart">
-              <div className="chart-title">Ventas por Día</div>
+              <div className="chart-title">{t('admin.dashboard.ventas.por_dia')}</div>
               <div className="chart-wrapper chart-wrapper--large">
                 <Line
                   data={lineData}
@@ -272,7 +274,7 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
                         displayColors: false,
                         callbacks: {
                           label: function (context) {
-                            return `Ventas: ${formatCurrency(context.parsed.y)}`;
+                            return `${t('admin.dashboard.ventas.por_dia')}: ${formatCurrency(context.parsed.y)}`;
                           },
                         },
                       },
@@ -296,7 +298,7 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
             </div>
 
             <div className="chart-container chart-container--small doughnut-chart">
-              <div className="chart-title">Ventas por Método de Pago</div>
+              <div className="chart-title">{t('admin.dashboard.ventas.por_metodo')}</div>
               <div className="chart-wrapper chart-wrapper--small">
                 <Doughnut
                   data={doughnutData}
@@ -330,7 +332,7 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
           </div>
 
           <div className="chart-container bar-chart">
-            <div className="chart-title">Productos Más Vendidos</div>
+            <div className="chart-title">{t('admin.dashboard.ventas.mas_vendidos')}</div>
             <div className="chart-wrapper chart-wrapper--large">
               <Bar
                 data={barData}
@@ -363,13 +365,13 @@ const DashboardVentasUI = ({ metrics, loading, error, contentRef, handleGenerate
 
             {productosVendidos && productosVendidos.length > 0 && (
               <div className="table-container">
-                <div className="table-title">Top 10 Productos Más Vendidos</div>
+                <div className="table-title">{t('admin.dashboard.ventas.top_10')}</div>
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>Producto</th>
-                      <th>Cantidad</th>
-                      <th>Ingresos</th>
+                      <th>{t('admin.dashboard.ventas.tabla_producto')}</th>
+                      <th>{t('admin.dashboard.ventas.tabla_cantidad')}</th>
+                      <th>{t('admin.dashboard.ventas.tabla_ingresos')}</th>
                     </tr>
                   </thead>
                   <tbody>

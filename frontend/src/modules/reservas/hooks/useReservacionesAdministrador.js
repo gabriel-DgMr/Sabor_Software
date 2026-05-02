@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import reservasService from '../services/reservas-service';
+import { toast } from 'react-toastify';
 
 export const useReservacionesAdministrador = () => {
   const [filtroHora, setFiltroHora] = useState('todos');
   const [reservas, setReservas] = useState([]);
   const [reservasFiltradas, setReservasFiltradas] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const { t } = useTranslation();
 
   const [filtros, setFiltros] = useState({
@@ -36,7 +36,6 @@ export const useReservacionesAdministrador = () => {
     estado: 'PENDIENTE',
   });
   const [errors, setErrors] = useState({});
-  const [successMessage, setSuccessMessage] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editingReservaId, setEditingReservaId] = useState(null);
   const [loadingStates, setLoadingStates] = useState({
@@ -251,15 +250,15 @@ export const useReservacionesAdministrador = () => {
       await reservasService.actualizarEstado(idReserva, nuevoEstado);
 
       await cargarReservas();
-      setSuccessMessage(
+      toast.success(
         nuevoEstado === 'COMPLETADO'
           ? t('reservas.tarjeta.confirmar')
           : t('reservas.tarjeta.cancelar')
       );
-      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error al actualizar reserva:', error);
-      setError('Error al actualizar la reserva. Por favor, inténtalo de nuevo.');
+      const mensajeError = error.response?.data?.message || error.message || t('error_generico');
+      toast.error(mensajeError);
     } finally {
       const actionType = nuevoEstado === 'COMPLETADO' ? 'confirm' : 'cancel';
       setLoadingStates(prev => ({
@@ -269,22 +268,37 @@ export const useReservacionesAdministrador = () => {
     }
   };
 
-  const eliminarReserva = async idReserva => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar esta reserva?')) return;
+  const [confirmEliminar, setConfirmEliminar] = useState(false);
+  const [reservaAEliminar, setReservaAEliminar] = useState(null);
+
+  const eliminarReserva = idReserva => {
+    setReservaAEliminar(idReserva);
+    setConfirmEliminar(true);
+  };
+
+  const confirmarEliminacion = async () => {
+    const idReserva = reservaAEliminar;
+    setConfirmEliminar(false);
+    setReservaAEliminar(null);
+    if (!idReserva) return;
+
     try {
       setLoadingStates(prev => ({ ...prev, delete: { ...prev.delete, [idReserva]: true } }));
 
       await reservasService.eliminar(idReserva);
 
       await cargarReservas();
-      setSuccessMessage(t('reservas.tarjeta.eliminar'));
-      setTimeout(() => setSuccessMessage(''), 3000);
+      toast.success(t('reservas.tarjeta.eliminar'));
     } catch (error) {
       console.error('Error al eliminar reserva:', error);
-      setError('Error al eliminar la reserva. Por favor, inténtalo de nuevo.');
     } finally {
       setLoadingStates(prev => ({ ...prev, delete: { ...prev.delete, [idReserva]: false } }));
     }
+  };
+
+  const cancelarEliminacion = () => {
+    setConfirmEliminar(false);
+    setReservaAEliminar(null);
   };
 
   const handleSubmit = async e => {
@@ -306,16 +320,12 @@ export const useReservacionesAdministrador = () => {
       }
 
       await cargarReservas();
-      setSuccessMessage(
-        isEditing ? t('reservas.gestion.actualizar') : t('reservas.gestion.guardar')
-      );
+      toast.success(isEditing ? t('reservas.gestion.actualizar') : t('reservas.gestion.guardar'));
       limpiarFormulario();
-      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error al procesar reserva:', error);
-      setError(
-        `Error al ${isEditing ? 'actualizar' : 'crear'} la reserva: ${error.response?.data?.message || error.message}`
-      );
+      const mensajeError = error.response?.data?.message || error.message || t('error_generico');
+      toast.error(mensajeError);
     } finally {
       setLoadingStates(prev => ({ ...prev, submit: false }));
     }
@@ -340,13 +350,10 @@ export const useReservacionesAdministrador = () => {
     aplicandoFiltros,
     reservasFiltradas,
     isLoading,
-    error,
-    setError,
     formData,
     setFormData,
     errors,
     setErrors,
-    successMessage,
     isEditing,
     loadingStates,
     limpiarFiltros,
@@ -355,9 +362,13 @@ export const useReservacionesAdministrador = () => {
     limpiarFormulario,
     actualizarEstadoReserva,
     eliminarReserva,
+    confirmarEliminacion,
+    cancelarEliminacion,
+    confirmEliminar,
     handleSubmit,
     estadisticas,
     cargarReservas,
+    t,
   };
 };
 

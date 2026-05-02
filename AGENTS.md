@@ -1,8 +1,28 @@
-# 🤖 Proyecto SABOR - Guía de Agentes y Refactorización
+# 🤖 Proyecto SABOR — Manual Operativo del Agente IA
 
-Este documento define el contexto, estándares y directrices para agentes IA o desarrolladores que asistan en la refactorización y normalización del código del proyecto **SABOR**. El objetivo principal es migrar y mantener una **Screaming Architecture**, así como asegurar el uso estricto de **BEM en español** para el ecosistema CSS, garantizando las mejores prácticas de la industria en frontend y backend.
+Este documento es la **fuente de verdad** para cualquier agente IA o desarrollador que trabaje en el proyecto **SABOR**. Define el contexto del proyecto, la arquitectura vigente, las convenciones de código, las reglas de decisión y el sistema de skills disponibles.
 
-## 🛠️ Stack Tecnológico Principal
+---
+
+## 🍽️ Identidad del Proyecto
+
+**SABOR** es un sistema integral de gestión para restaurantes que cubre:
+
+- **Gestión de pedidos** — Creación, seguimiento y entrega de órdenes (en local y domicilios).
+- **Gestión de productos** — Catálogo, inventario, categorías y precios del menú.
+- **Reservas** — Sistema de reservación de mesas con control de disponibilidad horaria.
+- **Autenticación y usuarios** — Registro, login, roles (admin/cliente/invitado), JWT.
+- **Pagos** — Integración de pasarelas y confirmación de transacciones.
+- **Reportes y dashboard** — Estadísticas de ventas, métricas y gráficos para administradores.
+- **Marketing y banners** — Gestión de contenido promocional y comunicaciones.
+- **Contacto** — Canal de comunicación desde la web pública.
+- **Home pública** — Landing page del restaurante con menú, secciones y navegación.
+
+La aplicación es bilingüe (español/inglés) mediante **i18next** y tiene como mercado primario Latinoamérica.
+
+---
+
+## 🛠️ Stack Tecnológico
 
 ### Backend
 
@@ -11,107 +31,140 @@ Este documento define el contexto, estándares y directrices para agentes IA o d
 - **Base de Datos:** MySQL (Driver: `mysql2`).
 - **Autenticación y Seguridad:** JWT (`jsonwebtoken`), `bcrypt`, `helmet`, `xss-clean`, `express-rate-limit`.
 - **Tiempo Real:** Socket.io (Servidor).
-- **Otros:** Multer, Axios, Brevo/Nodemailer, PDFKit.
+- **Otros:** Multer (uploads), Axios, Brevo/Nodemailer (emails), PDFKit (reportes), QRCode.
 
 ### Frontend
 
-- **Herramienta de Construcción:** Vite.
+- **Build Tool:** Vite.
 - **Librería UI:** React (v19) / React DOM.
 - **Enrutamiento:** React Router DOM (v7.5).
-- **Peticiones HTTP y Estado:** Axios.
+- **Peticiones HTTP:** Axios (instancia centralizada con interceptores JWT).
 - **Tiempo Real:** Socket.io-client.
-- **Estilos:** Vanilla CSS (Metodología BEM en español).
-- **Otros:** Chart.js, React-Toastify, i18next (Internacionalización).
+- **Estilos:** Vanilla CSS con metodología **BEM en español**.
+- **Animaciones:** GSAP (GreenSock Animation Platform).
+- **Otros:** Chart.js (gráficos), React-Toastify (notificaciones), i18next (internacionalización), react-helmet-async (SEO).
 
 ### Herramientas Compartidas / Monorepo
 
 - **Gestión de Scripts:** Concurrently.
 - **Linter y Formatter:** ESLint, Prettier.
 - **Git Hooks:** Husky, lint-staged.
+- **Deploy:** Docker, Docker Compose, Railway.
 
 ---
 
-## 💻 Comandos Básicos de Ejecución
+## 💻 Comandos Esenciales
 
-Estos comandos deben ejecutarse desde la raíz del proyecto (a menos que se indique lo contrario).
+Ejecutar desde la raíz del proyecto:
 
-- `npm run install:all`: Instala las dependencias en raíz, backend y frontend.
-- `npm run dev`: Ejecuta concurrentemente los servidores de desarrollo de backend y frontend.
-- `npm run build`: Construye los artefactos de producción en backend y frontend.
-- `npm run lint:fix`: Ejecuta el linter corrigiendo errores automáticamente en ambos entornos.
-- `npm run format`: Formatea todo el código base utilizando Prettier.
-- `npm run deploy:prepare`: Limpia, instala dependencias, corre auditorías de seguridad y hace un build total.
+| Comando                  | Descripción                                                |
+| ------------------------ | ---------------------------------------------------------- |
+| `npm run dev`            | Inicia backend y frontend en modo desarrollo (concurrente) |
+| `npm run install:all`    | Instala dependencias en raíz, backend y frontend           |
+| `npm run build`          | Build de producción (frontend + backend)                   |
+| `npm run lint:fix`       | Ejecuta ESLint con auto-fix en ambos entornos              |
+| `npm run format`         | Formatea todo el código con Prettier                       |
+| `npm run deploy:prepare` | Limpia, instala, audita seguridad y hace build total       |
+| `npm run dev:backend`    | Solo servidor backend en desarrollo                        |
+| `npm run dev:frontend`   | Solo servidor frontend en desarrollo                       |
 
 ---
 
-## 🏛️ Screaming Architecture (Arquitectura Gritona)
+## 🏛️ Arquitectura Actual
 
-El rediseño arquitectónico obedece al patrón **Screaming Architecture**, donde la estructura de carpetas revela _qué hace la aplicación_ y no _qué framework está usando_. Todos los nuevos módulos y refactorizaciones deben seguir estrictamente esta división modular enfocada al dominio de negocio (p.ej. `gestión-órdenes`, `inventario`, `usuarios`).
+El proyecto sigue **Screaming Architecture**: la estructura de carpetas revela _qué hace la aplicación_, no _qué framework usa_. Cada carpeta de módulo corresponde a un dominio de negocio real.
 
-### Estructura Target (Backend & Frontend)
-
-**Backend Target (Ejemplo):**
+### Backend
 
 ```text
 backend/
 ├── src/
+│   ├── app.js                    # Entry point y configuración Express
 │   ├── modules/
-│   │   ├── pedidos/
-│   │   │   ├── controllers.js    # Controladores REST/HTTP de pedidos
-│   │   │   ├── services.js       # Lógica de negocio core para pedidos
-│   │   │   ├── queries.js        # Consultas de BD dedicadas a pedidos
-│   │   │   ├── routes.js         # Definición de rutas Express de pedidos
-│   │   │   └── validations.js    # Esquemas de validación de entradas
-│   │   ├── inventario/
-│   │   │   └── ...               # (Misma estructura modular)
-│   │   └── usuarios/
-│   │       └── ...
-│   ├── core/                     # Lógica transversal independiente del dominio
-│   │   ├── config/               # Variables de entorno y configuraciones
-│   │   ├── db/                   # Inicialización y conexiones
-│   │   ├── middlewares/          # Autenticación, manejo de errores
+│   │   ├── auth/                 # Autenticación (login, registro, JWT)
+│   │   ├── banners/              # Gestión de banners promocionales
+│   │   ├── contacto/             # Formulario/mensajes de contacto
+│   │   ├── pagos/                # Procesamiento de pagos
+│   │   ├── pedidos/              # Gestión de órdenes y domicilios
+│   │   │   ├── controllers.js    # Controladores REST/HTTP
+│   │   │   ├── services.js       # Lógica de negocio
+│   │   │   ├── queries.js        # Consultas SQL preparadas
+│   │   │   └── routes.js         # Definición de rutas Express
+│   │   ├── productos/            # Catálogo, inventario, categorías
+│   │   ├── reportes/             # Generación de reportes y estadísticas
+│   │   ├── reservas/             # Sistema de reservaciones
+│   │   └── usuarios/             # Gestión de perfiles y roles
+│   ├── core/                     # Lógica transversal (NO de dominio)
+│   │   ├── config/               # Variables de entorno y configuración
+│   │   ├── middlewares/          # Auth, error handling, rate limiting
 │   │   └── utils/                # Helpers generales
-│   └── index.js                  # Entry point del servidor
+│   ├── logs/                     # Archivos de log
+│   └── public/                   # Archivos estáticos (uploads)
 ```
 
-**Frontend Target (Ejemplo):**
+**Patrón de cada módulo backend:** `controllers.js` → `services.js` → `queries.js`, con `routes.js` definiendo los endpoints.
+
+### Frontend
 
 ```text
 frontend/
 ├── src/
+│   ├── main.jsx                  # Punto de montaje de React
+│   ├── App.jsx                   # Componente raíz con rutas
+│   ├── index.css                 # Estilos globales y variables CSS
+│   ├── i18n.js                   # Configuración de internacionalización
 │   ├── modules/
-│   │   ├── pedidos/              # Módulo visible y "gritón"
-│   │   │   ├── pages/            # Vistas principales del dominio pedidos
-│   │   │   ├── components/       # Componentes React específicos de pedidos
-│   │   │   ├── hooks/            # Hooks de lógica de estado de pedidos
-│   │   │   ├── services.js       # LLamadas Axios para el módulo pedidos
-│   │   │   └── styles/           # Archivos CSS BEM de pedidos
-│   │   ├── menu/                 # Otro módulo "gritón"
-│   │   │   └── ...
-│   ├── shared/                   # Código compartido genérico (UI transversal)
-│   │   ├── components/           # Botones, Inputs, Modales genéricos
-│   │   ├── hooks/                # Hooks globales
-│   │   └── utils/                # Funciones auxiliares
-│   ├── app/                      # Configuración de nivel superior
-│   │   ├── router/               # React Router
-│   │   ├── context/              # Context Providers globales (Auth, Theme)
-│   │   └── styles/               # Variables CSS, reset y layout global
-│   └── main.jsx                  # Punto de montaje de React
+│   │   ├── auth/                 # Login, registro, recuperación de contraseña
+│   │   ├── dashboard/            # Panel de administrador con métricas
+│   │   ├── home/                 # Landing page pública del restaurante
+│   │   ├── marketing/            # Gestión de banners y promociones
+│   │   ├── pedidos/              # Vista de órdenes (cliente y admin)
+│   │   │   ├── pages/            # Vistas principales
+│   │   │   ├── components/       # Componentes React del módulo
+│   │   │   ├── hooks/            # Hooks de lógica de estado
+│   │   │   ├── services.js       # Llamadas Axios del módulo
+│   │   │   └── styles/           # CSS con BEM en español
+│   │   ├── productos/            # Administración de productos/menú
+│   │   ├── reservas/             # Interfaz de reservaciones
+│   │   └── usuarios/             # Perfil, historial, configuración
+│   ├── shared/                   # Código compartido genérico
+│   │   ├── components/           # Botones, Inputs, Modales, Header, Footer
+│   │   ├── context/              # Contextos compartidos
+│   │   ├── hooks/                # Hooks globales reutilizables
+│   │   ├── locales/              # Archivos de traducción (es.json, en.json)
+│   │   ├── services/             # Instancia Axios centralizada
+│   │   ├── styles/               # Estilos compartidos
+│   │   └── utils/                # Funciones auxiliares (formateo de fechas, etc.)
+│   └── app/                      # Configuración de nivel superior
+│       ├── context/              # Context Providers globales (Auth, Theme)
+│       └── styles/               # Variables CSS globales, reset, layout
 ```
+
+**Patrón de cada módulo frontend:** `pages/` → `components/` + `hooks/` para lógica, `services.js` para API, `styles/` para CSS BEM.
 
 ---
 
-## 🎨 Convenciones de Diseño y Frontend (BEM en Español)
+## 📐 Convenciones de Código
 
-Para mantener una separación limpia de estilos sin frameworks de utilidad invasivos, se utilizará estrictamente CSS Vanilla implementando la metodología **BEM (Block, Element, Modifier)**, pero completamente localizada al **ESPAÑOL**.
+### Nomenclatura (Casing)
 
-### Reglas para BEM en Español
+| Elemento                     | Formato                            | Ejemplo                                        |
+| ---------------------------- | ---------------------------------- | ---------------------------------------------- |
+| Carpetas/Directorios         | `kebab-case`                       | `gestion-pedidos`, `carrito-compras`           |
+| Componentes React (archivos) | `PascalCase`                       | `TarjetaProducto.jsx`, `ModalConfirmacion.jsx` |
+| Archivos generales           | `kebab-case` o `camelCase` (hooks) | `auth-service.js`, `useAuth.js`                |
+| Variables y funciones        | `camelCase`                        | `obtenerPedidos()`, `usuarioActual`            |
+| Clases CSS (BEM)             | `kebab-case` + BEM                 | `tarjeta-destacada__boton`                     |
+| Constantes / env             | `UPPER_SNAKE_CASE`                 | `API_BASE_URL`, `TOKEN_EXPIRATION`             |
+| Commits                      | Conventional Commits               | `feat: añade gestión de inventario`            |
 
-1. **Bloque:** Componente principal (`.tarjeta`, `.boton`, `.navegacion`).
-2. **Elemento:** Sub-nodo dependiente del bloque, unido por dos guiones bajos (`__`) (`.tarjeta__imagen`, `.navegacion__enlace`).
-3. **Modificador:** Variación o estado de un bloque/elemento, unido por dos guiones medios (`--`) (`.boton--primario`, `.tarjeta--activa`).
+### BEM en Español
 
-**Ejemplo de HTML y CSS aplicando BEM en Español:**
+Todos los estilos usan **BEM (Block, Element, Modifier)** localizado al español:
+
+- **Bloque:** Componente principal → `.tarjeta`, `.boton`, `.navegacion`
+- **Elemento:** Sub-nodo, unido por `__` → `.tarjeta__imagen`, `.navegacion__enlace`
+- **Modificador:** Variación/estado, unido por `--` → `.boton--primario`, `.tarjeta--activa`
 
 ```html
 <article class="tarjeta tarjeta--destacada">
@@ -125,300 +178,236 @@ Para mantener una separación limpia de estilos sin frameworks de utilidad invas
 ```
 
 ```css
-/* tarjeta.css */
 .tarjeta {
-  /* Estilos base */
+  /* Estilos base del bloque */
 }
 .tarjeta--destacada {
-  /* Estilos modificador: borde resaltado, sombra extra */
+  /* Modificador: borde resaltado, sombra extra */
 }
 .tarjeta__imagen {
-  /* Estilos de la imagen interna */
-}
-.tarjeta__contenido {
-  /* Layout del contenido */
+  /* Elemento: imagen interna */
 }
 .tarjeta__titulo {
-  /* Tipografía del título */
+  /* Elemento: tipografía del título */
 }
-.tarjeta__descripcion {
-  /* ... */
-}
-
-/* boton.css (Módulo separado en UI Compartida) */
 .boton {
-  /* Estilo general de botones */
+  /* Bloque separado: estilo general de botones */
 }
 .boton--primario {
-  /* Colores primarios */
+  /* Modificador: colores primarios */
 }
 ```
 
----
+### Idioma del Código
 
-## 📜 Convenciones Globales y Mejores Prácticas
+- Los **módulos de negocio** usan nombres en español (coherente con BEM y dominio hispano).
+- Evitar Spanglish: mantener coherencia dentro de cada módulo.
+- Palabras técnicas universales en inglés son aceptables (`controller`, `service`, `hook`, `query`).
 
-### Backend (Node.js/Express)
+### Formateo y Linting
 
-1. **Validación Exhaustiva:** Toda entrada de datos debe validarse rigurosamente en la capa de controladores/middlewares antes de llegar a los servicios.
-2. **Capa de Servicios Separada:** Los controladores NO deben tener lógica de negocio pesada, ni interactuar de forma directa con SQL. Los controladores deben procesar `req` y despachar la tarea a un servicio.
-3. **Consultas a Base de Datos:** Centralizar las consultas (`queries`) evitando consultas en línea propensas a SQL Injections. Usar preparación de statements estricta.
-4. **Manejo Centralizado de Errores:** Evitar los bloques `try/catch` redundantes con una función tipo `catchAsync` y un middleware global de captura de excepciones.
-5. **Seguridad:** Mantener activos Helmets y los limitadores de rango. Usar variables de entorno para TODOS los secretos.
-
-### Frontend (React/Vite)
-
-1. **Separación Lógica/Vista:** Mover lógica compleja a Hooks Personalizados en lugar de empaquetar todo dentro de componentes masivos.
-2. **Estética y UI/UX:** Al trabajar en UI, aplicar prácticas modernas de diseño web de manera impecable (modo oscuro, colores armoniosos, tipografías legibles como Inter, micro-interacciones suaves en `.hover`). Las interfaces deben sentirse PREMIUM.
-3. **Manejo de Peticiones:** Utilizar un servicio centralizado de Axios para preconfigurar tokens JWT y manejar intercepciones de respuestas (ej. para forzar deslogueo en 401).
-4. **Sin "Magic Numbers" o "Magic Strings":** Agrupar constantes y variables de enrutamiento dentro de archivos unificados de configuración compartida.
-
-### Código y Versionado
-
-- **Idioma del Código:** Variables, funciones y documentación deben mantener coherencia. Ya que la aplicación tiene dominio hispano y BEM está en español, los MÓDULOS DE NEGOCIO pueden tener variables y clases en español, pero debe haber coherencia (Spanglish evitable).
-- **Convenciones de Nomenclatura (Casing):**
-  - **Carpetas/Directorios:** `kebab-case` (ej. `gestion-pedidos`, `carrito-compras`). Esto asegura compatibilidad universal y URLs amigables.
-  - **Archivos de Componentes React:** `PascalCase` (ej. `TarjetaProducto.jsx`, `ModalConfirmacion.jsx`).
-  - **Archivos Generales (Servicios, Controladores, Utils):** `kebab-case` para el nombre del archivo (ej. `auth-service.js`, `db-connection.js`) o `camelCase` si el archivo exporta solo un hook `useAuth.js`.
-  - **Variables y Funciones (JS/TS):** `camelCase` (ej. `obtenerPedidos()`, `usuarioActual`).
-  - **Clases CSS (BEM):** `kebab-case` combinado con las uniones BEM (ej. `tarjeta-destacada__boton`).
-  - **Constantes y Variables de Entorno:** `UPPER_SNAKE_CASE` (ej. `API_BASE_URL`, `TOKEN_EXPIRATION`).
-- **Commits:** Mensajes claros siguiendo Conventional Commits (ej. `feat: añade gestión de inventario`, `refactor: migración de componente tabla de pedidos a BEM`).
-- **ESLint & Prettier:** Evitar deshabilitar las reglas de ESLint sin justificación explícita. Mantener el formato con prettier asegurado en pre-commit.
+- **ESLint & Prettier** activos con pre-commit via Husky + lint-staged.
+- No deshabilitar reglas de ESLint sin justificación explícita.
 
 ---
 
-> **⚡ Directriz Fundamental del Agente AI:**
-> Cada vez que asistas en desarrollar o refactorizar código de este proyecto, revisa que este se acople inmediatamente a la estructura _Screaming Architecture_ y aplica estilos con Vanilla CSS utilizando _BEM en Español_. No introduzcas herramientas de CSS genérico o frameworks ajenos a la directriz.
+## 🧠 Reglas de Operación del Agente
 
-## 🧠 Reglas de Decisión del Agente
+### Prioridades de Decisión
 
 Cuando el agente trabaje en el proyecto, debe seguir este orden de prioridad:
 
-1. Arquitectura (Screaming Architecture)
-2. Seguridad (validación, sanitización, JWT)
-3. Legibilidad y mantenibilidad
-4. Performance
-5. Estética (UI/UX)
+1. **Arquitectura** (Screaming Architecture)
+2. **Seguridad** (validación, sanitización, JWT)
+3. **Legibilidad y mantenibilidad**
+4. **Performance**
+5. **Estética** (UI/UX)
 
-En caso de conflicto:
+### En Caso de Conflicto
 
-- Nunca sacrificar seguridad por rapidez
-- Nunca romper la arquitectura por conveniencia
-- Priorizar simplicidad sobre sobreingeniería
+- Nunca sacrificar seguridad por rapidez.
+- Nunca romper la arquitectura por conveniencia.
+- Priorizar simplicidad sobre sobreingeniería.
 
-## ❌ Anti-patrones Prohibidos
+### ❌ Anti-patrones Prohibidos
 
-- ❌ Lógica de negocio en controladores
-- ❌ Consultas SQL dentro de controllers
-- ❌ Componentes React con más de 300 líneas
-- ❌ Uso de estados globales innecesarios
-- ❌ CSS sin BEM o con nombres genéricos (ej. `.box`, `.container`)
-- ❌ Hardcodeo de URLs o tokens
+- ❌ Lógica de negocio en controladores (usar `services.js`).
+- ❌ Consultas SQL dentro de controllers (usar `queries.js`).
+- ❌ Componentes React con más de 300 líneas (extraer a hooks/sub-componentes).
+- ❌ Uso de estados globales innecesarios.
+- ❌ CSS sin BEM o con nombres genéricos (`.box`, `.container`, `.wrapper`).
+- ❌ Hardcodeo de URLs, tokens o magic strings.
+- ❌ Frameworks CSS externos (TailwindCSS, Bootstrap) — solo Vanilla CSS + BEM.
+- ❌ `try/catch` redundantes — usar `catchAsync` y middleware global de errores.
 
-## 🧪 Testing
+### ⚡ Directriz Fundamental
 
-El proyecto debe incluir:
-
-- Pruebas unitarias (servicios, utils)
-- Pruebas de integración (APIs)
-- Pruebas E2E (flujos críticos)
-
-Herramientas sugeridas:
-
-- Backend: Jest + Supertest
-- Frontend: Vitest + React Testing Library
-- E2E: Playwright
-
-Reglas:
-
-- Todo bug corregido debe incluir un test
-- No hacer deploy sin pasar tests
-
-## ⚡ Performance
-
-- Lazy loading en rutas (React)
-- Memoización en componentes pesados
-- Evitar renders innecesarios
-- Optimización de queries SQL (índices)
-- Compresión de assets en producción
-
-## 🔐 Seguridad
-
-- Sanitización de datos
-- Uso de JWT para autenticación
-- Helmets y xss-clean para protección
-- Rate limiting para prevenir ataques
-- Variables de entorno para secretos
-- No hardcodeo de URLs o tokens
-- Sanitización de inputs en frontend y backend
-- Protección contra CSRF
-- Rotación de tokens
-- Logs de auditoría para acciones críticas
-
-# 🧠 Skills Registry
-
-**Ubicación:** `.agents/skills/`
-
-Este proyecto utiliza el sistema de habilidades (skills) listado abajo para guiar al agente IA.
-Cada skill define buenas prácticas específicas que deben aplicarse según el contexto de la tarea.
-
-### Listado Completo de Skills
-
-- **Core & Planning:** `brainstorming`, `writing-plans`, `executing-plans`, `find-skills`.
-- **Arquitectura:** `sabor-architecture` (Crítica).
-- **Backend:** `nodejs-best-practices`, `web-security`.
-- **Frontend Core:** `vercel-react-best-practices`, `react-performance-optimization`, `frontend-design`, `ui-ux-pro-max`.
-- **Animaciones (GSAP):** `gsap-core`, `gsap-react`, `gsap-scrolltrigger`, `gsap-timeline`, `gsap-plugins`, `gsap-utils`, `gsap-performance`, `gsap-frameworks`.
-- **Testing:** `react-testing-library`, `playwright-e2e-testing`.
-- **Documentación:** `documentation-skill`, `jsdoc-best-practices`.
-- **Performance:** `performance-optimization`, `web-performance-optimization`.
+> Cada vez que asistas en desarrollar o modificar código de este proyecto, verifica que se acople a la estructura Screaming Architecture y aplica estilos con Vanilla CSS utilizando BEM en Español. No introduzcas herramientas de CSS genérico ni frameworks ajenos a la directriz.
 
 ---
 
-> 📝 **Nota sobre Evolución del Documento:**
-> Este archivo `AGENTS.md`, así como las _skills_, es un documento vivo. **Puede y debe ser modificado** continuamente según lo que el equipo o los agentes vayan aprendiendo y refinando durante el progreso del desarrollo del proyecto.
+## 📜 Mejores Prácticas por Capa
 
-## 🔍 Reglas de Uso de Skills
+### Backend (Node.js/Express)
 
-Antes de escribir código, el agente debe:
+1. **Flujo de datos:** `routes.js` → `controllers.js` → `services.js` → `queries.js`. Los controladores procesan `req`/`res` y delegan al servicio.
+2. **Validación exhaustiva:** Toda entrada se valida en controladores/middlewares antes de llegar a servicios.
+3. **Consultas preparadas:** Centralizar en `queries.js` con prepared statements. Nunca SQL inline.
+4. **Manejo de errores:** Usar `catchAsync` y middleware global. Evitar `try/catch` repetitivos.
+5. **Seguridad:** Helmet, rate limiting, variables de entorno para TODOS los secretos. Sanitización de inputs.
+6. **Autenticación:** JWT con middleware de verificación. Rotación de tokens. Interceptar 401 en frontend.
 
-1. Identificar el tipo de tarea.
-2. Seleccionar las skills y directrices relevantes.
-3. Aplicarlas activamente durante la implementación.
+### Frontend (React/Vite)
 
-## 📚 Mapeo de Skills por Contexto
+1. **Separación lógica/vista:** Hooks personalizados para lógica compleja, componentes solo para renderizado.
+2. **Estética premium:** Modo oscuro, colores armoniosos, tipografías legibles (Inter), micro-interacciones con GSAP. Las interfaces deben sentirse PREMIUM.
+3. **Peticiones centralizadas:** Instancia Axios en `shared/services/` con interceptores JWT y manejo de 401.
+4. **Sin magic strings:** Constantes y rutas en archivos de configuración compartida.
+5. **Lazy loading:** Rutas con `React.lazy()` y `Suspense`.
+6. **Memoización:** `React.memo`, `useMemo`, `useCallback` en componentes pesados.
+7. **Internacionalización:** Usar `i18next` para todo texto visible. Llaves en `shared/locales/`.
 
-### ⚛️ Frontend (React, UI, UX)
+### Seguridad
 
-**Usar cuando:**
+- Sanitización de datos en frontend y backend.
+- JWT para autenticación con rotación de tokens.
+- Helmet y xss-clean activos.
+- Rate limiting en endpoints sensibles.
+- Variables de entorno para secretos (nunca hardcodear).
+- Protección contra CSRF.
+- Logs de auditoría para acciones críticas.
 
-- Se creen componentes
-- Se trabaje en UI/UX
-- Se optimice la interfaz o el renderizado
+### Performance
 
-**Skills:**
+- Lazy loading en rutas React.
+- Memoización en componentes pesados.
+- Evitar renders innecesarios (`React.memo`, `key` props).
+- Optimización de queries SQL (índices, joins eficientes).
+- Compresión de assets en producción.
+- GSAP con `will-change` y transforms para animaciones 60fps.
 
-- `vercel-react-best-practices`
-- `react-performance-optimization`
-- `frontend-design`
-- `ui-ux-pro-max`
-- `gsap-react` (para animaciones en React)
-- `gsap-core` / `gsap-scrolltrigger` / `gsap-timeline` (según necesidad)
+### Testing
 
-### 🎨 Estilos y Animaciones (CSS / BEM / GSAP)
+| Capa        | Herramienta           | Enfoque                          |
+| ----------- | --------------------- | -------------------------------- |
+| Unitarias   | Jest / Vitest         | Servicios, utils, hooks          |
+| Integración | Supertest             | Endpoints API                    |
+| Componentes | React Testing Library | Componentes React (user-centric) |
+| E2E         | Playwright            | Flujos críticos cross-browser    |
 
-**Usar cuando:**
+**Reglas:**
 
-- Se escriba CSS
-- Se diseñen componentes visuales o interacciones animadas
+- Todo bug corregido debe incluir un test.
+- No hacer deploy sin pasar tests.
 
-**Skills:**
+---
 
-- `frontend-design`
-- `ui-ux-pro-max`
-- `gsap-performance`
-- `gsap-utils`
-- `gsap-plugins`
+## 🧩 Sistema de Skills
 
-**Regla adicional:**
-Aplicar estrictamente BEM en español para CSS y GSAP para interacciones complejas "Premium".
+**Ubicación:** `.agents/skills/`
 
-### ⚙️ Backend (Node.js / API)
+El proyecto utiliza **24 skills** que guían al agente según el contexto de la tarea. Cada skill define buenas prácticas que deben aplicarse activamente.
 
-**Usar cuando:**
+### Registro Completo de Skills
 
-- Se creen endpoints
-- Se trabaje en lógica de negocio
+#### 🔑 Core & Planning
 
-**Skills:**
+| Skill             | Propósito                                          | Cuándo Usarla                                                                                   |
+| ----------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `brainstorming`   | Exploración de ideas y diseño antes de implementar | **Obligatoria** antes de cualquier trabajo creativo: crear features, componentes, funcionalidad |
+| `writing-plans`   | Crear planes de implementación detallados          | Cuando tienes spec/requisitos para una tarea multi-paso                                         |
+| `executing-plans` | Ejecutar planes con checkpoints de revisión        | Cuando tienes un plan escrito para implementar en sesión separada                               |
+| `find-skills`     | Descubrir e instalar nuevas skills                 | Cuando no está claro qué skill aplicar o se necesitan nuevas capacidades                        |
 
-- `nodejs-best-practices`
-- `web-security`
+#### 🏛️ Arquitectura
 
-### 🔐 Seguridad
+| Skill                | Propósito                                                       | Cuándo Usarla                                            |
+| -------------------- | --------------------------------------------------------------- | -------------------------------------------------------- |
+| `sabor-architecture` | Screaming Architecture, BEM español, modularización por dominio | **SIEMPRE** — en cualquier tarea, verificar cumplimiento |
 
-**Usar cuando:**
+#### ⚙️ Backend
 
-- Se maneje autenticación o tokens
-- Se procesen inputs del usuario
+| Skill                   | Propósito                                                   | Cuándo Usarla                                       |
+| ----------------------- | ----------------------------------------------------------- | --------------------------------------------------- |
+| `nodejs-best-practices` | Principios Node.js: async patterns, seguridad, arquitectura | Al crear endpoints, lógica de negocio, servicios    |
+| `web-security`          | Seguridad web: validación, sanitización, protección         | Al manejar autenticación, tokens, inputs de usuario |
 
-**Skills:**
+#### ⚛️ Frontend Core
 
-- `web-security`
+| Skill                            | Propósito                                                                                 | Cuándo Usarla                                          |
+| -------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `vercel-react-best-practices`    | Optimización React/Next.js según Vercel Engineering                                       | Al escribir/refactorizar componentes React             |
+| `react-performance-optimization` | Memoización, code splitting, rendering eficiente                                          | Al optimizar componentes lentos o grandes datasets     |
+| `frontend-design`                | Interfaces de producción con alta calidad visual                                          | Al crear componentes, páginas o trabajar en UI         |
+| `ui-ux-pro-max`                  | Inteligencia de diseño: 50+ estilos, 161 paletas, 57 font-pairings, 161 tipos de producto | Al diseñar UI/UX, elegir estilos, colores, tipografías |
 
-### ⚡ Performance
+#### 🎬 Animaciones (GSAP)
 
-**Usar cuando:**
+| Skill                | Propósito                                                               | Cuándo Usarla                                                                  |
+| -------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `gsap-core`          | API core: `to()`, `from()`, `fromTo()`, easing, stagger, `matchMedia()` | Para cualquier animación JS, easing, responsive                                |
+| `gsap-react`         | GSAP en React: `useGSAP` hook, refs, `gsap.context()`, cleanup          | Animaciones en componentes React (siempre preferir sobre `gsap-core` en React) |
+| `gsap-scrolltrigger` | Animaciones scroll-linked, pinning, scrub, triggers                     | Parallax, secciones fijadas, animaciones al scroll                             |
+| `gsap-timeline`      | Secuenciación: `gsap.timeline()`, position parameter, nesting           | Coreografiar múltiples animaciones en secuencia                                |
+| `gsap-plugins`       | ScrollTo, Flip, Draggable, SplitText, ScrambleText, SVG plugins         | Funcionalidad avanzada: drag, flip, texto animado                              |
+| `gsap-utils`         | Utilidades: `clamp`, `mapRange`, `snap`, `wrap`, `toArray`              | Funciones helper para cálculos de animación                                    |
+| `gsap-performance`   | Optimización: transforms, will-change, batching, 60fps                  | Al optimizar animaciones GSAP, reducir jank                                    |
+| `gsap-frameworks`    | GSAP en Vue, Svelte (lifecycle, scoping, cleanup)                       | Solo si se trabaja fuera de React (no aplica normalmente)                      |
 
-- Se optimice frontend o backend
-- Se detecten o auditen problemas de rendimiento
+#### 🧪 Testing
 
-**Skills:**
+| Skill                    | Propósito                                           | Cuándo Usarla                                                 |
+| ------------------------ | --------------------------------------------------- | ------------------------------------------------------------- |
+| `react-testing-library`  | Testing de componentes React centrado en el usuario | Al escribir tests de componentes (queries, user-event, async) |
+| `playwright-e2e-testing` | E2E testing cross-browser con auto-wait             | Pruebas de flujos completos (login → pedido → pago)           |
 
-- `performance-optimization`
-- `web-performance-optimization`
-- `react-performance-optimization`
-- `gsap-performance`
+#### 📝 Documentación
 
-### 🧪 Testing
+| Skill                  | Propósito                            | Cuándo Usarla                                        |
+| ---------------------- | ------------------------------------ | ---------------------------------------------------- |
+| `documentation-skill`  | Guías y estándares de documentación  | Al crear README, documentación técnica               |
+| `jsdoc-best-practices` | JSDoc para funciones, módulos y APIs | Al documentar funciones exportadas, servicios, utils |
 
-**Usar cuando:**
+#### ⚡ Performance
 
-- Se escriban pruebas o se modifique lógica esencial
-- Se corrijan o documenten bugs
+| Skill                          | Propósito                                                 | Cuándo Usarla                                |
+| ------------------------------ | --------------------------------------------------------- | -------------------------------------------- |
+| `performance-optimization`     | Optimización general: caching, bundle, queries, profiling | Al auditar o mejorar rendimiento general     |
+| `web-performance-optimization` | Core Web Vitals, carga, runtime, bundle size              | Al optimizar tiempos de carga y métricas web |
 
-**Skills:**
+---
 
-- `react-testing-library`
-- `playwright-e2e-testing`
+### Mapeo Rápido: Tipo de Tarea → Skills
 
-**Regla:**
-Todo cambio importante debe incluir pruebas.
+| Estoy trabajando en...          | Skills a consultar                                                                                               |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Componentes React / UI**      | `frontend-design`, `ui-ux-pro-max`, `vercel-react-best-practices`, `gsap-react`                                  |
+| **CSS / Estilos / Animaciones** | `frontend-design`, `ui-ux-pro-max`, `gsap-core`, `gsap-performance`                                              |
+| **Endpoints / API backend**     | `nodejs-best-practices`, `web-security`                                                                          |
+| **Autenticación / Tokens**      | `web-security`, `nodejs-best-practices`                                                                          |
+| **Optimización de rendimiento** | `performance-optimization`, `web-performance-optimization`, `react-performance-optimization`, `gsap-performance` |
+| **Tests**                       | `react-testing-library`, `playwright-e2e-testing`                                                                |
+| **Planificación**               | `brainstorming`, `writing-plans`, `executing-plans`                                                              |
+| **Documentación**               | `documentation-skill`, `jsdoc-best-practices`                                                                    |
+| **No sé qué skill aplicar**     | `find-skills`                                                                                                    |
 
-### 📝 Documentación y Planificación
+### Reglas de Uso de Skills
 
-**Usar cuando:**
+1. **Antes de escribir código:** Identificar el tipo de tarea y seleccionar las skills relevantes.
+2. **`sabor-architecture`** se aplica **siempre**, sin excepción.
+3. **`brainstorming`** es obligatoria antes de cualquier trabajo creativo nuevo.
+4. Consultar la skill correspondiente **leyendo su `SKILL.md`** antes de implementar.
 
-- Se creen archivos README o documentación
-- Se planifiquen tareas complejas (antes de tocar código)
+### Prioridad de Skills (en caso de conflicto)
 
-**Skills:**
+1. `sabor-architecture` — Arquitectura es inviolable
+2. `web-security` — Seguridad nunca se negocia
+3. `nodejs-best-practices` / `vercel-react-best-practices` — Mejores prácticas del stack
+4. `performance-optimization` / `react-performance-optimization` — Rendimiento
+5. `ui-ux-pro-max` / `frontend-design` — Estética
 
-- `documentation-skill`
-- `jsdoc-best-practices`
-- `brainstorming`
-- `writing-plans`
-- `executing-plans`
+---
 
-### 🔍 Exploración y Búsqueda
+## 📝 Evolución del Documento
 
-**Usar cuando:**
-
-- No esté claro qué skill aplicar
-- Se necesiten nuevas herramientas en los agentes
-
-**Skills:**
-
-- `find-skills`
-
-### 🧱 Arquitectura del Proyecto (CRÍTICA)
-
-**Usar SIEMPRE en cualquier tarea:**
-
-**Skills:**
-
-- `sabor-architecture`
-
-**Regla:**
-Toda implementación debe seguir estrictamente _Screaming Architecture_.
-
-## ⚡ Prioridad de Skills
-
-En caso de conflicto entre skills al momento de programar, prevalece el siguiente orden:
-
-1. `sabor-architecture`
-2. `web-security`
-3. `nodejs-best-practices` / `vercel-react-best-practices`
-4. `performance-optimization` / `react-performance-optimization`
-5. `ui-ux-pro-max` / `frontend-design`
+Este archivo `AGENTS.md`, así como las skills en `.agents/skills/`, son **documentos vivos**. Deben ser actualizados conforme el equipo o los agentes aprendan y refinen las prácticas del proyecto. Si se agregan nuevos módulos, skills o convenciones, este archivo debe reflejarlos.

@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { useAuth } from '../../app/context/AuthContext';
+import LoadingScreen from './LoadingScreen';
 
 const RoleProtectedRoute = ({
   children,
@@ -12,20 +13,7 @@ const RoleProtectedRoute = ({
 
   // Si está cargando, mostrar loading
   if (loading) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '200px',
-          fontSize: '16px',
-          color: '#666',
-        }}
-      >
-        Verificando permisos...
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   // Si no está autenticado, no mostrar nada

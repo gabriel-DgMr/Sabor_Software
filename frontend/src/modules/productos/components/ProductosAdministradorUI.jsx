@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import gsap from 'gsap';
+import { useTranslation } from 'react-i18next';
 import MenuLateral from '../../dashboard/components/MenuLateralAdministrador';
 import ProductoLista from './ProductoLista';
 import ProductoFormulario from './ProductoFormulario';
+import ModalConfirmacion from '../../../shared/components/ModalConfirmacion';
 import '../styles/gestion-productos.css';
 
 /**
@@ -15,13 +17,15 @@ const ProductosAdministradorUI = ({
   formData,
   imagePreview,
   errors,
-  successMessage,
   isEditing,
   loadingStates,
   handleInputChange,
   handleRemoveImage,
   handleEditProduct,
   handleDeleteProduct,
+  confirmarEliminacion,
+  cancelarEliminacion,
+  confirmEliminar,
   handleSubmit,
   resetForm,
   searchTerm,
@@ -31,6 +35,7 @@ const ProductosAdministradorUI = ({
   setIsModalOpen,
 }) => {
   const gridRef = useRef(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (gridRef.current && filteredProducts.length > 0) {
@@ -56,34 +61,31 @@ const ProductosAdministradorUI = ({
           {/* Encabezado Premium */}
           <header className="gestion-productos__encabezado">
             <div className="gestion-productos__info">
-              <h1>Gestión de Productos</h1>
-              <p>Administra el catálogo de tu restaurante con estilo y eficiencia.</p>
+              <h1>{t('admin.productos.titulo')}</h1>
+              <p>{t('admin.productos.subtitulo')}</p>
             </div>
             <div className="gestion-productos__acciones">
               <div className="gestion-productos__busqueda">
+                <span className="gestion-productos__busqueda-icono">🔍</span>
                 <input
                   className="gestion-productos__input-busqueda"
-                  placeholder="Buscar por nombre o categoría..."
+                  placeholder={t('admin.productos.buscar_placeholder')}
                   type="text"
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                 />
               </div>
               <button
-                className="boton boton--primario"
+                className="boton-moderno boton-moderno--primario"
                 onClick={() => {
                   resetForm();
                   setIsModalOpen(true);
                 }}
               >
-                + Nuevo Producto
+                + {t('admin.productos.nuevo')}
               </button>
             </div>
           </header>
-
-          {successMessage && (
-            <div className="notificacion notificacion--exito">{successMessage}</div>
-          )}
 
           {/* Grilla de productos */}
           <div ref={gridRef} className="gestion-productos__rejilla">
@@ -102,7 +104,7 @@ const ProductosAdministradorUI = ({
               <div className="modal-sabor" onClick={e => e.stopPropagation()}>
                 <header className="modal-sabor__header">
                   <h2 className="modal-sabor__titulo">
-                    {isEditing ? 'Editar Producto' : 'Nuevo Producto'}
+                    {isEditing ? t('admin.productos.editar') : t('admin.productos.nuevo')}
                   </h2>
                   <button className="modal-sabor__cerrar" onClick={resetForm}>
                     ✕
@@ -126,6 +128,18 @@ const ProductosAdministradorUI = ({
               </div>
             </div>
           )}
+
+          {/* Modal de Confirmación para Eliminar */}
+          <ModalConfirmacion
+            abierto={confirmEliminar}
+            alCerrar={cancelarEliminacion}
+            alConfirmar={confirmarEliminacion}
+            titulo={t('admin.productos.eliminar_titulo')}
+            mensaje={t('admin.productos.eliminar_confirm')}
+            textoConfirmar={t('admin.productos.eliminar_titulo').split(' ')[0]}
+            textoCancelar={t('reservas.gestion.cancelar')}
+            variante="peligro"
+          />
         </div>
       </main>
     </div>
@@ -140,7 +154,6 @@ ProductosAdministradorUI.propTypes = {
   formData: PropTypes.object.isRequired,
   imagePreview: PropTypes.string,
   errors: PropTypes.object.isRequired,
-  successMessage: PropTypes.string,
   isEditing: PropTypes.bool.isRequired,
   loadingStates: PropTypes.object.isRequired,
   handleInputChange: PropTypes.func.isRequired,

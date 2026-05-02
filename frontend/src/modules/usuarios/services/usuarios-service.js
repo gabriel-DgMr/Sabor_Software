@@ -144,4 +144,52 @@ export const usuariosService = {
       throw error;
     }
   },
+
+  /**
+   * Crea un nuevo usuario (administrativo).
+   */
+  crear: async datos => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/auth/crear-usuario`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datos),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Error al crear el usuario');
+      return data;
+    } catch (error) {
+      console.error('Error en usuariosService.crear:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Actualiza un usuario (administrativo).
+   */
+  actualizar: async (id, datos) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/auth/actualizarusuario/${id}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datos),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Error al actualizar el usuario');
+      return data;
+    } catch (error) {
+      console.error('Error en usuariosService.actualizar:', error);
+      throw error;
+    }
+  },
 };

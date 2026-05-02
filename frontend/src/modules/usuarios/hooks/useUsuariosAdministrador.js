@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../app/context/AuthContext';
 import { usuariosService } from '../services/usuarios-service';
+import { toast } from 'react-toastify';
 
 export const useUsuariosAdministrador = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [usuarios, setUsuarios] = useState([]);
   const [roles, setRoles] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(null);
   const [usuarioEditando, setUsuarioEditando] = useState(null);
   const [nuevoRol, setNuevoRol] = useState('');
   const [filtro, setFiltro] = useState('todos');
   const [busqueda, setBusqueda] = useState('');
   const [confirmacion, setConfirmacion] = useState(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [usuarioParaEditar, setUsuarioParaEditar] = useState(null);
 
   const normalizarRol = rol => rol?.toLowerCase().trim() || 'cliente';
   const esAdministrador = rol => normalizarRol(rol) === 'administrador';
@@ -34,7 +36,6 @@ export const useUsuariosAdministrador = () => {
 
       try {
         setCargando(true);
-        setError(null);
 
         const [usuariosData, rolesData] = await Promise.all([
           usuariosService.obtenerTodos(),
@@ -53,7 +54,7 @@ export const useUsuariosAdministrador = () => {
         setRoles(rolesNormalizados);
       } catch (err) {
         console.error('Error al cargar datos:', err);
-        setError('Error al cargar los datos. Por favor, intenta de nuevo.');
+        toast.error('Error al cargar los datos. Por favor, intenta de nuevo.');
       } finally {
         setCargando(false);
       }
@@ -92,6 +93,56 @@ export const useUsuariosAdministrador = () => {
     setNuevoRol('');
   };
 
+  const abrirModalCreacion = () => {
+    setUsuarioParaEditar(null);
+    setModalAbierto(true);
+  };
+
+  const abrirModalEdicion = usuario => {
+    setUsuarioParaEditar(usuario);
+    setModalAbierto(true);
+  };
+
+  const cerrarModal = () => {
+    setModalAbierto(false);
+    setUsuarioParaEditar(null);
+  };
+
+  const guardarUsuario = async datos => {
+    try {
+      setCargando(true);
+      if (usuarioParaEditar) {
+        // Actualizar existente
+        await usuariosService.actualizar(usuarioParaEditar.id_usuario, datos);
+        setUsuarios(prev =>
+          prev.map(u =>
+            u.id_usuario === usuarioParaEditar.id_usuario
+              ? {
+                  ...u,
+                  ...datos,
+                  nombre_rol: roles.find(r => r.id_rol == datos.id_rol)?.nombre_rol || u.nombre_rol,
+                }
+              : u
+          )
+        );
+        toast.success(t('admin.usuarios.exito.actualizar'));
+      } else {
+        // Crear nuevo
+        await usuariosService.crear(datos);
+        // Recargar la lista para obtener el nuevo usuario con su ID y datos completos
+        const nuevosUsuarios = await usuariosService.obtenerTodos();
+        setUsuarios(nuevosUsuarios);
+        toast.success(t('admin.usuarios.exito.crear'));
+      }
+      cerrarModal();
+    } catch (err) {
+      console.error('Error al guardar usuario:', err);
+      toast.error(err.message || 'Error al procesar la solicitud');
+    } finally {
+      setCargando(false);
+    }
+  };
+
   const confirmarCambioRol = usuario => {
     const rolSeleccionado = roles.find(r => r.id_rol === parseInt(nuevoRol));
     setConfirmacion({
@@ -118,14 +169,11 @@ export const useUsuariosAdministrador = () => {
       setUsuarioEditando(null);
       setNuevoRol('');
       setConfirmacion(null);
-      setError(null);
-      setTimeout(() => {
-        setError(`Rol de ${confirmacion.usuario.nombre_usuario} actualizado exitosamente`);
-        setTimeout(() => setError(null), 3000);
-      }, 100);
+      toast.success(`Rol de ${confirmacion.usuario.nombre_usuario} actualizado exitosamente`);
     } catch (err) {
       console.error('Error al actualizar rol:', err);
-      setError(err.message || 'Error al actualizar el rol del usuario');
+      const mensajeError = err.message || 'Error al actualizar el rol del usuario';
+      toast.error(mensajeError);
     } finally {
       setCargando(false);
     }
@@ -133,8 +181,7 @@ export const useUsuariosAdministrador = () => {
 
   const confirmarDesactivacion = usuario => {
     if (usuario.id_usuario === user?.id_usuario) {
-      setError('No puedes desactivar tu propia cuenta');
-      setTimeout(() => setError(null), 3000);
+      toast.warn('No puedes desactivar tu propia cuenta');
       return;
     }
 
@@ -152,14 +199,11 @@ export const useUsuariosAdministrador = () => {
 
       setUsuarios(prev => prev.filter(u => u.id_usuario !== confirmacion.usuario.id_usuario));
       setConfirmacion(null);
-      setError(null);
-      setTimeout(() => {
-        setError(`Usuario ${confirmacion.usuario.nombre_usuario} desactivado exitosamente`);
-        setTimeout(() => setError(null), 3000);
-      }, 100);
+      toast.success(`Usuario ${confirmacion.usuario.nombre_usuario} desactivado exitosamente`);
     } catch (err) {
       console.error('Error al desactivar usuario:', err);
-      setError(err.message || 'Error al desactivar el usuario');
+      const mensajeError = err.message || 'Error al desactivar el usuario';
+      toast.error(mensajeError);
     } finally {
       setCargando(false);
     }
@@ -172,8 +216,6 @@ export const useUsuariosAdministrador = () => {
     usuarios,
     roles,
     cargando,
-    error,
-    setError,
     usuarioEditando,
     nuevoRol,
     setNuevoRol,
@@ -194,5 +236,11 @@ export const useUsuariosAdministrador = () => {
     esEmpleado,
     esAdministrador,
     obtenerEtiquetaRol,
+    modalAbierto,
+    usuarioParaEditar,
+    abrirModalCreacion,
+    abrirModalEdicion,
+    cerrarModal,
+    guardarUsuario,
   };
 };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import MenuLateral from '../components/MenuLateralAdministrador';
 import DashboardHeader from '../components/DashboardHeader';
 import ModalConfirmacion from '../../../shared/components/ModalConfirmacion';
@@ -11,6 +12,7 @@ import '../styles/gestion-banners.css';
 import '../../../shared/styles/shared.css';
 
 const GestionBanners = () => {
+  const { t } = useTranslation();
   const [banners, setBanners] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [mostrarModal, setMostrarModal] = useState(false);
@@ -39,7 +41,7 @@ const GestionBanners = () => {
       const data = await bannersService.getAdminBanners();
       setBanners(data);
     } catch (error) {
-      toast.error('Error al cargar banners');
+      toast.error(t('pedidos.estado.error_carga'));
     } finally {
       setCargando(false);
     }
@@ -104,12 +106,12 @@ const GestionBanners = () => {
 
     // Validación de campos
     const nuevosErrores = {};
-    if (!formData.titulo.trim()) nuevosErrores.titulo = 'El título es obligatorio';
-    if (!editandoId && !formData.imagen) nuevosErrores.imagen = 'La imagen es obligatoria';
+    if (!formData.titulo.trim()) nuevosErrores.titulo = t('config.personal.error');
+    if (!editandoId && !formData.imagen) nuevosErrores.imagen = t('config.personal.error');
 
     if (Object.keys(nuevosErrores).length > 0) {
       setErrores(nuevosErrores);
-      toast.error('Por favor, completa todos los campos obligatorios');
+      toast.error(t('config.personal.error'));
       return;
     }
 
@@ -125,16 +127,16 @@ const GestionBanners = () => {
     try {
       if (editandoId) {
         await bannersService.updateBanner(editandoId, data);
-        toast.success('Banner actualizado');
+        toast.success(t('auth.actualizar.exito'));
       } else {
         await bannersService.createBanner(data);
-        toast.success('Banner creado');
+        toast.success(t('auth.registro.exito'));
       }
       cargarBanners();
       resetForm();
     } catch (error) {
       console.error(error);
-      const mensajeError = error.response?.data?.message || 'Error al guardar el banner';
+      const mensajeError = error.response?.data?.message || t('pedidos.estado.error_carga');
       setErrores({ general: mensajeError });
       toast.error(mensajeError);
     }
@@ -169,10 +171,10 @@ const GestionBanners = () => {
 
     try {
       await bannersService.deleteBanner(bannerABorrar);
-      toast.success('Banner eliminado');
+      toast.success(t('carrito_eliminado'));
       cargarBanners();
     } catch (error) {
-      toast.error('Error al eliminar');
+      toast.error(t('pedidos.estado.error_carga'));
     } finally {
       setMostrarConfirmacionBorrar(false);
       setBannerABorrar(null);
@@ -184,8 +186,8 @@ const GestionBanners = () => {
       <MenuLateral />
       <main className="tablero__principal">
         <DashboardHeader
-          titulo="Gestión de Banners"
-          subtitulo="Administra las noticias y promociones del carrusel principal"
+          titulo={t('admin.banners.titulo')}
+          subtitulo={t('admin.banners.subtitulo')}
         />
 
         <section className="gestion-banners">
@@ -194,7 +196,7 @@ const GestionBanners = () => {
               className="boton-moderno boton-moderno--primario"
               onClick={() => setMostrarModal(true)}
             >
-              <FaPlus /> Añadir Nuevo Banner
+              <FaPlus /> {t('admin.banners.nuevo')}
             </button>
           </div>
 
@@ -202,18 +204,18 @@ const GestionBanners = () => {
             <table className="gestion-banners__tabla">
               <thead>
                 <tr>
-                  <th>Orden</th>
-                  <th>Vista Previa</th>
-                  <th>Título</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
+                  <th>{t('admin.banners.tabla.orden')}</th>
+                  <th>{t('admin.banners.tabla.previa')}</th>
+                  <th>{t('admin.banners.tabla.titulo')}</th>
+                  <th>{t('admin.banners.tabla.estado')}</th>
+                  <th>{t('admin.banners.tabla.acciones')}</th>
                 </tr>
               </thead>
               <tbody>
                 {banners.length === 0 && !cargando && (
                   <tr>
                     <td colSpan="5" style={{ textAlign: 'center', padding: '3rem' }}>
-                      No hay banners registrados actualmente.
+                      {t('admin.banners.vacio')}
                     </td>
                   </tr>
                 )}
@@ -234,7 +236,7 @@ const GestionBanners = () => {
                       <span
                         className={`etiqueta-estado ${banner.activo ? 'etiqueta-estado--activo' : 'etiqueta-estado--inactivo'}`}
                       >
-                        {banner.activo ? 'Activo' : 'Inactivo'}
+                        {banner.activo ? t('config.personal.si') : t('config.personal.no')}
                       </span>
                     </td>
                     <td>
@@ -242,14 +244,14 @@ const GestionBanners = () => {
                         <button
                           className="boton-circular boton-circular--editar"
                           onClick={() => handleEdit(banner)}
-                          title="Editar Banner"
+                          title={t('admin.productos.editar')}
                         >
                           <FaEdit />
                         </button>
                         <button
                           className="boton-circular boton-circular--eliminar"
                           onClick={() => handleDelete(banner.id_banner)}
-                          title="Eliminar Banner"
+                          title={t('carrito_eliminar')}
                         >
                           <FaTrash />
                         </button>
@@ -270,7 +272,7 @@ const GestionBanners = () => {
             <div className="modal-ventana">
               <div className="modal-ventana__header">
                 <h3 className="modal-ventana__titulo">
-                  {editandoId ? 'Editar Banner' : 'Nuevo Banner'}
+                  {editandoId ? t('admin.banners.editar') : t('admin.banners.nuevo')}
                 </h3>
                 <button className="modal-ventana__cerrar" onClick={resetForm}>
                   <FaTimes />
@@ -280,7 +282,9 @@ const GestionBanners = () => {
               <form onSubmit={handleSubmit} className="formulario-banners">
                 <div className="formulario-banners__fila">
                   <div className="formulario-banners__campo">
-                    <label className="formulario-banners__label">Título del Banner (ES)*</label>
+                    <label className="formulario-banners__label">
+                      {t('admin.banners.form.titulo_es')}
+                    </label>
                     <input
                       className={`formulario-banners__input ${errores.titulo ? 'formulario-banners__input--error' : ''}`}
                       type="text"
@@ -294,7 +298,9 @@ const GestionBanners = () => {
                     )}
                   </div>
                   <div className="formulario-banners__campo">
-                    <label className="formulario-banners__label">Título del Banner (EN)</label>
+                    <label className="formulario-banners__label">
+                      {t('admin.banners.form.titulo_en')}
+                    </label>
                     <input
                       className="formulario-banners__input"
                       type="text"
@@ -308,7 +314,9 @@ const GestionBanners = () => {
 
                 <div className="formulario-banners__fila">
                   <div className="formulario-banners__campo">
-                    <label className="formulario-banners__label">Descripción (ES)</label>
+                    <label className="formulario-banners__label">
+                      {t('admin.banners.form.desc_es')}
+                    </label>
                     <textarea
                       className="formulario-banners__textarea"
                       name="descripcion"
@@ -318,7 +326,9 @@ const GestionBanners = () => {
                     ></textarea>
                   </div>
                   <div className="formulario-banners__campo">
-                    <label className="formulario-banners__label">Descripción (EN)</label>
+                    <label className="formulario-banners__label">
+                      {t('admin.banners.form.desc_en')}
+                    </label>
                     <textarea
                       className="formulario-banners__textarea"
                       name="descripcion_en"
@@ -331,7 +341,9 @@ const GestionBanners = () => {
 
                 <div className="formulario-banners__fila">
                   <div className="formulario-banners__campo">
-                    <label className="formulario-banners__label">Texto Botón (ES)</label>
+                    <label className="formulario-banners__label">
+                      {t('admin.banners.form.btn_es')}
+                    </label>
                     <input
                       className="formulario-banners__input"
                       type="text"
@@ -342,7 +354,9 @@ const GestionBanners = () => {
                     />
                   </div>
                   <div className="formulario-banners__campo">
-                    <label className="formulario-banners__label">Texto Botón (EN)</label>
+                    <label className="formulario-banners__label">
+                      {t('admin.banners.form.btn_en')}
+                    </label>
                     <input
                       className="formulario-banners__input"
                       type="text"
@@ -355,7 +369,9 @@ const GestionBanners = () => {
                 </div>
 
                 <div className="formulario-banners__campo">
-                  <label className="formulario-banners__label">Enlace (URL)</label>
+                  <label className="formulario-banners__label">
+                    {t('admin.banners.form.enlace')}
+                  </label>
                   <input
                     className="formulario-banners__input"
                     type="text"
@@ -369,7 +385,7 @@ const GestionBanners = () => {
                 <div className="formulario-banners__fila">
                   <div className="formulario-banners__campo">
                     <label className="formulario-banners__label">
-                      Posición del Contenido (3x3)
+                      {t('admin.banners.form.posicion')}
                     </label>
                     <div className="selector-posicion">
                       {[
@@ -394,14 +410,16 @@ const GestionBanners = () => {
                       ))}
                     </div>
                     <p className="formulario-banners__hint">
-                      Selecciona dónde quieres que aparezca el texto y el botón.
+                      {t('admin.banners.form.posicion_hint')}
                     </p>
                   </div>
 
                   <div className="formulario-banners__campo">
                     <div className="formulario-banners__sub-fila">
                       <div className="formulario-banners__campo-flex">
-                        <label className="formulario-banners__label">Orden de Visualización</label>
+                        <label className="formulario-banners__label">
+                          {t('admin.banners.form.orden')}
+                        </label>
                         <input
                           className="formulario-banners__input"
                           type="number"
@@ -422,7 +440,9 @@ const GestionBanners = () => {
                             checked={formData.activo}
                             onChange={handleInputChange}
                           />
-                          <span className="formulario-banners__label">Activar Banner</span>
+                          <span className="formulario-banners__label">
+                            {t('admin.banners.form.activo')}
+                          </span>
                         </label>
                       </div>
                     </div>
@@ -431,7 +451,10 @@ const GestionBanners = () => {
 
                 <div className="formulario-banners__campo">
                   <label className="formulario-banners__label">
-                    Imagen del Banner {editandoId ? '(Opcional)' : '*'}
+                    {t('admin.banners.form.imagen')}{' '}
+                    {editandoId
+                      ? t('admin.banners.form.opcional')
+                      : t('admin.banners.form.obligatorio')}
                   </label>
 
                   {imagenPreview ? (
@@ -448,7 +471,7 @@ const GestionBanners = () => {
                           setFormData({ ...formData, imagen: null });
                           setImagenPreview(null);
                         }}
-                        title="Eliminar imagen seleccionada"
+                        title={t('carrito_eliminar')}
                       >
                         <FaTrash />
                       </button>
@@ -472,7 +495,7 @@ const GestionBanners = () => {
                           margin: 0,
                         }}
                       >
-                        Haz clic para subir una imagen
+                        {t('admin.banners.form.imagen_hint')}
                       </p>
                       <input
                         id="imagen-input"
@@ -494,10 +517,10 @@ const GestionBanners = () => {
                     className="boton-moderno boton-moderno--social"
                     onClick={resetForm}
                   >
-                    Cancelar
+                    {t('reservas.gestion.cancelar')}
                   </button>
                   <button type="submit" className="boton-moderno boton-moderno--primario">
-                    <FaSave /> {editandoId ? 'Actualizar Banner' : 'Guardar Banner'}
+                    <FaSave /> {editandoId ? t('auth.actualizar.boton') : t('reservas.form.submit')}
                   </button>
                 </div>
                 {errores.general && (
@@ -515,10 +538,10 @@ const GestionBanners = () => {
             setBannerABorrar(null);
           }}
           alConfirmar={confirmarBorrado}
-          titulo="Eliminar Banner"
-          mensaje="¿Estás seguro de que deseas eliminar este banner? Esta acción no se puede deshacer."
-          textoConfirmar="Eliminar permanentemente"
-          textoCancelar="Conservar banner"
+          titulo={t('admin.banners.borrar_titulo')}
+          mensaje={t('admin.banners.borrar_confirm')}
+          textoConfirmar={t('admin.banners.borrar_ok')}
+          textoCancelar={t('admin.banners.borrar_no')}
           variante="peligro"
         />
       </main>

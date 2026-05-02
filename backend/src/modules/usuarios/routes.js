@@ -24,6 +24,13 @@ router.get(
   usuarioController.getusuarioById,
 );
 
+router.post(
+  "/crear-usuario",
+  authenticateToken,
+  checkRole(["Administrador"]),
+  usuarioController.crearUsuario,
+);
+
 router.put(
   "/actualizarusuario/:id",
   authenticateToken,

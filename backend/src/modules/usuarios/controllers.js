@@ -30,7 +30,31 @@ export const getusuarioById = async (req, res) => {
 };
 
 /**
- * Actualiza nombre, correo, teléfono y opcionalmente imagen del usuario.
+ * Crea un nuevo usuario desde el panel de administración.
+ */
+export const crearUsuario = async (req, res) => {
+  try {
+    const userData = {
+      nombre_usuario: req.body.nombre_usuario,
+      correo_usuario: req.body.correo_usuario,
+      telefono_usuario: req.body.telefono_usuario,
+      contraseña_usuario: req.body.contraseña_usuario,
+      id_rol: req.body.id_rol,
+    };
+
+    await usuarioService.createUserService(userData);
+    res.status(201).json({ message: "Usuario creado exitosamente" });
+  } catch (error) {
+    logger.error("Error al crear usuario:", error);
+    if (error.message.includes("ya está registrado")) {
+      return res.status(400).json({ message: error.message });
+    }
+    res.status(500).json({ message: "Error al crear el usuario" });
+  }
+};
+
+/**
+ * Actualiza nombre, correo, teléfono y opcionalmente imagen o rol del usuario.
  */
 export const updateusuario = async (req, res) => {
   try {
@@ -40,6 +64,11 @@ export const updateusuario = async (req, res) => {
       correo_usuario: req.body.correo_usuario,
       telefono_usuario: req.body.telefono_usuario,
     };
+
+    // Si es administrador, permite actualizar el rol en la misma petición
+    if (req.user.rol === "Administrador" && req.body.id_rol) {
+      updateData.id_rol = req.body.id_rol;
+    }
 
     await usuarioService.updateUserService(id, updateData, req.file);
     res.json({ message: "usuario actualizado exitosamente" });

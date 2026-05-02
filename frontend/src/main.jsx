@@ -8,13 +8,16 @@ import './app/styles/reset.css';
 import './index.css';
 import './i18n';
 import { AuthProvider } from './app/context/AuthContext.jsx';
+import { AlertProvider } from './app/context/AlertContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <AlertProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </AlertProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

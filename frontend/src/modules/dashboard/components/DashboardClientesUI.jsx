@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import MenuLateral from './MenuLateralAdministrador';
 import PDFDownloadButton from '../../../shared/components/PDFDownloadButton';
 import '../styles/dashboard-ui.css';
@@ -31,14 +32,16 @@ ChartJS.register(
 );
 
 const DashboardClientesUI = ({ metrics, loading, error, contentRef, handleGeneratePDF }) => {
-  if (loading) return <div>Cargando...</div>;
+  const { t } = useTranslation();
+
+  if (loading) return <div>{t('admin.usuarios.cargando')}</div>;
 
   if (error) {
     return (
       <div className="tablero">
         <MenuLateral />
         <main className="tablero__principal">
-          <h1 className="dashboard-title">Clientes</h1>
+          <h1 className="dashboard-title">{t('admin.usuarios.clientes')}</h1>
           <div
             style={{
               background: '#ffebee',
@@ -48,20 +51,20 @@ const DashboardClientesUI = ({ metrics, loading, error, contentRef, handleGenera
               border: '1px solid #ffcdd2',
             }}
           >
-            <h3>Error al cargar el dashboard</h3>
+            <h3>{t('admin.dashboard.ventas.error_carga')}</h3>
             <p>{error}</p>
             <p style={{ fontSize: 14, marginTop: 16 }}>
               {error.includes('403') || error.includes('No autorizado') ? (
                 <>
-                  <strong>Problema de autorización:</strong> Tu sesión puede haber expirado o no
-                  tienes permisos de administrador.
+                  <strong>{t('admin.dashboard.ventas.prob_autorizacion')}</strong>{' '}
+                  {t('admin.dashboard.ventas.sesion_expirada')}
                   <br />
                   <a href="/login" style={{ color: '#c62828', textDecoration: 'underline' }}>
-                    Haz clic aquí para iniciar sesión nuevamente
+                    {t('admin.dashboard.ventas.relogin')}
                   </a>
                 </>
               ) : (
-                'Verifica que la base de datos esté configurada correctamente y que el servidor esté funcionando.'
+                t('admin.dashboard.ventas.verificar_db')
               )}
             </p>
           </div>
@@ -75,7 +78,7 @@ const DashboardClientesUI = ({ metrics, loading, error, contentRef, handleGenera
       <div className="layout">
         <MenuLateral />
         <main className="dashboard-container">
-          <h1 className="dashboard-title">Clientes</h1>
+          <h1 className="dashboard-title">{t('admin.usuarios.clientes')}</h1>
           <div
             style={{
               background: '#e3f2fd',
@@ -86,10 +89,9 @@ const DashboardClientesUI = ({ metrics, loading, error, contentRef, handleGenera
               textAlign: 'center',
             }}
           >
-            <h3 style={{ marginBottom: 16 }}>📊 Dashboard Vacío</h3>
+            <h3 style={{ marginBottom: 16 }}>{t('admin.dashboard.usuarios.vacio_titulo')}</h3>
             <p style={{ fontSize: 16, marginBottom: 16 }}>
-              No hay datos de usuarios aún. El dashboard mostrará métricas cuando los usuarios
-              comiencen a registrarse y hacer pedidos.
+              {t('admin.dashboard.usuarios.vacio_desc')}
             </p>
             <div
               style={{
@@ -100,11 +102,11 @@ const DashboardClientesUI = ({ metrics, loading, error, contentRef, handleGenera
                 border: '1px solid #e0e0e0',
               }}
             >
-              <h4 style={{ marginBottom: 12 }}>💡 Próximos pasos:</h4>
+              <h4 style={{ marginBottom: 12 }}>{t('admin.dashboard.ventas.vacio_pasos')}</h4>
               <ul style={{ textAlign: 'left', margin: 0, paddingLeft: 20 }}>
-                <li>Registra algunos usuarios de prueba</li>
-                <li>Haz algunos pedidos</li>
-                <li>Las métricas aparecerán automáticamente</li>
+                <li>{t('admin.dashboard.ventas.vacio_paso1')}</li>
+                <li>{t('admin.dashboard.ventas.vacio_paso2')}</li>
+                <li>{t('admin.dashboard.ventas.vacio_paso3')}</li>
               </ul>
             </div>
           </div>
@@ -113,7 +115,7 @@ const DashboardClientesUI = ({ metrics, loading, error, contentRef, handleGenera
     );
   }
 
-  if (!metrics) return <div>Error cargando métricas</div>;
+  if (!metrics) return <div>{t('admin.usuarios.no_encontrados')}</div>;
 
   const { usuarios_nuevos, usuarios_activos, views, visitas, pedidosPorHora, usuariosPorDia } =
     metrics;
@@ -125,10 +127,10 @@ const DashboardClientesUI = ({ metrics, loading, error, contentRef, handleGenera
             const fecha = new Date(d.fecha);
             return `${fecha.getDate()}/${fecha.getMonth() + 1}`;
           })
-        : ['Sin datos'],
+        : [t('carrito_vacio')],
     datasets: [
       {
-        label: 'Usuarios registrados',
+        label: t('admin.dashboard.usuarios.registrados_dia'),
         data:
           usuariosPorDia && usuariosPorDia.length > 0
             ? usuariosPorDia.map(d => d.cantidad || 0)
@@ -152,9 +154,9 @@ const DashboardClientesUI = ({ metrics, loading, error, contentRef, handleGenera
           if (typeof p.hora === 'number') {
             return `${p.hora.toString().padStart(2, '0')}:00`;
           }
-          return p.hora || 'Sin hora';
+          return p.hora || t('carrito_vacio');
         })
-      : ['Sin datos'];
+      : [t('carrito_vacio')];
 
   const totalPedidos =
     pedidosPorHora && pedidosPorHora.length > 0
@@ -193,7 +195,7 @@ const DashboardClientesUI = ({ metrics, loading, error, contentRef, handleGenera
       <MenuLateral />
       <main className="tablero__principal">
         <div className="dashboard-header">
-          <h1 className="dashboard-title">Clientes</h1>
+          <h1 className="dashboard-title">{t('admin.usuarios.titulo')}</h1>
           <PDFDownloadButton
             onGeneratePDF={handleGeneratePDF}
             disabled={loading || error || !metrics}
@@ -204,24 +206,24 @@ const DashboardClientesUI = ({ metrics, loading, error, contentRef, handleGenera
           <div className="metrics-grid">
             {[
               {
-                label: 'Usuarios Únicos',
-                value: `${views || 0} Personas`,
-                description: 'Últimos 7 días',
+                label: t('admin.dashboard.usuarios.unicos'),
+                value: `${views || 0} ${t('admin.dashboard.usuarios.personas')}`,
+                description: t('admin.dashboard.ventas.ultimos_7'),
               },
               {
-                label: 'Total Visitas',
-                value: `${visitas || 0} Sesiones`,
-                description: 'Últimos 7 días',
+                label: t('admin.dashboard.usuarios.total_visitas'),
+                value: `${visitas || 0} ${t('admin.dashboard.usuarios.sesiones')}`,
+                description: t('admin.dashboard.ventas.ultimos_7'),
               },
               {
-                label: 'Usuarios Nuevos',
-                value: `${usuarios_nuevos || 0} Personas`,
-                description: 'Hoy',
+                label: t('admin.dashboard.usuarios.nuevos'),
+                value: `${usuarios_nuevos || 0} ${t('admin.dashboard.usuarios.personas')}`,
+                description: t('admin.dashboard.ventas.dia_actual'),
               },
               {
-                label: 'Usuarios Activos',
-                value: `${usuarios_activos || 0} Personas`,
-                description: 'Últimos 30 días',
+                label: t('admin.dashboard.usuarios.activos'),
+                value: `${usuarios_activos || 0} ${t('admin.dashboard.usuarios.personas')}`,
+                description: t('admin.dashboard.ventas.ultimos_30'),
               },
             ].map(card => (
               <div key={card.label} className="metric-card metric-card--clients">
@@ -236,7 +238,7 @@ const DashboardClientesUI = ({ metrics, loading, error, contentRef, handleGenera
 
           <div className="charts-container charts-container--clients">
             <div className="chart-container chart-container--large line-chart">
-              <div className="chart-title">Usuarios Registrados por Día</div>
+              <div className="chart-title">{t('admin.dashboard.usuarios.registrados_dia')}</div>
               <div className="chart-wrapper chart-wrapper--large">
                 <Line
                   data={lineData}
@@ -270,7 +272,7 @@ const DashboardClientesUI = ({ metrics, loading, error, contentRef, handleGenera
             </div>
 
             <div className="chart-container chart-container--small doughnut-chart">
-              <div className="chart-title">Pedidos por Hora</div>
+              <div className="chart-title">{t('admin.dashboard.usuarios.pedidos_hora')}</div>
               <div className="chart-wrapper chart-wrapper--small">
                 <Doughnut
                   data={doughnutData}
@@ -312,7 +314,7 @@ const DashboardClientesUI = ({ metrics, loading, error, contentRef, handleGenera
               ) : (
                 <div className="chart-no-data">
                   <div className="chart-no-data-icon">📊</div>
-                  <div>No hay datos de pedidos disponibles</div>
+                  <div>{t('admin.dashboard.usuarios.no_datos_pedidos')}</div>
                 </div>
               )}
             </div>

@@ -69,6 +69,14 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tarjeta-usuario:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
 }
 
 .tarjeta-usuario__encabezado {
@@ -112,6 +120,124 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* Overlay de Acciones en Hover */
+.tarjeta-usuario__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.tarjeta-usuario:hover .tarjeta-usuario__overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tarjeta-usuario__overlay-botones {
+  display: flex;
+  gap: 1.5rem;
+  transform: translateY(20px);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.tarjeta-usuario:hover .tarjeta-usuario__overlay-botones {
+  transform: translateY(0);
+}
+
+.boton-redondo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  font-size: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.boton-redondo:hover {
+  transform: scale(1.1);
+}
+
+.boton-redondo:active {
+  transform: scale(0.95);
+}
+
+.boton-redondo--editar:hover { background-color: var(--primary-50); }
+.boton-redondo--eliminar:hover { background-color: #fef2f2; }
+.boton-redondo--detalles:hover { background-color: #f0f9ff; }
+
+/* Modal de Formulario de Usuario */
+.modal-usuario {
+  max-width: 550px !important;
+}
+
+.modal-usuario__formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.modal-usuario__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modal-usuario__label {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--neutral-700);
+}
+
+.modal-usuario__input {
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--neutral-200);
+  border-radius: 8px;
+  font-size: 1.4rem;
+  transition: border-color 0.2s;
+}
+
+.modal-usuario__input:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.modal-usuario__input--error {
+  border-color: #ef4444;
+}
+
+.modal-usuario__error {
+  font-size: 1.2rem;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.modal-usuario__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--neutral-100);
 }
 
 /* Perfil / Actualizar Datos */

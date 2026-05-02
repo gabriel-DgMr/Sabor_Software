@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../app/context/AuthContext';
 import {
-  obtenerPedidos,
   actualizarEstadoPedido,
   marcarPedidoRecibido,
   obtenerSiguienteEstado,
   mapearEstadoAId,
 } from '../services/pedidos-service';
+import domicilioService from '../services/domicilio-service';
+import { toast } from 'react-toastify';
 
 /**
  * Hook personalizado para manejar la lógica de pedidos a domicilio.
@@ -28,9 +29,8 @@ export const useDomicilios = () => {
     try {
       setCargando(true);
       setError(null);
-      const datosPedidos = await obtenerPedidos();
-      // Filtrar solo domicilios
-      setPedidos(datosPedidos.filter(p => p.tipo_servicio === 'domicilio'));
+      const res = await domicilioService.getDomicilios();
+      setPedidos(res.data);
     } catch (err) {
       console.error('Error al cargar pedidos:', err);
       setError('No se pudieron cargar los pedidos a domicilio.');
@@ -57,9 +57,13 @@ export const useDomicilios = () => {
           p.id === pedidoId ? { ...p, estado: siguienteEstado, id_estado: nuevoEstadoId } : p
         )
       );
+      toast.success(`Pedido #${pedidoId} actualizado a ${siguienteEstado}`);
+      setError(null);
     } catch (err) {
       console.error('Error al cambiar estado:', err);
-      setError('No se pudo actualizar el estado del pedido.');
+      const mensajeError = 'No se pudo actualizar el estado del pedido.';
+      toast.error(mensajeError);
+      setError(mensajeError);
     } finally {
       setActualizando(prev => ({ ...prev, [pedidoId]: false }));
     }
@@ -71,9 +75,13 @@ export const useDomicilios = () => {
       await marcarPedidoRecibido(pedidoId);
 
       setPedidos(prev => prev.map(p => (p.id === pedidoId ? { ...p, recibido_cliente: true } : p)));
+      toast.success(`Pedido #${pedidoId} marcado como recibido`);
+      setError(null);
     } catch (err) {
       console.error('Error al marcar pedido como recibido:', err);
-      setError('No se pudo marcar el pedido como recibido.');
+      const mensajeError = 'No se pudo marcar el pedido como recibido.';
+      toast.error(mensajeError);
+      setError(mensajeError);
     } finally {
       setActualizando(prev => ({ ...prev, [pedidoId]: false }));
     }

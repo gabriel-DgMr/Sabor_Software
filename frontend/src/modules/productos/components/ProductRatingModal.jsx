@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import { useAlert } from '../../../app/context/AlertContext';
 import StarRating from '../../../shared/components/StarRating';
 import '../styles/productRatingModal.css';
 import { getImageUrl } from '../../../shared/utils/imageUtils.js';
@@ -16,12 +17,17 @@ const ProductRatingModal = ({
   const [rating, setRating] = useState(calificacionActual?.calificacion || 0);
   const [comentario, setComentario] = useState(calificacionActual?.comentario || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showAlert } = useAlert();
 
   const handleSubmit = async e => {
     e.preventDefault();
 
     if (rating === 0) {
-      alert('Por favor selecciona una calificación');
+      showAlert({
+        titulo: 'Calificación incompleta',
+        mensaje: 'Por favor selecciona una calificación',
+        variante: 'peligro',
+      });
       return;
     }
 
@@ -38,7 +44,11 @@ const ProductRatingModal = ({
       onClose();
     } catch (error) {
       console.error('Error al enviar calificación:', error);
-      alert('Error al enviar la calificación. Intenta de nuevo.');
+      showAlert({
+        titulo: 'Error',
+        mensaje: 'Error al enviar la calificación. Intenta de nuevo.',
+        variante: 'peligro',
+      });
     } finally {
       setIsSubmitting(false);
     }

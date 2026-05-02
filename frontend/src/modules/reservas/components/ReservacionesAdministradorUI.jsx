@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import gsap from 'gsap';
 import MenuLateral from '../../dashboard/components/MenuLateralAdministrador';
 import LoadingScreen from '../../../shared/components/LoadingScreen';
+import ModalConfirmacion from '../../../shared/components/ModalConfirmacion';
 import TarjetaReservacion from './TarjetaReservacion';
 import EstadisticasReservas from './EstadisticasReservas';
 import FiltrosReservas from './FiltrosReservas';
@@ -29,11 +30,8 @@ const ReservacionesAdministradorUI = ({
   setMostrarFiltros,
   reservasFiltradas,
   isLoading,
-  error,
-  setError,
   formData,
   errors,
-  successMessage,
   isEditing,
   loadingStates,
   limpiarFiltros,
@@ -42,6 +40,9 @@ const ReservacionesAdministradorUI = ({
   limpiarFormulario,
   actualizarEstadoReserva,
   eliminarReserva,
+  confirmarEliminacion,
+  cancelarEliminacion,
+  confirmEliminar,
   handleSubmit,
   estadisticas,
   cargarReservas,
@@ -95,14 +96,6 @@ const ReservacionesAdministradorUI = ({
               <h1 className="gestion-reservas__titulo">{t('reservas.gestion.titulo')}</h1>
               <p className="gestion-reservas__subtitulo">{t('reservas.gestion.subtitulo')}</p>
             </div>
-            {successMessage && (
-              <div className="notificacion notificacion--exito">{successMessage}</div>
-            )}
-            {error && (
-              <div className="notificacion notificacion--error">
-                {error} <button onClick={() => setError(null)}>✕</button>
-              </div>
-            )}
           </header>
 
           {/* Estadísticas */}
@@ -267,6 +260,18 @@ const ReservacionesAdministradorUI = ({
             </div>
           </section>
         </div>
+
+        {/* Modal de Confirmación para Eliminar */}
+        <ModalConfirmacion
+          abierto={confirmEliminar}
+          alCerrar={cancelarEliminacion}
+          alConfirmar={confirmarEliminacion}
+          titulo="Eliminar reserva"
+          mensaje="¿Estás seguro de que quieres eliminar esta reserva? Esta acción no se puede deshacer."
+          textoConfirmar="Eliminar"
+          textoCancelar="Cancelar"
+          variante="peligro"
+        />
       </main>
     </div>
   );
@@ -281,11 +286,8 @@ ReservacionesAdministradorUI.propTypes = {
   setMostrarFiltros: PropTypes.func.isRequired,
   reservasFiltradas: PropTypes.array.isRequired,
   isLoading: PropTypes.bool.isRequired,
-  error: PropTypes.string,
-  setError: PropTypes.func.isRequired,
   formData: PropTypes.object.isRequired,
   errors: PropTypes.object.isRequired,
-  successMessage: PropTypes.string,
   isEditing: PropTypes.bool.isRequired,
   loadingStates: PropTypes.object.isRequired,
   limpiarFiltros: PropTypes.func.isRequired,

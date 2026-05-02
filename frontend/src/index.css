@@ -48,8 +48,8 @@
   /* Typography */
   --font-main: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* 1rem = 9px (base 16px * 0.5625 = 9px) - Scaled down from 62.5% (10px) */
-  font-size: 56.25%;
+  /* Scaled down from 62.5% (10px) */
+  font-size: 62.5%;
   font-family: var(--font-main);
 }
 

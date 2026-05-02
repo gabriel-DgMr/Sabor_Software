@@ -41,6 +41,7 @@
   padding: 1.2rem;
   border-radius: 1.6rem;
   margin-bottom: 1rem;
+  overflow: hidden;
 }
 
 .menu-lateral__cliente {
@@ -50,6 +51,11 @@
   color: #fff;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  min-width: 0;
+  flex: 1;
+  background: transparent;
+  border: none;
+  text-align: left;
 }
 
 .menu-lateral__cliente:hover {
@@ -64,6 +70,52 @@
   text-overflow: ellipsis;
 }
 
+.menu-lateral__acciones {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-shrink: 0;
+}
+
+.menu-lateral__idiomas {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.4rem;
+  border-radius: 1rem;
+}
+
+.menu-lateral__idioma-boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0.6;
+  background: transparent;
+  border: none;
+}
+
+.menu-lateral__idioma-boton:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.menu-lateral__idioma-boton--activo {
+  opacity: 1;
+  background: var(--naranja-sabor);
+  box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
+}
+
+.menu-lateral__idioma-boton img {
+  width: 1.8rem;
+  height: auto;
+  border-radius: 0.2rem;
+}
+
 .menu-lateral-cerrar {
   color: rgba(255, 255, 255, 0.4);
   cursor: pointer;
@@ -71,6 +123,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
 }
 
 .menu-lateral-cerrar:hover {

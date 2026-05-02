@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import MenuLateral from '../../dashboard/components/MenuLateralAdministrador';
 import { FiRefreshCcw } from 'react-icons/fi';
 import { mapearEstado } from '../services/pedidos-service';
@@ -16,12 +17,13 @@ const PedidosAdministradorUI = ({
   setFiltroActivo,
   pedidosFiltrados,
   cargando,
-  error,
   authLoading,
   isAuthenticated,
   cambiarEstado,
   refrescarPedidos,
 }) => {
+  const { t } = useTranslation();
+
   if (authLoading || cargando) {
     return (
       <div className="tablero">
@@ -29,7 +31,7 @@ const PedidosAdministradorUI = ({
         <main className="tablero__principal">
           <div className="cargando">
             <div className="spinner"></div>
-            <p>Sincronizando pedidos...</p>
+            <p>{t('admin.pedidos.sincronizando')}</p>
           </div>
         </main>
       </div>
@@ -42,7 +44,7 @@ const PedidosAdministradorUI = ({
         <MenuLateral />
         <main className="tablero__principal">
           <div className="notificacion notificacion--error">
-            Acceso restringido. Por favor inicia sesión como administrador.
+            {t('admin.pedidos.acceso_restringido')}
           </div>
         </main>
       </div>
@@ -55,7 +57,7 @@ const PedidosAdministradorUI = ({
       <main className="tablero__principal">
         <header className="encabezado-tablero">
           <div className="encabezado-tablero__titulos">
-            <h1 className="encabezado-tablero__titulo">Gestión de Pedidos</h1>
+            <h1 className="encabezado-tablero__titulo">{t('admin.pedidos.titulo')}</h1>
           </div>
 
           <div className="pedidos-controles">
@@ -66,17 +68,15 @@ const PedidosAdministradorUI = ({
                   className={`usuarios-filtros__boton ${filtroActivo === estado ? 'usuarios-filtros__boton--activo' : ''}`}
                   onClick={() => setFiltroActivo(estado)}
                 >
-                  {estado === 'todos' ? 'Todos' : mapearEstado(estado)}
+                  {estado === 'todos' ? t('admin.pedidos.todos') : mapearEstado(estado)}
                 </button>
               ))}
             </div>
             <button className="boton boton--secundario" onClick={refrescarPedidos}>
-              <FiRefreshCcw /> Actualizar
+              <FiRefreshCcw /> {t('admin.pedidos.actualizar')}
             </button>
           </div>
         </header>
-
-        {error && <div className="notificacion notificacion--error">{error}</div>}
 
         <section className="tablero-pedidos">
           <PedidoLista
@@ -95,7 +95,6 @@ PedidosAdministradorUI.propTypes = {
   setFiltroActivo: PropTypes.func.isRequired,
   pedidosFiltrados: PropTypes.array.isRequired,
   cargando: PropTypes.bool.isRequired,
-  error: PropTypes.string,
   authLoading: PropTypes.bool.isRequired,
   isAuthenticated: PropTypes.bool.isRequired,
   cambiarEstado: PropTypes.func.isRequired,

@@ -30,6 +30,7 @@ const Header = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 992);
   const { t, i18n } = useTranslation();
   const headerRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const isActive = ruta => location.pathname === ruta;
 
@@ -85,6 +86,49 @@ const Header = () => {
       );
     }
   }, [cartItems.length]);
+
+  // Animación del menú dropdown del perfil
+  useGSAP(() => {
+    if (!dropdownRef.current) return;
+
+    if (showMenu) {
+      // Menú container animation
+      gsap.fromTo(
+        dropdownRef.current,
+        { autoAlpha: 0, scale: 0.96, y: 10 },
+        { autoAlpha: 1, scale: 1, y: 0, duration: 0.3, ease: 'power3.out', overwrite: true }
+      );
+
+      // Staggered childrens
+      const elements = gsap.utils.toArray(
+        dropdownRef.current.querySelectorAll(
+          '.menu-perfil__usuario, .menu-perfil__divisor, .menu-perfil__opcion'
+        )
+      );
+      gsap.fromTo(
+        elements,
+        { autoAlpha: 0, x: -10 },
+        {
+          autoAlpha: 1,
+          x: 0,
+          duration: 0.2,
+          stagger: 0.04,
+          ease: 'power2.out',
+          delay: 0.05,
+          overwrite: true,
+        }
+      );
+    } else {
+      gsap.to(dropdownRef.current, {
+        autoAlpha: 0,
+        scale: 0.96,
+        y: 10,
+        duration: 0.2,
+        ease: 'power2.in',
+        overwrite: true,
+      });
+    }
+  }, [showMenu]);
 
   return (
     <>
@@ -149,64 +193,105 @@ const Header = () => {
                 )}
               </button>
 
-              {showMenu && (
-                <div className="menu-perfil">
-                  {isAuthenticated ? (
-                    <>
-                      <div className="menu-perfil__usuario">
+              <div
+                className="menu-perfil"
+                ref={dropdownRef}
+                style={{
+                  visibility: 'hidden',
+                  opacity: 0,
+                  pointerEvents: showMenu ? 'auto' : 'none',
+                }}
+              >
+                {isAuthenticated ? (
+                  <>
+                    <div className="menu-perfil__usuario">
+                      {user?.imagen_usuario ? (
+                        <img
+                          src={getImageUrl(user.imagen_usuario)}
+                          alt="Perfil"
+                          className="menu-perfil__avatar"
+                        />
+                      ) : (
+                        <div className="menu-perfil__avatar-fallback">
+                          <IoPersonOutline size={20} />
+                        </div>
+                      )}
+                      <div className="menu-perfil__info">
                         <span className="menu-perfil__nombre">{user?.nombre_usuario}</span>
                         <span className="menu-perfil__correo">{user?.correo_usuario}</span>
                       </div>
-                      <Link className="menu-perfil__opcion" to="/actualizar-datos">
-                        <IoSettingsOutline size={18} />
-                        {t('actualizar_datos')}
-                      </Link>
-                      <Link className="menu-perfil__opcion" to="/historial-pedidos">
-                        <IoBagHandleOutline size={18} />
-                        {t('ver_historial_pedidos')}
-                      </Link>
-                      <Link className="menu-perfil__opcion" to="/historial-reservas">
-                        <IoCalendarOutline size={18} />
-                        {t('ver_historial_reservas')}
-                      </Link>
-                      <button
-                        className="menu-perfil__opcion menu-perfil__opcion--cerrar-sesion"
-                        onClick={logout}
-                      >
-                        <IoLogOutOutline size={18} />
-                        {t('cerrar_sesion')}
-                      </button>
-                    </>
-                  ) : (
+                    </div>
+
+                    <div className="menu-perfil__divisor"></div>
+
                     <Link
                       className="menu-perfil__opcion"
-                      to="/login"
-                      onClick={() => setShowMenu(false)}
+                      to="/actualizar-datos"
+                      onClick={() => isMobile && setShowMenu(false)}
                     >
-                      {t('iniciar_sesion')}
+                      <IoSettingsOutline size={18} />
+                      {t('actualizar_datos')}
                     </Link>
-                  )}
+                    <Link
+                      className="menu-perfil__opcion"
+                      to="/historial-pedidos"
+                      onClick={() => isMobile && setShowMenu(false)}
+                    >
+                      <IoBagHandleOutline size={18} />
+                      {t('ver_historial_pedidos')}
+                    </Link>
+                    <Link
+                      className="menu-perfil__opcion"
+                      to="/historial-reservas"
+                      onClick={() => isMobile && setShowMenu(false)}
+                    >
+                      <IoCalendarOutline size={18} />
+                      {t('ver_historial_reservas')}
+                    </Link>
 
-                  {/* Selector de Idioma en el Menú */}
-                  <div className="menu-perfil__opcion menu-perfil__opcion--idioma">
-                    <span>{t('idioma', 'Idioma')}</span>
-                    <div className="menu-perfil__idiomas-grid">
-                      <button
-                        className={`menu-perfil__idioma-boton ${i18n.language === 'es' ? 'menu-perfil__idioma-boton--activo' : ''}`}
-                        onClick={() => handleIdioma('es')}
-                      >
-                        <ReactCountryFlag svg countryCode="ES" />
-                      </button>
-                      <button
-                        className={`menu-perfil__idioma-boton ${i18n.language === 'en' ? 'menu-perfil__idioma-boton--activo' : ''}`}
-                        onClick={() => handleIdioma('en')}
-                      >
-                        <ReactCountryFlag svg countryCode="US" />
-                      </button>
-                    </div>
+                    <div className="menu-perfil__divisor"></div>
+
+                    <button
+                      className="menu-perfil__opcion menu-perfil__opcion--cerrar-sesion"
+                      onClick={() => {
+                        logout();
+                        setShowMenu(false);
+                      }}
+                    >
+                      <IoLogOutOutline size={18} />
+                      {t('cerrar_sesion')}
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    className="menu-perfil__opcion"
+                    to="/login"
+                    onClick={() => setShowMenu(false)}
+                  >
+                    <IoPersonOutline size={18} />
+                    {t('iniciar_sesion')}
+                  </Link>
+                )}
+
+                {/* Selector de Idioma en el Menú */}
+                <div className="menu-perfil__opcion menu-perfil__opcion--idioma">
+                  <span>{t('idioma', 'Idioma')}</span>
+                  <div className="menu-perfil__idiomas-grid">
+                    <button
+                      className={`menu-perfil__idioma-boton ${i18n.language === 'es' ? 'menu-perfil__idioma-boton--activo' : ''}`}
+                      onClick={() => handleIdioma('es')}
+                    >
+                      <ReactCountryFlag svg countryCode="ES" />
+                    </button>
+                    <button
+                      className={`menu-perfil__idioma-boton ${i18n.language === 'en' ? 'menu-perfil__idioma-boton--activo' : ''}`}
+                      onClick={() => handleIdioma('en')}
+                    >
+                      <ReactCountryFlag svg countryCode="US" />
+                    </button>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
 
             <Link className="encabezado__accion encabezado__accion--carrito" to="/carrito">

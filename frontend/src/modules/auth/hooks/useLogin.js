@@ -10,6 +10,7 @@ import {
   animateElements,
 } from '../../../shared/utils/animationUtils';
 import { validarLogin } from '../../../shared/utils/validaciones';
+import { obtenerRutaPorRol } from '../../../shared/utils/authUtils';
 
 export const useLogin = ({ onLoginSuccess }) => {
   const { login, loading } = useAuth();
@@ -65,10 +66,11 @@ export const useLogin = ({ onLoginSuccess }) => {
     if (result && result.success) {
       toast.success(t('login_exito'));
       setSuccessMessage(t('login_exito'));
-      setTimeout(() => {
-        navigate('/redirect');
-      }, 1000);
-      if (onLoginSuccess) onLoginSuccess();
+
+      if (onLoginSuccess) {
+        const destRoute = obtenerRutaPorRol(result.user?.nombre_rol);
+        onLoginSuccess(destRoute);
+      }
     } else {
       const mensajeError = result.message || t('login_error');
       toast.error(mensajeError);

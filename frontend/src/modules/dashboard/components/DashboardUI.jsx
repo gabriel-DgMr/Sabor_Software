@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import { FiTrendingUp, FiUsers, FiBox, FiShoppingCart, FiCalendar } from 'react-icons/fi';
 import DashboardHeader from './DashboardHeader';
 import DashboardCard from './DashboardCard';
@@ -7,19 +8,21 @@ import MenuLateral from './MenuLateralAdministrador';
 import '../styles/dashboard.css';
 
 const DashboardUI = ({ handleNavigate }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="tablero">
       <MenuLateral />
       <main className="tablero__principal">
         <DashboardHeader
-          titulo="Panel de Control"
-          subtitulo="Resumen general de la operación de hoy."
+          titulo={t('admin.dashboard.titulo')}
+          subtitulo={t('admin.dashboard.subtitulo')}
         />
 
         <div className="bento-grid">
           {/* Card Principal - Ventas Totales */}
           <DashboardCard
-            titulo="Ventas de Hoy"
+            titulo={t('admin.dashboard.ventas_hoy')}
             valor="$2.4M"
             icon={<FiTrendingUp />}
             type="primario"
@@ -29,7 +32,7 @@ const DashboardUI = ({ handleNavigate }) => {
 
           {/* Pedidos Activos */}
           <DashboardCard
-            titulo="Pedidos Activos"
+            titulo={t('admin.dashboard.pedidos_activos')}
             valor="12"
             icon={<FiShoppingCart />}
             onClick={handleNavigate('/administrar/pedidos')}
@@ -37,7 +40,7 @@ const DashboardUI = ({ handleNavigate }) => {
 
           {/* Reservas para hoy */}
           <DashboardCard
-            titulo="Reservas Hoy"
+            titulo={t('admin.dashboard.reservas_hoy')}
             valor="8"
             icon={<FiCalendar />}
             onClick={handleNavigate('/administrar/reservaciones')}
@@ -45,7 +48,7 @@ const DashboardUI = ({ handleNavigate }) => {
 
           {/* Gestionar Clientes */}
           <DashboardCard
-            titulo="Clientes"
+            titulo={t('admin.dashboard.clientes')}
             valor="156"
             icon={<FiUsers />}
             gridClass="bento-card--ancho"
@@ -54,7 +57,7 @@ const DashboardUI = ({ handleNavigate }) => {
 
           {/* Inventario */}
           <DashboardCard
-            titulo="Inventario"
+            titulo={t('admin.dashboard.inventario')}
             valor="Low"
             icon={<FiBox />}
             type="alto"

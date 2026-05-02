@@ -7,6 +7,7 @@ import {
   VISIBLE_DURATION,
   animateElements,
 } from '../../../shared/utils/animationUtils';
+import { toast } from 'react-toastify';
 import { validarProducto, validarImagen } from '../utils/validaciones';
 
 export const useProductosAdministrador = () => {
@@ -23,7 +24,6 @@ export const useProductosAdministrador = () => {
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
-  const [successMessage, setSuccessMessage] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editingProductId, setEditingProductId] = useState(null);
   const [loadingStates, setLoadingStates] = useState({
@@ -33,6 +33,8 @@ export const useProductosAdministrador = () => {
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [confirmEliminar, setConfirmEliminar] = useState(false);
+  const [productoAEliminar, setProductoAEliminar] = useState(null);
 
   useEffect(() => {
     const cargarProductos = async () => {
@@ -129,29 +131,42 @@ export const useProductosAdministrador = () => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteProduct = async idProducto => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-      try {
-        setLoadingStates(prev => ({
-          ...prev,
-          delete: { ...prev.delete, [idProducto]: true },
-        }));
-        await productosService.eliminar(idProducto);
-        const productos = await productosService.obtenerTodos();
-        dispatch({ type: 'SET_PRODUCTOS', payload: productos });
-        setSuccessMessage('Producto eliminado exitosamente');
-        setTimeout(() => {
-          setSuccessMessage('');
-        }, 3000);
-      } catch (error) {
-        dispatch({ type: 'SET_ERROR', payload: error.message });
-      } finally {
-        setLoadingStates(prev => ({
-          ...prev,
-          delete: { ...prev.delete, [idProducto]: false },
-        }));
-      }
+  const handleDeleteProduct = idProducto => {
+    setProductoAEliminar(idProducto);
+    setConfirmEliminar(true);
+  };
+
+  const confirmarEliminacion = async () => {
+    const idProducto = productoAEliminar;
+    setConfirmEliminar(false);
+    setProductoAEliminar(null);
+    if (!idProducto) return;
+
+    try {
+      setLoadingStates(prev => ({
+        ...prev,
+        delete: { ...prev.delete, [idProducto]: true },
+      }));
+      await productosService.eliminar(idProducto);
+      const productos = await productosService.obtenerTodos();
+      dispatch({ type: 'SET_PRODUCTOS', payload: productos });
+      toast.success('Producto eliminado exitosamente');
+    } catch (error) {
+      const mensajeError =
+        error.response?.data?.message || error.message || 'Error al eliminar el producto';
+      toast.error(mensajeError);
+      dispatch({ type: 'SET_ERROR', payload: mensajeError });
+    } finally {
+      setLoadingStates(prev => ({
+        ...prev,
+        delete: { ...prev.delete, [idProducto]: false },
+      }));
     }
+  };
+
+  const cancelarEliminacion = () => {
+    setConfirmEliminar(false);
+    setProductoAEliminar(null);
   };
 
   const handleSubmit = async e => {
@@ -204,11 +219,11 @@ export const useProductosAdministrador = () => {
       if (isEditing) {
         console.log('🔄 Actualizando producto:', editingProductId, datosParaEnviar);
         await productosService.actualizar(editingProductId, datosParaEnviar);
-        setSuccessMessage('Producto actualizado exitosamente');
+        toast.success('Producto actualizado exitosamente');
       } else {
         console.log('➕ Creando producto:', datosParaEnviar);
         await productosService.crear(datosParaEnviar);
-        setSuccessMessage('Producto creado exitosamente');
+        toast.success('Producto creado exitosamente');
       }
 
       // 4. Refrescar lista y limpiar formulario
@@ -228,17 +243,13 @@ export const useProductosAdministrador = () => {
       setImagePreview(null);
       setEditingProductId(null);
       setIsModalOpen(false);
-
-      setTimeout(() => {
-        setSuccessMessage('');
-      }, 3000);
     } catch (error) {
       console.error('💥 Error en handleSubmit:', error);
       const mensajeError =
         error.response?.data?.message ||
         error.message ||
         'Error inesperado al procesar el producto';
-      setErrors({ general: mensajeError });
+      toast.error(mensajeError);
       dispatch({
         type: 'SET_ERROR',
         payload: mensajeError,
@@ -281,13 +292,15 @@ export const useProductosAdministrador = () => {
     setFormData,
     imagePreview,
     errors,
-    successMessage,
     isEditing,
     loadingStates,
     handleInputChange,
     handleRemoveImage,
     handleEditProduct,
     handleDeleteProduct,
+    confirmarEliminacion,
+    cancelarEliminacion,
+    confirmEliminar,
     handleSubmit,
     resetForm,
     searchTerm,

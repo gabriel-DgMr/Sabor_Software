@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 
 import { useAuth } from '../../app/context/AuthContext';
 import { Navigate } from 'react-router-dom';
+import LoadingScreen from './LoadingScreen';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return <div>Cargando...</div>;
+    return <LoadingScreen />;
   }
 
   if (!isAuthenticated) {
